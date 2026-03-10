@@ -232,15 +232,14 @@ function renderAddressSuggestions(features) {
         const city = p.city || p.town || p.village || p.state || '';
         const postcode = p.postcode || '';
         const country = p.country || '';
-        const ccode = (p.countrycode || '').toUpperCase();
 
-        // Build main text considering regional conventions
+        // Build main text considering UI language conventions
         let mainText = '';
-        // Countries placing the Street name BEFORE the House Number
-        if (['ES', 'IT', 'PT', 'DE', 'AT', 'CH', 'NL', 'BE', 'PL', 'SE', 'NO', 'DK'].includes(ccode)) {
+        // If the UI is in Spanish, Italian, Portuguese, or German, put Street BEFORE the House Number
+        if (['es', 'it', 'pt', 'de'].includes(state.lang)) {
             mainText = (houseNumber ? `${street}, ${houseNumber}` : street).trim();
         } else {
-            // Default (France, UK, US, etc.): Number BEFORE Street
+            // Default UI (fr, en): Number BEFORE Street
             mainText = `${houseNumber} ${street}`.trim();
         }
 
