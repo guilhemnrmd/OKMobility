@@ -14,7 +14,7 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
     
@@ -86,46 +86,51 @@
                     </div>
                 </div>
 
-                <!-- Temporary Address Checkbox -->
-                <div class="temp-address-toggle">
-                    <div class="toggle-header">
-                        <label class="custom-checkbox">
-                            <input type="checkbox" id="hasTempAddress" name="hasTempAddress">
-                            <span class="checkmark"></span>
-                            <span id="lblTempAddressCheck">J'ai une adresse temporaire locale (Hôtel, etc.)</span>
-                        </label>
-                        <button type="button" class="info-btn" id="btnTempInfo" title="Utilisé si vous séjournez temporairement dans une autre adresse pendant votre location." aria-label="Information">
-                            <i class='bx bx-info-circle'></i>
-                        </button>
+                <!-- Expanding Temporary Address Wrapper -->
+                <div class="temp-address-wrapper" id="tempAddressWrapper">
+                    <!-- Temporary Address Checkbox -->
+                    <div class="temp-address-toggle">
+                        <div class="toggle-header">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" id="hasTempAddress" name="hasTempAddress">
+                                <span class="checkmark"></span>
+                                <span id="lblTempAddressCheck">J'ai une adresse temporaire locale (Hôtel, etc.)</span>
+                            </label>
+                            <button type="button" class="info-btn" id="btnTempInfo" title="Utilisé si vous séjournez temporairement dans une autre adresse pendant votre location." aria-label="Information">
+                                <i class='bx bx-info-circle'></i>
+                            </button>
+                        </div>
+                        <!-- Tooltip content hidden by default -->
+                        <div class="info-tooltip glass-panel" id="tempTooltip" style="display: none;">
+                            <p id="txtTempTooltip">Renseignez cette adresse si vous séjournez temporairement à un autre endroit (ex: Hôtel, Airbnb) pendant la durée de votre location.</p>
+                        </div>
                     </div>
-                    <!-- Tooltip content hidden by default -->
-                    <div class="info-tooltip glass-panel" id="tempTooltip" style="display: none;">
-                        <p id="txtTempTooltip">Renseignez cette adresse si vous séjournez temporairement à un autre endroit (ex: Hôtel, Airbnb) pendant la durée de votre location.</p>
-                    </div>
-                </div>
 
-                <!-- Temporary Address Fields (Hidden by default) -->
-                <div class="temp-address-section" id="tempAddressSection" style="display: none;">
-                    <div class="input-wrapper address-wrapper">
-                        <label for="tempAddress" id="lblTempAddress">Adresse temporaire</label>
-                        <div class="input-with-icon">
-                            <i class='bx bx-map-pin'></i>
-                            <input type="text" id="tempAddress" name="tempAddress" placeholder="Ex: Hotel Plaza">
-                        </div>
-                    </div>
-                    <div class="form-group-row">
-                        <div class="input-wrapper zip-wrapper">
-                            <label for="tempZipCode" id="lblTempZipCode">Code Postal</label>
-                            <div class="input-with-icon">
-                                <i class='bx bx-hash'></i>
-                                <input type="text" id="tempZipCode" name="tempZipCodePlaceholder" placeholder="">
+                    <!-- Temporary Address Fields (Hidden by CSS by default) -->
+                    <div class="temp-address-sliding-section" id="tempAddressSection">
+                        <div class="temp-address-content-inner">
+                            <div class="input-wrapper address-wrapper">
+                                <label for="tempAddress" id="lblTempAddress">Adresse temporaire</label>
+                                <div class="input-with-icon">
+                                    <i class='bx bx-map-pin'></i>
+                                    <input type="text" id="tempAddress" name="tempAddress" placeholder="Ex: Hotel Plaza">
+                                </div>
                             </div>
-                        </div>
-                        <div class="input-wrapper city-wrapper">
-                            <label for="tempCity" id="lblTempCity">Ville</label>
-                            <div class="input-with-icon">
-                                <i class='bx bx-buildings'></i>
-                                <input type="text" id="tempCity" name="tempCityPlaceholder" placeholder="">
+                            <div class="form-group-row">
+                                <div class="input-wrapper zip-wrapper">
+                                    <label for="tempZipCode" id="lblTempZipCode">Code Postal</label>
+                                    <div class="input-with-icon">
+                                        <i class='bx bx-hash'></i>
+                                        <input type="text" id="tempZipCode" name="tempZipCodePlaceholder" placeholder="">
+                                    </div>
+                                </div>
+                                <div class="input-wrapper city-wrapper">
+                                    <label for="tempCity" id="lblTempCity">Ville</label>
+                                    <div class="input-with-icon">
+                                        <i class='bx bx-buildings'></i>
+                                        <input type="text" id="tempCity" name="tempCityPlaceholder" placeholder="">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

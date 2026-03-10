@@ -258,14 +258,17 @@ dom.langSelect.addEventListener('change', (e) => {
 // ============================================================================
 
 dom.hasTempAddress.addEventListener('change', (e) => {
+    const wrapper = document.getElementById('tempAddressWrapper');
     if (e.target.checked) {
-        dom.tempAddressSection.style.display = 'block';
+        dom.tempAddressSection.classList.add('expanded');
+        wrapper.classList.add('active');
         // Add required attributes dynamically
         dom.tempAddress.setAttribute('required', 'true');
         dom.tempZipCode.setAttribute('required', 'true');
         dom.tempCity.setAttribute('required', 'true');
     } else {
-        dom.tempAddressSection.style.display = 'none';
+        dom.tempAddressSection.classList.remove('expanded');
+        wrapper.classList.remove('active');
         // Remove required attributes
         dom.tempAddress.removeAttribute('required');
         dom.tempZipCode.removeAttribute('required');
