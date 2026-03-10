@@ -10,16 +10,12 @@ const i18n = {
     "fr": {
       "dir": "ltr",
       "pageTitle": "Vos informations",
-      "lastName": "Nom",
-      "firstName": "Prénom",
       "address": "Adresse de résidence",
       "searchAddress": "Rechercher une adresse...",
       "zipCode": "Code Postal",
       "city": "Ville",
       "phone": "Téléphone Mobile",
       "email": "E-mail",
-      "placeholderLastName": "Dupont",
-      "placeholderFirstName": "Jean",
       "placeholderCity": "Paris",
       "placeholderZip": "75001",
       "placeholderPhone": "6 12 34 56 78",
@@ -33,16 +29,12 @@ const i18n = {
     "en": {
       "dir": "ltr",
       "pageTitle": "Your information",
-      "lastName": "Last Name",
-      "firstName": "First Name",
       "address": "Home Address",
       "searchAddress": "Search for an address...",
       "zipCode": "Postal Code / Zip",
       "city": "City",
       "phone": "Mobile Telephone Number",
       "email": "E-mail",
-      "placeholderLastName": "Smith",
-      "placeholderFirstName": "John",
       "placeholderCity": "London",
       "placeholderZip": "SW1A 1AA",
       "placeholderPhone": "7911 123456",
@@ -56,16 +48,12 @@ const i18n = {
     "es": {
       "dir": "ltr",
       "pageTitle": "Su información",
-      "lastName": "Apellidos",
-      "firstName": "Nombre",
       "address": "Dirección de residencia",
       "searchAddress": "Buscar dirección...",
       "zipCode": "Código Postal / CP",
       "city": "Ciudad",
       "phone": "Teléfono Móvil",
       "email": "E-mail",
-      "placeholderLastName": "García",
-      "placeholderFirstName": "Juan",
       "placeholderCity": "Madrid",
       "placeholderZip": "28001",
       "placeholderPhone": "612 34 56 78",
@@ -79,16 +67,12 @@ const i18n = {
     "it": {
       "dir": "ltr",
       "pageTitle": "Le tue informazioni",
-      "lastName": "Cognome",
-      "firstName": "Nome",
       "address": "Indirizzo di residenza",
       "searchAddress": "Cerca indirizzo...",
       "zipCode": "Codice Postale / CAP",
       "city": "Città",
       "phone": "Telefono Cellulare",
       "email": "E-mail",
-      "placeholderLastName": "Rossi",
-      "placeholderFirstName": "Mario",
       "placeholderCity": "Roma",
       "placeholderZip": "00118",
       "placeholderPhone": "312 345 6789",
@@ -102,16 +86,12 @@ const i18n = {
     "pt": {
       "dir": "ltr",
       "pageTitle": "As suas informações",
-      "lastName": "Apelido",
-      "firstName": "Nome",
       "address": "Morada",
       "searchAddress": "Pesquisar endereço...",
       "zipCode": "Código Postal",
       "city": "Cidade",
       "phone": "Telemóvel",
       "email": "E-mail",
-      "placeholderLastName": "Silva",
-      "placeholderFirstName": "João",
       "placeholderCity": "Lisboa",
       "placeholderZip": "1000-001",
       "placeholderPhone": "912 345 678",
@@ -125,16 +105,12 @@ const i18n = {
     "de": {
       "dir": "ltr",
       "pageTitle": "Ihre Informationen",
-      "lastName": "Nachname",
-      "firstName": "Vorname",
       "address": "Wohnanschrift",
       "searchAddress": "Adresse suchen...",
       "zipCode": "Postleitzahl / PLZ",
       "city": "Stadt",
       "phone": "Handynummer",
       "email": "E-Mail",
-      "placeholderLastName": "Mustermann",
-      "placeholderFirstName": "Max",
       "placeholderCity": "Berlin",
       "placeholderZip": "10115",
       "placeholderPhone": "151 23456789",
@@ -171,8 +147,6 @@ const dom = {
     zipCode: document.getElementById('zipCode'),
     city: document.getElementById('city'),
     fullAddress: document.getElementById('fullAddress'),
-    lastName: document.getElementById('lastName'),
-    firstName: document.getElementById('firstName'),
     phone: document.getElementById('phone'),
     email: document.getElementById('email'),
     addressLoader: document.getElementById('addressLoader'),
@@ -194,12 +168,6 @@ function applyLanguage(langCode) {
 
     // Update Text Nodes
     document.getElementById('pageTitle').textContent = t.pageTitle;
-    
-    document.getElementById('lblLastName').textContent = t.lastName;
-    dom.lastName.placeholder = t.placeholderLastName;
-    
-    document.getElementById('lblFirstName').textContent = t.firstName;
-    dom.firstName.placeholder = t.placeholderFirstName;
     
     document.getElementById('lblAddress').textContent = t.address;
     dom.searchAddress.placeholder = t.searchAddress;
@@ -366,9 +334,6 @@ dom.form.addEventListener('submit', (e) => {
     // Build plain text body for email
     const mailBody = `Nouveau Client
 
-NOM : ${formData.get('lastName').toUpperCase()}
-PRÉNOM : ${formData.get('firstName')}
-
 ADRESSE : ${addr}
 CODE POSTAL : ${formData.get('zipCode')}
 VILLE : ${formData.get('city')}
@@ -383,8 +348,6 @@ EMAIL : ${formData.get('email')}
 
     // Prepare Summary View
     dom.summaryContentBody.innerHTML = `
-        <strong>Nom :</strong> ${formData.get('lastName')} <br>
-        <strong>Prénom :</strong> ${formData.get('firstName')} <br>
         <strong>Adresse :</strong> ${addr} <br>
         <strong>CP / Ville :</strong> ${formData.get('zipCode')} ${formData.get('city')} <br>
         <strong>Tél :</strong> ${fullPhone} <br>
