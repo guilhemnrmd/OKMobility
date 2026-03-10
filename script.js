@@ -326,15 +326,14 @@ dom.form.addEventListener('submit', (e) => {
     // Add Temporary Address Block if checked
     if (dom.hasTempAddress.checked) {
         summaryHTML += `
-            <div class="summary-row" style="margin-top: 15px; border-top: 1px dashed var(--color-border); padding-top: 15px;">
+            <div class="summary-row" style="margin-top: 15px; padding-top: 15px;">
                 <span class="summary-label" style="color: var(--color-accent);"><i class='bx bx-map-pin'></i> ${t.tempAddress || 'Adresse temporaire'}</span>
                 <span class="summary-value">${formData.get('tempAddress')}</span>
             </div>
-            <div class="summary-row">
+            <div class="summary-row" style="margin-bottom: 15px;">
                 <span class="summary-label">${t.tempZipCode || 'CP'} / ${t.tempCity || 'Ville'}</span>
                 <span class="summary-value">${formData.get('tempZipCodePlaceholder')} ${formData.get('tempCityPlaceholder')}</span>
             </div>
-            <div class="summary-row" style="margin-bottom: 15px; border-bottom: 1px dashed var(--color-border); padding-bottom: 15px;"></div>
         `;
     }
 
