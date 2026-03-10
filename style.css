@@ -493,6 +493,10 @@ input::placeholder {
 /* =========================================================================
    Autocomplete Dropdown
    ========================================================================= */
+.address-wrapper {
+    position: relative;
+}
+
 .autocomplete-results {
     position: absolute;
     top: calc(100% + 4px);
