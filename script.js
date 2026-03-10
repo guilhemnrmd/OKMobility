@@ -346,12 +346,25 @@ EMAIL : ${formData.get('email')}
     const subject = "Nouveau Client OK Mobility";
     const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(mailBody)}`;
 
-    // Prepare Summary View
+    // Prepare Summary View with Beautiful UI Components
+    const t = i18n[state.lang];
     dom.summaryContentBody.innerHTML = `
-        <strong>Adresse :</strong> ${addr} <br>
-        <strong>CP / Ville :</strong> ${formData.get('zipCode')} ${formData.get('city')} <br>
-        <strong>Tél :</strong> ${fullPhone} <br>
-        <strong>Email :</strong> ${formData.get('email')}
+        <div class="summary-row">
+            <span class="summary-label">${t.address || 'Adresse'}</span>
+            <span class="summary-value">${addr}</span>
+        </div>
+        <div class="summary-row">
+            <span class="summary-label">${t.zipCode || 'CP'} / ${t.city || 'Ville'}</span>
+            <span class="summary-value">${formData.get('zipCode')} ${formData.get('city')}</span>
+        </div>
+        <div class="summary-row">
+            <span class="summary-label">${t.phone || 'Tél'}</span>
+            <span class="summary-value">${fullPhone}</span>
+        </div>
+        <div class="summary-row">
+            <span class="summary-label">${t.email || 'Email'}</span>
+            <span class="summary-value">${formData.get('email')}</span>
+        </div>
     `;
 
     // Configure Send Button
