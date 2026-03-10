@@ -1,0 +1,659 @@
+/* =========================================================================
+   OK Mobility - Liquid Glass UI (Airbnb DLS / Apple HIG inspired)
+   ========================================================================= */
+
+:root {
+    /* Airbnb DLS Inspired Typography */
+    --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    
+    /* OK Mobility Brand Colors */
+    --color-bg-primary: #F2F2F7;
+    --color-text-primary: #17181D; /* OK Dark Gray */
+    --color-text-secondary: #8E8E93;
+    --color-accent: #2054EA; /* OK Royal Blue */
+    --color-success: #34C759;
+    --color-border: rgba(0, 0, 0, 0.1);
+    
+    /* Liquid Glass Effects */
+    --glass-bg: rgba(255, 255, 255, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    --blur: blur(16px);
+    
+    /* Ambient Blobs for backgorund (OK Mobility vibe) */
+    --blob-1: #2054EA;   /* Royal Blue */
+    --blob-2: #05DBF3;   /* OK Cyan */
+    --blob-3: #17181D;   /* Dark Gray */
+
+    /* Metrics */
+    --radius-lg: 24px;
+    --radius-md: 16px;
+    --radius-sm: 12px;
+    --spacing-xs: 8px;
+    --spacing-sm: 16px;
+    --spacing-md: 24px;
+    --spacing-lg: 32px;
+    
+    /* Animations */
+    --transition-spring: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --transition-smooth: 0.3s ease-in-out;
+}
+
+/* Dark Mode Support (Automatic) */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-bg-primary: #000000;
+        --color-text-primary: #F2F2F7;
+        --color-text-secondary: #AEAEB2;
+        --color-border: rgba(255, 255, 255, 0.15);
+        
+        --glass-bg: rgba(28, 28, 30, 0.6);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        
+        --blob-1: #3855E5;
+        --blob-2: #05DBF3;
+        --blob-3: #2054EA;
+    }
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family-sans);
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+    position: relative;
+    padding: var(--spacing-sm);
+    /* Clean base size */
+    font-size: 16px; 
+}
+
+/* =========================================================================
+   Ambient Background (LiquidGlass Reference)
+   ========================================================================= */
+.ambient-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+    Filter: url('#goo'); /* SVG Filter could be added, but CSS blur is enough */
+}
+
+.blob {
+    position: absolute;
+    filter: blur(80px);
+    opacity: 0.6;
+    border-radius: 50%;
+    animation: float 20s infinite ease-in-out;
+}
+
+.blob-1 {
+    top: -10%; left: -10%;
+    width: 50vw; height: 50vw;
+    background: var(--blob-1);
+    animation-delay: 0s;
+}
+
+.blob-2 {
+    bottom: -10%; right: -10%;
+    width: 60vw; height: 60vw;
+    background: var(--blob-2);
+    animation-delay: -5s;
+}
+
+.blob-3 {
+    top: 40%; left: 40%;
+    width: 40vw; height: 40vw;
+    background: var(--blob-3);
+    animation-delay: -10s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+}
+
+/* =========================================================================
+   Liquid Glass Components
+   ========================================================================= */
+.glass-container {
+    width: 100%;
+    max-width: 600px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--glass-shadow);
+    padding: var(--spacing-lg);
+    z-index: 10;
+    animation: slideUp var(--transition-spring);
+}
+
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================================================
+   Header & Typography
+   ========================================================================= */
+.glass-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--spacing-sm);
+}
+
+.header-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo-img {
+    height: 24px; /* Slightly smaller to fit slogan nicely */
+    width: auto;
+}
+
+.logo-img-dark {
+    display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+    .logo-img-light {
+        display: none;
+    }
+    .logo-img-dark {
+        display: block;
+    }
+}
+
+.brand-slogan {
+    font-size: 0.70rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+}
+
+.lang-selector {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(142, 142, 147, 0.1);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+}
+
+.lang-selector i {
+    color: var(--color-text-secondary);
+}
+
+select {
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: var(--color-text-primary);
+    outline: none;
+    cursor: pointer;
+    appearance: none; /* Hide default arrow */
+    -webkit-appearance: none;
+    padding-inline-end: 16px;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: 12px;
+}
+@media (prefers-color-scheme: dark) {
+    select {
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F2F2F7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    }
+}
+
+
+.title-wrapper {
+    margin-bottom: var(--spacing-lg);
+}
+
+.gradient-text {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    background: linear-gradient(135deg, var(--color-text-primary) 0%, var(--color-text-secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Apple Intelligence Fake Badge */
+.ai-subtitle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background: linear-gradient(135deg, rgba(88, 86, 214, 0.1) 0%, rgba(94, 92, 230, 0.1) 100%);
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(88, 86, 214, 0.2);
+}
+
+.ai-icon {
+    background: linear-gradient(135deg, #FF9500, #FF2D55, #5856D6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* =========================================================================
+   Form Elements (HIG)
+   ========================================================================= */
+.modern-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.form-group-row {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.form-group-row .input-wrapper {
+    flex: 1;
+}
+
+@media (max-width: 480px) {
+    .form-group-row {
+        flex-direction: column;
+    }
+}
+
+.input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-with-icon i {
+    position: absolute;
+    left: 12px;
+    color: var(--color-text-secondary);
+    font-size: 1.1rem;
+    pointer-events: none;
+    z-index: 2; /* keep icon above the elements */
+}
+
+.input-with-icon input,
+.input-with-icon textarea,
+.input-with-icon select {
+    width: 100%;
+    padding: 14px 12px 14px 38px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.5); /* Glass effect */
+    color: var(--color-text-primary);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    transition: all var(--transition-base);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) inset;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.input-with-icon input,
+.input-with-icon select {
+    height: 52px; /* Fix height for exact uniform size */
+}
+
+.input-with-icon select {
+    cursor: pointer;
+    appearance: none; /* Provide a flat Apple-like appearance for the `<select>` without generic OS dropdown arrows */
+    -webkit-appearance: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-right: 30px; /* space for arrow */
+}
+
+label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-left: 4px; 
+}
+
+/* New: Phone Split Container */
+.phone-split-container {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.phone-split-container .phone-country-box {
+    flex: 0 0 115px; /* Fixed width for country code */
+    max-width: 115px;
+}
+
+.phone-split-container .phone-number-box {
+    flex: 1; /* Remaining space for phone number */
+}
+
+@media (max-width: 480px) {
+    .phone-split-container {
+        flex-direction: column;
+    }
+    .phone-split-container .phone-country-box {
+        flex: none;
+        max-width: 100%;
+    }
+}
+
+/* Custom Select Overlay */
+.custom-select-wrapper {
+    position: relative;
+    height: 52px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: rgba(255, 255, 255, 0.5); /* Glass effect */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) inset;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    transition: all var(--transition-base);
+}
+
+.custom-select-wrapper:focus-within {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 4px rgba(32, 84, 234, 0.15); /* OK Blue shadow */
+}
+
+@media (prefers-color-scheme: dark) {
+    .custom-select-wrapper {
+        background: rgba(0, 0, 0, 0.3);
+    }
+}
+
+.country-display {
+    color: var(--color-text-primary);
+    font-size: 0.95rem;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.overlay-select {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.select-arrow {
+    position: absolute;
+    right: 8px;
+    color: var(--color-text-secondary);
+    font-size: 1.2rem;
+    pointer-events: none;
+}
+
+/* Readonly fields (auto-filled) */
+input.filled-input[readonly] {
+    background: rgba(142, 142, 147, 0.05);
+    color: var(--color-text-secondary);
+    cursor: not-allowed;
+    border-style: dashed;
+}
+
+input::placeholder {
+    color: rgba(142, 142, 147, 0.6);
+}
+
+/* Loader */
+.loader {
+    position: absolute;
+    right: 16px;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--color-border);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* =========================================================================
+   Autocomplete Dropdown
+   ========================================================================= */
+.autocomplete-results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 100%;
+    max-height: 250px;
+    overflow-y: auto;
+    list-style: none;
+    z-index: 100;
+    padding: 8px 0;
+}
+
+.autocomplete-results li {
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background var(--transition-smooth);
+    display: flex;
+    flex-direction: column;
+}
+
+.autocomplete-results li:hover, .autocomplete-results li.active {
+    background: rgba(0, 122, 255, 0.1);
+}
+
+.ac-main {
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+.ac-sub {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+}
+
+/* =========================================================================
+   Buttons (Premium Design)
+   ========================================================================= */
+.form-actions {
+    margin-top: var(--spacing-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: var(--spacing-sm);
+}
+
+button, .btn-primary, .btn-secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 16px;
+    border-radius: var(--radius-lg); /* Pill shape */
+    font-family: inherit;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-spring);
+    border: none;
+    text-decoration: none;
+}
+
+/* Stunning Premium Button */
+.btn-primary {
+    background: linear-gradient(135deg, var(--color-accent) 0%, #1538A1 100%);
+    color: #FFF;
+    box-shadow: 0 8px 24px -6px rgba(32, 84, 234, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+    text-transform: none;
+    letter-spacing: 0.02em;
+}
+
+.btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 50%; height: 100%;
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+    transform: skewX(-20deg);
+    transition: all 0.5s ease;
+}
+
+.btn-primary:active {
+    transform: scale(0.96);
+    box-shadow: 0 4px 12px -4px rgba(32, 84, 234, 0.4);
+}
+
+.btn-primary:hover {
+    box-shadow: 0 12px 28px -6px rgba(32, 84, 234, 0.6);
+}
+
+.btn-primary:hover::after {
+    left: 150%;
+}
+
+.btn-secondary {
+    background: rgba(142, 142, 147, 0.08);
+    color: var(--color-text-primary);
+    border-radius: var(--radius-lg);
+}
+
+.btn-secondary:hover {
+    background: rgba(142, 142, 147, 0.2);
+}
+
+.btn-secondary:active {
+    transform: scale(0.98);
+}
+
+/* =========================================================================
+   Summary View
+   ========================================================================= */
+.summary-view {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    animation: fadeIn var(--transition-smooth);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.summary-card {
+    padding: var(--spacing-md);
+}
+
+.summary-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.success-icon {
+    font-size: 3rem;
+    color: var(--color-success);
+    margin-bottom: 8px;
+}
+
+.summary-content {
+    background: rgba(0,0,0,0.02);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    font-family: monospace;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+}
+
+@media (prefers-color-scheme: dark) {
+    .summary-content {
+        background: rgba(255,255,255,0.05);
+    }
+}
+
+.summary-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.legal-text {
+    font-size: 0.70rem;
+    color: var(--color-text-secondary);
+    text-align: justify;
+    line-height: 1.5;
+    margin-top: var(--spacing-xs);
+    opacity: 0.8;
+}
+
+/* Mobile Adjustments for Header */
+@media (max-width: 480px) {
+    .glass-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+    .lang-selector {
+        align-self: flex-end;
+    }
+}

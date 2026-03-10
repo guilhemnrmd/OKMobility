@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OK Mobility - Vos Informations</title>
+    
+    <!-- Modern Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Boxicons for elegant icons -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <!-- Dynamic Ambient Background -->
+    <div class="ambient-background">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <!-- Main Liquid Glass Container -->
+    <main class="glass-container">
+        
+        <!-- Header & Language Selector -->
+        <header class="glass-header">
+            <div class="header-brand">
+                <div class="logo">
+                    <img src="https://okmobility.com/img/logos/okmobility-imagotipo.svg" alt="OK Mobility Logo" class="logo-img logo-img-light">
+                    <img src="https://okmobility.com/img/logos/okmobility-imagotipo-white.svg" alt="OK Mobility Logo" class="logo-img logo-img-dark">
+                </div>
+                <span class="brand-slogan">The Global Mobility Platform</span>
+            </div>
+            
+            <div class="lang-selector">
+                <i class='bx bx-globe'></i>
+                <select id="languageSelect" aria-label="Select language">
+                    <option value="en" selected>English</option>
+                    <option value="fr">Français</option>
+                    <option value="es">Español</option>
+                    <option value="it">Italiano</option>
+                    <option value="pt">Português</option>
+                    <option value="de">Deutsch</option>
+                </select>
+            </div>
+        </header>
+
+        <section class="form-content">
+            
+            <div class="title-wrapper">
+                <h1 id="pageTitle" class="gradient-text">Vos informations</h1>
+            </div>
+
+            <form id="clientForm" class="modern-form" novalidate>
+                
+                <!-- Nom & Prénom Section -->
+                <div class="form-group-row name-section" id="nameSection">
+                    <div class="input-wrapper">
+                        <label for="lastName" id="lblLastName">Nom</label>
+                        <div class="input-with-icon">
+                            <i class='bx bx-user'></i>
+                            <input type="text" id="lastName" name="lastName" placeholder="Ex: Dupont" required>
+                        </div>
+                    </div>
+                    <div class="input-wrapper">
+                        <label for="firstName" id="lblFirstName">Prénom</label>
+                        <div class="input-with-icon">
+                            <i class='bx bx-user'></i>
+                            <input type="text" id="firstName" name="firstName" placeholder="Ex: Jean" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Address Autocomplete Section -->
+                <div class="input-wrapper address-wrapper">
+                    <label for="address" id="lblAddress">Adresse de résidence</label>
+                    <div class="input-with-icon">
+                        <i class='bx bx-map'></i>
+                        <input type="text" id="addressSearch" name="addressSearch" placeholder="Rechercher une adresse..." autocomplete="off">
+                        <!-- Loading spinner for API -->
+                        <div class="loader" id="addressLoader" style="display: none;"></div>
+                    </div>
+                    <!-- Dropdown for Photon Suggestions -->
+                    <ul class="autocomplete-results glass-panel" id="addressResults" style="display: none;"></ul>
+                    
+                    <!-- Hidden field to store full address line if needed -->
+                    <input type="hidden" id="fullAddress" name="fullAddress">
+                </div>
+
+                <!-- Postal Code & City (Auto-filled) -->
+                <div class="form-group-row">
+                    <div class="input-wrapper zip-wrapper">
+                        <label for="zipCode" id="lblZipCode">Code Postal</label>
+                        <div class="input-with-icon">
+                            <i class='bx bx-hash'></i>
+                            <input type="text" id="zipCode" name="zipCode">
+                        </div>
+                    </div>
+                    <div class="input-wrapper city-wrapper">
+                        <label for="city" id="lblCity">Ville</label>
+                        <div class="input-with-icon">
+                            <i class='bx bx-buildings'></i>
+                            <input type="text" id="city" name="city">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phone Section with Country Code -->
+                <div class="input-wrapper">
+                    <label for="phone" id="lblPhone">Mobile Telephone Number</label>
+                    <div class="phone-split-container">
+                        <div class="phone-country-box custom-select-wrapper">
+                            <div id="countryCodeDisplay" class="country-display">🇫🇷 +33</div>
+                            <select id="countryCode" name="countryCode" class="overlay-select" aria-label="Country Code">
+                                <option value="+33" selected>🇫🇷 France (+33)</option>
+                            </select>
+                            <i class='bx bx-chevron-down select-arrow'></i>
+                        </div>
+                        <div class="input-with-icon phone-number-box">
+                            <i class='bx bx-phone'></i>
+                            <input type="tel" id="phone" name="phone" pattern="^[0-9\s]+$" placeholder="6 12 34 56 78" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email Section -->
+                <div class="input-wrapper">
+                    <label for="email" id="lblEmail">E-mail</label>
+                    <div class="input-with-icon">
+                        <i class='bx bx-envelope'></i>
+                        <!-- inputmode="email" triggers email keyboard on mobile -->
+                        <input type="email" id="email" name="email" inputmode="email" placeholder="jean.dupont@email.com" required>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="form-actions">
+                    <button type="submit" id="btnGenerate" class="btn-primary glass-btn">
+                        <span id="txtBtnGenerate">Générer mon résumé</span>
+                    </button>
+            <p class="legal-text">
+                OK MOBILITY GROUP, S.L.U. es el Responsable del tratamiento de los datos personales del Interesado y le informa de que estos datos se tratarán de conformidad con lo dispuesto en el Reglamento (UE) 2016/679, de 27 de abril (GDPR), y la Ley Orgánica 3/2018, de 5 de diciembre (LOPDG).
+            </p>
+            </form>
+
+            <!-- Success / Summary View (Hidden by default) -->
+            <div id="summaryView" class="summary-view" style="display: none;">
+                <div class="summary-card glass-panel">
+                    <div class="summary-header">
+                        <i class='bx bx-check-circle success-icon'></i>
+                        <h2 id="summaryTitle">Résumé prêt</h2>
+                    </div>
+                    <div class="summary-content" id="summaryContentBody">
+                        <!-- Filled via JS -->
+                    </div>
+                    <div class="summary-actions">
+                        <a href="#" id="btnSend" class="btn-primary">
+                            <i class='bx bx-send'></i>
+                            <span id="txtBtnSend">Envoyer par e-mail</span>
+                        </a>
+                        <button id="btnEdit" class="btn-secondary">
+                            <i class='bx bx-edit-alt'></i>
+                            <span id="txtBtnEdit">Modifier</span>
+                        </button>
+                    </div>
+                </div>
+            <p class="legal-text">
+                OK MOBILITY GROUP, S.L.U. es el Responsable del tratamiento de los datos personales del Interesado y le informa de que estos datos se tratarán de conformidad con lo dispuesto en el Reglamento (UE) 2016/679, de 27 de abril (GDPR), y la Ley Orgánica 3/2018, de 5 de diciembre (LOPDG).
+            </p>
+            </div>
+
+        </section>
+        
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
