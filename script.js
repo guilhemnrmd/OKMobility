@@ -11,7 +11,13 @@ const i18n = {
       "dir": "ltr",
       "pageTitle": "Vos informations",
       "address": "Adresse de résidence",
-      "searchAddress": "Rechercher une adresse...",
+      "address": "Adresse de résidence",
+      "addressPlaceholder": "Ex: 15 Rue de Rivoli",
+      "tempAddressCheck": "J'ai une adresse temporaire locale (Hôtel, etc.)",
+      "tempTooltip": "Renseignez cette adresse si vous séjournez temporairement à un autre endroit (ex: Hôtel, Airbnb) pendant la durée de votre location.",
+      "tempAddress": "Adresse temporaire",
+      "tempZipCode": "Code Postal",
+      "tempCity": "Ville",
       "zipCode": "Code Postal",
       "city": "Ville",
       "phone": "Téléphone Mobile",
@@ -29,7 +35,13 @@ const i18n = {
       "dir": "ltr",
       "pageTitle": "Your information",
       "address": "Home Address",
-      "searchAddress": "Search for an address...",
+      "address": "Home Address",
+      "addressPlaceholder": "Ex: 221B Baker Street",
+      "tempAddressCheck": "I have a local temporary address (Hotel, etc.)",
+      "tempTooltip": "Fill in this address if you are temporarily staying at another location (e.g., Hotel, Airbnb) during your rental period.",
+      "tempAddress": "Temporary Address",
+      "tempZipCode": "Postal Code / Zip",
+      "tempCity": "City",
       "zipCode": "Postal Code / Zip",
       "city": "City",
       "phone": "Mobile Telephone Number",
@@ -47,7 +59,13 @@ const i18n = {
       "dir": "ltr",
       "pageTitle": "Su información",
       "address": "Dirección de residencia",
-      "searchAddress": "Buscar dirección...",
+      "address": "Dirección de residencia",
+      "addressPlaceholder": "Ej: Gran Vía, 15",
+      "tempAddressCheck": "Tengo una dirección temporal local (Hotel, etc.)",
+      "tempTooltip": "Rellene esta dirección si se aloja temporalmente en otro lugar (ej. Hotel, Airbnb) durante su alquiler.",
+      "tempAddress": "Dirección temporal",
+      "tempZipCode": "Código Postal / CP",
+      "tempCity": "Ciudad",
       "zipCode": "Código Postal / CP",
       "city": "Ciudad",
       "phone": "Teléfono Móvil",
@@ -65,7 +83,13 @@ const i18n = {
       "dir": "ltr",
       "pageTitle": "Le tue informazioni",
       "address": "Indirizzo di residenza",
-      "searchAddress": "Cerca indirizzo...",
+      "address": "Indirizzo di residenza",
+      "addressPlaceholder": "Es: Via Roma, 10",
+      "tempAddressCheck": "Ho un indirizzo temporaneo locale (Hotel, ecc.)",
+      "tempTooltip": "Compila questo indirizzo se soggiorni temporaneamente in un altro luogo (es. Hotel, Airbnb) durante il noleggio.",
+      "tempAddress": "Indirizzo temporaneo",
+      "tempZipCode": "Codice Postale / CAP",
+      "tempCity": "Città",
       "zipCode": "Codice Postale / CAP",
       "city": "Città",
       "phone": "Telefono Cellulare",
@@ -83,7 +107,13 @@ const i18n = {
       "dir": "ltr",
       "pageTitle": "As suas informações",
       "address": "Morada",
-      "searchAddress": "Pesquisar endereço...",
+      "address": "Morada",
+      "addressPlaceholder": "Ex: Rua Augusta, 20",
+      "tempAddressCheck": "Tenho um endereço temporário local (Hotel, etc.)",
+      "tempTooltip": "Preencha este endereço se estiver hospedado temporariamente noutro local (ex: Hotel, Airbnb) durante o seu aluguer.",
+      "tempAddress": "Endereço temporário",
+      "tempZipCode": "Código Postal",
+      "tempCity": "Cidade",
       "zipCode": "Código Postal",
       "city": "Cidade",
       "phone": "Telemóvel",
@@ -101,7 +131,13 @@ const i18n = {
       "dir": "ltr",
       "pageTitle": "Ihre Informationen",
       "address": "Wohnanschrift",
-      "searchAddress": "Adresse suchen...",
+      "address": "Wohnanschrift",
+      "addressPlaceholder": "Bsp: Alexanderplatz 4",
+      "tempAddressCheck": "Ich habe eine lokale temporäre Adresse (Hotel usw.)",
+      "tempTooltip": "Geben Sie diese Adresse an, wenn Sie sich während Ihrer Anmietung vorübergehend an einem anderen Ort (z.B. Hotel, Airbnb) aufhalten.",
+      "tempAddress": "Temporäre Adresse",
+      "tempZipCode": "Postleitzahl / PLZ",
+      "tempCity": "Stadt",
       "zipCode": "Postleitzahl / PLZ",
       "city": "Stadt",
       "phone": "Handynummer",
@@ -135,15 +171,27 @@ const dom = {
     // Outputs
     summaryContentBody: document.getElementById('summaryContentBody'),
     btnEdit: document.getElementById('btnEdit'),
-    // Inputs
-    searchAddress: document.getElementById('addressSearch'),
-    addressResults: document.getElementById('addressResults'),
+    btnEdit: document.getElementById('btnEdit'),
+    // Inputs Main Address
+    address: document.getElementById('address'),
     zipCode: document.getElementById('zipCode'),
     city: document.getElementById('city'),
-    fullAddress: document.getElementById('fullAddress'),
+    // Inputs Temp Address
+    hasTempAddress: document.getElementById('hasTempAddress'),
+    lblTempAddressCheck: document.getElementById('lblTempAddressCheck'),
+    txtTempTooltip: document.getElementById('txtTempTooltip'),
+    btnTempInfo: document.getElementById('btnTempInfo'),
+    tempTooltip: document.getElementById('tempTooltip'),
+    tempAddressSection: document.getElementById('tempAddressSection'),
+    lblTempAddress: document.getElementById('lblTempAddress'),
+    tempAddress: document.getElementById('tempAddress'),
+    lblTempZipCode: document.getElementById('lblTempZipCode'),
+    tempZipCode: document.getElementById('tempZipCode'),
+    lblTempCity: document.getElementById('lblTempCity'),
+    tempCity: document.getElementById('tempCity'),
+    // Contact
     phone: document.getElementById('phone'),
-    email: document.getElementById('email'),
-    addressLoader: document.getElementById('addressLoader')
+    email: document.getElementById('email')
 };
 
 // ============================================================================
@@ -163,7 +211,20 @@ function applyLanguage(langCode) {
     document.getElementById('pageTitle').textContent = t.pageTitle;
     
     document.getElementById('lblAddress').textContent = t.address;
-    dom.searchAddress.placeholder = t.searchAddress;
+    dom.address.placeholder = t.addressPlaceholder;
+    
+    // Temporary Address Texts
+    dom.lblTempAddressCheck.textContent = t.tempAddressCheck;
+    dom.txtTempTooltip.textContent = t.tempTooltip;
+    
+    dom.lblTempAddress.textContent = t.tempAddress;
+    dom.tempAddress.placeholder = t.addressPlaceholder;
+    
+    dom.lblTempZipCode.textContent = t.tempZipCode;
+    dom.tempZipCode.placeholder = t.placeholderZip;
+    
+    dom.lblTempCity.textContent = t.tempCity;
+    dom.tempCity.placeholder = t.placeholderCity;
     
     document.getElementById('lblZipCode').textContent = t.zipCode;
     dom.zipCode.placeholder = t.placeholderZip;
@@ -193,119 +254,36 @@ dom.langSelect.addEventListener('change', (e) => {
 });
 
 // ============================================================================
-// 4. Address Autocomplete (Photon API)
+// 4. Temporary Address Toggle
 // ============================================================================
-async function fetchAddressSuggestions(query) {
-    if (!query || query.length < 3) {
-        dom.addressResults.style.display = 'none';
-        return;
+
+dom.hasTempAddress.addEventListener('change', (e) => {
+    if (e.target.checked) {
+        dom.tempAddressSection.style.display = 'block';
+        // Add required attributes dynamically
+        dom.tempAddress.setAttribute('required', 'true');
+        dom.tempZipCode.setAttribute('required', 'true');
+        dom.tempCity.setAttribute('required', 'true');
+    } else {
+        dom.tempAddressSection.style.display = 'none';
+        // Remove required attributes
+        dom.tempAddress.removeAttribute('required');
+        dom.tempZipCode.removeAttribute('required');
+        dom.tempCity.removeAttribute('required');
     }
-
-    try {
-        dom.addressLoader.style.display = 'block';
-        // Limit to 5 results to keep UI clean
-        const response = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5`);
-        const data = await response.json();
-        
-        renderAddressSuggestions(data.features);
-    } catch (error) {
-        console.error('Error fetching addresses:', error);
-    } finally {
-        dom.addressLoader.style.display = 'none';
-    }
-}
-
-function renderAddressSuggestions(features) {
-    dom.addressResults.innerHTML = '';
-    
-    if (!features || features.length === 0) {
-        dom.addressResults.style.display = 'none';
-        return;
-    }
-
-    features.forEach(feature => {
-        const p = feature.properties;
-        
-        // Construct display string safely
-        const street = p.street || p.name || '';
-        const houseNumber = p.housenumber ? p.housenumber : '';
-        const city = p.city || p.town || p.village || p.state || '';
-        const postcode = p.postcode || '';
-        const country = p.country || '';
-
-        // Build main text considering UI language conventions
-        let mainText = '';
-        // If the UI is in Spanish, Italian, Portuguese, or German, put Street BEFORE the House Number
-        if (['es', 'it', 'pt', 'de'].includes(state.lang)) {
-            mainText = (houseNumber ? `${street}, ${houseNumber}` : street).trim();
-        } else {
-            // Default UI (fr, en): Number BEFORE Street
-            mainText = `${houseNumber} ${street}`.trim();
-        }
-
-        // Ultimate fallback
-        if (!mainText || mainText === ',') mainText = p.name || city;
-        
-        let subText = `${postcode} ${city}, ${country}`.replace(/^[\s,]+/, '').trim();
-
-        const li = document.createElement('li');
-        li.innerHTML = `
-            <span class="ac-main">${mainText}</span>
-            <span class="ac-sub">${subText}</span>
-        `;
-
-        li.addEventListener('click', () => {
-            selectAddress(p, mainText);
-        });
-
-        dom.addressResults.appendChild(li);
-    });
-
-    dom.addressResults.style.display = 'block';
-}
-
-function selectAddress(properties, mainText) {
-    // Fill the visual search input with the main street text
-    dom.searchAddress.value = mainText;
-    
-    // Fill hidden full address just in case
-    dom.fullAddress.value = `${mainText}, ${properties.postcode || ''} ${properties.city || properties.town || properties.state || ''}, ${properties.country || ''}`;
-    
-    // Auto-fill Readonly fields
-    dom.zipCode.value = properties.postcode || '';
-    dom.city.value = properties.city || properties.town || properties.village || properties.state || '';
-
-    dom.addressResults.style.display = 'none';
-    state.addressSelected = true;
-
-    // Optional: Visual cue (Green check on focus out or transition)
-    dom.zipCode.parentElement.style.boxShadow = "0 0 0 2px rgba(52, 199, 89, 0.3)";
-    dom.city.parentElement.style.boxShadow = "0 0 0 2px rgba(52, 199, 89, 0.3)";
-    setTimeout(() => {
-        dom.zipCode.parentElement.style.boxShadow = "none";
-        dom.city.parentElement.style.boxShadow = "none";
-    }, 1000);
-}
-
-// Event Listeners for search with Debounce (300ms)
-dom.searchAddress.addEventListener('input', (e) => {
-    // If we just selected an address programmatically, ignore this input event
-    if (state.addressSelected) {
-        state.addressSelected = false; // Reset for next manual typing
-        return;
-    }
-
-    clearTimeout(state.debounceTimer);
-    
-    state.debounceTimer = setTimeout(() => {
-        fetchAddressSuggestions(e.target.value.trim());
-    }, 300);
 });
 
-// Close dropdown when clicking outside
+// Tooltip Toggle on Info Button Click
+dom.btnTempInfo.addEventListener('click', (e) => {
+    e.stopPropagation(); // Prevent document click from immediately closing it
+    const isHidden = dom.tempTooltip.style.display === 'none';
+    dom.tempTooltip.style.display = isHidden ? 'block' : 'none';
+});
+
+// Close tooltip when clicking anywhere else
 document.addEventListener('click', (e) => {
-    if (!dom.searchAddress.contains(e.target) && !dom.addressResults.contains(e.target)) {
-        dom.addressResults.style.display = 'none';
+    if (!dom.btnTempInfo.contains(e.target) && !dom.tempTooltip.contains(e.target)) {
+        dom.tempTooltip.style.display = 'none';
     }
 });
 
@@ -322,12 +300,7 @@ dom.form.addEventListener('submit', (e) => {
     }
 
     const formData = new FormData(dom.form);
-    
-    // Fallback: If no address was properly "selected" from Photon, use raw search input
-    let addr = dom.fullAddress.value;
-    if (!state.addressSelected || !addr) {
-        addr = `${formData.get('addressSearch')} - ${formData.get('zipCode')} ${formData.get('city')}`;
-    }
+    const addr = formData.get('address');
     
     // Combine Phone Input
     const fullPhone = `${formData.get('countryCode')} ${formData.get('phone')}`;
@@ -335,7 +308,8 @@ dom.form.addEventListener('submit', (e) => {
     // Prepare Summary View with Beautiful UI Components
     const t = i18n[state.lang];
     
-    dom.summaryContentBody.innerHTML = `
+    // Base Document
+    let summaryHTML = `
         <div class="summary-row">
             <span class="summary-label">${t.address || 'Adresse'}</span>
             <span class="summary-value">${addr}</span>
@@ -344,6 +318,25 @@ dom.form.addEventListener('submit', (e) => {
             <span class="summary-label">${t.zipCode || 'CP'} / ${t.city || 'Ville'}</span>
             <span class="summary-value">${formData.get('zipCode')} ${formData.get('city')}</span>
         </div>
+    `;
+
+    // Add Temporary Address Block if checked
+    if (dom.hasTempAddress.checked) {
+        summaryHTML += `
+            <div class="summary-row" style="margin-top: 15px; border-top: 1px dashed var(--color-border); padding-top: 15px;">
+                <span class="summary-label" style="color: var(--color-accent);"><i class='bx bx-map-pin'></i> ${t.tempAddress || 'Adresse temporaire'}</span>
+                <span class="summary-value">${formData.get('tempAddress')}</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">${t.tempZipCode || 'CP'} / ${t.tempCity || 'Ville'}</span>
+                <span class="summary-value">${formData.get('tempZipCodePlaceholder')} ${formData.get('tempCityPlaceholder')}</span>
+            </div>
+            <div class="summary-row" style="margin-bottom: 15px; border-bottom: 1px dashed var(--color-border); padding-bottom: 15px;"></div>
+        `;
+    }
+
+    // Add Phone and Email
+    summaryHTML += `
         <div class="summary-row">
             <span class="summary-label">${t.phone || 'Tél'}</span>
             <span class="summary-value">${fullPhone}</span>
@@ -353,6 +346,8 @@ dom.form.addEventListener('submit', (e) => {
             <span class="summary-value">${formData.get('email')}</span>
         </div>
     `;
+
+    dom.summaryContentBody.innerHTML = summaryHTML;
 
     // Configure Send Button
     // Note: The Send button logic has been removed as requested by the user
