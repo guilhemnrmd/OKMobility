@@ -228,14 +228,24 @@ function renderAddressSuggestions(features) {
         
         // Construct display string safely
         const street = p.street || p.name || '';
-        const houseNumber = p.housenumber || '';
+        const houseNumber = p.housenumber ? p.housenumber : '';
         const city = p.city || p.town || p.village || p.state || '';
         const postcode = p.postcode || '';
         const country = p.country || '';
+        const ccode = (p.countrycode || '').toUpperCase();
 
-        // Build main text (street + number) and sub text (postcode + city)
-        let mainText = `${houseNumber} ${street}`.trim();
-        if (!mainText) mainText = p.name || city;
+        // Build main text considering regional conventions
+        let mainText = '';
+        // Countries placing the Street name BEFORE the House Number
+        if (['ES', 'IT', 'PT', 'DE', 'AT', 'CH', 'NL', 'BE', 'PL', 'SE', 'NO', 'DK'].includes(ccode)) {
+            mainText = (houseNumber ? `${street}, ${houseNumber}` : street).trim();
+        } else {
+            // Default (France, UK, US, etc.): Number BEFORE Street
+            mainText = `${houseNumber} ${street}`.trim();
+        }
+
+        // Ultimate fallback
+        if (!mainText || mainText === ',') mainText = p.name || city;
         
         let subText = `${postcode} ${city}, ${country}`.replace(/^[\s,]+/, '').trim();
 
