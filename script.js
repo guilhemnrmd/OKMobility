@@ -241,7 +241,7 @@ function applyLanguage(langCode) {
     document.getElementById('txtBtnGenerate').textContent = t.btnGenerate;
     document.getElementById('txtBtnEdit').textContent = t.btnEdit;
     
-    document.getElementById('summaryTitle').textContent = i18n['es'].summaryTitle;
+    document.getElementById('summaryTitle').textContent = t.summaryTitle;
     
     // Legal Texts
     document.querySelectorAll('.legal-text').forEach(el => {
