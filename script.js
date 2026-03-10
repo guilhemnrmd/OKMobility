@@ -24,7 +24,7 @@ const i18n = {
       "btnSend": "Envoyer par e-mail",
       "btnEdit": "Modifier",
       "legalText": "OK MOBILITY GROUP, S.L.U. est le Responsable du traitement des données personnelles de l'intéressé et l'informe que ces données seront traitées conformément aux dispositions du Règlement (UE) 2016/679 du 27 avril (RGPD) et de la Loi Organique 3/2018 du 5 décembre (LOPDG).",
-      "summaryTitle": "Veuillez présenter ce résumé à un agent"
+      "summaryTitle": "Veuillez présenter ce résumé au conseiller"
     },
     "en": {
       "dir": "ltr",
@@ -43,7 +43,7 @@ const i18n = {
       "btnSend": "Send by e-mail",
       "btnEdit": "Edit",
       "legalText": "OK MOBILITY GROUP, S.L.U. is the Data Controller of the Data Subject's personal data and informs them that this data will be processed in accordance with the provisions of Regulation (EU) 2016/679 of April 27 (GDPR) and Organic Law 3/2018 of December 5 (LOPDG).",
-      "summaryTitle": "Please present this summary to an agent"
+      "summaryTitle": "Please present this summary to the advisor"
     },
     "es": {
       "dir": "ltr",
@@ -62,7 +62,7 @@ const i18n = {
       "btnSend": "Enviar por e-mail",
       "btnEdit": "Modificar",
       "legalText": "OK MOBILITY GROUP, S.L.U. es el Responsable del tratamiento de los datos personales del Interesado y le informa de que estos datos se tratarán de conformidad con lo dispuesto en el Reglamento (UE) 2016/679, de 27 de abril (GDPR), y la Ley Orgánica 3/2018, de 5 de diciembre (LOPDG).",
-      "summaryTitle": "Por favor, presente este resumen a un agente"
+      "summaryTitle": "Por favor, presente este resumen al asesor"
     },
     "it": {
       "dir": "ltr",
@@ -81,7 +81,7 @@ const i18n = {
       "btnSend": "Invia tramite e-mail",
       "btnEdit": "Modifica",
       "legalText": "OK MOBILITY GROUP, S.L.U. è il Titolare del trattamento dei dati personali dell'Interessato e lo informa che tali dati saranno trattati in conformità a quanto disposto dal Regolamento (UE) 2016/679 del 27 aprile (GDPR) e dalla Legge Organica 3/2018 del 5 dicembre (LOPDG).",
-      "summaryTitle": "Si prega di presentare questo riepilogo a un agente"
+      "summaryTitle": "Si prega di presentare questo riepilogo al consulente"
     },
     "pt": {
       "dir": "ltr",
@@ -100,7 +100,7 @@ const i18n = {
       "btnSend": "Enviar por e-mail",
       "btnEdit": "Editar",
       "legalText": "A OK MOBILITY GROUP, S.L.U. é a Responsável pelo tratamento dos dados pessoais do Titular e informa que estes dados serão tratados de acordo com o Regulamento (UE) 2016/679 de 27 de abril (RGPD) e a Lei Orgânica 3/2018 de 5 de dezembro (LOPDG).",
-      "summaryTitle": "Por favor, apresente este resumo a um agente"
+      "summaryTitle": "Por favor, apresente este resumo ao consultor"
     },
     "de": {
       "dir": "ltr",
@@ -119,7 +119,7 @@ const i18n = {
       "btnSend": "Per E-Mail senden",
       "btnEdit": "Bearbeiten",
       "legalText": "OK MOBILITY GROUP, S.L.U. ist der Verantwortliche für die Verarbeitung der personenbezogenen Daten der betroffenen Person und teilt mit, dass diese Daten gemäß den Bestimmungen der Verordnung (EU) 2016/679 vom 27. April (DSGVO) und dem Organgesetz 3/2018 vom 5. Dezember (LOPDG) verarbeitet werden.",
-      "summaryTitle": "Bitte legen Sie diese Zusammenfassung einem Mitarbeiter vor"
+      "summaryTitle": "Bitte legen Sie diese Zusammenfassung dem Berater vor"
     }
 };
 
