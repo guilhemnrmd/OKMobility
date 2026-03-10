@@ -127,7 +127,7 @@ const i18n = {
 // 2. DOM Elements & State
 // ============================================================================
 const state = {
-    lang: 'en',
+    lang: 'es', // Default fallback
     debounceTimer: null,
     addressSelected: false
 };
@@ -384,6 +384,22 @@ dom.btnEdit.addEventListener('click', () => {
 // ============================================================================
 // 6. Init
 // ============================================================================
+
+// Detect Browser Language
+function detectUserLanguage() {
+    if (navigator.language) {
+        const browserLang = navigator.language.split('-')[0].toLowerCase();
+        // Check if we support this exact language (fr, en, es, it, pt, de)
+        if (i18n[browserLang]) {
+            return browserLang;
+        }
+    }
+    // Ultimate fallback if language is unsupported or undetected
+    return 'es'; 
+}
+
+state.lang = detectUserLanguage();
+dom.langSelect.value = state.lang; // Sync UI Select box
 applyLanguage(state.lang);
 
 // ============================================================================
