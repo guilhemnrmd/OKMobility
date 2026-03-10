@@ -241,7 +241,7 @@ function applyLanguage(langCode) {
     document.getElementById('txtBtnGenerate').textContent = t.btnGenerate;
     document.getElementById('txtBtnEdit').textContent = t.btnEdit;
     
-    document.getElementById('summaryTitle').textContent = t.summaryTitle;
+    document.getElementById('summaryTitle').textContent = i18n['es'].summaryTitle;
     
     // Legal Texts
     document.querySelectorAll('.legal-text').forEach(el => {
@@ -308,8 +308,8 @@ dom.form.addEventListener('submit', (e) => {
     // Combine Phone Input
     const fullPhone = `${formData.get('countryCode')} ${formData.get('phone')}`;
 
-    // Prepare Summary View with Beautiful UI Components
-    const t = i18n[state.lang];
+    // Prepare Summary View with Beautiful UI Components (Forced to Spanish)
+    const t = i18n['es'];
     
     // Base Document
     let summaryHTML = `
