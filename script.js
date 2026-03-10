@@ -21,7 +21,6 @@ const i18n = {
       "placeholderPhone": "6 12 34 56 78",
       "placeholderEmail": "jean.dupont@email.com",
       "btnGenerate": "Générer mon résumé",
-      "btnSend": "Envoyer par e-mail",
       "btnEdit": "Modifier",
       "legalText": "OK MOBILITY GROUP, S.L.U. est le Responsable du traitement des données personnelles de l'intéressé et l'informe que ces données seront traitées conformément aux dispositions du Règlement (UE) 2016/679 du 27 avril (RGPD) et de la Loi Organique 3/2018 du 5 décembre (LOPDG).",
       "summaryTitle": "Veuillez présenter ce résumé au conseiller"
@@ -40,7 +39,6 @@ const i18n = {
       "placeholderPhone": "7911 123456",
       "placeholderEmail": "john.doe@email.com",
       "btnGenerate": "Generate my summary",
-      "btnSend": "Send by e-mail",
       "btnEdit": "Edit",
       "legalText": "OK MOBILITY GROUP, S.L.U. is the Data Controller of the Data Subject's personal data and informs them that this data will be processed in accordance with the provisions of Regulation (EU) 2016/679 of April 27 (GDPR) and Organic Law 3/2018 of December 5 (LOPDG).",
       "summaryTitle": "Please present this summary to the advisor"
@@ -59,7 +57,6 @@ const i18n = {
       "placeholderPhone": "612 34 56 78",
       "placeholderEmail": "juan.perez@email.com",
       "btnGenerate": "Generar mi resumen",
-      "btnSend": "Enviar por e-mail",
       "btnEdit": "Modificar",
       "legalText": "OK MOBILITY GROUP, S.L.U. es el Responsable del tratamiento de los datos personales del Interesado y le informa de que estos datos se tratarán de conformidad con lo dispuesto en el Reglamento (UE) 2016/679, de 27 de abril (GDPR), y la Ley Orgánica 3/2018, de 5 de diciembre (LOPDG).",
       "summaryTitle": "Por favor, presente este resumen al asesor"
@@ -78,7 +75,6 @@ const i18n = {
       "placeholderPhone": "312 345 6789",
       "placeholderEmail": "mario.rossi@email.com",
       "btnGenerate": "Genera il mio riepilogo",
-      "btnSend": "Invia tramite e-mail",
       "btnEdit": "Modifica",
       "legalText": "OK MOBILITY GROUP, S.L.U. è il Titolare del trattamento dei dati personali dell'Interessato e lo informa che tali dati saranno trattati in conformità a quanto disposto dal Regolamento (UE) 2016/679 del 27 aprile (GDPR) e dalla Legge Organica 3/2018 del 5 dicembre (LOPDG).",
       "summaryTitle": "Si prega di presentare questo riepilogo al consulente"
@@ -97,7 +93,6 @@ const i18n = {
       "placeholderPhone": "912 345 678",
       "placeholderEmail": "joao.silva@email.com",
       "btnGenerate": "Gerar o meu resumo",
-      "btnSend": "Enviar por e-mail",
       "btnEdit": "Editar",
       "legalText": "A OK MOBILITY GROUP, S.L.U. é a Responsável pelo tratamento dos dados pessoais do Titular e informa que estes dados serão tratados de acordo com o Regulamento (UE) 2016/679 de 27 de abril (RGPD) e a Lei Orgânica 3/2018 de 5 de dezembro (LOPDG).",
       "summaryTitle": "Por favor, apresente este resumo ao consultor"
@@ -116,7 +111,6 @@ const i18n = {
       "placeholderPhone": "151 23456789",
       "placeholderEmail": "max.mustermann@email.com",
       "btnGenerate": "Meine Zusammenfassung erstellen",
-      "btnSend": "Per E-Mail senden",
       "btnEdit": "Bearbeiten",
       "legalText": "OK MOBILITY GROUP, S.L.U. ist der Verantwortliche für die Verarbeitung der personenbezogenen Daten der betroffenen Person und teilt mit, dass diese Daten gemäß den Bestimmungen der Verordnung (EU) 2016/679 vom 27. April (DSGVO) und dem Organgesetz 3/2018 vom 5. Dezember (LOPDG) verarbeitet werden.",
       "summaryTitle": "Bitte legen Sie diese Zusammenfassung dem Berater vor"
@@ -140,7 +134,7 @@ const dom = {
     summaryView: document.getElementById('summaryView'),
     // Outputs
     summaryContentBody: document.getElementById('summaryContentBody'),
-    btnSend: document.getElementById('btnSend'),
+    btnEdit: document.getElementById('btnEdit'),
     // Inputs
     searchAddress: document.getElementById('addressSearch'),
     addressResults: document.getElementById('addressResults'),
@@ -149,8 +143,7 @@ const dom = {
     fullAddress: document.getElementById('fullAddress'),
     phone: document.getElementById('phone'),
     email: document.getElementById('email'),
-    addressLoader: document.getElementById('addressLoader'),
-    btnEdit: document.getElementById('btnEdit')
+    addressLoader: document.getElementById('addressLoader')
 };
 
 // ============================================================================
@@ -185,7 +178,6 @@ function applyLanguage(langCode) {
     dom.email.placeholder = t.placeholderEmail;
     
     document.getElementById('txtBtnGenerate').textContent = t.btnGenerate;
-    document.getElementById('txtBtnSend').textContent = t.btnSend;
     document.getElementById('txtBtnEdit').textContent = t.btnEdit;
     
     document.getElementById('summaryTitle').textContent = t.summaryTitle;
@@ -331,23 +323,9 @@ dom.form.addEventListener('submit', (e) => {
     // Combine Phone Input
     const fullPhone = `${formData.get('countryCode')} ${formData.get('phone')}`;
 
-    // Build plain text body for email
-    const mailBody = `Nouveau Client
-
-ADRESSE : ${addr}
-CODE POSTAL : ${formData.get('zipCode')}
-VILLE : ${formData.get('city')}
-
-TÉLÉPHONE : ${fullPhone}
-EMAIL : ${formData.get('email')}
-`;
-
-    // Encode for safely putting in mailto link
-    const subject = "Nouveau Client OK Mobility";
-    const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(mailBody)}`;
-
     // Prepare Summary View with Beautiful UI Components
     const t = i18n[state.lang];
+    
     dom.summaryContentBody.innerHTML = `
         <div class="summary-row">
             <span class="summary-label">${t.address || 'Adresse'}</span>
@@ -368,7 +346,7 @@ EMAIL : ${formData.get('email')}
     `;
 
     // Configure Send Button
-    dom.btnSend.href = mailtoLink;
+    // Note: The Send button logic has been removed as requested by the user
 
     // Transition UI
     dom.form.style.display = 'none';
