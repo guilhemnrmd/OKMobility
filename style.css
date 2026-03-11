@@ -279,6 +279,7 @@ body {
 }
 
 .lang-selector {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -290,6 +291,8 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.5);
     box-shadow: 0 4px 16px rgba(32, 84, 234, 0.1);
     transition: all var(--transition-smooth);
+    cursor: pointer;
+    user-select: none;
 }
 
 .lang-selector:hover {
@@ -315,6 +318,17 @@ body {
 .lang-selector i {
     color: var(--color-text-secondary);
     font-size: 1.1rem;
+    pointer-events: none;
+}
+
+.lang-selector select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    border-radius: 50px;
 }
 
 select {
@@ -635,6 +649,7 @@ input::placeholder {
     min-height: 52px;
     background: transparent;
     transition: all var(--transition-base);
+    cursor: pointer;
 }
 
 .custom-checkbox {
@@ -698,13 +713,13 @@ input::placeholder {
     content: "";
     position: absolute;
     display: none;
-    left: 7px;
-    top: 3px;
+    left: 50%;
+    top: 50%;
     width: 5px;
-    height: 10px;
+    height: 9px;
     border: solid white;
     border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
+    transform: translate(-50%, -60%) rotate(45deg);
 }
 
 .custom-checkbox input:checked ~ .checkmark:after {

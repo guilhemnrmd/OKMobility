@@ -205,6 +205,11 @@ function applyLanguage(langCode) {
 
     state.lang = langCode;
 
+    // Sync lang display label
+    const langNames = { fr: 'Français', en: 'English', es: 'Español', it: 'Italiano', pt: 'Português', de: 'Deutsch' };
+    const langDisplay = document.getElementById('langDisplay');
+    if (langDisplay) langDisplay.textContent = langNames[langCode] || langCode;
+
     // Apply Directionality & Lang Attribute
     dom.html.setAttribute('dir', t.dir);
     dom.html.setAttribute('lang', langCode);
@@ -288,6 +293,13 @@ dom.hasTempAddress.addEventListener('change', (e) => {
         dom.tempAddress.removeAttribute('required');
         dom.tempZipCode.removeAttribute('required');
         dom.tempCity.removeAttribute('required');
+    }
+});
+
+// Clic sur toute la ligne = coche la case (sauf si clic sur le bouton info ou sur le label lui-même qui gère nativement)
+document.querySelector('.toggle-header').addEventListener('click', (e) => {
+    if (!dom.btnTempInfo.contains(e.target) && !e.target.closest('.custom-checkbox')) {
+        dom.hasTempAddress.click();
     }
 });
 
