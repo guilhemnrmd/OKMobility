@@ -159,7 +159,8 @@ const i18n = {
 const state = {
     lang: 'es', // Default fallback
     debounceTimer: null,
-    addressSelected: false
+    addressSelected: false,
+    globalCountriesData: []
 };
 
 const dom = {
@@ -247,6 +248,10 @@ function applyLanguage(langCode) {
     document.querySelectorAll('.legal-text').forEach(el => {
         el.textContent = t.legalText;
     });
+
+    if (state.globalCountriesData && state.globalCountriesData.length > 0) {
+        renderCountrySelect(lang);
+    }
 }
 
 dom.langSelect.addEventListener('change', (e) => {
@@ -390,7 +395,6 @@ applyLanguage(state.lang);
 // 7. Dynamic Data (Country Dial Codes)
 // ============================================================================
 async function populateCountryCodes() {
-    const select = document.getElementById('countryCode');
     try {
         const response = await fetch('https://restcountries.com/v3.1/all?fields=name,cca2,idd');
         const data = await response.json();
@@ -417,72 +421,82 @@ async function populateCountryCodes() {
         // Sort alphabetically by English name
         countries.sort((a, b) => a.name.localeCompare(b.name));
 
-        // Auto-detect user's country based on browser language
-        let userCountryCode = 'ES'; // Ultimate default
-        if (navigator.language) {
-            const parts = navigator.language.split('-');
-            if (parts.length > 1) {
-                userCountryCode = parts[1].toUpperCase(); // e.g., 'en-US' -> 'US'
-            } else {
-                // Map common languages to likely countries if no region is provided
-                const langToCountry = {
-                    'fr': 'FR', 'es': 'ES', 'en': 'GB', 'it': 'IT', 'pt': 'PT', 'de': 'DE'
-                };
-                userCountryCode = langToCountry[parts[0].toLowerCase()] || 'ES';
-            }
-        }
+        state.globalCountriesData = countries;
 
-        // Find the best matching country or fallback to ES
-        let defaultCountryIndex = countries.findIndex(c => c.cca2 === userCountryCode);
-        if (defaultCountryIndex === -1) {
-            defaultCountryIndex = countries.findIndex(c => c.cca2 === 'ES');
-        }
-        
-        // Extract default country to put it at the top
-        const defaultCountry = countries.splice(defaultCountryIndex, 1)[0];
-
-        select.innerHTML = '';
-        
-        // 1. Add the predicted country at the very top
-        if (defaultCountry) {
-            const topOption = document.createElement('option');
-            topOption.value = defaultCountry.code;
-            topOption.textContent = defaultCountry.fullLabel;
-            topOption.dataset.short = defaultCountry.shortLabel;
-            topOption.selected = true;
-            select.appendChild(topOption);
-            
-            // Set initial display
-            document.getElementById('countryCodeDisplay').textContent = defaultCountry.shortLabel;
-            
-            // Add a separator
-            const separator = document.createElement('option');
-            separator.disabled = true;
-            separator.textContent = '──────────';
-            select.appendChild(separator);
-        }
-
-        // 2. Add all other countries sorted alphabetically
-        countries.forEach(c => {
-            const option = document.createElement('option');
-            option.value = c.code;
-            option.textContent = c.fullLabel;
-            option.dataset.short = c.shortLabel;
-            select.appendChild(option);
-        });
-        
-        // 3. Update the overlay view when the native select changes
+        const select = document.getElementById('countryCode');
+        // Update the overlay view when the native select changes (only bind once)
         select.addEventListener('change', (e) => {
             const selectedOpt = e.target.options[e.target.selectedIndex];
             if (selectedOpt && selectedOpt.dataset.short) {
                 document.getElementById('countryCodeDisplay').textContent = selectedOpt.dataset.short;
             }
         });
+
+        // Initial render
+        renderCountrySelect(state.lang);
         
     } catch (error) {
-        console.error("Failed to load country codes:", error);
-        // Fallback already in HTML
+        console.error('Error fetching country codes:', error);
     }
+}
+
+function renderCountrySelect(langCode) {
+    if (!state.globalCountriesData || state.globalCountriesData.length === 0) return;
+    const select = document.getElementById('countryCode');
+    
+    // Determine priority countries based on UI language
+    let priorityCca2 = [];
+    switch (langCode) {
+        case 'en': priorityCca2 = ['GB', 'US', 'CA', 'AU']; break;
+        case 'es': priorityCca2 = ['ES', 'MX', 'AR', 'CO']; break;
+        case 'fr': priorityCca2 = ['FR', 'BE', 'CH', 'CA']; break;
+        case 'it': priorityCca2 = ['IT', 'CH']; break;
+        case 'pt': priorityCca2 = ['PT', 'BR']; break;
+        case 'de': priorityCca2 = ['DE', 'AT', 'CH']; break;
+        default: priorityCca2 = ['ES'];
+    }
+    
+    const countriesCopy = [...state.globalCountriesData];
+    const topCountries = [];
+    
+    priorityCca2.forEach(cca2 => {
+        const idx = countriesCopy.findIndex(c => c.cca2 === cca2);
+        if (idx !== -1) {
+            topCountries.push(countriesCopy.splice(idx, 1)[0]);
+        }
+    });
+
+    select.innerHTML = '';
+    
+    // 1. Add priority countries at the top
+    topCountries.forEach((c, index) => {
+        const option = document.createElement('option');
+        option.value = c.code;
+        option.textContent = c.fullLabel;
+        option.dataset.short = c.shortLabel;
+        if (index === 0) {
+            option.selected = true; // Select the first one by default
+            document.getElementById('countryCodeDisplay').textContent = c.shortLabel;
+        }
+        select.appendChild(option);
+    });
+    
+    // Add separator
+    if (topCountries.length > 0) {
+        const separator = document.createElement('option');
+        separator.disabled = true;
+        separator.textContent = '──────────';
+        select.appendChild(separator);
+    }
+
+    // 2. Add all other countries sorted alphabetically
+    countriesCopy.forEach(c => {
+        const option = document.createElement('option');
+        option.value = c.code;
+        option.textContent = c.fullLabel;
+        option.dataset.short = c.shortLabel;
+        select.appendChild(option);
+    });
 }
 
 function getFlagEmoji(countryCode) {
