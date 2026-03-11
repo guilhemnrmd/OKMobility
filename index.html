@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+    <meta name="referrer" content="same-origin">
     <title>OK Mobility</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     
@@ -15,7 +17,7 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css?v=11">
+    <link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
     
@@ -39,16 +41,21 @@
                 <span class="brand-slogan">The Global Mobility Platform</span>
             </div>
             
-            <div class="lang-selector">
-                <i class='bx bx-globe'></i>
-                <select id="languageSelect" aria-label="Select language">
-                    <option value="en" selected>English</option>
-                    <option value="fr">Français</option>
-                    <option value="es">Español</option>
-                    <option value="it">Italiano</option>
-                    <option value="pt">Português</option>
-                    <option value="de">Deutsch</option>
-                </select>
+            <div class="header-controls">
+                <div class="lang-selector">
+                    <i class='bx bx-globe'></i>
+                    <select id="languageSelect" aria-label="Select language">
+                        <option value="en" selected>English</option>
+                        <option value="fr">Français</option>
+                        <option value="es">Español</option>
+                        <option value="it">Italiano</option>
+                        <option value="pt">Português</option>
+                        <option value="de">Deutsch</option>
+                    </select>
+                </div>
+                <button id="btnReset" class="btn-reset" aria-label="Reset">
+                    <i class='bx bx-rotate-left'></i>
+                </button>
             </div>
         </header>
 
@@ -95,7 +102,7 @@
                             <label class="custom-checkbox">
                                 <input type="checkbox" id="hasTempAddress" name="hasTempAddress">
                                 <span class="checkmark"></span>
-                                <span id="lblTempAddressCheck">J'ai une adresse temporaire locale (Hôtel, etc.)</span>
+                                <span id="lblTempAddressCheck">J'ai une adresse temporaire locale</span>
                             </label>
                             <button type="button" class="info-btn" id="btnTempInfo" title="Utilisé si vous séjournez temporairement dans une autre adresse pendant votre location." aria-label="Information">
                                 <i class='bx bx-info-circle'></i>
@@ -202,6 +209,6 @@
         
     </main>
 
-    <script src="script.js?v=11"></script>
+    <script src="script.js?v=12"></script>
 </body>
 </html>

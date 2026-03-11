@@ -10,6 +10,20 @@ Une application web statique moderne, élégante et ultra-rapide permettant de r
 - **Mode 100% Client/Front-End** : Pas de serveur lourd, pas de base de données logicielle requise. Fichiers ultra-légers prêts à être hébergés n'importe où.
 - **Génération de Résumé Visuel** : Transforme instantanément la saisie dans une vue carte propre et moderne pour validation par le conseiller.
 
+## 🎨 Charte graphique (DA)
+Couleurs de référence utilisées dans l'application :
+
+- **Bleu principal** : `#2054EA`
+- **Blanc** : `#FFFFFF`
+- **Noir/Anthracite** : `#17181D`
+
+Ces couleurs sont appliquées aux éléments clés (fonds, textes, accent, boutons, états focus) pour améliorer la lisibilité (notamment sur les labels type Adresse, Email, etc.).
+
+## 🔒 Confidentialité / visibilité publique
+- Le site reste une application statique front-end (pas de stockage serveur natif).
+- Ajout de directives anti-indexation (`noindex`, `nofollow`, etc.) dans la page pour limiter l'exposition dans les moteurs.
+- Le menu d'indicatifs téléphoniques est piloté par la **langue choisie dans l'app** (sélecteur en haut), et non directement par la langue navigateur. Au premier chargement, la langue navigateur sert seulement à pré-remplir ce choix.
+
 ## 🚀 Déploiement : Hébergement gratuit sur Cloudflare Pages
 
 Cloudflare Pages est l'une des plateformes les plus rapides et sécurisées pour héberger des sites web statiques. Votre site sera disponible sous une URL professionnelle finissant par `.pages.dev`.

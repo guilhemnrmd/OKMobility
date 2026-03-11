@@ -12,8 +12,8 @@ const i18n = {
       "pageTitle": "Vos informations",
       "address": "Adresse de résidence",
       "address": "Adresse de résidence",
-      "addressPlaceholder": "Ex: 15 Rue de Rivoli",
-      "tempAddressCheck": "J'ai une adresse temporaire locale (Hôtel, etc.)",
+      "addressPlaceholder": "15 Rue de Rivoli",
+      "tempAddressCheck": "J'ai une adresse temporaire locale",
       "tempTooltip": "Renseignez cette adresse si vous séjournez temporairement à un autre endroit (ex: Hôtel, Airbnb) pendant la durée de votre location.",
       "tempAddress": "Adresse temporaire",
       "tempZipCode": "Code Postal",
@@ -28,7 +28,7 @@ const i18n = {
       "placeholderEmail": "jean.dupont@email.com",
       "btnGenerate": "Générer mon résumé",
       "btnEdit": "Modifier",
-      "legalText": "OK MOBILITY GROUP, S.L.U. est le Responsable du traitement des données personnelles de l'intéressé et l'informe que ces données seront traitées conformément aux dispositions du Règlement (UE) 2016/679 du 27 avril (RGPD) et de la Loi Organique 3/2018 du 5 décembre (LOPDG).",
+      "legalText": "OK MOBILITY GROUP, S.L.U. est le Responsable du traitement des données à caractère personnel de la personne concernée et l'informe que lesdites données feront l'objet d'un traitement conformément aux dispositions du Règlement (UE) 2016/679 du Parlement européen et du Conseil du 27 avril 2016 (RGPD) et de la Loi Organique 3/2018 du 5 décembre relative à la protection des données personnelles et à la garantie des droits numériques (LOPDGDD).",
       "summaryTitle": "Veuillez présenter ce résumé au conseiller"
     },
     "en": {
@@ -36,8 +36,8 @@ const i18n = {
       "pageTitle": "Your information",
       "address": "Home Address",
       "address": "Home Address",
-      "addressPlaceholder": "Ex: 221B Baker Street",
-      "tempAddressCheck": "I have a local temporary address (Hotel, etc.)",
+      "addressPlaceholder": "221B Baker Street",
+      "tempAddressCheck": "I have a local temporary address",
       "tempTooltip": "Fill in this address if you are temporarily staying at another location (e.g., Hotel, Airbnb) during your rental period.",
       "tempAddress": "Temporary Address",
       "tempZipCode": "Postal Code / Zip",
@@ -52,7 +52,7 @@ const i18n = {
       "placeholderEmail": "john.doe@email.com",
       "btnGenerate": "Generate my summary",
       "btnEdit": "Edit",
-      "legalText": "OK MOBILITY GROUP, S.L.U. is the Data Controller of the Data Subject's personal data and informs them that this data will be processed in accordance with the provisions of Regulation (EU) 2016/679 of April 27 (GDPR) and Organic Law 3/2018 of December 5 (LOPDG).",
+      "legalText": "OK MOBILITY GROUP, S.L.U. acts as Data Controller with respect to the personal data of the Data Subject and hereby informs that such data shall be processed in accordance with the provisions of Regulation (EU) 2016/679 of the European Parliament and of the Council of 27 April 2016 (GDPR) and Organic Law 3/2018 of 5 December on the Protection of Personal Data and Guarantee of Digital Rights (LOPDGDD).",
       "summaryTitle": "Please present this summary to the advisor"
     },
     "es": {
@@ -60,8 +60,8 @@ const i18n = {
       "pageTitle": "Su información",
       "address": "Dirección de residencia",
       "address": "Dirección de residencia",
-      "addressPlaceholder": "Ej: Gran Vía, 15",
-      "tempAddressCheck": "Tengo una dirección temporal local (Hotel, etc.)",
+      "addressPlaceholder": "Gran Vía, 15",
+      "tempAddressCheck": "Tengo una dirección temporal local",
       "tempTooltip": "Rellene esta dirección si se aloja temporalmente en otro lugar (ej. Hotel, Airbnb) durante su alquiler.",
       "tempAddress": "Dirección temporal",
       "tempZipCode": "Código Postal / CP",
@@ -84,8 +84,8 @@ const i18n = {
       "pageTitle": "Le tue informazioni",
       "address": "Indirizzo di residenza",
       "address": "Indirizzo di residenza",
-      "addressPlaceholder": "Es: Via Roma, 10",
-      "tempAddressCheck": "Ho un indirizzo temporaneo locale (Hotel, ecc.)",
+      "addressPlaceholder": "Via Roma, 10",
+      "tempAddressCheck": "Ho un indirizzo temporaneo locale",
       "tempTooltip": "Compila questo indirizzo se soggiorni temporaneamente in un altro luogo (es. Hotel, Airbnb) durante il noleggio.",
       "tempAddress": "Indirizzo temporaneo",
       "tempZipCode": "Codice Postale / CAP",
@@ -100,7 +100,7 @@ const i18n = {
       "placeholderEmail": "mario.rossi@email.com",
       "btnGenerate": "Genera il mio riepilogo",
       "btnEdit": "Modifica",
-      "legalText": "OK MOBILITY GROUP, S.L.U. è il Titolare del trattamento dei dati personali dell'Interessato e lo informa che tali dati saranno trattati in conformità a quanto disposto dal Regolamento (UE) 2016/679 del 27 aprile (GDPR) e dalla Legge Organica 3/2018 del 5 dicembre (LOPDG).",
+      "legalText": "OK MOBILITY GROUP, S.L.U. è il Titolare del trattamento dei dati personali dell'Interessato e lo informa che tali dati saranno trattati in conformità con le disposizioni del Regolamento (UE) 2016/679 del Parlamento europeo e del Consiglio del 27 aprile 2016 (GDPR) e della Legge Organica 3/2018 del 5 dicembre sulla protezione dei dati personali e garanzia dei diritti digitali (LOPDGDD).",
       "summaryTitle": "Si prega di presentare questo riepilogo al consulente"
     },
     "pt": {
@@ -108,8 +108,8 @@ const i18n = {
       "pageTitle": "As suas informações",
       "address": "Morada",
       "address": "Morada",
-      "addressPlaceholder": "Ex: Rua Augusta, 20",
-      "tempAddressCheck": "Tenho um endereço temporário local (Hotel, etc.)",
+      "addressPlaceholder": "Rua Augusta, 20",
+      "tempAddressCheck": "Tenho um endereço temporário local",
       "tempTooltip": "Preencha este endereço se estiver hospedado temporariamente noutro local (ex: Hotel, Airbnb) durante o seu aluguer.",
       "tempAddress": "Endereço temporário",
       "tempZipCode": "Código Postal",
@@ -124,7 +124,7 @@ const i18n = {
       "placeholderEmail": "joao.silva@email.com",
       "btnGenerate": "Gerar o meu resumo",
       "btnEdit": "Editar",
-      "legalText": "A OK MOBILITY GROUP, S.L.U. é a Responsável pelo tratamento dos dados pessoais do Titular e informa que estes dados serão tratados de acordo com o Regulamento (UE) 2016/679 de 27 de abril (RGPD) e a Lei Orgânica 3/2018 de 5 de dezembro (LOPDG).",
+      "legalText": "A OK MOBILITY GROUP, S.L.U. é a Responsável pelo tratamento dos dados pessoais do Titular dos dados e informa que os referidos dados serão tratados em conformidade com o disposto no Regulamento (UE) 2016/679 do Parlamento Europeu e do Conselho, de 27 de abril de 2016 (RGPD), e na Lei Orgânica n.º 3/2018, de 5 de dezembro, relativa à Proteção de Dados Pessoais e à Garantia dos Direitos Digitais (LOPDGDD).",
       "summaryTitle": "Por favor, apresente este resumo ao consultor"
     },
     "de": {
@@ -132,8 +132,8 @@ const i18n = {
       "pageTitle": "Ihre Informationen",
       "address": "Wohnanschrift",
       "address": "Wohnanschrift",
-      "addressPlaceholder": "Bsp: Alexanderplatz 4",
-      "tempAddressCheck": "Ich habe eine lokale temporäre Adresse (Hotel usw.)",
+      "addressPlaceholder": "Alexanderplatz 4",
+      "tempAddressCheck": "Ich habe eine lokale temporäre Adresse",
       "tempTooltip": "Geben Sie diese Adresse an, wenn Sie sich während Ihrer Anmietung vorübergehend an einem anderen Ort (z.B. Hotel, Airbnb) aufhalten.",
       "tempAddress": "Temporäre Adresse",
       "tempZipCode": "Postleitzahl / PLZ",
@@ -148,7 +148,7 @@ const i18n = {
       "placeholderEmail": "max.mustermann@email.com",
       "btnGenerate": "Meine Zusammenfassung erstellen",
       "btnEdit": "Bearbeiten",
-      "legalText": "OK MOBILITY GROUP, S.L.U. ist der Verantwortliche für die Verarbeitung der personenbezogenen Daten der betroffenen Person und teilt mit, dass diese Daten gemäß den Bestimmungen der Verordnung (EU) 2016/679 vom 27. April (DSGVO) und dem Organgesetz 3/2018 vom 5. Dezember (LOPDG) verarbeitet werden.",
+      "legalText": "OK MOBILITY GROUP, S.L.U. ist der Verantwortliche im Sinne des Datenschutzrechts für die Verarbeitung der personenbezogenen Daten der betroffenen Person und teilt mit, dass diese Daten gemäß den Bestimmungen der Verordnung (EU) 2016/679 des Europäischen Parlaments und des Rates vom 27. April 2016 (DSGVO) sowie des Organgesetzes 3/2018 vom 5. Dezember über den Schutz personenbezogener Daten und die Gewährleistung digitaler Rechte (LOPDGDD) verarbeitet werden.",
       "summaryTitle": "Bitte legen Sie diese Zusammenfassung dem Berater vor"
     }
 };
@@ -251,12 +251,19 @@ function applyLanguage(langCode) {
     });
 
     if (state.globalCountriesData && state.globalCountriesData.length > 0) {
-        renderCountrySelect(lang);
+        renderCountrySelect(langCode);
     }
 }
 
 dom.langSelect.addEventListener('change', (e) => {
     applyLanguage(e.target.value);
+});
+
+document.getElementById('btnReset').addEventListener('click', () => {
+    const btn = document.getElementById('btnReset');
+    btn.classList.add('spinning');
+    sessionStorage.setItem('okm_lang', state.lang);
+    setTimeout(() => location.reload(), 520);
 });
 
 // ============================================================================
@@ -388,7 +395,8 @@ function detectUserLanguage() {
     return 'es'; 
 }
 
-state.lang = detectUserLanguage();
+state.lang = sessionStorage.getItem('okm_lang') || detectUserLanguage();
+sessionStorage.removeItem('okm_lang');
 dom.langSelect.value = state.lang; // Sync UI Select box
 applyLanguage(state.lang);
 
@@ -446,16 +454,24 @@ function renderCountrySelect(langCode) {
     if (!state.globalCountriesData || state.globalCountriesData.length === 0) return;
     const select = document.getElementById('countryCode');
     const currentSelection = state.phoneSelectedManually ? select.value : null;
+    const localeForDisplay = i18n[langCode] ? langCode : 'en';
+    let displayNames = null;
+
+    try {
+        displayNames = new Intl.DisplayNames([localeForDisplay], { type: 'region' });
+    } catch (_) {
+        displayNames = null;
+    }
     
     // Determine priority countries based on UI language
     let priorityCca2 = [];
     switch (langCode) {
-        case 'en': priorityCca2 = ['GB', 'US', 'CA', 'AU']; break;
-        case 'es': priorityCca2 = ['ES', 'MX', 'AR', 'CO']; break;
-        case 'fr': priorityCca2 = ['FR', 'BE', 'CH', 'CA']; break;
-        case 'it': priorityCca2 = ['IT', 'CH']; break;
-        case 'pt': priorityCca2 = ['PT', 'BR']; break;
-        case 'de': priorityCca2 = ['DE', 'AT', 'CH']; break;
+        case 'en': priorityCca2 = ['GB', 'US', 'CA', 'AU', 'IE', 'NZ']; break;
+        case 'es': priorityCca2 = ['ES', 'MX', 'AR', 'CO', 'CL', 'PE', 'VE']; break;
+        case 'fr': priorityCca2 = ['FR', 'BE', 'CH', 'CA', 'LU', 'MC']; break;
+        case 'it': priorityCca2 = ['IT', 'CH', 'SM', 'VA']; break;
+        case 'pt': priorityCca2 = ['PT', 'BR', 'AO', 'MZ', 'CV']; break;
+        case 'de': priorityCca2 = ['DE', 'AT', 'CH', 'LU', 'LI']; break;
         default: priorityCca2 = ['ES'];
     }
     
@@ -475,8 +491,9 @@ function renderCountrySelect(langCode) {
     // 1. Add priority countries at the top
     topCountries.forEach((c, index) => {
         const option = document.createElement('option');
+        const localizedName = displayNames ? displayNames.of(c.cca2) : c.name;
         option.value = c.code;
-        option.textContent = c.fullLabel;
+        option.textContent = `${getFlagEmoji(c.cca2)} ${localizedName || c.name} (${c.code})`;
         option.dataset.short = c.shortLabel;
         
         if (c.code === currentSelection || (!currentSelection && index === 0)) {
@@ -498,8 +515,9 @@ function renderCountrySelect(langCode) {
     // 2. Add all other countries sorted alphabetically
     countriesCopy.forEach(c => {
         const option = document.createElement('option');
+        const localizedName = displayNames ? displayNames.of(c.cca2) : c.name;
         option.value = c.code;
-        option.textContent = c.fullLabel;
+        option.textContent = `${getFlagEmoji(c.cca2)} ${localizedName || c.name} (${c.code})`;
         option.dataset.short = c.shortLabel;
         
         if (!selectionRestored && c.code === currentSelection) {
@@ -522,3 +540,37 @@ function getFlagEmoji(countryCode) {
 
 // Call on startup
 populateCountryCodes();
+
+// ============================================================================
+// 8. Fix layout jump on language switch — lock legal-text height to tallest version
+// ============================================================================
+function lockLegalTextHeight() {
+    const els = document.querySelectorAll('.legal-text');
+    if (!els.length) return;
+
+    // Remove any previously set min-height to measure freely
+    els.forEach(el => el.style.minHeight = '');
+
+    let maxHeight = 0;
+    const original = els[0].textContent;
+
+    // Measure each language's legal text on the first .legal-text element
+    Object.values(i18n).forEach(t => {
+        els[0].textContent = t.legalText;
+        maxHeight = Math.max(maxHeight, els[0].scrollHeight);
+    });
+
+    // Restore current text
+    els[0].textContent = i18n[state.lang].legalText;
+
+    // Apply the max height as min-height to all legal-text elements
+    els.forEach(el => el.style.minHeight = maxHeight + 'px');
+}
+
+// Run once DOM is ready, and re-run on resize (debounced)
+window.addEventListener('load', lockLegalTextHeight);
+let _legalResizeTimer;
+window.addEventListener('resize', () => {
+    clearTimeout(_legalResizeTimer);
+    _legalResizeTimer = setTimeout(lockLegalTextHeight, 200);
+});
