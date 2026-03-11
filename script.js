@@ -243,7 +243,9 @@ function applyLanguage(langCode) {
     document.getElementById('txtBtnGenerate').textContent = t.btnGenerate;
     document.getElementById('txtBtnEdit').textContent = t.btnEdit;
     
-    document.getElementById('summaryTitle').textContent = t.summaryTitle;
+    // Met à jour le h1 selon la vue active
+    const summaryVisible = dom.summaryView && dom.summaryView.style.display !== 'none';
+    document.getElementById('pageTitle').textContent = summaryVisible ? t.summaryTitle : t.pageTitle;
     
     // Legal Texts
     document.querySelectorAll('.legal-text').forEach(el => {
@@ -368,12 +370,14 @@ dom.form.addEventListener('submit', (e) => {
     // Note: The Send button logic has been removed as requested by the user
 
     // Transition UI
+    document.getElementById('pageTitle').textContent = i18n[state.lang].summaryTitle;
     dom.form.style.display = 'none';
     dom.summaryView.style.display = 'flex';
 });
 
 // Edit Button logic
 dom.btnEdit.addEventListener('click', () => {
+    document.getElementById('pageTitle').textContent = i18n[state.lang].pageTitle;
     dom.summaryView.style.display = 'none';
     dom.form.style.display = 'flex';
 });
