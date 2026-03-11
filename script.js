@@ -160,7 +160,8 @@ const state = {
     lang: 'es', // Default fallback
     debounceTimer: null,
     addressSelected: false,
-    globalCountriesData: []
+    globalCountriesData: [],
+    phoneSelectedManually: false
 };
 
 const dom = {
@@ -426,6 +427,7 @@ async function populateCountryCodes() {
         const select = document.getElementById('countryCode');
         // Update the overlay view when the native select changes (only bind once)
         select.addEventListener('change', (e) => {
+            state.phoneSelectedManually = true;
             const selectedOpt = e.target.options[e.target.selectedIndex];
             if (selectedOpt && selectedOpt.dataset.short) {
                 document.getElementById('countryCodeDisplay').textContent = selectedOpt.dataset.short;
@@ -443,7 +445,7 @@ async function populateCountryCodes() {
 function renderCountrySelect(langCode) {
     if (!state.globalCountriesData || state.globalCountriesData.length === 0) return;
     const select = document.getElementById('countryCode');
-    const currentSelection = select.value;
+    const currentSelection = state.phoneSelectedManually ? select.value : null;
     
     // Determine priority countries based on UI language
     let priorityCca2 = [];
