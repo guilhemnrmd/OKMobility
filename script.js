@@ -443,6 +443,7 @@ async function populateCountryCodes() {
 function renderCountrySelect(langCode) {
     if (!state.globalCountriesData || state.globalCountriesData.length === 0) return;
     const select = document.getElementById('countryCode');
+    const currentSelection = select.value;
     
     // Determine priority countries based on UI language
     let priorityCca2 = [];
@@ -467,6 +468,7 @@ function renderCountrySelect(langCode) {
     });
 
     select.innerHTML = '';
+    let selectionRestored = false;
     
     // 1. Add priority countries at the top
     topCountries.forEach((c, index) => {
@@ -474,9 +476,11 @@ function renderCountrySelect(langCode) {
         option.value = c.code;
         option.textContent = c.fullLabel;
         option.dataset.short = c.shortLabel;
-        if (index === 0) {
-            option.selected = true; // Select the first one by default
+        
+        if (c.code === currentSelection || (!currentSelection && index === 0)) {
+            option.selected = true;
             document.getElementById('countryCodeDisplay').textContent = c.shortLabel;
+            selectionRestored = true;
         }
         select.appendChild(option);
     });
@@ -495,6 +499,12 @@ function renderCountrySelect(langCode) {
         option.value = c.code;
         option.textContent = c.fullLabel;
         option.dataset.short = c.shortLabel;
+        
+        if (!selectionRestored && c.code === currentSelection) {
+            option.selected = true;
+            document.getElementById('countryCodeDisplay').textContent = c.shortLabel;
+            selectionRestored = true;
+        }
         select.appendChild(option);
     });
 }
