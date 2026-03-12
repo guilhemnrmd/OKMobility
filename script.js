@@ -368,9 +368,6 @@ if (btnReset) {
         sessionStorage.setItem('okm_lang', state.lang);
         setTimeout(() => location.reload(), 520);
     });
-    console.log('Reset button event attached');
-} else {
-    console.error('btnReset element not found');
 }
 
 // ============================================================================
@@ -754,15 +751,10 @@ function updateConnectButtonIcon() {
 // Event listeners for modal
 if (dom.btnConnect) {
     dom.btnConnect.addEventListener('click', openConnectionModal);
-    console.log('Connect button event attached');
-} else {
-    console.error('btnConnect element not found');
 }
 
 if (dom.btnCloseModal) {
     dom.btnCloseModal.addEventListener('click', closeConnectionModal);
-} else {
-    console.warn('btnCloseModal element not found');
 }
 
 if (dom.connectionModal) {
