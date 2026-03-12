@@ -937,31 +937,10 @@ input::placeholder {
     line-height: 1.5;
 }
 
-.modal-close {
-    border: none;
-    background: transparent;
-    font-size: 1.5rem;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    padding: 6px;
-    border-radius: 8px;
-    transition: background var(--transition-smooth);
-}
-
-.modal-close:hover {
-    background: rgba(142, 142, 147, 0.15);
-}
-
 .modal-actions {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: var(--spacing-sm);
-}
-
-@media (max-width: 480px) {
-    .modal-actions {
-        grid-template-columns: 1fr;
-    }
 }
 
 /* =========================================================================

@@ -258,11 +258,9 @@ const dom = {
     txtAdvisorConnect: document.getElementById('txtAdvisorConnect'),
     advisorModal: document.getElementById('advisorModal'),
     advisorModalOverlay: document.getElementById('advisorModalOverlay'),
-    advisorModalClose: document.getElementById('advisorModalClose'),
     advisorModalTitle: document.getElementById('advisorModalTitle'),
     advisorModalDesc: document.getElementById('advisorModalDesc'),
     advisorModalCancel: document.getElementById('advisorModalCancel'),
-    advisorModalConnect: document.getElementById('advisorModalConnect'),
     advisorCodeInput: document.getElementById('advisorCodeInput'),
     advisorConnectionStatus: document.getElementById('advisorConnectionStatus'),
     clientStatusIndicator: document.getElementById('clientStatusIndicator'),
@@ -336,9 +334,6 @@ function applyLanguage(langCode) {
     }
     if (dom.advisorModalDesc) {
         dom.advisorModalDesc.textContent = t.advisorModalDesc || 'Enter the code provided by the advisor.';
-    }
-    if (dom.advisorModalConnect) {
-        dom.advisorModalConnect.textContent = t.advisorModalConnect || 'Connect';
     }
     if (dom.advisorModalCancel) {
         dom.advisorModalCancel.textContent = t.advisorModalCancel || 'Cancel';
@@ -893,9 +888,6 @@ function attachRealTimeListeners() {
 if (dom.btnOpenAdvisorModal) {
     dom.btnOpenAdvisorModal.addEventListener('click', openAdvisorModal);
 }
-if (dom.advisorModalClose) {
-    dom.advisorModalClose.addEventListener('click', closeAdvisorModal);
-}
 if (dom.advisorModalCancel) {
     dom.advisorModalCancel.addEventListener('click', closeAdvisorModal);
 }
@@ -908,13 +900,6 @@ document.addEventListener('keydown', (e) => {
         closeAdvisorModal();
     }
 });
-
-// Connect button in modal
-if (dom.advisorModalConnect) {
-    dom.advisorModalConnect.addEventListener('click', () => {
-        connectToAdvisor();
-    });
-}
 
 // Code input behavior
 if (dom.advisorCodeInput) {
@@ -930,6 +915,9 @@ if (dom.advisorCodeInput) {
     // Auto-uppercase
     dom.advisorCodeInput.addEventListener('input', (e) => {
         e.target.value = e.target.value.toUpperCase();
+        if (e.target.value.trim().length >= 7 && !state.advisorConnected) {
+            connectToAdvisor();
+        }
     });
 }
 
