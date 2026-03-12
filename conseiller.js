@@ -94,7 +94,8 @@ const languageNames = {
     es: 'Español',
     it: 'Italiano',
     pt: 'Português',
-    de: 'Deutsch'
+    de: 'Deutsch',
+    nl: 'Nederlands'
 };
 
 function hasActiveClientConnection() {

@@ -204,6 +204,39 @@ const i18n = {
       "statusConnecting": "Verbinde...",
       "statusConnected": "Mit Berater verbunden",
       "statusError": "Verbindungsfehler"
+        },
+        "nl": {
+            "dir": "ltr",
+            "pageTitle": "Uw gegevens",
+            "address": "Woonadres",
+            "addressPlaceholder": "Damrak 1",
+            "tempAddressCheck": "Ik heb een tijdelijk lokaal adres",
+            "tempTooltip": "Vul dit adres in als u tijdens uw huurperiode tijdelijk op een andere locatie verblijft (bijv. hotel, Airbnb).",
+            "tempAddress": "Tijdelijk adres",
+            "tempZipCode": "Postcode",
+            "tempCity": "Plaats",
+            "zipCode": "Postcode",
+            "city": "Plaats",
+            "phone": "Mobiel telefoonnummer",
+            "email": "E-mail",
+            "placeholderCity": "Amsterdam",
+            "placeholderZip": "1012 LG",
+            "placeholderPhone": "06 12 34 56 78",
+            "placeholderEmail": "jan.jansen@email.com",
+            "btnGenerate": "Mijn overzicht genereren",
+            "btnEdit": "Bewerken",
+            "legalText": "OK MOBILITY GROUP, S.L.U. is de verwerkingsverantwoordelijke voor de persoonsgegevens van de betrokkene en informeert dat deze gegevens worden verwerkt in overeenstemming met Verordening (EU) 2016/679 van het Europees Parlement en de Raad van 27 april 2016 (AVG) en Organieke Wet 3/2018 van 5 december inzake de bescherming van persoonsgegevens en de waarborging van digitale rechten (LOPDGDD).",
+            "summaryTitle": "Toon dit overzicht aan de adviseur",
+            "advisorConnectButton": "Adviseur verbinden",
+            "advisorModalTitle": "Verbinding met adviseur",
+            "advisorModalDesc": "Voer de code in die door de adviseur is gegeven.",
+            "advisorModalConnect": "Verbinden",
+            "advisorModalCancel": "Annuleren",
+            "advisorCodePlaceholder": "XXXXXX",
+            "statusNotConnected": "Niet verbonden",
+            "statusConnecting": "Verbinden...",
+            "statusConnected": "Verbonden met adviseur",
+            "statusError": "Verbindingsfout"
     }
 };
 
@@ -277,7 +310,7 @@ function applyLanguage(langCode) {
     state.lang = langCode;
 
     // Sync lang display label
-    const langNames = { fr: 'Français', en: 'English', es: 'Español', it: 'Italiano', pt: 'Português', de: 'Deutsch' };
+    const langNames = { fr: 'Français', en: 'English', es: 'Español', it: 'Italiano', pt: 'Português', de: 'Deutsch', nl: 'Nederlands' };
     const langDisplay = document.getElementById('langDisplay');
     if (langDisplay) langDisplay.textContent = langNames[langCode] || langCode;
 
@@ -524,7 +557,7 @@ dom.btnEdit.addEventListener('click', () => {
 function detectUserLanguage() {
     if (navigator.language) {
         const browserLang = navigator.language.split('-')[0].toLowerCase();
-        // Check if we support this exact language (fr, en, es, it, pt, de)
+        // Check if we support this exact language (fr, en, es, it, pt, de, nl)
         if (i18n[browserLang]) {
             return browserLang;
         }
@@ -610,6 +643,7 @@ function renderCountrySelect(langCode) {
         case 'it': priorityCca2 = ['IT', 'CH', 'SM', 'VA']; break;
         case 'pt': priorityCca2 = ['PT', 'BR', 'AO', 'MZ', 'CV']; break;
         case 'de': priorityCca2 = ['DE', 'AT', 'CH', 'LU', 'LI']; break;
+        case 'nl': priorityCca2 = ['NL', 'BE', 'SR', 'AW', 'CW']; break;
         default: priorityCca2 = ['ES'];
     }
     
