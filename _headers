@@ -1,0 +1,11 @@
+/index.html
+  Cache-Control: no-store
+
+/conseiller.html
+  Cache-Control: no-store
+
+/retailer/
+  Cache-Control: no-store
+
+/retailer/index.html
+  Cache-Control: no-store
