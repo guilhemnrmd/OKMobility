@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+    <meta name="referrer" content="same-origin">
+    <title>OK Mobility - Conseiller</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    
+    <!-- Modern Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Boxicons for elegant icons -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css?v=13">
+    
+    <!-- PeerJS -->
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    
+    <!-- QRCode.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    
+    <!-- Dynamic Ambient Background -->
+    <div class="ambient-background">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <!-- Main Liquid Glass Container -->
+    <main class="glass-container conseiller-container">
+        
+        <!-- Header -->
+        <header class="glass-header">
+            <div class="header-brand">
+                <div class="logo">
+                    <img src="https://okmobility.com/img/logos/okmobility-imagotipo.svg" alt="OK Mobility Logo" class="logo-img logo-img-light">
+                    <img src="https://okmobility.com/img/logos/okmobility-imagotipo-white.svg" alt="OK Mobility Logo" class="logo-img logo-img-dark">
+                </div>
+                <span class="brand-slogan">Vista Asesor</span>
+            </div>
+            
+            <div class="header-controls">
+                <button id="btnNewSession" class="btn-reset" aria-label="Nueva sesión" title="Nueva sesión">
+                    <i class='bx bx-rotate-left'></i>
+                </button>
+            </div>
+        </header>
+
+        <section class="form-content">
+            
+            <!-- Connection Setup View -->
+            <div id="setupView" class="setup-view">
+                <div class="title-wrapper">
+                    <h1 class="gradient-text">Sesión de recogida</h1>
+                    <p class="setup-subtitle">El cliente debe escanear este código QR o introducir el código manualmente</p>
+                </div>
+
+                <!-- Session Code Display -->
+                <div class="session-code-display glass-panel">
+                    <div class="code-label">Código de sesión</div>
+                    <div class="code-value" id="sessionCode">---</div>
+                    <button class="btn-copy-code" id="btnCopyCode" title="Copiar código">
+                        <i class='bx bx-copy'></i>
+                    </button>
+                </div>
+
+                <!-- QR Code -->
+                <div class="qr-wrapper glass-panel">
+                    <div id="qrCode"></div>
+                    <p class="qr-hint">Escanear para conectar</p>
+                </div>
+
+                <!-- Connection Status -->
+                <div class="connection-status" id="connectionStatus">
+                    <div class="status-indicator waiting"></div>
+                    <span id="statusText">Esperando cliente...</span>
+                </div>
+            </div>
+
+            <!-- Live Data View (Hidden by default) -->
+            <div id="liveDataView" class="live-data-view" style="display: none;">
+                <div class="title-wrapper">
+                    <h1 class="gradient-text">Datos del cliente</h1>
+                    <div class="connection-status connected" id="liveConnectionStatus">
+                        <div class="status-indicator connected"></div>
+                        <span>Cliente conectado</span>
+                    </div>
+                </div>
+
+                <!-- Live Data Table -->
+                <div class="live-data-table glass-panel">
+                    
+                    <div class="data-row" id="rowAddress">
+                        <div class="data-info">
+                            <span class="data-label">Dirección</span>
+                            <span class="data-value" id="valAddress">-</span>
+                        </div>
+                        <button class="btn-copy" data-field="address" title="Copiar">
+                            <i class='bx bx-copy'></i>
+                        </button>
+                    </div>
+
+                    <div class="data-row" id="rowZipCity">
+                        <div class="data-info">
+                            <span class="data-label">CP / Ciudad</span>
+                            <span class="data-value" id="valZipCity">-</span>
+                        </div>
+                        <button class="btn-copy" data-field="zipCity" title="Copiar">
+                            <i class='bx bx-copy'></i>
+                        </button>
+                    </div>
+
+                    <!-- Temporary Address (hidden by default) -->
+                    <div class="data-row temp-address-row" id="rowTempAddress" style="display: none;">
+                        <div class="data-info">
+                            <span class="data-label"><i class='bx bx-map-pin'></i> Dirección temporal</span>
+                            <span class="data-value" id="valTempAddress">-</span>
+                        </div>
+                        <button class="btn-copy" data-field="tempAddress" title="Copiar">
+                            <i class='bx bx-copy'></i>
+                        </button>
+                    </div>
+
+                    <div class="data-row temp-address-row" id="rowTempZipCity" style="display: none;">
+                        <div class="data-info">
+                            <span class="data-label">CP / Ciudad (temp)</span>
+                            <span class="data-value" id="valTempZipCity">-</span>
+                        </div>
+                        <button class="btn-copy" data-field="tempZipCity" title="Copiar">
+                            <i class='bx bx-copy'></i>
+                        </button>
+                    </div>
+
+                    <div class="data-row" id="rowPhone">
+                        <div class="data-info">
+                            <span class="data-label">Teléfono</span>
+                            <span class="data-value" id="valPhone">-</span>
+                        </div>
+                        <button class="btn-copy" data-field="phone" title="Copiar">
+                            <i class='bx bx-copy'></i>
+                        </button>
+                    </div>
+
+                    <div class="data-row" id="rowEmail">
+                        <div class="data-info">
+                            <span class="data-label">E-mail</span>
+                            <span class="data-value" id="valEmail">-</span>
+                        </div>
+                        <button class="btn-copy" data-field="email" title="Copiar">
+                            <i class='bx bx-copy'></i>
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- Copy All Button -->
+                <div class="form-actions">
+                    <button id="btnCopyAll" class="btn-primary glass-btn">
+                        <i class='bx bx-copy-alt'></i>
+                        <span>Copiar todo</span>
+                    </button>
+                </div>
+
+                <p class="legal-text">
+                    Los datos mostrados provienen directamente del dispositivo del cliente mediante conexión cifrada P2P (WebRTC). No se almacena ninguna información en servidores externos.
+                </p>
+            </div>
+
+            <!-- Disconnected View -->
+            <div id="disconnectedView" class="disconnected-view" style="display: none;">
+                <div class="title-wrapper">
+                    <h1 class="gradient-text">Cliente desconectado</h1>
+                    <p class="setup-subtitle">La sesión ha terminado. Pulse el botón para iniciar una nueva sesión.</p>
+                </div>
+                <div class="form-actions">
+                    <button id="btnRestart" class="btn-primary glass-btn">
+                        <i class='bx bx-refresh'></i>
+                        <span>Nueva sesión</span>
+                    </button>
+                </div>
+            </div>
+
+        </section>
+        
+    </main>
+
+    <script src="conseiller.js?v=1"></script>
+</body>
+</html>

@@ -17,7 +17,10 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css?v=12">
+    <link rel="stylesheet" href="style.css?v=13">
+    
+    <!-- PeerJS -->
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 </head>
 <body>
     
@@ -173,6 +176,27 @@
                     </div>
                 </div>
 
+                <!-- Advisor Code Section (Optional) -->
+                <div class="advisor-code-section" id="advisorCodeSection">
+                    <div class="advisor-code-toggle">
+                        <label class="custom-checkbox">
+                            <input type="checkbox" id="hasAdvisorCode" name="hasAdvisorCode">
+                            <span class="checkmark"></span>
+                            <span id="lblAdvisorCodeCheck">Enviar directamente al asesor</span>
+                        </label>
+                    </div>
+                    <div class="advisor-code-input-wrapper" id="advisorCodeInputWrapper" style="display: none;">
+                        <div class="input-with-icon">
+                            <i class='bx bx-link'></i>
+                            <input type="text" id="advisorCode" name="advisorCode" placeholder="OKM-XXXXXX" maxlength="10" autocomplete="off" style="text-transform: uppercase;">
+                        </div>
+                        <div class="advisor-connection-status" id="advisorConnectionStatus">
+                            <div class="status-indicator" id="clientStatusIndicator"></div>
+                            <span id="clientStatusText">Sin conectar</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Actions -->
                 <div class="form-actions">
                     <button type="submit" id="btnGenerate" class="btn-primary glass-btn">
@@ -206,6 +230,6 @@
         
     </main>
 
-    <script src="script.js?v=12"></script>
+    <script src="script.js?v=13"></script>
 </body>
 </html>
