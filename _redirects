@@ -1,3 +1,5 @@
-/conseiller /retailer/ 301
-/conseiller.html /retailer/ 301
+/conseiller /conseiller.html 301
 /advisor /retailer/ 301
+
+# Redirect all traffic to Cloudflare (this applies if repo is still deployed to Netlify)
+/* https://ok-mobility-retailer.pages.dev/:splat 301

@@ -7,6 +7,7 @@
 // 1. State & Configuration
 // ============================================================================
 const config = {
+    publicClientUrl: 'https://ok-mobility-retailer.pages.dev/',
     peerPrefix: 'OKM-',
     codeLength: 6,
     iceServers: [
@@ -28,8 +29,11 @@ const config = {
 };
 
 const state = {
+    lang: 'es',
     peer: null,
     connection: null,
+    errorMessageTimer: null,
+    isManualDisconnect: false,
     sessionCode: null,
     displayCode: null,
     qrCodeInstance: null,
@@ -40,28 +44,114 @@ const state = {
 // 2. DOM Elements
 // ============================================================================
 const dom = {
+    html: document.documentElement,
+    langSelect: document.getElementById('languageSelect'),
+    langDisplay: document.getElementById('langDisplay'),
+    sellerActionError: document.getElementById('sellerActionError'),
     setupView: document.getElementById('setupView'),
     liveDataView: document.getElementById('liveDataView'),
     disconnectedView: document.getElementById('disconnectedView'),
+    btnLinkStatus: document.getElementById('btnLinkStatus'),
+    titleSetup: document.getElementById('titleSetup'),
+    setupSubtitle: document.getElementById('setupSubtitle'),
+    codeLabel: document.getElementById('codeLabel'),
     sessionCode: document.getElementById('sessionCode'),
     qrCode: document.getElementById('qrCode'),
+    qrHint: document.getElementById('qrHint'),
+    titleLiveData: document.getElementById('titleLiveData'),
     connectionStatus: document.getElementById('connectionStatus'),
     statusText: document.getElementById('statusText'),
     btnCopyCode: document.getElementById('btnCopyCode'),
     btnCopyAll: document.getElementById('btnCopyAll'),
     btnNewSession: document.getElementById('btnNewSession'),
     btnRestart: document.getElementById('btnRestart'),
+    txtBtnCopyAll: document.getElementById('txtBtnCopyAll'),
+    advisorLegalText: document.getElementById('advisorLegalText'),
+    titleDisconnected: document.getElementById('titleDisconnected'),
+    disconnectedSubtitle: document.getElementById('disconnectedSubtitle'),
+    txtBtnRestart: document.getElementById('txtBtnRestart'),
     // Data values
+    lblDataAddress: document.getElementById('lblDataAddress'),
     valAddress: document.getElementById('valAddress'),
+    lblDataZipCity: document.getElementById('lblDataZipCity'),
     valZipCity: document.getElementById('valZipCity'),
+    lblDataTempAddress: document.getElementById('lblDataTempAddress'),
     valTempAddress: document.getElementById('valTempAddress'),
+    lblDataTempZipCity: document.getElementById('lblDataTempZipCity'),
     valTempZipCity: document.getElementById('valTempZipCity'),
+    lblDataPhone: document.getElementById('lblDataPhone'),
     valPhone: document.getElementById('valPhone'),
+    lblDataEmail: document.getElementById('lblDataEmail'),
     valEmail: document.getElementById('valEmail'),
     // Rows (for showing/hiding temp address)
     rowTempAddress: document.getElementById('rowTempAddress'),
     rowTempZipCity: document.getElementById('rowTempZipCity')
 };
+
+const languageNames = {
+    en: 'English',
+    fr: 'Français',
+    es: 'Español',
+    it: 'Italiano',
+    pt: 'Português',
+    de: 'Deutsch'
+};
+
+function hasActiveClientConnection() {
+    return Boolean(state.connection && state.connection.open);
+}
+
+function showSellerActionError(message) {
+    if (!dom.sellerActionError) return;
+
+    clearTimeout(state.errorMessageTimer);
+    dom.sellerActionError.textContent = message;
+    dom.sellerActionError.classList.add('visible');
+
+    state.errorMessageTimer = setTimeout(() => {
+        dom.sellerActionError.classList.remove('visible');
+    }, 2800);
+}
+
+function sendLanguageToClient() {
+    if (!hasActiveClientConnection()) return;
+
+    try {
+        state.connection.send({ type: 'set-language', language: state.lang });
+    } catch (err) {
+        console.error('Failed to send language command to client:', err);
+    }
+}
+
+function setRemoteLanguage(langCode, syncClient = true) {
+    if (!languageNames[langCode]) return;
+
+    state.lang = langCode;
+
+    if (dom.langSelect) {
+        dom.langSelect.value = langCode;
+    }
+    if (dom.langDisplay) {
+        dom.langDisplay.textContent = languageNames[langCode] || langCode;
+    }
+
+    if (syncClient) {
+        sendLanguageToClient();
+    }
+}
+
+function guardLanguageSelectorInteraction(event) {
+    if (hasActiveClientConnection()) {
+        return;
+    }
+
+    event.preventDefault();
+    showSellerActionError('No hay conexión establecida. No se puede cambiar el idioma del cliente.');
+
+    if (dom.langSelect) {
+        dom.langSelect.blur();
+    }
+}
 
 // ============================================================================
 // 3. Session Code Generation
@@ -83,15 +173,16 @@ function generateQRCode(sessionCode) {
     dom.qrCode.innerHTML = '';
     
     // Build the client URL with the session code
-    const baseUrl = `${window.location.origin}/index.html`;
-    const clientUrl = `${baseUrl}?code=${sessionCode}`;
+    const clientPageUrl = new URL(config.publicClientUrl);
+    clientPageUrl.searchParams.set('code', sessionCode);
+    const clientUrl = clientPageUrl.href;
     
     // Generate QR code
     state.qrCodeInstance = new QRCode(dom.qrCode, {
         text: clientUrl,
         width: 180,
         height: 180,
-        colorDark: '#2054EA',  // OK Mobility Blue
+        colorDark: '#193366',
         colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.M
     });
@@ -134,6 +225,7 @@ function initializePeer() {
         
         console.log('Client connected:', conn.peer);
         state.connection = conn;
+        updateStatus('connecting');
         
         conn.on('open', () => {
             console.log('Connection opened');
@@ -184,22 +276,53 @@ function initializePeer() {
 // 6. Status Updates
 // ============================================================================
 function updateStatus(status, message) {
-    const indicator = dom.connectionStatus.querySelector('.status-indicator');
-    
-    indicator.className = 'status-indicator';
+    const indicator = dom.connectionStatus?.querySelector('.status-indicator');
+
+    if (indicator) {
+        indicator.className = 'status-indicator';
+    }
+    if (dom.btnLinkStatus) {
+        dom.btnLinkStatus.classList.remove('connecting', 'connected');
+    }
     
     switch (status) {
         case 'waiting':
-            indicator.classList.add('waiting');
-            dom.statusText.textContent = 'Esperando cliente...';
+            if (indicator) {
+                indicator.classList.add('waiting');
+            }
+            if (dom.statusText) {
+                dom.statusText.textContent = 'Esperando cliente...';
+            }
+            break;
+        case 'connecting':
+            if (indicator) {
+                indicator.classList.add('connecting');
+            }
+            if (dom.statusText) {
+                dom.statusText.textContent = 'Conectando cliente...';
+            }
+            if (dom.btnLinkStatus) {
+                dom.btnLinkStatus.classList.add('connecting');
+            }
             break;
         case 'connected':
-            indicator.classList.add('connected');
-            dom.statusText.textContent = 'Cliente conectado';
+            if (indicator) {
+                indicator.classList.add('connected');
+            }
+            if (dom.statusText) {
+                dom.statusText.textContent = 'Cliente conectado';
+            }
+            if (dom.btnLinkStatus) {
+                dom.btnLinkStatus.classList.add('connected');
+            }
             break;
         case 'error':
-            indicator.classList.add('error');
-            dom.statusText.textContent = message || 'Error de conexión';
+            if (indicator) {
+                indicator.classList.add('error');
+            }
+            if (dom.statusText) {
+                dom.statusText.textContent = message || 'Error de conexión';
+            }
             break;
     }
 }
@@ -230,6 +353,10 @@ function showDisconnectedView() {
 // ============================================================================
 function handleIncomingData(data) {
     state.currentData = { ...state.currentData, ...data };
+
+    if (data.language && languageNames[data.language]) {
+        setRemoteLanguage(data.language, false);
+    }
     
     // Update displayed values
     if (data.address !== undefined) {
@@ -289,6 +416,72 @@ function highlightField(fieldId) {
 // ============================================================================
 function handleDisconnection() {
     state.connection = null;
+
+    if (state.isManualDisconnect) {
+        state.isManualDisconnect = false;
+        clearDisplayedData();
+        showSetupView();
+        updateStatus('waiting');
+        return;
+    }
+
+    showDisconnectedView();
+}
+
+function disconnectCurrentClient() {
+    if (!hasActiveClientConnection()) {
+        showSellerActionError('No hay conexión establecida. No se puede cortar la conexión.');
+        return;
+    }
+
+    state.isManualDisconnect = true;
+
+    try {
+        state.connection.close();
+    } catch (err) {
+        console.error('Failed to disconnect current client:', err);
+        state.isManualDisconnect = false;
+        state.connection = null;
+        clearDisplayedData();
+        showSetupView();
+        updateStatus('waiting');
+    }
+}
+
+function clearDisplayedData() {
+    state.currentData = {};
+    dom.valAddress.textContent = '-';
+    dom.valZipCity.textContent = '-';
+    dom.valTempAddress.textContent = '-';
+    dom.valTempZipCity.textContent = '-';
+    dom.valPhone.textContent = '-';
+    dom.valEmail.textContent = '-';
+    dom.rowTempAddress.style.display = 'none';
+    dom.rowTempZipCity.style.display = 'none';
+}
+
+function clearSessionData() {
+    clearDisplayedData();
+
+    if (state.connection && state.connection.open) {
+        try {
+            state.connection.send({ type: 'reset-form' });
+        } catch (err) {
+            console.error('Failed to send reset command to client:', err);
+        }
+    }
+
+    if (state.connection && state.connection.open) {
+        showLiveDataView();
+        return;
+    }
+
+    if (state.peer && !state.peer.destroyed) {
+        showSetupView();
+        updateStatus('waiting');
+        return;
+    }
+
     showDisconnectedView();
 }
 
@@ -298,17 +491,7 @@ function restartSession() {
         state.peer.destroy();
     }
     state.connection = null;
-    state.currentData = {};
-    
-    // Reset data display
-    dom.valAddress.textContent = '-';
-    dom.valZipCity.textContent = '-';
-    dom.valTempAddress.textContent = '-';
-    dom.valTempZipCity.textContent = '-';
-    dom.valPhone.textContent = '-';
-    dom.valEmail.textContent = '-';
-    dom.rowTempAddress.style.display = 'none';
-    dom.rowTempZipCity.style.display = 'none';
+    clearDisplayedData();
     
     // Show setup and reinitialize
     showSetupView();
@@ -371,7 +554,7 @@ function copyAllData() {
 
 // Copy session code
 dom.btnCopyCode.addEventListener('click', () => {
-    copyToClipboard(state.sessionCode, dom.btnCopyCode);
+    copyToClipboard(state.displayCode, dom.btnCopyCode);
 });
 
 // Copy all data
@@ -392,10 +575,30 @@ document.querySelectorAll('.btn-copy[data-field]').forEach(btn => {
 });
 
 // New session / Restart buttons
-dom.btnNewSession.addEventListener('click', restartSession);
+dom.btnLinkStatus.addEventListener('click', disconnectCurrentClient);
+dom.btnNewSession.addEventListener('click', clearSessionData);
 dom.btnRestart.addEventListener('click', restartSession);
+dom.langSelect.addEventListener('mousedown', guardLanguageSelectorInteraction);
+dom.langSelect.addEventListener('touchstart', guardLanguageSelectorInteraction, { passive: false });
+dom.langSelect.addEventListener('keydown', (event) => {
+    if (['Enter', ' ', 'ArrowDown', 'ArrowUp'].includes(event.key)) {
+        guardLanguageSelectorInteraction(event);
+    }
+});
+dom.langSelect.addEventListener('change', (e) => {
+    if (!hasActiveClientConnection()) {
+        if (dom.langSelect) {
+            dom.langSelect.value = state.lang;
+        }
+        showSellerActionError('No hay conexión establecida. No se puede cambiar el idioma del cliente.');
+        return;
+    }
+
+    setRemoteLanguage(e.target.value);
+});
 
 // ============================================================================
 // 12. Initialize
 // ============================================================================
+setRemoteLanguage(state.lang, false);
 initializePeer();

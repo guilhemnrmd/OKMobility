@@ -32,21 +32,38 @@
                 <span class="brand-slogan">Vista Asesor</span>
             </div>
             <div class="header-controls">
-                <button id="btnNewSession" class="btn-reset" aria-label="Nueva sesión" title="Nueva sesión">
+                <div class="lang-selector">
+                    <i class='bx bx-globe'></i>
+                    <span id="langDisplay">Español</span>
+                    <select id="languageSelect" aria-label="Seleccionar idioma">
+                        <option value="en">English</option>
+                        <option value="fr">Français</option>
+                        <option value="es" selected>Español</option>
+                        <option value="it">Italiano</option>
+                        <option value="pt">Português</option>
+                        <option value="de">Deutsch</option>
+                    </select>
+                </div>
+                <button type="button" id="btnLinkStatus" class="btn-link-status" aria-label="Desconectar cliente" title="Desconectar cliente">
+                    <i class='bx bx-link'></i>
+                </button>
+                <button id="btnNewSession" class="btn-reset" aria-label="Borrar datos" title="Borrar datos">
                     <i class='bx bx-rotate-left'></i>
                 </button>
             </div>
         </header>
 
+        <div id="sellerActionError" class="seller-action-error" role="alert" aria-live="polite"></div>
+
         <section class="form-content">
             <div id="setupView" class="setup-view">
                 <div class="title-wrapper">
-                    <h1 class="gradient-text">Sesión de recogida</h1>
-                    <p class="setup-subtitle">El cliente debe escanear este código QR o introducir el código manualmente</p>
+                    <h1 id="titleSetup" class="gradient-text">Sesión de recogida</h1>
+                    <p id="setupSubtitle" class="setup-subtitle">El cliente debe escanear este código QR o introducir el código manualmente</p>
                 </div>
 
                 <div class="session-code-display glass-panel">
-                    <div class="code-label">Código de sesión</div>
+                    <div id="codeLabel" class="code-label">Código de sesión</div>
                     <div class="code-value" id="sessionCode">---</div>
                     <button class="btn-copy-code" id="btnCopyCode" title="Copiar código">
                         <i class='bx bx-copy'></i>
@@ -54,29 +71,25 @@
                 </div>
 
                 <div class="qr-wrapper glass-panel">
-                    <div id="qrCode"></div>
-                    <p class="qr-hint">Escanear para conectar</p>
-                </div>
-
-                <div class="connection-status" id="connectionStatus">
-                    <div class="status-indicator waiting"></div>
-                    <span id="statusText">Esperando cliente...</span>
+                    <div class="qr-code-frame">
+                        <div id="qrCode"></div>
+                        <div class="qr-center-badge" aria-hidden="true">
+                            <img src="/favicon.ico" alt="OK Mobility">
+                        </div>
+                    </div>
+                    <p id="qrHint" class="qr-hint">Escanear para conectar</p>
                 </div>
             </div>
 
             <div id="liveDataView" class="live-data-view" style="display: none;">
                 <div class="title-wrapper">
-                    <h1 class="gradient-text">Datos del cliente</h1>
-                    <div class="connection-status connected" id="liveConnectionStatus">
-                        <div class="status-indicator connected"></div>
-                        <span>Cliente conectado</span>
-                    </div>
+                    <h1 id="titleLiveData" class="gradient-text">Datos del cliente</h1>
                 </div>
 
                 <div class="live-data-table glass-panel">
                     <div class="data-row" id="rowAddress">
                         <div class="data-info">
-                            <span class="data-label">Dirección</span>
+                            <span id="lblDataAddress" class="data-label">Dirección</span>
                             <span class="data-value" id="valAddress">-</span>
                         </div>
                         <button class="btn-copy" data-field="address" title="Copiar">
@@ -86,7 +99,7 @@
 
                     <div class="data-row" id="rowZipCity">
                         <div class="data-info">
-                            <span class="data-label">CP / Ciudad</span>
+                            <span id="lblDataZipCity" class="data-label">CP / Ciudad</span>
                             <span class="data-value" id="valZipCity">-</span>
                         </div>
                         <button class="btn-copy" data-field="zipCity" title="Copiar">
@@ -96,7 +109,7 @@
 
                     <div class="data-row temp-address-row" id="rowTempAddress" style="display: none;">
                         <div class="data-info">
-                            <span class="data-label"><i class='bx bx-map-pin'></i> Dirección temporal</span>
+                            <span id="lblDataTempAddress" class="data-label"><i class='bx bx-map-pin'></i> Dirección temporal</span>
                             <span class="data-value" id="valTempAddress">-</span>
                         </div>
                         <button class="btn-copy" data-field="tempAddress" title="Copiar">
@@ -106,7 +119,7 @@
 
                     <div class="data-row temp-address-row" id="rowTempZipCity" style="display: none;">
                         <div class="data-info">
-                            <span class="data-label">CP / Ciudad (temp)</span>
+                            <span id="lblDataTempZipCity" class="data-label">CP / Ciudad (temp)</span>
                             <span class="data-value" id="valTempZipCity">-</span>
                         </div>
                         <button class="btn-copy" data-field="tempZipCity" title="Copiar">
@@ -116,7 +129,7 @@
 
                     <div class="data-row" id="rowPhone">
                         <div class="data-info">
-                            <span class="data-label">Teléfono</span>
+                            <span id="lblDataPhone" class="data-label">Teléfono</span>
                             <span class="data-value" id="valPhone">-</span>
                         </div>
                         <button class="btn-copy" data-field="phone" title="Copiar">
@@ -126,7 +139,7 @@
 
                     <div class="data-row" id="rowEmail">
                         <div class="data-info">
-                            <span class="data-label">E-mail</span>
+                            <span id="lblDataEmail" class="data-label">E-mail</span>
                             <span class="data-value" id="valEmail">-</span>
                         </div>
                         <button class="btn-copy" data-field="email" title="Copiar">
@@ -138,24 +151,29 @@
                 <div class="form-actions">
                     <button id="btnCopyAll" class="btn-primary glass-btn">
                         <i class='bx bx-copy-alt'></i>
-                        <span>Copiar todo</span>
+                        <span id="txtBtnCopyAll">Copiar todo</span>
                     </button>
                 </div>
 
-                <p class="legal-text">
+                <p id="advisorLegalText" class="legal-text">
                     Los datos mostrados provienen directamente del dispositivo del cliente mediante conexión cifrada P2P (WebRTC). No se almacena ninguna información en servidores externos.
                 </p>
             </div>
 
             <div id="disconnectedView" class="disconnected-view" style="display: none;">
-                <div class="title-wrapper">
-                    <h1 class="gradient-text">Cliente desconectado</h1>
-                    <p class="setup-subtitle">La sesión ha terminado. Pulse el botón para iniciar una nueva sesión.</p>
+                <div class="disconnected-card glass-panel">
+                    <div class="disconnected-icon">
+                        <i class='bx bx-unlink'></i>
+                    </div>
+                    <div class="title-wrapper disconnected-copy">
+                        <h1 id="titleDisconnected" class="gradient-text">Cliente desconectado</h1>
+                        <p id="disconnectedSubtitle" class="setup-subtitle">La sesión ha terminado. Pulse el botón para iniciar una nueva sesión.</p>
+                    </div>
                 </div>
                 <div class="form-actions">
                     <button id="btnRestart" class="btn-primary glass-btn">
                         <i class='bx bx-refresh'></i>
-                        <span>Nueva sesión</span>
+                        <span id="txtBtnRestart">Nueva sesión</span>
                     </button>
                 </div>
             </div>

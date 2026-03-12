@@ -356,6 +356,10 @@ dom.langSelect.addEventListener('change', (e) => {
 });
 
 document.getElementById('btnReset').addEventListener('click', () => {
+    resetClientForm();
+});
+
+function resetClientForm() {
     const btn = document.getElementById('btnReset');
     btn.classList.add('spinning');
 
@@ -389,7 +393,7 @@ document.getElementById('btnReset').addEventListener('click', () => {
     }
 
     setTimeout(() => btn.classList.remove('spinning'), 520);
-});
+}
 
 // ============================================================================
 // 4. Temporary Address Toggle
@@ -786,6 +790,20 @@ function connectToAdvisor() {
             // Send current form data immediately
             sendFormDataToAdvisor();
         });
+
+        state.advisorConnection.on('data', (data) => {
+            if (data && data.type === 'reset-form') {
+                resetClientForm();
+                return;
+            }
+
+            if (data && data.type === 'set-language' && data.language && i18n[data.language]) {
+                if (dom.langSelect) {
+                    dom.langSelect.value = data.language;
+                }
+                applyLanguage(data.language);
+            }
+        });
         
         state.advisorConnection.on('close', () => {
             console.log('Disconnected from advisor');
@@ -826,25 +844,41 @@ function updateClientStatus(status) {
     const t = i18n[state.lang] || i18n['es'];
     const indicator = dom.clientStatusIndicator;
     const text = dom.clientStatusText;
-    
+
+    if (!indicator) {
+        if (dom.btnOpenAdvisorModal) {
+            dom.btnOpenAdvisorModal.classList.remove('connected', 'connecting');
+            if (status === 'connecting') dom.btnOpenAdvisorModal.classList.add('connecting');
+            if (status === 'connected') dom.btnOpenAdvisorModal.classList.add('connected');
+        }
+        return;
+    }
+
     indicator.className = 'status-indicator';
+    
+    // Update button state
+    if (dom.btnOpenAdvisorModal) {
+        dom.btnOpenAdvisorModal.classList.remove('connected', 'connecting');
+    }
     
     switch (status) {
         case 'connecting':
             indicator.classList.add('connecting');
-            text.textContent = t.statusConnecting || 'Connecting...';
+            if (text) text.textContent = t.statusConnecting || 'Connecting...';
+            if (dom.btnOpenAdvisorModal) dom.btnOpenAdvisorModal.classList.add('connecting');
             break;
         case 'connected':
             indicator.classList.add('connected');
-            text.textContent = t.statusConnected || 'Connected to advisor';
+            if (text) text.textContent = t.statusConnected || 'Connected to advisor';
+            if (dom.btnOpenAdvisorModal) dom.btnOpenAdvisorModal.classList.add('connected');
             break;
         case 'error':
             indicator.classList.add('error');
-            text.textContent = t.statusError || 'Connection error';
+            if (text) text.textContent = t.statusError || 'Connection error';
             break;
         default:
             indicator.classList.add('disconnected');
-            text.textContent = t.statusNotConnected || 'Not connected';
+            if (text) text.textContent = t.statusNotConnected || 'Not connected';
     }
 }
 
@@ -857,6 +891,7 @@ function sendFormDataToAdvisor() {
     const phoneCode = selectedOption ? selectedOption.value : '+33';
     
     const data = {
+        language: state.lang,
         address: dom.address.value,
         zipCode: dom.zipCode.value,
         city: dom.city.value,
