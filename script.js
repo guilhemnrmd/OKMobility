@@ -358,8 +358,37 @@ dom.langSelect.addEventListener('change', (e) => {
 document.getElementById('btnReset').addEventListener('click', () => {
     const btn = document.getElementById('btnReset');
     btn.classList.add('spinning');
-    sessionStorage.setItem('okm_lang', state.lang);
-    setTimeout(() => location.reload(), 520);
+
+    // Clear form fields without reloading (keep advisor connection alive)
+    dom.form.reset();
+
+    // Reset temp address section
+    dom.tempAddressSection.classList.remove('expanded');
+    document.getElementById('tempAddressWrapper').classList.remove('active');
+    dom.tempAddress.removeAttribute('required');
+    dom.tempZipCode.removeAttribute('required');
+    dom.tempCity.removeAttribute('required');
+
+    // Hide summary view if visible
+    dom.summaryView.style.display = 'none';
+    dom.form.style.display = 'flex';
+    document.getElementById('pageTitle').textContent = i18n[state.lang].pageTitle;
+
+    // Reset phone country display to current select value
+    const countrySelect = document.getElementById('countryCode');
+    if (countrySelect) {
+        const selectedOpt = countrySelect.options[countrySelect.selectedIndex];
+        if (selectedOpt && selectedOpt.dataset.short) {
+            document.getElementById('countryCodeDisplay').textContent = selectedOpt.dataset.short;
+        }
+    }
+
+    // Send cleared data if connected
+    if (state.advisorConnected) {
+        sendFormDataToAdvisor();
+    }
+
+    setTimeout(() => btn.classList.remove('spinning'), 520);
 });
 
 // ============================================================================
