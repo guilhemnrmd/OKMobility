@@ -34,7 +34,11 @@ const i18n = {
       "statusNotConnected": "Non connecté",
       "statusConnecting": "Connexion...",
       "statusConnected": "Connecté au conseiller",
-      "statusError": "Erreur de connexion"
+      "statusError": "Erreur de connexion",
+      "modalTitle": "Connexion conseiller",
+      "modalSubtitle": "Entrez le code affiché sur l'écran du conseiller",
+      "btnConnect": "Se connecter",
+      "btnDisconnect": "Déconnecter"
     },
     "en": {
       "dir": "ltr",
@@ -63,7 +67,11 @@ const i18n = {
       "statusNotConnected": "Not connected",
       "statusConnecting": "Connecting...",
       "statusConnected": "Connected to advisor",
-      "statusError": "Connection error"
+      "statusError": "Connection error",
+      "modalTitle": "Advisor Connection",
+      "modalSubtitle": "Enter the code shown on the advisor's screen",
+      "btnConnect": "Connect",
+      "btnDisconnect": "Disconnect"
     },
     "es": {
       "dir": "ltr",
@@ -92,7 +100,11 @@ const i18n = {
       "statusNotConnected": "Sin conectar",
       "statusConnecting": "Conectando...",
       "statusConnected": "Conectado al asesor",
-      "statusError": "Error de conexión"
+      "statusError": "Error de conexión",
+      "modalTitle": "Conexión con asesor",
+      "modalSubtitle": "Introduzca el código mostrado en la pantalla del asesor",
+      "btnConnect": "Conectar",
+      "btnDisconnect": "Desconectar"
     },
     "it": {
       "dir": "ltr",
@@ -121,7 +133,11 @@ const i18n = {
       "statusNotConnected": "Non connesso",
       "statusConnecting": "Connessione...",
       "statusConnected": "Connesso al consulente",
-      "statusError": "Errore di connessione"
+      "statusError": "Errore di connessione",
+      "modalTitle": "Connessione consulente",
+      "modalSubtitle": "Inserisci il codice mostrato sullo schermo del consulente",
+      "btnConnect": "Connetti",
+      "btnDisconnect": "Disconnetti"
     },
     "pt": {
       "dir": "ltr",
@@ -150,7 +166,11 @@ const i18n = {
       "statusNotConnected": "Não conectado",
       "statusConnecting": "Conectando...",
       "statusConnected": "Conectado ao consultor",
-      "statusError": "Erro de conexão"
+      "statusError": "Erro de conexão",
+      "modalTitle": "Conexão com consultor",
+      "modalSubtitle": "Introduza o código mostrado no ecrã do consultor",
+      "btnConnect": "Conectar",
+      "btnDisconnect": "Desconectar"
     },
     "de": {
       "dir": "ltr",
@@ -179,7 +199,11 @@ const i18n = {
       "statusNotConnected": "Nicht verbunden",
       "statusConnecting": "Verbinde...",
       "statusConnected": "Mit Berater verbunden",
-      "statusError": "Verbindungsfehler"
+      "statusError": "Verbindungsfehler",
+      "modalTitle": "Berater-Verbindung",
+      "modalSubtitle": "Geben Sie den Code ein, der auf dem Bildschirm des Beraters angezeigt wird",
+      "btnConnect": "Verbinden",
+      "btnDisconnect": "Trennen"
     }
 };
 
@@ -229,15 +253,21 @@ const dom = {
     // Contact
     phone: document.getElementById('phone'),
     email: document.getElementById('email'),
-    // Advisor Connection
-    hasAdvisorCode: document.getElementById('hasAdvisorCode'),
-    advisorCodeSection: document.getElementById('advisorCodeSection'),
-    advisorCodeInputWrapper: document.getElementById('advisorCodeInputWrapper'),
+    // Connection Modal
+    btnConnect: document.getElementById('btnConnect'),
+    connectIcon: document.getElementById('connectIcon'),
+    connectionModal: document.getElementById('connectionModal'),
+    btnCloseModal: document.getElementById('btnCloseModal'),
+    modalTitle: document.getElementById('modalTitle'),
+    modalSubtitle: document.getElementById('modalSubtitle'),
     advisorCode: document.getElementById('advisorCode'),
-    lblAdvisorCodeCheck: document.getElementById('lblAdvisorCodeCheck'),
-    advisorConnectionStatus: document.getElementById('advisorConnectionStatus'),
+    connectionStatusModal: document.getElementById('connectionStatusModal'),
     clientStatusIndicator: document.getElementById('clientStatusIndicator'),
-    clientStatusText: document.getElementById('clientStatusText')
+    clientStatusText: document.getElementById('clientStatusText'),
+    btnConnectAdvisor: document.getElementById('btnConnectAdvisor'),
+    btnDisconnect: document.getElementById('btnDisconnect'),
+    txtBtnConnect: document.getElementById('txtBtnConnect'),
+    txtBtnDisconnect: document.getElementById('txtBtnDisconnect')
 };
 
 // ============================================================================
@@ -301,12 +331,21 @@ function applyLanguage(langCode) {
         el.textContent = t.legalText;
     });
 
-    // Advisor Code Labels
-    if (dom.lblAdvisorCodeCheck) {
-        dom.lblAdvisorCodeCheck.textContent = t.advisorCodeCheck || 'Send directly to advisor';
+    // Connection Modal Texts
+    if (dom.modalTitle) {
+        dom.modalTitle.textContent = t.modalTitle || 'Advisor Connection';
+    }
+    if (dom.modalSubtitle) {
+        dom.modalSubtitle.textContent = t.modalSubtitle || "Enter the code shown on the advisor's screen";
     }
     if (dom.advisorCode) {
         dom.advisorCode.placeholder = t.advisorCodePlaceholder || 'OKM-XXXXXX';
+    }
+    if (dom.txtBtnConnect) {
+        dom.txtBtnConnect.textContent = t.btnConnect || 'Connect';
+    }
+    if (dom.txtBtnDisconnect) {
+        dom.txtBtnDisconnect.textContent = t.btnDisconnect || 'Disconnect';
     }
     // Update connection status text if not connected
     if (dom.clientStatusText && !state.advisorConnected) {
@@ -669,22 +708,73 @@ const peerConfig = {
     ]
 };
 
-// Toggle advisor code input visibility
-if (dom.hasAdvisorCode) {
-    dom.hasAdvisorCode.addEventListener('change', (e) => {
-        if (e.target.checked) {
-            dom.advisorCodeInputWrapper.style.display = 'block';
-            // Check if code is pre-filled from URL
-            const urlCode = new URLSearchParams(window.location.search).get('code');
-            if (urlCode && !dom.advisorCode.value) {
-                dom.advisorCode.value = urlCode.toUpperCase();
-                // Auto-connect if code came from QR
-                setTimeout(() => connectToAdvisor(), 500);
-            }
-        } else {
-            dom.advisorCodeInputWrapper.style.display = 'none';
-            disconnectFromAdvisor();
+// ============================================================================
+// 10. Modal Management
+// ============================================================================
+
+function openConnectionModal() {
+    dom.connectionModal.style.display = 'flex';
+    dom.advisorCode.focus();
+    // Update UI based on connection state
+    updateModalUI();
+}
+
+function closeConnectionModal() {
+    dom.connectionModal.style.display = 'none';
+}
+
+function updateModalUI() {
+    if (state.advisorConnected) {
+        dom.btnConnectAdvisor.style.display = 'none';
+        dom.btnDisconnect.style.display = 'flex';
+        dom.advisorCode.disabled = true;
+    } else {
+        dom.btnConnectAdvisor.style.display = 'flex';
+        dom.btnDisconnect.style.display = 'none';
+        dom.advisorCode.disabled = false;
+    }
+}
+
+function updateConnectButtonIcon() {
+    // Update the header connect button to show connection state
+    if (state.advisorConnected) {
+        dom.connectIcon.className = 'bx bx-link';
+        dom.btnConnect.classList.add('connected');
+    } else {
+        dom.connectIcon.className = 'bx bx-link';
+        dom.btnConnect.classList.remove('connected');
+    }
+}
+
+// Event listeners for modal
+if (dom.btnConnect) {
+    dom.btnConnect.addEventListener('click', openConnectionModal);
+}
+
+if (dom.btnCloseModal) {
+    dom.btnCloseModal.addEventListener('click', closeConnectionModal);
+}
+
+if (dom.connectionModal) {
+    dom.connectionModal.addEventListener('click', (e) => {
+        if (e.target === dom.connectionModal) {
+            closeConnectionModal();
         }
+    });
+}
+
+if (dom.btnConnectAdvisor) {
+    dom.btnConnectAdvisor.addEventListener('click', () => {
+        if (dom.advisorCode.value.trim().length >= 7) {
+            connectToAdvisor();
+        }
+    });
+}
+
+if (dom.btnDisconnect) {
+    dom.btnDisconnect.addEventListener('click', () => {
+        disconnectFromAdvisor();
+        updateModalUI();
     });
 }
 
@@ -693,10 +783,9 @@ function checkUrlForAdvisorCode() {
     const urlCode = new URLSearchParams(window.location.search).get('code');
     if (urlCode) {
         dom.advisorCode.value = urlCode.toUpperCase();
-        dom.hasAdvisorCode.checked = true;
-        dom.advisorCodeInputWrapper.style.display = 'block';
-        // Auto-connect after a short delay
-        setTimeout(() => connectToAdvisor(), 800);
+        // Open modal and auto-connect
+        openConnectionModal();
+        setTimeout(() => connectToAdvisor(), 500);
     }
 }
 
@@ -724,6 +813,8 @@ function connectToAdvisor() {
             console.log('Connected to advisor');
             state.advisorConnected = true;
             updateClientStatus('connected');
+            updateModalUI();
+            updateConnectButtonIcon();
             // Send current form data immediately
             sendFormDataToAdvisor();
         });
@@ -732,12 +823,16 @@ function connectToAdvisor() {
             console.log('Disconnected from advisor');
             state.advisorConnected = false;
             updateClientStatus('disconnected');
+            updateModalUI();
+            updateConnectButtonIcon();
         });
         
         state.advisorConnection.on('error', (err) => {
             console.error('Connection error:', err);
             state.advisorConnected = false;
             updateClientStatus('error');
+            updateModalUI();
+            updateConnectButtonIcon();
         });
     });
     
@@ -745,6 +840,8 @@ function connectToAdvisor() {
         console.error('Peer error:', err);
         state.advisorConnected = false;
         updateClientStatus('error');
+        updateModalUI();
+        updateConnectButtonIcon();
     });
 }
 
@@ -760,6 +857,7 @@ function disconnectFromAdvisor() {
     }
     state.advisorConnected = false;
     updateClientStatus('disconnected');
+    updateConnectButtonIcon();
 }
 
 // Update connection status UI
@@ -767,6 +865,8 @@ function updateClientStatus(status) {
     const t = i18n[state.lang] || i18n['es'];
     const indicator = dom.clientStatusIndicator;
     const text = dom.clientStatusText;
+    
+    if (!indicator || !text) return;
     
     indicator.className = 'status-indicator';
     
@@ -855,14 +955,8 @@ function attachRealTimeListeners() {
     }
 }
 
-// Connect button on code input blur/enter
+// Advisor code input handlers
 if (dom.advisorCode) {
-    dom.advisorCode.addEventListener('blur', () => {
-        if (dom.advisorCode.value.trim().length >= 7 && !state.advisorConnected) {
-            connectToAdvisor();
-        }
-    });
-    
     dom.advisorCode.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -873,6 +967,14 @@ if (dom.advisorCode) {
     });
     
     // Auto-uppercase
+    dom.advisorCode.addEventListener('input', (e) => {
+        e.target.value = e.target.value.toUpperCase();
+    });
+}
+
+// Initialize
+attachRealTimeListeners();
+checkUrlForAdvisorCode();
     dom.advisorCode.addEventListener('input', (e) => {
         e.target.value = e.target.value.toUpperCase();
     });
