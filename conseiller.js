@@ -31,6 +31,7 @@ const state = {
     peer: null,
     connection: null,
     sessionCode: null,
+    displayCode: null,
     qrCodeInstance: null,
     currentData: {}
 };
@@ -71,7 +72,7 @@ function generateSessionCode() {
     for (let i = 0; i < config.codeLength; i++) {
         code += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    return config.peerPrefix + code;
+    return code;
 }
 
 // ============================================================================
@@ -100,13 +101,14 @@ function generateQRCode(sessionCode) {
 // 5. PeerJS Initialization
 // ============================================================================
 function initializePeer() {
-    state.sessionCode = generateSessionCode();
+    state.displayCode = generateSessionCode();
+    state.sessionCode = config.peerPrefix + state.displayCode;
     
     // Display session code
-    dom.sessionCode.textContent = state.sessionCode;
+    dom.sessionCode.textContent = state.displayCode;
     
     // Generate QR code
-    generateQRCode(state.sessionCode);
+    generateQRCode(state.displayCode);
     
     // Create Peer with custom ICE servers
     state.peer = new Peer(state.sessionCode, {

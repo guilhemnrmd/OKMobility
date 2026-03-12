@@ -34,7 +34,7 @@ const i18n = {
     "advisorModalDesc": "Saisissez le code fourni par le conseiller.",
     "advisorModalConnect": "Connecter",
     "advisorModalCancel": "Annuler",
-    "advisorCodePlaceholder": "OKM-XXXXXX",
+    "advisorCodePlaceholder": "XXXXXX",
       "statusNotConnected": "Non connecté",
       "statusConnecting": "Connexion...",
       "statusConnected": "Connecté au conseiller",
@@ -67,7 +67,7 @@ const i18n = {
     "advisorModalDesc": "Enter the code provided by the advisor.",
     "advisorModalConnect": "Connect",
     "advisorModalCancel": "Cancel",
-    "advisorCodePlaceholder": "OKM-XXXXXX",
+    "advisorCodePlaceholder": "XXXXXX",
       "statusNotConnected": "Not connected",
       "statusConnecting": "Connecting...",
       "statusConnected": "Connected to advisor",
@@ -100,7 +100,7 @@ const i18n = {
     "advisorModalDesc": "Introduzca el código proporcionado por el asesor.",
     "advisorModalConnect": "Conectar",
     "advisorModalCancel": "Cancelar",
-    "advisorCodePlaceholder": "OKM-XXXXXX",
+    "advisorCodePlaceholder": "XXXXXX",
       "statusNotConnected": "Sin conectar",
       "statusConnecting": "Conectando...",
       "statusConnected": "Conectado al asesor",
@@ -133,7 +133,7 @@ const i18n = {
     "advisorModalDesc": "Inserisci il codice fornito dal consulente.",
     "advisorModalConnect": "Connetti",
     "advisorModalCancel": "Annulla",
-    "advisorCodePlaceholder": "OKM-XXXXXX",
+    "advisorCodePlaceholder": "XXXXXX",
       "statusNotConnected": "Non connesso",
       "statusConnecting": "Connessione...",
       "statusConnected": "Connesso al consulente",
@@ -166,7 +166,7 @@ const i18n = {
     "advisorModalDesc": "Digite o código fornecido pelo consultor.",
     "advisorModalConnect": "Conectar",
     "advisorModalCancel": "Cancelar",
-    "advisorCodePlaceholder": "OKM-XXXXXX",
+    "advisorCodePlaceholder": "XXXXXX",
       "statusNotConnected": "Não conectado",
       "statusConnecting": "Conectando...",
       "statusConnected": "Conectado ao consultor",
@@ -199,7 +199,7 @@ const i18n = {
     "advisorModalDesc": "Geben Sie den vom Berater bereitgestellten Code ein.",
     "advisorModalConnect": "Verbinden",
     "advisorModalCancel": "Abbrechen",
-    "advisorCodePlaceholder": "OKM-XXXXXX",
+    "advisorCodePlaceholder": "XXXXXX",
       "statusNotConnected": "Nicht verbunden",
       "statusConnecting": "Verbinde...",
       "statusConnected": "Mit Berater verbunden",
@@ -339,7 +339,7 @@ function applyLanguage(langCode) {
         dom.advisorModalCancel.textContent = t.advisorModalCancel || 'Cancel';
     }
     if (dom.advisorCodeInput) {
-        dom.advisorCodeInput.placeholder = t.advisorCodePlaceholder || 'OKM-XXXXXX';
+        dom.advisorCodeInput.placeholder = t.advisorCodePlaceholder || 'XXXXXX';
     }
     // Update connection status text if not connected
     if (dom.clientStatusText && !state.advisorConnected) {
@@ -730,8 +730,9 @@ function checkUrlForAdvisorCode() {
 
 // Connect to advisor's Peer
 function connectToAdvisor() {
-    const code = dom.advisorCodeInput.value.trim().toUpperCase();
-    if (!code || code.length < 7) return; // OKM- + at least 3 chars
+    const raw = dom.advisorCodeInput.value.trim().toUpperCase();
+    if (!raw || raw.length < 4) return;
+    const code = raw.startsWith('OKM-') ? raw : `OKM-${raw}`;
     
     updateClientStatus('connecting');
     
@@ -906,7 +907,7 @@ if (dom.advisorCodeInput) {
     dom.advisorCodeInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            if (dom.advisorCodeInput.value.trim().length >= 7) {
+            if (dom.advisorCodeInput.value.trim().length >= 4) {
                 connectToAdvisor();
             }
         }
@@ -915,7 +916,7 @@ if (dom.advisorCodeInput) {
     // Auto-uppercase
     dom.advisorCodeInput.addEventListener('input', (e) => {
         e.target.value = e.target.value.toUpperCase();
-        if (e.target.value.trim().length >= 7 && !state.advisorConnected) {
+        if (e.target.value.trim().length >= 4 && !state.advisorConnected) {
             connectToAdvisor();
         }
     });
