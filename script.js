@@ -331,9 +331,6 @@ function applyLanguage(langCode) {
     });
 
     // Advisor Modal Labels
-    if (dom.txtAdvisorConnect) {
-        dom.txtAdvisorConnect.textContent = t.advisorConnectButton || 'Connect an advisor';
-    }
     if (dom.advisorModalTitle) {
         dom.advisorModalTitle.textContent = t.advisorModalTitle || 'Advisor connection';
     }
@@ -760,6 +757,7 @@ function connectToAdvisor() {
             console.log('Connected to advisor');
             state.advisorConnected = true;
             updateClientStatus('connected');
+            closeAdvisorModal();
             // Send current form data immediately
             sendFormDataToAdvisor();
         });

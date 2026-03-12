@@ -806,42 +806,49 @@ input::placeholder {
    Advisor Connect Button (Client Side)
    ========================================================================= */
 
-.advisor-connect-wrapper {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: var(--spacing-sm);
-}
-
-.advisor-connect-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
-    border-radius: 999px;
-    border: 1px solid var(--color-border);
+/* Icon button used in header controls */
+.btn-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
     background: rgba(255, 255, 255, 0.6);
-    color: var(--color-text-primary);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 16px rgba(32, 84, 234, 0.1);
+    color: var(--color-text-secondary);
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: 600;
+    padding: 0;
     transition: all var(--transition-smooth);
+    flex-shrink: 0;
 }
 
-.advisor-connect-link:hover {
-    border-color: var(--color-accent);
+.btn-icon:hover {
+    background: rgba(255, 255, 255, 0.75);
+    box-shadow: 0 6px 20px rgba(32, 84, 234, 0.15);
+    border-color: rgba(255, 255, 255, 0.7);
     color: var(--color-accent);
-    background: rgba(255, 255, 255, 0.85);
+}
+
+.btn-icon:active {
+    transform: scale(0.95);
 }
 
 @media (prefers-color-scheme: dark) {
-    .advisor-connect-link {
+    .btn-icon {
         background: rgba(28, 28, 30, 0.6);
         border-color: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     }
 
-    .advisor-connect-link:hover {
+    .btn-icon:hover {
         background: rgba(28, 28, 30, 0.8);
         border-color: rgba(255, 255, 255, 0.25);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
     }
 }
 
