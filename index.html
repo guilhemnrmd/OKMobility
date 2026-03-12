@@ -17,7 +17,10 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css?v=12">
+    <link rel="stylesheet" href="style.css?v=14">
+    
+    <!-- PeerJS -->
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 </head>
 <body>
     
@@ -54,6 +57,9 @@
                         <option value="de">Deutsch</option>
                     </select>
                 </div>
+                <button type="button" id="btnOpenAdvisorModal" class="btn-icon" aria-label="Connecter un conseiller" title="Connecter un conseiller">
+                    <i class='bx bx-link'></i>
+                </button>
                 <button id="btnReset" class="btn-reset" aria-label="Reset">
                     <i class='bx bx-rotate-left'></i>
                 </button>
@@ -203,9 +209,29 @@
             </div>
 
         </section>
+
+        <!-- Advisor Connection Modal -->
+        <div class="modal-overlay" id="advisorModalOverlay" style="display: none;"></div>
+        <div class="advisor-modal glass-panel" id="advisorModal" role="dialog" aria-modal="true" aria-labelledby="advisorModalTitle" style="display: none;">
+            <div class="modal-header">
+                <h2 id="advisorModalTitle">Connecter un conseiller</h2>
+            </div>
+            <p id="advisorModalDesc" class="modal-desc">Saisissez le code fourni par le conseiller.</p>
+            <div class="input-with-icon">
+                <i class='bx bx-link'></i>
+                <input type="text" id="advisorCodeInput" placeholder="XXXXXX" maxlength="6" autocomplete="off" style="text-transform: uppercase;">
+            </div>
+            <div class="advisor-connection-status" id="advisorConnectionStatus">
+                <div class="status-indicator" id="clientStatusIndicator"></div>
+                <span id="clientStatusText">Non connecté</span>
+            </div>
+            <div class="modal-actions">
+                <button id="advisorModalCancel" class="btn-secondary">Annuler</button>
+            </div>
+        </div>
         
     </main>
 
-    <script src="script.js?v=12"></script>
+    <script src="script.js?v=14"></script>
 </body>
 </html>

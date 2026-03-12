@@ -11,7 +11,6 @@ const i18n = {
       "dir": "ltr",
       "pageTitle": "Vos informations",
       "address": "Adresse de résidence",
-      "address": "Adresse de résidence",
       "addressPlaceholder": "15 Rue de Rivoli",
       "tempAddressCheck": "J'ai une adresse temporaire locale",
       "tempTooltip": "Renseignez cette adresse si vous séjournez temporairement à un autre endroit (ex: Hôtel, Airbnb) pendant la durée de votre location.",
@@ -29,12 +28,21 @@ const i18n = {
       "btnGenerate": "Générer mon résumé",
       "btnEdit": "Modifier",
       "legalText": "OK MOBILITY GROUP, S.L.U. est le Responsable du traitement des données à caractère personnel de la personne concernée et l'informe que lesdites données feront l'objet d'un traitement conformément aux dispositions du Règlement (UE) 2016/679 du Parlement européen et du Conseil du 27 avril 2016 (RGPD) et de la Loi Organique 3/2018 du 5 décembre relative à la protection des données personnelles et à la garantie des droits numériques (LOPDGDD).",
-      "summaryTitle": "Veuillez présenter ce résumé au conseiller"
+    "summaryTitle": "Veuillez présenter ce résumé au conseiller",
+    "advisorConnectButton": "Connecter un conseiller",
+    "advisorModalTitle": "Connexion conseiller",
+    "advisorModalDesc": "Saisissez le code fourni par le conseiller.",
+    "advisorModalConnect": "Connecter",
+    "advisorModalCancel": "Annuler",
+    "advisorCodePlaceholder": "XXXXXX",
+      "statusNotConnected": "Non connecté",
+      "statusConnecting": "Connexion...",
+      "statusConnected": "Connecté au conseiller",
+      "statusError": "Erreur de connexion"
     },
     "en": {
       "dir": "ltr",
       "pageTitle": "Your information",
-      "address": "Home Address",
       "address": "Home Address",
       "addressPlaceholder": "221B Baker Street",
       "tempAddressCheck": "I have a local temporary address",
@@ -53,12 +61,21 @@ const i18n = {
       "btnGenerate": "Generate my summary",
       "btnEdit": "Edit",
       "legalText": "OK MOBILITY GROUP, S.L.U. acts as Data Controller with respect to the personal data of the Data Subject and hereby informs that such data shall be processed in accordance with the provisions of Regulation (EU) 2016/679 of the European Parliament and of the Council of 27 April 2016 (GDPR) and Organic Law 3/2018 of 5 December on the Protection of Personal Data and Guarantee of Digital Rights (LOPDGDD).",
-      "summaryTitle": "Please present this summary to the advisor"
+    "summaryTitle": "Please present this summary to the advisor",
+    "advisorConnectButton": "Connect an advisor",
+    "advisorModalTitle": "Advisor connection",
+    "advisorModalDesc": "Enter the code provided by the advisor.",
+    "advisorModalConnect": "Connect",
+    "advisorModalCancel": "Cancel",
+    "advisorCodePlaceholder": "XXXXXX",
+      "statusNotConnected": "Not connected",
+      "statusConnecting": "Connecting...",
+      "statusConnected": "Connected to advisor",
+      "statusError": "Connection error"
     },
     "es": {
       "dir": "ltr",
       "pageTitle": "Su información",
-      "address": "Dirección de residencia",
       "address": "Dirección de residencia",
       "addressPlaceholder": "Gran Vía, 15",
       "tempAddressCheck": "Tengo una dirección temporal local",
@@ -77,12 +94,21 @@ const i18n = {
       "btnGenerate": "Generar mi resumen",
       "btnEdit": "Modificar",
       "legalText": "OK MOBILITY GROUP, S.L.U. es el Responsable del tratamiento de los datos personales del Interesado y le informa de que estos datos se tratarán de conformidad con lo dispuesto en el Reglamento (UE) 2016/679, de 27 de abril (GDPR), y la Ley Orgánica 3/2018, de 5 de diciembre (LOPDG).",
-      "summaryTitle": "Por favor, presente este resumen al asesor"
+    "summaryTitle": "Por favor, presente este resumen al asesor",
+    "advisorConnectButton": "Conectar asesor",
+    "advisorModalTitle": "Conexión con asesor",
+    "advisorModalDesc": "Introduzca el código proporcionado por el asesor.",
+    "advisorModalConnect": "Conectar",
+    "advisorModalCancel": "Cancelar",
+    "advisorCodePlaceholder": "XXXXXX",
+      "statusNotConnected": "Sin conectar",
+      "statusConnecting": "Conectando...",
+      "statusConnected": "Conectado al asesor",
+      "statusError": "Error de conexión"
     },
     "it": {
       "dir": "ltr",
       "pageTitle": "Le tue informazioni",
-      "address": "Indirizzo di residenza",
       "address": "Indirizzo di residenza",
       "addressPlaceholder": "Via Roma, 10",
       "tempAddressCheck": "Ho un indirizzo temporaneo locale",
@@ -101,12 +127,21 @@ const i18n = {
       "btnGenerate": "Genera il mio riepilogo",
       "btnEdit": "Modifica",
       "legalText": "OK MOBILITY GROUP, S.L.U. è il Titolare del trattamento dei dati personali dell'Interessato e lo informa che tali dati saranno trattati in conformità con le disposizioni del Regolamento (UE) 2016/679 del Parlamento europeo e del Consiglio del 27 aprile 2016 (GDPR) e della Legge Organica 3/2018 del 5 dicembre sulla protezione dei dati personali e garanzia dei diritti digitali (LOPDGDD).",
-      "summaryTitle": "Si prega di presentare questo riepilogo al consulente"
+    "summaryTitle": "Si prega di presentare questo riepilogo al consulente",
+    "advisorConnectButton": "Collega un consulente",
+    "advisorModalTitle": "Connessione consulente",
+    "advisorModalDesc": "Inserisci il codice fornito dal consulente.",
+    "advisorModalConnect": "Connetti",
+    "advisorModalCancel": "Annulla",
+    "advisorCodePlaceholder": "XXXXXX",
+      "statusNotConnected": "Non connesso",
+      "statusConnecting": "Connessione...",
+      "statusConnected": "Connesso al consulente",
+      "statusError": "Errore di connessione"
     },
     "pt": {
       "dir": "ltr",
       "pageTitle": "As suas informações",
-      "address": "Morada",
       "address": "Morada",
       "addressPlaceholder": "Rua Augusta, 20",
       "tempAddressCheck": "Tenho um endereço temporário local",
@@ -125,12 +160,21 @@ const i18n = {
       "btnGenerate": "Gerar o meu resumo",
       "btnEdit": "Editar",
       "legalText": "A OK MOBILITY GROUP, S.L.U. é a Responsável pelo tratamento dos dados pessoais do Titular dos dados e informa que os referidos dados serão tratados em conformidade com o disposto no Regulamento (UE) 2016/679 do Parlamento Europeu e do Conselho, de 27 de abril de 2016 (RGPD), e na Lei Orgânica n.º 3/2018, de 5 de dezembro, relativa à Proteção de Dados Pessoais e à Garantia dos Direitos Digitais (LOPDGDD).",
-      "summaryTitle": "Por favor, apresente este resumo ao consultor"
+    "summaryTitle": "Por favor, apresente este resumo ao consultor",
+    "advisorConnectButton": "Conectar consultor",
+    "advisorModalTitle": "Conexão com consultor",
+    "advisorModalDesc": "Digite o código fornecido pelo consultor.",
+    "advisorModalConnect": "Conectar",
+    "advisorModalCancel": "Cancelar",
+    "advisorCodePlaceholder": "XXXXXX",
+      "statusNotConnected": "Não conectado",
+      "statusConnecting": "Conectando...",
+      "statusConnected": "Conectado ao consultor",
+      "statusError": "Erro de conexão"
     },
     "de": {
       "dir": "ltr",
       "pageTitle": "Ihre Informationen",
-      "address": "Wohnanschrift",
       "address": "Wohnanschrift",
       "addressPlaceholder": "Alexanderplatz 4",
       "tempAddressCheck": "Ich habe eine lokale temporäre Adresse",
@@ -149,7 +193,17 @@ const i18n = {
       "btnGenerate": "Meine Zusammenfassung erstellen",
       "btnEdit": "Bearbeiten",
       "legalText": "OK MOBILITY GROUP, S.L.U. ist der Verantwortliche im Sinne des Datenschutzrechts für die Verarbeitung der personenbezogenen Daten der betroffenen Person und teilt mit, dass diese Daten gemäß den Bestimmungen der Verordnung (EU) 2016/679 des Europäischen Parlaments und des Rates vom 27. April 2016 (DSGVO) sowie des Organgesetzes 3/2018 vom 5. Dezember über den Schutz personenbezogener Daten und die Gewährleistung digitaler Rechte (LOPDGDD) verarbeitet werden.",
-      "summaryTitle": "Bitte legen Sie diese Zusammenfassung dem Berater vor"
+    "summaryTitle": "Bitte legen Sie diese Zusammenfassung dem Berater vor",
+    "advisorConnectButton": "Berater verbinden",
+    "advisorModalTitle": "Beraterverbindung",
+    "advisorModalDesc": "Geben Sie den vom Berater bereitgestellten Code ein.",
+    "advisorModalConnect": "Verbinden",
+    "advisorModalCancel": "Abbrechen",
+    "advisorCodePlaceholder": "XXXXXX",
+      "statusNotConnected": "Nicht verbunden",
+      "statusConnecting": "Verbinde...",
+      "statusConnected": "Mit Berater verbunden",
+      "statusError": "Verbindungsfehler"
     }
 };
 
@@ -161,7 +215,12 @@ const state = {
     debounceTimer: null,
     addressSelected: false,
     globalCountriesData: [],
-    phoneSelectedManually: false
+    phoneSelectedManually: false,
+    // WebRTC / PeerJS
+    peer: null,
+    advisorConnection: null,
+    advisorConnected: false,
+    sendDebounceTimer: null
 };
 
 const dom = {
@@ -193,7 +252,19 @@ const dom = {
     tempCity: document.getElementById('tempCity'),
     // Contact
     phone: document.getElementById('phone'),
-    email: document.getElementById('email')
+    email: document.getElementById('email'),
+    // Advisor Connection (Modal)
+    btnOpenAdvisorModal: document.getElementById('btnOpenAdvisorModal'),
+    txtAdvisorConnect: document.getElementById('txtAdvisorConnect'),
+    advisorModal: document.getElementById('advisorModal'),
+    advisorModalOverlay: document.getElementById('advisorModalOverlay'),
+    advisorModalTitle: document.getElementById('advisorModalTitle'),
+    advisorModalDesc: document.getElementById('advisorModalDesc'),
+    advisorModalCancel: document.getElementById('advisorModalCancel'),
+    advisorCodeInput: document.getElementById('advisorCodeInput'),
+    advisorConnectionStatus: document.getElementById('advisorConnectionStatus'),
+    clientStatusIndicator: document.getElementById('clientStatusIndicator'),
+    clientStatusText: document.getElementById('clientStatusText')
 };
 
 // ============================================================================
@@ -257,6 +328,24 @@ function applyLanguage(langCode) {
         el.textContent = t.legalText;
     });
 
+    // Advisor Modal Labels
+    if (dom.advisorModalTitle) {
+        dom.advisorModalTitle.textContent = t.advisorModalTitle || 'Advisor connection';
+    }
+    if (dom.advisorModalDesc) {
+        dom.advisorModalDesc.textContent = t.advisorModalDesc || 'Enter the code provided by the advisor.';
+    }
+    if (dom.advisorModalCancel) {
+        dom.advisorModalCancel.textContent = t.advisorModalCancel || 'Cancel';
+    }
+    if (dom.advisorCodeInput) {
+        dom.advisorCodeInput.placeholder = t.advisorCodePlaceholder || 'XXXXXX';
+    }
+    // Update connection status text if not connected
+    if (dom.clientStatusText && !state.advisorConnected) {
+        dom.clientStatusText.textContent = t.statusNotConnected || 'Not connected';
+    }
+
     if (state.globalCountriesData && state.globalCountriesData.length > 0) {
         renderCountrySelect(langCode);
     }
@@ -269,8 +358,37 @@ dom.langSelect.addEventListener('change', (e) => {
 document.getElementById('btnReset').addEventListener('click', () => {
     const btn = document.getElementById('btnReset');
     btn.classList.add('spinning');
-    sessionStorage.setItem('okm_lang', state.lang);
-    setTimeout(() => location.reload(), 520);
+
+    // Clear form fields without reloading (keep advisor connection alive)
+    dom.form.reset();
+
+    // Reset temp address section
+    dom.tempAddressSection.classList.remove('expanded');
+    document.getElementById('tempAddressWrapper').classList.remove('active');
+    dom.tempAddress.removeAttribute('required');
+    dom.tempZipCode.removeAttribute('required');
+    dom.tempCity.removeAttribute('required');
+
+    // Hide summary view if visible
+    dom.summaryView.style.display = 'none';
+    dom.form.style.display = 'flex';
+    document.getElementById('pageTitle').textContent = i18n[state.lang].pageTitle;
+
+    // Reset phone country display to current select value
+    const countrySelect = document.getElementById('countryCode');
+    if (countrySelect) {
+        const selectedOpt = countrySelect.options[countrySelect.selectedIndex];
+        if (selectedOpt && selectedOpt.dataset.short) {
+            document.getElementById('countryCodeDisplay').textContent = selectedOpt.dataset.short;
+        }
+    }
+
+    // Send cleared data if connected
+    if (state.advisorConnected) {
+        sendFormDataToAdvisor();
+    }
+
+    setTimeout(() => btn.classList.remove('spinning'), 520);
 });
 
 // ============================================================================
@@ -590,3 +708,249 @@ window.addEventListener('resize', () => {
     clearTimeout(_legalResizeTimer);
     _legalResizeTimer = setTimeout(lockLegalTextHeight, 200);
 });
+
+// ============================================================================
+// 9. WebRTC / PeerJS - Advisor Connection (Client Side)
+// ============================================================================
+
+const peerConfig = {
+    iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun.cloudflare.com:3478' },
+        {
+            urls: 'turn:openrelay.metered.ca:80',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+        },
+        {
+            urls: 'turn:openrelay.metered.ca:443',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+        }
+    ]
+};
+
+// Modal open/close helpers
+function openAdvisorModal() {
+    if (dom.advisorModalOverlay) dom.advisorModalOverlay.style.display = 'block';
+    if (dom.advisorModal) dom.advisorModal.style.display = 'block';
+    if (dom.advisorCodeInput) {
+        dom.advisorCodeInput.focus();
+        dom.advisorCodeInput.select();
+    }
+}
+
+function closeAdvisorModal() {
+    if (dom.advisorModalOverlay) dom.advisorModalOverlay.style.display = 'none';
+    if (dom.advisorModal) dom.advisorModal.style.display = 'none';
+}
+
+// Check URL for pre-filled advisor code on load
+function checkUrlForAdvisorCode() {
+    const urlCode = new URLSearchParams(window.location.search).get('code');
+    if (urlCode && dom.advisorCodeInput) {
+        dom.advisorCodeInput.value = urlCode.toUpperCase();
+        openAdvisorModal();
+        // Auto-connect after a short delay
+        setTimeout(() => connectToAdvisor(), 600);
+    }
+}
+
+// Connect to advisor's Peer
+function connectToAdvisor() {
+    const raw = dom.advisorCodeInput.value.trim().toUpperCase();
+    if (!raw || raw.length < 4) return;
+    const code = raw.startsWith('OKM-') ? raw : `OKM-${raw}`;
+    
+    updateClientStatus('connecting');
+    
+    // Create our peer (auto-generated ID)
+    if (state.peer) {
+        state.peer.destroy();
+    }
+    
+    state.peer = new Peer({ config: { iceServers: peerConfig.iceServers } });
+    
+    state.peer.on('open', () => {
+        console.log('Client peer opened, connecting to advisor:', code);
+        
+        // Connect to the advisor's peer
+        state.advisorConnection = state.peer.connect(code, { reliable: true });
+        
+        state.advisorConnection.on('open', () => {
+            console.log('Connected to advisor');
+            state.advisorConnected = true;
+            updateClientStatus('connected');
+            closeAdvisorModal();
+            // Send current form data immediately
+            sendFormDataToAdvisor();
+        });
+        
+        state.advisorConnection.on('close', () => {
+            console.log('Disconnected from advisor');
+            state.advisorConnected = false;
+            updateClientStatus('disconnected');
+        });
+        
+        state.advisorConnection.on('error', (err) => {
+            console.error('Connection error:', err);
+            state.advisorConnected = false;
+            updateClientStatus('error');
+        });
+    });
+    
+    state.peer.on('error', (err) => {
+        console.error('Peer error:', err);
+        state.advisorConnected = false;
+        updateClientStatus('error');
+    });
+}
+
+// Disconnect from advisor
+function disconnectFromAdvisor() {
+    if (state.advisorConnection) {
+        state.advisorConnection.close();
+        state.advisorConnection = null;
+    }
+    if (state.peer) {
+        state.peer.destroy();
+        state.peer = null;
+    }
+    state.advisorConnected = false;
+    updateClientStatus('disconnected');
+}
+
+// Update connection status UI
+function updateClientStatus(status) {
+    const t = i18n[state.lang] || i18n['es'];
+    const indicator = dom.clientStatusIndicator;
+    const text = dom.clientStatusText;
+    
+    indicator.className = 'status-indicator';
+    
+    switch (status) {
+        case 'connecting':
+            indicator.classList.add('connecting');
+            text.textContent = t.statusConnecting || 'Connecting...';
+            break;
+        case 'connected':
+            indicator.classList.add('connected');
+            text.textContent = t.statusConnected || 'Connected to advisor';
+            break;
+        case 'error':
+            indicator.classList.add('error');
+            text.textContent = t.statusError || 'Connection error';
+            break;
+        default:
+            indicator.classList.add('disconnected');
+            text.textContent = t.statusNotConnected || 'Not connected';
+    }
+}
+
+// Send form data to advisor (debounced)
+function sendFormDataToAdvisor() {
+    if (!state.advisorConnected || !state.advisorConnection) return;
+    
+    const countryCode = document.getElementById('countryCode');
+    const selectedOption = countryCode.options[countryCode.selectedIndex];
+    const phoneCode = selectedOption ? selectedOption.value : '+33';
+    
+    const data = {
+        address: dom.address.value,
+        zipCode: dom.zipCode.value,
+        city: dom.city.value,
+        hasTempAddress: dom.hasTempAddress.checked,
+        tempAddress: dom.tempAddress.value,
+        tempZipCode: dom.tempZipCode.value,
+        tempCity: dom.tempCity.value,
+        phone: `${phoneCode} ${dom.phone.value}`,
+        email: dom.email.value
+    };
+    
+    try {
+        state.advisorConnection.send(data);
+        console.log('Sent data to advisor:', data);
+    } catch (err) {
+        console.error('Failed to send data:', err);
+    }
+}
+
+// Debounced send on input
+function debouncedSendToAdvisor() {
+    if (!state.advisorConnected) return;
+    
+    clearTimeout(state.sendDebounceTimer);
+    state.sendDebounceTimer = setTimeout(() => {
+        sendFormDataToAdvisor();
+    }, 300);
+}
+
+// Attach input listeners to all form fields for real-time sync
+function attachRealTimeListeners() {
+    const fields = [
+        dom.address, dom.zipCode, dom.city,
+        dom.tempAddress, dom.tempZipCode, dom.tempCity,
+        dom.phone, dom.email
+    ];
+    
+    fields.forEach(field => {
+        if (field) {
+            field.addEventListener('input', debouncedSendToAdvisor);
+        }
+    });
+    
+    // Also listen to country code changes
+    const countryCode = document.getElementById('countryCode');
+    if (countryCode) {
+        countryCode.addEventListener('change', debouncedSendToAdvisor);
+    }
+    
+    // And temp address checkbox
+    if (dom.hasTempAddress) {
+        dom.hasTempAddress.addEventListener('change', () => {
+            setTimeout(sendFormDataToAdvisor, 100);
+        });
+    }
+}
+
+// Modal controls
+if (dom.btnOpenAdvisorModal) {
+    dom.btnOpenAdvisorModal.addEventListener('click', openAdvisorModal);
+}
+if (dom.advisorModalCancel) {
+    dom.advisorModalCancel.addEventListener('click', closeAdvisorModal);
+}
+if (dom.advisorModalOverlay) {
+    dom.advisorModalOverlay.addEventListener('click', closeAdvisorModal);
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && dom.advisorModal && dom.advisorModal.style.display !== 'none') {
+        closeAdvisorModal();
+    }
+});
+
+// Code input behavior
+if (dom.advisorCodeInput) {
+    dom.advisorCodeInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (dom.advisorCodeInput.value.trim().length >= 4) {
+                connectToAdvisor();
+            }
+        }
+    });
+    
+    // Auto-uppercase
+    dom.advisorCodeInput.addEventListener('input', (e) => {
+        e.target.value = e.target.value.toUpperCase();
+        if (e.target.value.trim().length >= 4 && !state.advisorConnected) {
+            connectToAdvisor();
+        }
+    });
+}
+
+// Initialize
+attachRealTimeListeners();
+checkUrlForAdvisorCode();

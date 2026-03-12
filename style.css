@@ -802,6 +802,491 @@ input::placeholder {
     transform: translateY(0);
 }
 
+/* =========================================================================
+   Advisor Connect Button (Client Side)
+   ========================================================================= */
+
+/* Icon button used in header controls */
+.btn-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 16px rgba(32, 84, 234, 0.1);
+    color: var(--color-text-secondary);
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    transition: all var(--transition-smooth);
+    flex-shrink: 0;
+}
+
+.btn-icon:hover {
+    background: rgba(255, 255, 255, 0.75);
+    box-shadow: 0 6px 20px rgba(32, 84, 234, 0.15);
+    border-color: rgba(255, 255, 255, 0.7);
+    color: var(--color-accent);
+}
+
+.btn-icon:active {
+    transform: scale(0.95);
+}
+
+@media (prefers-color-scheme: dark) {
+    .btn-icon {
+        background: rgba(28, 28, 30, 0.6);
+        border-color: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-icon:hover {
+        background: rgba(28, 28, 30, 0.8);
+        border-color: rgba(255, 255, 255, 0.25);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+}
+
+.advisor-connection-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+}
+
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--color-text-secondary);
+    transition: all 0.3s ease;
+}
+
+.status-indicator.connecting {
+    background: #FF9500;
+    animation: pulse 1.5s infinite;
+}
+
+.status-indicator.connected {
+    background: var(--color-success);
+    box-shadow: 0 0 8px rgba(52, 199, 89, 0.5);
+}
+
+.status-indicator.error {
+    background: #FF3B30;
+}
+
+.status-indicator.waiting {
+    background: #FF9500;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.9); }
+}
+
+/* =========================================================================
+   Advisor Modal
+   ========================================================================= */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 50;
+}
+
+.advisor-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(92vw, 420px);
+    padding: var(--spacing-md);
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    animation: fadeIn var(--transition-base) forwards;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.modal-header h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.modal-desc {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+}
+
+.modal-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+}
+
+/* =========================================================================
+   Conseiller (Advisor) Page Styles
+   ========================================================================= */
+
+.conseiller-container {
+    max-width: 550px;
+}
+
+.setup-view,
+.live-data-view,
+.disconnected-view {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.setup-subtitle {
+    font-size: 0.95rem;
+    color: var(--color-text-secondary);
+    margin-top: 4px;
+    line-height: 1.5;
+}
+
+/* Session Code Display */
+.session-code-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: var(--spacing-md);
+    position: relative;
+}
+
+.code-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    position: absolute;
+    top: 10px;
+    left: 14px;
+}
+
+.code-value {
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: 'SF Mono', 'Menlo', monospace;
+    color: var(--color-accent);
+    letter-spacing: 0.15em;
+    margin-top: 12px;
+}
+
+.btn-copy-code {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(32, 84, 234, 0.1);
+    border: none;
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--color-accent);
+    font-size: 1.1rem;
+    transition: all var(--transition-smooth);
+}
+
+.btn-copy-code:hover {
+    background: rgba(32, 84, 234, 0.2);
+}
+
+.btn-copy-code.copied {
+    background: var(--color-success);
+    color: white;
+}
+
+/* QR Code Wrapper */
+.qr-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--spacing-md);
+    gap: 12px;
+}
+
+.qr-wrapper #qrCode {
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.qr-wrapper #qrCode img,
+.qr-wrapper #qrCode canvas {
+    display: block;
+}
+
+.qr-hint {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+}
+
+/* Connection Status */
+.connection-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+}
+
+.connection-status.connected {
+    color: var(--color-success);
+}
+
+/* Live Data Table */
+.live-data-table {
+    padding: var(--spacing-sm);
+}
+
+.data-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--color-border);
+    gap: 12px;
+}
+
+.data-row:last-child {
+    border-bottom: none;
+}
+
+.data-row.temp-address-row {
+    background: rgba(32, 84, 234, 0.03);
+    border-radius: var(--radius-sm);
+    margin: 4px 0;
+}
+
+@media (prefers-color-scheme: dark) {
+    .data-row.temp-address-row {
+        background: rgba(32, 84, 234, 0.08);
+    }
+}
+
+.data-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.data-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.data-label i {
+    color: var(--color-accent);
+}
+
+.data-value {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    word-break: break-word;
+    transition: background 0.3s ease;
+    padding: 2px 4px;
+    margin: -2px -4px;
+    border-radius: 4px;
+}
+
+.data-value.highlight {
+    animation: highlightPulse 0.6s ease;
+}
+
+@keyframes highlightPulse {
+    0% { background: rgba(32, 84, 234, 0.3); }
+    100% { background: transparent; }
+}
+
+.btn-copy {
+    flex-shrink: 0;
+    background: rgba(142, 142, 147, 0.08);
+    border: none;
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    font-size: 1rem;
+    transition: all var(--transition-smooth);
+}
+
+.btn-copy:hover {
+    background: rgba(32, 84, 234, 0.15);
+    color: var(--color-accent);
+}
+
+.btn-copy.copied {
+    background: var(--color-success);
+    color: white;
+}
+
+/* =========================================================================
+   Accueil (Home) Page Styles
+   ========================================================================= */
+
+.accueil-container {
+    max-width: 500px;
+}
+
+.accueil-header {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: var(--spacing-md);
+}
+
+.accueil-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.accueil-subtitle {
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+    margin-top: 6px;
+}
+
+/* Mode Selection Cards */
+.mode-cards {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.mode-card {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    text-decoration: none;
+    color: inherit;
+    transition: all var(--transition-smooth);
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.mode-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-accent);
+    box-shadow: 0 8px 24px rgba(32, 84, 234, 0.15);
+}
+
+.mode-card:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.mode-icon {
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+}
+
+.mode-icon.advisor-icon {
+    background: linear-gradient(135deg, var(--color-accent), #1538A1);
+    color: white;
+}
+
+.mode-icon.client-icon {
+    background: linear-gradient(135deg, #34C759, #248A3D);
+    color: white;
+}
+
+.mode-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.mode-info h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 4px;
+}
+
+.mode-info p {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+}
+
+.mode-arrow {
+    flex-shrink: 0;
+    font-size: 1.5rem;
+    color: var(--color-text-secondary);
+    transition: transform var(--transition-smooth);
+}
+
+.mode-card:hover .mode-arrow {
+    transform: translateX(4px);
+    color: var(--color-accent);
+}
+
+/* Info Section */
+.accueil-info {
+    padding: var(--spacing-sm);
+}
+
+.info-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+}
+
+.info-row i {
+    font-size: 1.2rem;
+    color: var(--color-success);
+}
+
 .autocomplete-results li:hover, .autocomplete-results li.active {
     background: rgba(0, 122, 255, 0.1);
 }
