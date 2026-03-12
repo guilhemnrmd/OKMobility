@@ -386,6 +386,9 @@ function applyLanguage(langCode) {
 
 dom.langSelect.addEventListener('change', (e) => {
     applyLanguage(e.target.value);
+    if (state.advisorConnected) {
+        sendFormDataToAdvisor();
+    }
 });
 
 document.getElementById('btnReset').addEventListener('click', () => {
