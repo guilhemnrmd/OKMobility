@@ -28,17 +28,17 @@ const i18n = {
       "btnGenerate": "Générer mon résumé",
       "btnEdit": "Modifier",
       "legalText": "OK MOBILITY GROUP, S.L.U. est le Responsable du traitement des données à caractère personnel de la personne concernée et l'informe que lesdites données feront l'objet d'un traitement conformément aux dispositions du Règlement (UE) 2016/679 du Parlement européen et du Conseil du 27 avril 2016 (RGPD) et de la Loi Organique 3/2018 du 5 décembre relative à la protection des données personnelles et à la garantie des droits numériques (LOPDGDD).",
-      "summaryTitle": "Veuillez présenter ce résumé au conseiller",
-      "advisorCodeCheck": "Envoyer directement au conseiller",
-      "advisorCodePlaceholder": "OKM-XXXXXX",
+    "summaryTitle": "Veuillez présenter ce résumé au conseiller",
+    "advisorConnectButton": "Connecter un conseiller",
+    "advisorModalTitle": "Connexion conseiller",
+    "advisorModalDesc": "Saisissez le code fourni par le conseiller.",
+    "advisorModalConnect": "Connecter",
+    "advisorModalCancel": "Annuler",
+    "advisorCodePlaceholder": "OKM-XXXXXX",
       "statusNotConnected": "Non connecté",
       "statusConnecting": "Connexion...",
       "statusConnected": "Connecté au conseiller",
-      "statusError": "Erreur de connexion",
-      "modalTitle": "Connexion conseiller",
-      "modalSubtitle": "Entrez le code affiché sur l'écran du conseiller",
-      "btnConnect": "Se connecter",
-      "btnDisconnect": "Déconnecter"
+      "statusError": "Erreur de connexion"
     },
     "en": {
       "dir": "ltr",
@@ -61,17 +61,17 @@ const i18n = {
       "btnGenerate": "Generate my summary",
       "btnEdit": "Edit",
       "legalText": "OK MOBILITY GROUP, S.L.U. acts as Data Controller with respect to the personal data of the Data Subject and hereby informs that such data shall be processed in accordance with the provisions of Regulation (EU) 2016/679 of the European Parliament and of the Council of 27 April 2016 (GDPR) and Organic Law 3/2018 of 5 December on the Protection of Personal Data and Guarantee of Digital Rights (LOPDGDD).",
-      "summaryTitle": "Please present this summary to the advisor",
-      "advisorCodeCheck": "Send directly to advisor",
-      "advisorCodePlaceholder": "OKM-XXXXXX",
+    "summaryTitle": "Please present this summary to the advisor",
+    "advisorConnectButton": "Connect an advisor",
+    "advisorModalTitle": "Advisor connection",
+    "advisorModalDesc": "Enter the code provided by the advisor.",
+    "advisorModalConnect": "Connect",
+    "advisorModalCancel": "Cancel",
+    "advisorCodePlaceholder": "OKM-XXXXXX",
       "statusNotConnected": "Not connected",
       "statusConnecting": "Connecting...",
       "statusConnected": "Connected to advisor",
-      "statusError": "Connection error",
-      "modalTitle": "Advisor Connection",
-      "modalSubtitle": "Enter the code shown on the advisor's screen",
-      "btnConnect": "Connect",
-      "btnDisconnect": "Disconnect"
+      "statusError": "Connection error"
     },
     "es": {
       "dir": "ltr",
@@ -94,17 +94,17 @@ const i18n = {
       "btnGenerate": "Generar mi resumen",
       "btnEdit": "Modificar",
       "legalText": "OK MOBILITY GROUP, S.L.U. es el Responsable del tratamiento de los datos personales del Interesado y le informa de que estos datos se tratarán de conformidad con lo dispuesto en el Reglamento (UE) 2016/679, de 27 de abril (GDPR), y la Ley Orgánica 3/2018, de 5 de diciembre (LOPDG).",
-      "summaryTitle": "Por favor, presente este resumen al asesor",
-      "advisorCodeCheck": "Enviar directamente al asesor",
-      "advisorCodePlaceholder": "OKM-XXXXXX",
+    "summaryTitle": "Por favor, presente este resumen al asesor",
+    "advisorConnectButton": "Conectar asesor",
+    "advisorModalTitle": "Conexión con asesor",
+    "advisorModalDesc": "Introduzca el código proporcionado por el asesor.",
+    "advisorModalConnect": "Conectar",
+    "advisorModalCancel": "Cancelar",
+    "advisorCodePlaceholder": "OKM-XXXXXX",
       "statusNotConnected": "Sin conectar",
       "statusConnecting": "Conectando...",
       "statusConnected": "Conectado al asesor",
-      "statusError": "Error de conexión",
-      "modalTitle": "Conexión con asesor",
-      "modalSubtitle": "Introduzca el código mostrado en la pantalla del asesor",
-      "btnConnect": "Conectar",
-      "btnDisconnect": "Desconectar"
+      "statusError": "Error de conexión"
     },
     "it": {
       "dir": "ltr",
@@ -127,17 +127,17 @@ const i18n = {
       "btnGenerate": "Genera il mio riepilogo",
       "btnEdit": "Modifica",
       "legalText": "OK MOBILITY GROUP, S.L.U. è il Titolare del trattamento dei dati personali dell'Interessato e lo informa che tali dati saranno trattati in conformità con le disposizioni del Regolamento (UE) 2016/679 del Parlamento europeo e del Consiglio del 27 aprile 2016 (GDPR) e della Legge Organica 3/2018 del 5 dicembre sulla protezione dei dati personali e garanzia dei diritti digitali (LOPDGDD).",
-      "summaryTitle": "Si prega di presentare questo riepilogo al consulente",
-      "advisorCodeCheck": "Invia direttamente al consulente",
-      "advisorCodePlaceholder": "OKM-XXXXXX",
+    "summaryTitle": "Si prega di presentare questo riepilogo al consulente",
+    "advisorConnectButton": "Collega un consulente",
+    "advisorModalTitle": "Connessione consulente",
+    "advisorModalDesc": "Inserisci il codice fornito dal consulente.",
+    "advisorModalConnect": "Connetti",
+    "advisorModalCancel": "Annulla",
+    "advisorCodePlaceholder": "OKM-XXXXXX",
       "statusNotConnected": "Non connesso",
       "statusConnecting": "Connessione...",
       "statusConnected": "Connesso al consulente",
-      "statusError": "Errore di connessione",
-      "modalTitle": "Connessione consulente",
-      "modalSubtitle": "Inserisci il codice mostrato sullo schermo del consulente",
-      "btnConnect": "Connetti",
-      "btnDisconnect": "Disconnetti"
+      "statusError": "Errore di connessione"
     },
     "pt": {
       "dir": "ltr",
@@ -160,17 +160,17 @@ const i18n = {
       "btnGenerate": "Gerar o meu resumo",
       "btnEdit": "Editar",
       "legalText": "A OK MOBILITY GROUP, S.L.U. é a Responsável pelo tratamento dos dados pessoais do Titular dos dados e informa que os referidos dados serão tratados em conformidade com o disposto no Regulamento (UE) 2016/679 do Parlamento Europeu e do Conselho, de 27 de abril de 2016 (RGPD), e na Lei Orgânica n.º 3/2018, de 5 de dezembro, relativa à Proteção de Dados Pessoais e à Garantia dos Direitos Digitais (LOPDGDD).",
-      "summaryTitle": "Por favor, apresente este resumo ao consultor",
-      "advisorCodeCheck": "Enviar diretamente ao consultor",
-      "advisorCodePlaceholder": "OKM-XXXXXX",
+    "summaryTitle": "Por favor, apresente este resumo ao consultor",
+    "advisorConnectButton": "Conectar consultor",
+    "advisorModalTitle": "Conexão com consultor",
+    "advisorModalDesc": "Digite o código fornecido pelo consultor.",
+    "advisorModalConnect": "Conectar",
+    "advisorModalCancel": "Cancelar",
+    "advisorCodePlaceholder": "OKM-XXXXXX",
       "statusNotConnected": "Não conectado",
       "statusConnecting": "Conectando...",
       "statusConnected": "Conectado ao consultor",
-      "statusError": "Erro de conexão",
-      "modalTitle": "Conexão com consultor",
-      "modalSubtitle": "Introduza o código mostrado no ecrã do consultor",
-      "btnConnect": "Conectar",
-      "btnDisconnect": "Desconectar"
+      "statusError": "Erro de conexão"
     },
     "de": {
       "dir": "ltr",
@@ -193,17 +193,17 @@ const i18n = {
       "btnGenerate": "Meine Zusammenfassung erstellen",
       "btnEdit": "Bearbeiten",
       "legalText": "OK MOBILITY GROUP, S.L.U. ist der Verantwortliche im Sinne des Datenschutzrechts für die Verarbeitung der personenbezogenen Daten der betroffenen Person und teilt mit, dass diese Daten gemäß den Bestimmungen der Verordnung (EU) 2016/679 des Europäischen Parlaments und des Rates vom 27. April 2016 (DSGVO) sowie des Organgesetzes 3/2018 vom 5. Dezember über den Schutz personenbezogener Daten und die Gewährleistung digitaler Rechte (LOPDGDD) verarbeitet werden.",
-      "summaryTitle": "Bitte legen Sie diese Zusammenfassung dem Berater vor",
-      "advisorCodeCheck": "Direkt an den Berater senden",
-      "advisorCodePlaceholder": "OKM-XXXXXX",
+    "summaryTitle": "Bitte legen Sie diese Zusammenfassung dem Berater vor",
+    "advisorConnectButton": "Berater verbinden",
+    "advisorModalTitle": "Beraterverbindung",
+    "advisorModalDesc": "Geben Sie den vom Berater bereitgestellten Code ein.",
+    "advisorModalConnect": "Verbinden",
+    "advisorModalCancel": "Abbrechen",
+    "advisorCodePlaceholder": "OKM-XXXXXX",
       "statusNotConnected": "Nicht verbunden",
       "statusConnecting": "Verbinde...",
       "statusConnected": "Mit Berater verbunden",
-      "statusError": "Verbindungsfehler",
-      "modalTitle": "Berater-Verbindung",
-      "modalSubtitle": "Geben Sie den Code ein, der auf dem Bildschirm des Beraters angezeigt wird",
-      "btnConnect": "Verbinden",
-      "btnDisconnect": "Trennen"
+      "statusError": "Verbindungsfehler"
     }
 };
 
@@ -253,21 +253,20 @@ const dom = {
     // Contact
     phone: document.getElementById('phone'),
     email: document.getElementById('email'),
-    // Connection Modal
-    btnConnect: document.getElementById('btnConnect'),
-    connectIcon: document.getElementById('connectIcon'),
-    connectionModal: document.getElementById('connectionModal'),
-    btnCloseModal: document.getElementById('btnCloseModal'),
-    modalTitle: document.getElementById('modalTitle'),
-    modalSubtitle: document.getElementById('modalSubtitle'),
-    advisorCode: document.getElementById('advisorCode'),
-    connectionStatusModal: document.getElementById('connectionStatusModal'),
+    // Advisor Connection (Modal)
+    btnOpenAdvisorModal: document.getElementById('btnOpenAdvisorModal'),
+    txtAdvisorConnect: document.getElementById('txtAdvisorConnect'),
+    advisorModal: document.getElementById('advisorModal'),
+    advisorModalOverlay: document.getElementById('advisorModalOverlay'),
+    advisorModalClose: document.getElementById('advisorModalClose'),
+    advisorModalTitle: document.getElementById('advisorModalTitle'),
+    advisorModalDesc: document.getElementById('advisorModalDesc'),
+    advisorModalCancel: document.getElementById('advisorModalCancel'),
+    advisorModalConnect: document.getElementById('advisorModalConnect'),
+    advisorCodeInput: document.getElementById('advisorCodeInput'),
+    advisorConnectionStatus: document.getElementById('advisorConnectionStatus'),
     clientStatusIndicator: document.getElementById('clientStatusIndicator'),
-    clientStatusText: document.getElementById('clientStatusText'),
-    btnConnectAdvisor: document.getElementById('btnConnectAdvisor'),
-    btnDisconnect: document.getElementById('btnDisconnect'),
-    txtBtnConnect: document.getElementById('txtBtnConnect'),
-    txtBtnDisconnect: document.getElementById('txtBtnDisconnect')
+    clientStatusText: document.getElementById('clientStatusText')
 };
 
 // ============================================================================
@@ -331,21 +330,24 @@ function applyLanguage(langCode) {
         el.textContent = t.legalText;
     });
 
-    // Connection Modal Texts
-    if (dom.modalTitle) {
-        dom.modalTitle.textContent = t.modalTitle || 'Advisor Connection';
+    // Advisor Modal Labels
+    if (dom.txtAdvisorConnect) {
+        dom.txtAdvisorConnect.textContent = t.advisorConnectButton || 'Connect an advisor';
     }
-    if (dom.modalSubtitle) {
-        dom.modalSubtitle.textContent = t.modalSubtitle || "Enter the code shown on the advisor's screen";
+    if (dom.advisorModalTitle) {
+        dom.advisorModalTitle.textContent = t.advisorModalTitle || 'Advisor connection';
     }
-    if (dom.advisorCode) {
-        dom.advisorCode.placeholder = t.advisorCodePlaceholder || 'OKM-XXXXXX';
+    if (dom.advisorModalDesc) {
+        dom.advisorModalDesc.textContent = t.advisorModalDesc || 'Enter the code provided by the advisor.';
     }
-    if (dom.txtBtnConnect) {
-        dom.txtBtnConnect.textContent = t.btnConnect || 'Connect';
+    if (dom.advisorModalConnect) {
+        dom.advisorModalConnect.textContent = t.advisorModalConnect || 'Connect';
     }
-    if (dom.txtBtnDisconnect) {
-        dom.txtBtnDisconnect.textContent = t.btnDisconnect || 'Disconnect';
+    if (dom.advisorModalCancel) {
+        dom.advisorModalCancel.textContent = t.advisorModalCancel || 'Cancel';
+    }
+    if (dom.advisorCodeInput) {
+        dom.advisorCodeInput.placeholder = t.advisorCodePlaceholder || 'OKM-XXXXXX';
     }
     // Update connection status text if not connected
     if (dom.clientStatusText && !state.advisorConnected) {
@@ -361,14 +363,12 @@ dom.langSelect.addEventListener('change', (e) => {
     applyLanguage(e.target.value);
 });
 
-const btnReset = document.getElementById('btnReset');
-if (btnReset) {
-    btnReset.addEventListener('click', () => {
-        btnReset.classList.add('spinning');
-        sessionStorage.setItem('okm_lang', state.lang);
-        setTimeout(() => location.reload(), 520);
-    });
-}
+document.getElementById('btnReset').addEventListener('click', () => {
+    const btn = document.getElementById('btnReset');
+    btn.classList.add('spinning');
+    sessionStorage.setItem('okm_lang', state.lang);
+    setTimeout(() => location.reload(), 520);
+});
 
 // ============================================================================
 // 4. Temporary Address Toggle
@@ -710,90 +710,35 @@ const peerConfig = {
     ]
 };
 
-// ============================================================================
-// 10. Modal Management
-// ============================================================================
-
-function openConnectionModal() {
-    dom.connectionModal.style.display = 'flex';
-    dom.advisorCode.focus();
-    // Update UI based on connection state
-    updateModalUI();
-}
-
-function closeConnectionModal() {
-    dom.connectionModal.style.display = 'none';
-}
-
-function updateModalUI() {
-    if (state.advisorConnected) {
-        dom.btnConnectAdvisor.style.display = 'none';
-        dom.btnDisconnect.style.display = 'flex';
-        dom.advisorCode.disabled = true;
-    } else {
-        dom.btnConnectAdvisor.style.display = 'flex';
-        dom.btnDisconnect.style.display = 'none';
-        dom.advisorCode.disabled = false;
+// Modal open/close helpers
+function openAdvisorModal() {
+    if (dom.advisorModalOverlay) dom.advisorModalOverlay.style.display = 'block';
+    if (dom.advisorModal) dom.advisorModal.style.display = 'block';
+    if (dom.advisorCodeInput) {
+        dom.advisorCodeInput.focus();
+        dom.advisorCodeInput.select();
     }
 }
 
-function updateConnectButtonIcon() {
-    // Update the header connect button to show connection state
-    if (state.advisorConnected) {
-        dom.connectIcon.className = 'bx bx-link';
-        dom.btnConnect.classList.add('connected');
-    } else {
-        dom.connectIcon.className = 'bx bx-link';
-        dom.btnConnect.classList.remove('connected');
-    }
-}
-
-// Event listeners for modal
-if (dom.btnConnect) {
-    dom.btnConnect.addEventListener('click', openConnectionModal);
-}
-
-if (dom.btnCloseModal) {
-    dom.btnCloseModal.addEventListener('click', closeConnectionModal);
-}
-
-if (dom.connectionModal) {
-    dom.connectionModal.addEventListener('click', (e) => {
-        if (e.target === dom.connectionModal) {
-            closeConnectionModal();
-        }
-    });
-}
-
-if (dom.btnConnectAdvisor) {
-    dom.btnConnectAdvisor.addEventListener('click', () => {
-        if (dom.advisorCode.value.trim().length >= 7) {
-            connectToAdvisor();
-        }
-    });
-}
-
-if (dom.btnDisconnect) {
-    dom.btnDisconnect.addEventListener('click', () => {
-        disconnectFromAdvisor();
-        updateModalUI();
-    });
+function closeAdvisorModal() {
+    if (dom.advisorModalOverlay) dom.advisorModalOverlay.style.display = 'none';
+    if (dom.advisorModal) dom.advisorModal.style.display = 'none';
 }
 
 // Check URL for pre-filled advisor code on load
 function checkUrlForAdvisorCode() {
     const urlCode = new URLSearchParams(window.location.search).get('code');
-    if (urlCode) {
-        dom.advisorCode.value = urlCode.toUpperCase();
-        // Open modal and auto-connect
-        openConnectionModal();
-        setTimeout(() => connectToAdvisor(), 500);
+    if (urlCode && dom.advisorCodeInput) {
+        dom.advisorCodeInput.value = urlCode.toUpperCase();
+        openAdvisorModal();
+        // Auto-connect after a short delay
+        setTimeout(() => connectToAdvisor(), 600);
     }
 }
 
 // Connect to advisor's Peer
 function connectToAdvisor() {
-    const code = dom.advisorCode.value.trim().toUpperCase();
+    const code = dom.advisorCodeInput.value.trim().toUpperCase();
     if (!code || code.length < 7) return; // OKM- + at least 3 chars
     
     updateClientStatus('connecting');
@@ -815,8 +760,6 @@ function connectToAdvisor() {
             console.log('Connected to advisor');
             state.advisorConnected = true;
             updateClientStatus('connected');
-            updateModalUI();
-            updateConnectButtonIcon();
             // Send current form data immediately
             sendFormDataToAdvisor();
         });
@@ -825,16 +768,12 @@ function connectToAdvisor() {
             console.log('Disconnected from advisor');
             state.advisorConnected = false;
             updateClientStatus('disconnected');
-            updateModalUI();
-            updateConnectButtonIcon();
         });
         
         state.advisorConnection.on('error', (err) => {
             console.error('Connection error:', err);
             state.advisorConnected = false;
             updateClientStatus('error');
-            updateModalUI();
-            updateConnectButtonIcon();
         });
     });
     
@@ -842,8 +781,6 @@ function connectToAdvisor() {
         console.error('Peer error:', err);
         state.advisorConnected = false;
         updateClientStatus('error');
-        updateModalUI();
-        updateConnectButtonIcon();
     });
 }
 
@@ -859,7 +796,6 @@ function disconnectFromAdvisor() {
     }
     state.advisorConnected = false;
     updateClientStatus('disconnected');
-    updateConnectButtonIcon();
 }
 
 // Update connection status UI
@@ -867,8 +803,6 @@ function updateClientStatus(status) {
     const t = i18n[state.lang] || i18n['es'];
     const indicator = dom.clientStatusIndicator;
     const text = dom.clientStatusText;
-    
-    if (!indicator || !text) return;
     
     indicator.className = 'status-indicator';
     
@@ -957,27 +891,46 @@ function attachRealTimeListeners() {
     }
 }
 
-// Advisor code input handlers
-if (dom.advisorCode) {
-    dom.advisorCode.addEventListener('keypress', (e) => {
+// Modal controls
+if (dom.btnOpenAdvisorModal) {
+    dom.btnOpenAdvisorModal.addEventListener('click', openAdvisorModal);
+}
+if (dom.advisorModalClose) {
+    dom.advisorModalClose.addEventListener('click', closeAdvisorModal);
+}
+if (dom.advisorModalCancel) {
+    dom.advisorModalCancel.addEventListener('click', closeAdvisorModal);
+}
+if (dom.advisorModalOverlay) {
+    dom.advisorModalOverlay.addEventListener('click', closeAdvisorModal);
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && dom.advisorModal && dom.advisorModal.style.display !== 'none') {
+        closeAdvisorModal();
+    }
+});
+
+// Connect button in modal
+if (dom.advisorModalConnect) {
+    dom.advisorModalConnect.addEventListener('click', () => {
+        connectToAdvisor();
+    });
+}
+
+// Code input behavior
+if (dom.advisorCodeInput) {
+    dom.advisorCodeInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            if (dom.advisorCode.value.trim().length >= 7) {
+            if (dom.advisorCodeInput.value.trim().length >= 7) {
                 connectToAdvisor();
             }
         }
     });
     
     // Auto-uppercase
-    dom.advisorCode.addEventListener('input', (e) => {
-        e.target.value = e.target.value.toUpperCase();
-    });
-}
-
-// Initialize
-attachRealTimeListeners();
-checkUrlForAdvisorCode();
-    dom.advisorCode.addEventListener('input', (e) => {
+    dom.advisorCodeInput.addEventListener('input', (e) => {
         e.target.value = e.target.value.toUpperCase();
     });
 }
