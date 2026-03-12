@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+    <meta name="referrer" content="same-origin">
+    <title>OK Mobility</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    
+    <!-- Modern Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Boxicons for elegant icons -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css?v=14">
+</head>
+<body>
+    
+    <!-- Dynamic Ambient Background -->
+    <div class="ambient-background">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <!-- Main Liquid Glass Container -->
+    <main class="glass-container accueil-container">
+        
+        <!-- Header -->
+        <header class="glass-header accueil-header">
+            <div class="header-brand">
+                <div class="logo">
+                    <img src="https://okmobility.com/img/logos/okmobility-imagotipo.svg" alt="OK Mobility Logo" class="logo-img logo-img-light">
+                    <img src="https://okmobility.com/img/logos/okmobility-imagotipo-white.svg" alt="OK Mobility Logo" class="logo-img logo-img-dark">
+                </div>
+                <span class="brand-slogan">The Global Mobility Platform</span>
+            </div>
+            
+            <div class="header-controls">
+                <div class="lang-selector">
+                    <i class='bx bx-globe'></i>
+                    <span id="langDisplay">Español</span>
+                    <select id="languageSelect" aria-label="Select language">
+                        <option value="es" selected>Español</option>
+                        <option value="en">English</option>
+                        <option value="fr">Français</option>
+                        <option value="it">Italiano</option>
+                        <option value="pt">Português</option>
+                        <option value="de">Deutsch</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+
+        <section class="accueil-content">
+            
+            <div class="title-wrapper">
+                <h1 id="pageTitle" class="gradient-text">Recogida de datos</h1>
+                <p id="pageSubtitle" class="accueil-subtitle">Seleccione el modo de uso</p>
+            </div>
+
+            <!-- Mode Selection Cards -->
+            <div class="mode-cards">
+                
+                <!-- Advisor Mode Card -->
+                <a href="conseiller.html" class="mode-card glass-panel" id="cardAdvisor">
+                    <div class="mode-icon advisor-icon">
+                        <i class='bx bx-desktop'></i>
+                    </div>
+                    <div class="mode-info">
+                        <h2 id="titleAdvisor">Modo Asesor</h2>
+                        <p id="descAdvisor">Reciba los datos del cliente en tiempo real en su pantalla</p>
+                    </div>
+                    <div class="mode-arrow">
+                        <i class='bx bx-chevron-right'></i>
+                    </div>
+                </a>
+
+                <!-- Client Mode Card -->
+                <a href="index.html" class="mode-card glass-panel" id="cardClient">
+                    <div class="mode-icon client-icon">
+                        <i class='bx bx-mobile-alt'></i>
+                    </div>
+                    <div class="mode-info">
+                        <h2 id="titleClient">Modo Cliente</h2>
+                        <p id="descClient">El cliente rellena el formulario en su dispositivo</p>
+                    </div>
+                    <div class="mode-arrow">
+                        <i class='bx bx-chevron-right'></i>
+                    </div>
+                </a>
+
+            </div>
+
+            <!-- Info Section -->
+            <div class="accueil-info glass-panel">
+                <div class="info-row">
+                    <i class='bx bx-shield-quarter'></i>
+                    <span id="infoPrivacy">Conexión cifrada P2P — Sin almacenamiento en servidor</span>
+                </div>
+            </div>
+
+        </section>
+        
+    </main>
+
+    <script>
+        // i18n for the home page
+        const i18n = {
+            "es": {
+                "pageTitle": "Recogida de datos",
+                "pageSubtitle": "Seleccione el modo de uso",
+                "titleAdvisor": "Modo Asesor",
+                "descAdvisor": "Reciba los datos del cliente en tiempo real en su pantalla",
+                "titleClient": "Modo Cliente", 
+                "descClient": "El cliente rellena el formulario en su dispositivo",
+                "infoPrivacy": "Conexión cifrada P2P — Sin almacenamiento en servidor"
+            },
+            "en": {
+                "pageTitle": "Data Collection",
+                "pageSubtitle": "Select usage mode",
+                "titleAdvisor": "Advisor Mode",
+                "descAdvisor": "Receive client data in real-time on your screen",
+                "titleClient": "Client Mode",
+                "descClient": "The client fills the form on their device",
+                "infoPrivacy": "Encrypted P2P connection — No server storage"
+            },
+            "fr": {
+                "pageTitle": "Collecte de données",
+                "pageSubtitle": "Sélectionnez le mode d'utilisation",
+                "titleAdvisor": "Mode Conseiller",
+                "descAdvisor": "Recevez les données client en temps réel sur votre écran",
+                "titleClient": "Mode Client",
+                "descClient": "Le client remplit le formulaire sur son appareil",
+                "infoPrivacy": "Connexion P2P chiffrée — Aucun stockage serveur"
+            },
+            "it": {
+                "pageTitle": "Raccolta dati",
+                "pageSubtitle": "Seleziona la modalità di utilizzo",
+                "titleAdvisor": "Modalità Consulente",
+                "descAdvisor": "Ricevi i dati del cliente in tempo reale sul tuo schermo",
+                "titleClient": "Modalità Cliente",
+                "descClient": "Il cliente compila il modulo sul proprio dispositivo",
+                "infoPrivacy": "Connessione P2P crittografata — Nessun salvataggio su server"
+            },
+            "pt": {
+                "pageTitle": "Recolha de dados",
+                "pageSubtitle": "Selecione o modo de utilização",
+                "titleAdvisor": "Modo Consultor",
+                "descAdvisor": "Receba os dados do cliente em tempo real no seu ecrã",
+                "titleClient": "Modo Cliente",
+                "descClient": "O cliente preenche o formulário no seu dispositivo",
+                "infoPrivacy": "Conexão P2P encriptada — Sem armazenamento em servidor"
+            },
+            "de": {
+                "pageTitle": "Datenerfassung",
+                "pageSubtitle": "Nutzungsmodus auswählen",
+                "titleAdvisor": "Berater-Modus",
+                "descAdvisor": "Empfangen Sie Kundendaten in Echtzeit auf Ihrem Bildschirm",
+                "titleClient": "Kunden-Modus",
+                "descClient": "Der Kunde füllt das Formular auf seinem Gerät aus",
+                "infoPrivacy": "Verschlüsselte P2P-Verbindung — Keine Serverspeicherung"
+            }
+        };
+
+        const langNames = { fr: 'Français', en: 'English', es: 'Español', it: 'Italiano', pt: 'Português', de: 'Deutsch' };
+
+        function applyLanguage(langCode) {
+            const t = i18n[langCode];
+            if (!t) return;
+
+            document.documentElement.lang = langCode;
+            document.getElementById('langDisplay').textContent = langNames[langCode];
+            
+            document.getElementById('pageTitle').textContent = t.pageTitle;
+            document.getElementById('pageSubtitle').textContent = t.pageSubtitle;
+            document.getElementById('titleAdvisor').textContent = t.titleAdvisor;
+            document.getElementById('descAdvisor').textContent = t.descAdvisor;
+            document.getElementById('titleClient').textContent = t.titleClient;
+            document.getElementById('descClient').textContent = t.descClient;
+            document.getElementById('infoPrivacy').textContent = t.infoPrivacy;
+
+            // Store preference
+            localStorage.setItem('okm_lang_pref', langCode);
+        }
+
+        // Detect browser language
+        function detectUserLanguage() {
+            // Check stored preference first
+            const stored = localStorage.getItem('okm_lang_pref');
+            if (stored && i18n[stored]) return stored;
+
+            if (navigator.language) {
+                const browserLang = navigator.language.split('-')[0].toLowerCase();
+                if (i18n[browserLang]) return browserLang;
+            }
+            return 'es';
+        }
+
+        // Initialize
+        const lang = detectUserLanguage();
+        document.getElementById('languageSelect').value = lang;
+        applyLanguage(lang);
+
+        document.getElementById('languageSelect').addEventListener('change', (e) => {
+            applyLanguage(e.target.value);
+        });
+    </script>
+</body>
+</html>
