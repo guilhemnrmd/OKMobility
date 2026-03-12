@@ -83,7 +83,7 @@ function generateQRCode(sessionCode) {
     dom.qrCode.innerHTML = '';
     
     // Build the client URL with the session code
-    const baseUrl = window.location.href.replace('conseiller.html', 'index.html');
+    const baseUrl = `${window.location.origin}/index.html`;
     const clientUrl = `${baseUrl}?code=${sessionCode}`;
     
     // Generate QR code
