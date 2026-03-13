@@ -806,28 +806,60 @@ const peerConfig = {
     ]
 };
 
+const TURN_FETCH_TIMEOUT_MS = 3500;
+
+function normalizeIceServers(servers) {
+    if (!servers) return [];
+    const list = Array.isArray(servers) ? servers : [servers];
+    return list.filter((server) => {
+        if (!server || typeof server !== 'object') return false;
+        return typeof server.urls === 'string' || Array.isArray(server.urls);
+    });
+}
+
+function buildMergedIceServers(dynamicServers) {
+    const baseStun = [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun.cloudflare.com:3478' }
+    ];
+
+    const cloudflareServers = normalizeIceServers(dynamicServers);
+    const fallbackTurnServers = peerConfig.iceServers.filter((server) => {
+        if (!server || !server.urls) return false;
+        const urls = Array.isArray(server.urls) ? server.urls : [server.urls];
+        return urls.some((url) => typeof url === 'string' && (url.startsWith('turn:') || url.startsWith('turns:')));
+    });
+
+    return [...baseStun, ...cloudflareServers, ...fallbackTurnServers];
+}
+
 // Fetch ephemeral Cloudflare TURN credentials.
 // Falls back to the hardcoded openrelay servers if the API is unavailable.
 async function fetchTurnCredentials() {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TURN_FETCH_TIMEOUT_MS);
+
     try {
         const response = await fetch('/api/turn-credentials', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal
         });
+
+        clearTimeout(timeoutId);
         if (!response.ok) throw new Error('HTTP ' + response.status);
+
         const data = await response.json();
-        if (data.iceServers) {
-            // Cloudflare returns a single iceServers object — merge with STUN
-            return [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'stun:stun.cloudflare.com:3478' },
-                data.iceServers
-            ];
+
+        if (data && data.iceServers) {
+            return buildMergedIceServers(data.iceServers);
         }
     } catch (err) {
+        clearTimeout(timeoutId);
         console.warn('Cloudflare TURN unavailable, using fallback:', err.message);
     }
+
     return peerConfig.iceServers;
 }
 
