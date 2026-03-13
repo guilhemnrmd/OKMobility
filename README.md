@@ -44,9 +44,80 @@ Pour confidentialité et fiabilité réseau, les ressources suivantes sont déso
 	- Source : `boxicons@2.1.4` (distribution npm/CDN)
 	- Emplacement local CSS : [assets/boxicons/css/boxicons.min.css](assets/boxicons/css/boxicons.min.css)
 	- Emplacement local fonts : [assets/boxicons/fonts/boxicons.woff2](assets/boxicons/fonts/boxicons.woff2), [assets/boxicons/fonts/boxicons.woff](assets/boxicons/fonts/boxicons.woff), [assets/boxicons/fonts/boxicons.ttf](assets/boxicons/fonts/boxicons.ttf), [assets/boxicons/fonts/boxicons.eot](assets/boxicons/fonts/boxicons.eot), [assets/boxicons/fonts/boxicons.svg](assets/boxicons/fonts/boxicons.svg)
-	- Chargement : [index.html](index.html), [conseiller.html](conseiller.html), [retailer/index.html](retailer/index.html)
+	- Chargement : [index.html](index.html), [retailer/index.html](retailer/index.html)
 
 > Note: conservez les versions d'origine et licences associées lors de futures mises à jour de ces assets.
+
+## 🧭 Structure actuelle (repère rapide)
+
+- **Client (page publique)** : [index.html](index.html)
+- **Conseiller (page interne)** : [retailer/index.html](retailer/index.html)
+- **Styles partagés** : [style.css](style.css)
+- **JS Client** : [assets/js/script.js](assets/js/script.js)
+- **JS Conseiller** : [assets/js/conseiller.js](assets/js/conseiller.js)
+- **Favicon** : [assets/favicon.ico](assets/favicon.ico)
+- **Headers de sécurité Cloudflare Pages** : [_headers](_headers)
+- **Redirections** : [_redirects](_redirects)
+- **API TURN (Cloudflare Functions)** : [functions/api/turn-credentials.js](functions/api/turn-credentials.js)
+
+## 🔐 Durcissement sécurité (100% compatible plan gratuit)
+
+Le projet applique une protection « raisonnable » gratuite. Objectif: limiter la réutilisation abusive et protéger les secrets, tout en restant simple à maintenir.
+
+### 1) En-têtes HTTP de sécurité
+Configurés dans [_headers](_headers):
+
+- `Content-Security-Policy` (CSP) stricte
+- `X-Frame-Options: DENY` + `frame-ancestors 'none'`
+- `X-Content-Type-Options: nosniff`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy` restrictive
+- `X-Robots-Tag` + meta robots anti-indexation
+
+### 2) Endpoint TURN renforcé
+Implémenté dans [functions/api/turn-credentials.js](functions/api/turn-credentials.js):
+
+- Vérification d'origine (`origin` / `referer`) sur domaine autorisé
+- Support `OPTIONS` (preflight CORS)
+- Limitation de débit par IP mémoire (fenêtre glissante)
+- Réponses JSON sans cache (`Cache-Control: no-store`)
+
+### 3) Limite importante à connaître
+Un code exécuté côté navigateur n'est **jamais** incopiable à 100%. La bonne stratégie est:
+
+- secrets et logique sensible côté API/serveur
+- durcissement côté front pour compliquer la copie opportuniste
+- évolution progressive sans verrouiller le projet
+
+## ↩️ Revenir en arrière sans se perdre
+
+Oui, retour arrière possible à tout moment grâce à Git.
+
+### Cas A — Annuler le dernier commit (sans réécrire l'historique partagé)
+
+Utiliser un revert:
+
+- `git log --oneline -n 10`
+- `git revert <sha_du_commit_a_annuler>`
+- `git push`
+
+### Cas B — Revenir temporairement à une ancienne version pour test local
+
+- `git checkout <sha_ancien>`
+- tester
+- `git checkout main`
+
+### Cas C — Restaurer un fichier précis
+
+- `git checkout <sha_ancien> -- path/du/fichier`
+- `git commit -m "restore: path/du/fichier depuis <sha>"`
+- `git push`
+
+### Bonne pratique recommandée pour les prochaines évolutions
+
+- Créer une branche de travail par changement important (`feature/...`, `chore/...`, `security/...`)
+- Valider puis fusionner dans `main` quand c'est stable
+- Déployer ensuite pour garder un historique clair et réversible
 
 ---
 
