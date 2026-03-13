@@ -1777,13 +1777,7 @@ button, .btn-primary, .btn-secondary {
 /* =========================================================================
    Responsive Layout (Tablet + Mobile)
    ========================================================================= */
-@media (max-width: 900px) {
-    body {
-        align-items: flex-start;
-    }
-}
-
-@media (max-width: 768px) {
+@media (max-width: 640px) {
     :root {
         --spacing-sm: 14px;
         --spacing-md: 20px;
