@@ -412,6 +412,7 @@ function applyLanguage(langCode) {
     }
 
     if (state.globalCountriesData && state.globalCountriesData.length > 0) {
+        state.countrySelectedManually = false;
         renderCountryNameSelect(langCode);
         renderCountryCodeSelect(langCode);
     }
@@ -446,6 +447,13 @@ function resetClientForm() {
     dom.summaryView.style.display = 'none';
     dom.form.style.display = 'flex';
     document.getElementById('pageTitle').textContent = i18n[state.lang].pageTitle;
+
+    // Reset country to language default
+    state.countrySelectedManually = false;
+    if (state.globalCountriesData && state.globalCountriesData.length > 0) {
+        renderCountryNameSelect(state.lang);
+        renderCountryCodeSelect(state.lang);
+    }
 
     // Reset country displays to current select values
     const countrySelect = dom.country;
