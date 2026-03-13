@@ -1242,14 +1242,14 @@ input::placeholder {
 
 .qr-wrapper #qrCode {
     background: #ffffff;
-    border-radius: var(--radius-sm);
-    overflow: hidden;
+    border-radius: 0;
+    overflow: visible;
 }
 
 .qr-wrapper #qrCode img,
 .qr-wrapper #qrCode canvas {
     display: block;
-    border-radius: calc(var(--radius-sm) - 2px);
+    border-radius: 0;
 }
 
 .qr-center-badge {
