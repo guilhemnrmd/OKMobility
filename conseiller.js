@@ -131,6 +131,46 @@ const languageNames = {
     nl: 'Nederlands'
 };
 
+const incomingDataLimits = {
+    address: 140,
+    zipCode: 20,
+    city: 80,
+    tempAddress: 140,
+    tempZipCode: 20,
+    tempCity: 80,
+    phone: 40,
+    email: 120
+};
+
+function sanitizeText(value, maxLength) {
+    if (typeof value !== 'string') return '';
+    return value.trim().slice(0, maxLength);
+}
+
+function sanitizeIncomingData(data) {
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+        return {};
+    }
+
+    const clean = {};
+
+    if (typeof data.language === 'string' && languageNames[data.language]) {
+        clean.language = data.language;
+    }
+
+    if ('hasTempAddress' in data) {
+        clean.hasTempAddress = Boolean(data.hasTempAddress);
+    }
+
+    Object.keys(incomingDataLimits).forEach((key) => {
+        if (key in data) {
+            clean[key] = sanitizeText(data[key], incomingDataLimits[key]);
+        }
+    });
+
+    return clean;
+}
+
 function hasActiveClientConnection() {
     return Boolean(state.connection && state.connection.open);
 }
@@ -229,7 +269,10 @@ function generateQRCode(sessionCode) {
 // Falls back to the hardcoded openrelay servers if the API is unavailable.
 async function fetchTurnCredentials() {
     try {
-        const response = await fetch('/api/turn-credentials');
+        const response = await fetch('/api/turn-credentials', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
         if (!response.ok) throw new Error('HTTP ' + response.status);
         const data = await response.json();
         if (data.iceServers) {
@@ -292,7 +335,6 @@ async function initializePeer() {
         });
         
         conn.on('data', (data) => {
-            console.log('Received data:', data);
             handleIncomingData(data);
         });
         
@@ -410,51 +452,54 @@ function showDisconnectedView() {
 // 8. Data Handling
 // ============================================================================
 function handleIncomingData(data) {
-    state.currentData = { ...state.currentData, ...data };
+    const cleanData = sanitizeIncomingData(data);
+    if (!Object.keys(cleanData).length) return;
 
-    if (data.language && languageNames[data.language]) {
-        setRemoteLanguage(data.language, false);
+    state.currentData = { ...state.currentData, ...cleanData };
+
+    if (cleanData.language && languageNames[cleanData.language]) {
+        setRemoteLanguage(cleanData.language, false);
     }
     
     // Update displayed values
-    if (data.address !== undefined) {
-        dom.valAddress.textContent = data.address || '-';
+    if (cleanData.address !== undefined) {
+        dom.valAddress.textContent = cleanData.address || '-';
         highlightField('valAddress');
     }
     
-    if (data.zipCode !== undefined || data.city !== undefined) {
-        const zip = data.zipCode || state.currentData.zipCode || '';
-        const city = data.city || state.currentData.city || '';
+    if (cleanData.zipCode !== undefined || cleanData.city !== undefined) {
+        const zip = cleanData.zipCode || state.currentData.zipCode || '';
+        const city = cleanData.city || state.currentData.city || '';
         dom.valZipCity.textContent = `${zip} ${city}`.trim() || '-';
         highlightField('valZipCity');
     }
     
     // Handle temporary address visibility
-    if (data.hasTempAddress !== undefined) {
-        const show = data.hasTempAddress;
+    if (cleanData.hasTempAddress !== undefined) {
+        const show = cleanData.hasTempAddress;
         dom.rowTempAddress.style.display = show ? 'flex' : 'none';
         dom.rowTempZipCity.style.display = show ? 'flex' : 'none';
     }
     
-    if (data.tempAddress !== undefined) {
-        dom.valTempAddress.textContent = data.tempAddress || '-';
+    if (cleanData.tempAddress !== undefined) {
+        dom.valTempAddress.textContent = cleanData.tempAddress || '-';
         highlightField('valTempAddress');
     }
     
-    if (data.tempZipCode !== undefined || data.tempCity !== undefined) {
-        const zip = data.tempZipCode || state.currentData.tempZipCode || '';
-        const city = data.tempCity || state.currentData.tempCity || '';
+    if (cleanData.tempZipCode !== undefined || cleanData.tempCity !== undefined) {
+        const zip = cleanData.tempZipCode || state.currentData.tempZipCode || '';
+        const city = cleanData.tempCity || state.currentData.tempCity || '';
         dom.valTempZipCity.textContent = `${zip} ${city}`.trim() || '-';
         highlightField('valTempZipCity');
     }
     
-    if (data.phone !== undefined) {
-        dom.valPhone.textContent = data.phone || '-';
+    if (cleanData.phone !== undefined) {
+        dom.valPhone.textContent = cleanData.phone || '-';
         highlightField('valPhone');
     }
     
-    if (data.email !== undefined) {
-        dom.valEmail.textContent = data.email || '-';
+    if (cleanData.email !== undefined) {
+        dom.valEmail.textContent = cleanData.email || '-';
         highlightField('valEmail');
     }
 }

@@ -24,8 +24,61 @@
  *   TURN_KEY_ID     — Key ID from Cloudflare Calls dashboard
  *   TURN_API_TOKEN  — API Token for that key
  */
+const TURN_TTL_SECONDS = 600; // 10 minutes
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX_REQUESTS = 60;
+const rateLimitStore = new Map();
+
+function getClientIp(request) {
+    return request.headers.get('cf-connecting-ip') || 'unknown';
+}
+
+function isRateLimited(key) {
+    const now = Date.now();
+    const entry = rateLimitStore.get(key);
+
+    if (!entry || now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
+        rateLimitStore.set(key, { windowStart: now, count: 1 });
+        return false;
+    }
+
+    entry.count += 1;
+    rateLimitStore.set(key, entry);
+    return entry.count > RATE_LIMIT_MAX_REQUESTS;
+}
+
 export async function onRequest(context) {
-    const { env } = context;
+    const { env, request } = context;
+
+    if (request.method !== 'POST') {
+        return new Response(JSON.stringify({ error: 'Method Not Allowed' }), {
+            status: 405,
+            headers: {
+                'Content-Type': 'application/json',
+                'Allow': 'POST'
+            }
+        });
+    }
+
+    const allowedOrigins = new Set([
+        'https://ok-mobility-retailer.pages.dev'
+    ]);
+
+    const origin = request.headers.get('origin');
+    if (origin && !allowedOrigins.has(origin)) {
+        return new Response(JSON.stringify({ error: 'Forbidden origin' }), {
+            status: 403,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
+
+    const clientKey = getClientIp(request);
+    if (isRateLimited(clientKey)) {
+        return new Response(JSON.stringify({ error: 'Too Many Requests' }), {
+            status: 429,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
 
     // If secrets are not set, return 503 so clients fall back gracefully
     if (!env.TURN_KEY_ID || !env.TURN_API_TOKEN) {
@@ -44,7 +97,7 @@ export async function onRequest(context) {
                     'Authorization': `Bearer ${env.TURN_API_TOKEN}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ ttl: 86400 }) // credentials valid 24h
+                body: JSON.stringify({ ttl: TURN_TTL_SECONDS })
             }
         );
 

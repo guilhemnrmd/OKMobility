@@ -271,7 +271,8 @@ const state = {
     peer: null,
     advisorConnection: null,
     advisorConnected: false,
-    sendDebounceTimer: null
+    sendDebounceTimer: null,
+    lastSentPayload: null
 };
 
 const dom = {
@@ -809,7 +810,10 @@ const peerConfig = {
 // Falls back to the hardcoded openrelay servers if the API is unavailable.
 async function fetchTurnCredentials() {
     try {
-        const response = await fetch('/api/turn-credentials');
+        const response = await fetch('/api/turn-credentials', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
         if (!response.ok) throw new Error('HTTP ' + response.status);
         const data = await response.json();
         if (data.iceServers) {
@@ -878,10 +882,11 @@ async function connectToAdvisor() {
         state.advisorConnection.on('open', () => {
             console.log('Connected to advisor');
             state.advisorConnected = true;
+            state.lastSentPayload = null;
             updateClientStatus('connected');
             closeAdvisorModal();
             // Send current form data immediately
-            sendFormDataToAdvisor();
+            sendFormDataToAdvisor(true);
         });
 
         state.advisorConnection.on('data', (data) => {
@@ -901,12 +906,14 @@ async function connectToAdvisor() {
         state.advisorConnection.on('close', () => {
             console.log('Disconnected from advisor');
             state.advisorConnected = false;
+            state.lastSentPayload = null;
             updateClientStatus('disconnected');
         });
         
         state.advisorConnection.on('error', (err) => {
             console.error('Connection error:', err);
             state.advisorConnected = false;
+            state.lastSentPayload = null;
             updateClientStatus('error');
         });
     });
@@ -929,6 +936,7 @@ function disconnectFromAdvisor() {
         state.peer = null;
     }
     state.advisorConnected = false;
+    state.lastSentPayload = null;
     updateClientStatus('disconnected');
 }
 
@@ -975,30 +983,59 @@ function updateClientStatus(status) {
     }
 }
 
-// Send form data to advisor (debounced)
-function sendFormDataToAdvisor() {
+function clampText(value, maxLength) {
+    if (typeof value !== 'string') return '';
+    return value.trim().slice(0, maxLength);
+}
+
+function buildAdvisorPayload() {
     if (!state.advisorConnected || !state.advisorConnection) return;
     
     const countryCode = document.getElementById('countryCode');
-    const selectedOption = countryCode.options[countryCode.selectedIndex];
+    const selectedOption = countryCode ? countryCode.options[countryCode.selectedIndex] : null;
     const phoneCode = selectedOption ? selectedOption.value : '+33';
+
+    const phoneValue = clampText(dom.phone?.value || '', 40);
+    const formattedPhone = `${phoneCode} ${phoneValue}`.replace(/\s+/g, ' ').trim();
     
-    const data = {
+    return {
         language: state.lang,
-        address: dom.address.value,
-        zipCode: dom.zipCode.value,
-        city: dom.city.value,
-        hasTempAddress: dom.hasTempAddress.checked,
-        tempAddress: dom.tempAddress.value,
-        tempZipCode: dom.tempZipCode.value,
-        tempCity: dom.tempCity.value,
-        phone: `${phoneCode} ${dom.phone.value}`,
-        email: dom.email.value
+        address: clampText(dom.address?.value || '', 140),
+        zipCode: clampText(dom.zipCode?.value || '', 20),
+        city: clampText(dom.city?.value || '', 80),
+        hasTempAddress: Boolean(dom.hasTempAddress?.checked),
+        tempAddress: clampText(dom.tempAddress?.value || '', 140),
+        tempZipCode: clampText(dom.tempZipCode?.value || '', 20),
+        tempCity: clampText(dom.tempCity?.value || '', 80),
+        phone: formattedPhone.slice(0, 40),
+        email: clampText(dom.email?.value || '', 120)
     };
+}
+
+function getPayloadPatch(previousPayload, nextPayload) {
+    const patch = {};
+    Object.keys(nextPayload).forEach((key) => {
+        if (!previousPayload || previousPayload[key] !== nextPayload[key]) {
+            patch[key] = nextPayload[key];
+        }
+    });
+    return patch;
+}
+
+// Send form data to advisor (debounced)
+function sendFormDataToAdvisor(forceSnapshot = false) {
+    if (!state.advisorConnected || !state.advisorConnection) return;
+
+    const payload = buildAdvisorPayload();
+    const outgoing = forceSnapshot
+        ? payload
+        : getPayloadPatch(state.lastSentPayload, payload);
+
+    if (!Object.keys(outgoing).length) return;
     
     try {
-        state.advisorConnection.send(data);
-        console.log('Sent data to advisor:', data);
+        state.advisorConnection.send(outgoing);
+        state.lastSentPayload = payload;
     } catch (err) {
         console.error('Failed to send data:', err);
     }
