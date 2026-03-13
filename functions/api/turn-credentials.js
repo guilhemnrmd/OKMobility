@@ -90,7 +90,7 @@ export async function onRequest(context) {
 
     try {
         const response = await fetch(
-            `https://rtc.live.cloudflare.com/v1/turn/keys/${env.TURN_KEY_ID}/credentials/generate`,
+            `https://rtc.live.cloudflare.com/v1/turn/keys/${env.TURN_KEY_ID}/credentials/generate-ice-servers`,
             {
                 method: 'POST',
                 headers: {
