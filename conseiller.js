@@ -1,3 +1,21 @@
+/*
+ * © 2026 Guilhem Normand. Tous droits réservés.
+ * Ce logiciel est une création indépendante.
+ * Toute copie, rétro-ingénierie, modification ou hébergement sur un serveur tiers
+ * sans licence explicite de l'auteur est strictement interdite et s'expose à des
+ * poursuites pour contrefaçon selon le droit européen.
+ *
+ * © 2026 Guilhem Normand. Todos los derechos reservados.
+ * Este software es una creación independiente.
+ * Cualquier copia, ingeniería inversa, modificación o alojamiento en un servidor de
+ * terceros sin licencia explícita del autor está estrictamente prohibido y puede dar
+ * lugar a acciones legales por infracción conforme al derecho europeo.
+ *
+ * PRIVACITÉ / PRIVACIDAD:
+ * Toutes les données échangées sont privées et transmises en P2P chiffré (WebRTC).
+ * Aucune donnée personnelle n'est stockée côté serveur dans cette application.
+ */
+
 /**
  * OK Mobility - Conseiller (Advisor) View
  * Real-time P2P data reception via WebRTC/PeerJS
@@ -207,7 +225,28 @@ function generateQRCode(sessionCode) {
 // ============================================================================
 // 5. PeerJS Initialization
 // ============================================================================
-function initializePeer() {
+// Fetch ephemeral Cloudflare TURN credentials.
+// Falls back to the hardcoded openrelay servers if the API is unavailable.
+async function fetchTurnCredentials() {
+    try {
+        const response = await fetch('/api/turn-credentials');
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        const data = await response.json();
+        if (data.iceServers) {
+            return [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun.cloudflare.com:3478' },
+                data.iceServers
+            ];
+        }
+    } catch (err) {
+        console.warn('Cloudflare TURN unavailable, using fallback:', err.message);
+    }
+    return config.iceServers;
+}
+
+async function initializePeer() {
     state.displayCode = generateSessionCode();
     state.sessionCode = config.peerPrefix + state.displayCode;
     
@@ -217,10 +256,13 @@ function initializePeer() {
     // Generate QR code
     generateQRCode(state.displayCode);
     
+    // Fetch fresh TURN credentials (falls back to openrelay if unavailable)
+    const iceServers = await fetchTurnCredentials();
+
     // Create Peer with custom ICE servers
     state.peer = new Peer(state.sessionCode, {
         config: {
-            iceServers: config.iceServers
+            iceServers
         }
     });
     

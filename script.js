@@ -1,3 +1,21 @@
+/*
+ * © 2026 Guilhem Normand. Tous droits réservés.
+ * Ce logiciel est une création indépendante.
+ * Toute copie, rétro-ingénierie, modification ou hébergement sur un serveur tiers
+ * sans licence explicite de l'auteur est strictement interdite et s'expose à des
+ * poursuites pour contrefaçon selon le droit européen.
+ *
+ * © 2026 Guilhem Normand. Todos los derechos reservados.
+ * Este software es una creación independiente.
+ * Cualquier copia, ingeniería inversa, modificación o alojamiento en un servidor de
+ * terceros sin licencia explícita del autor está estrictamente prohibido y puede dar
+ * lugar a acciones legales por infracción conforme al derecho europeo.
+ *
+ * PRIVACITÉ / PRIVACIDAD:
+ * Toutes les données échangées sont privées et transmises en P2P chiffré (WebRTC).
+ * Aucune donnée personnelle n'est stockée côté serveur dans cette application.
+ */
+
 /**
  * OK Mobility - Client Info Form Logic
  * Features: i18n (8 languages), RTL support, Photon API Autocomplete, Mailto Generator
@@ -787,6 +805,28 @@ const peerConfig = {
     ]
 };
 
+// Fetch ephemeral Cloudflare TURN credentials.
+// Falls back to the hardcoded openrelay servers if the API is unavailable.
+async function fetchTurnCredentials() {
+    try {
+        const response = await fetch('/api/turn-credentials');
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        const data = await response.json();
+        if (data.iceServers) {
+            // Cloudflare returns a single iceServers object — merge with STUN
+            return [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun.cloudflare.com:3478' },
+                data.iceServers
+            ];
+        }
+    } catch (err) {
+        console.warn('Cloudflare TURN unavailable, using fallback:', err.message);
+    }
+    return peerConfig.iceServers;
+}
+
 // Modal open/close helpers
 function openAdvisorModal() {
     if (dom.advisorModalOverlay) dom.advisorModalOverlay.style.display = 'block';
@@ -814,7 +854,7 @@ function checkUrlForAdvisorCode() {
 }
 
 // Connect to advisor's Peer
-function connectToAdvisor() {
+async function connectToAdvisor() {
     const raw = dom.advisorCodeInput.value.trim().toUpperCase();
     if (!raw || raw.length < 4) return;
     const code = raw.startsWith('OKM-') ? raw : `OKM-${raw}`;
@@ -826,7 +866,8 @@ function connectToAdvisor() {
         state.peer.destroy();
     }
     
-    state.peer = new Peer({ config: { iceServers: peerConfig.iceServers } });
+    const iceServers = await fetchTurnCredentials();
+    state.peer = new Peer({ config: { iceServers } });
     
     state.peer.on('open', () => {
         console.log('Client peer opened, connecting to advisor:', code);

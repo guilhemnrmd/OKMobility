@@ -1,0 +1,70 @@
+/*
+ * © 2026 Guilhem Normand. Tous droits réservés.
+ * Ce logiciel est une création indépendante.
+ * Toute copie, rétro-ingénierie, modification ou hébergement sur un serveur tiers
+ * sans licence explicite de l'auteur est strictement interdite et s'expose à des
+ * poursuites pour contrefaçon selon le droit européen.
+ *
+ * © 2026 Guilhem Normand. Todos los derechos reservados.
+ * Este software es una creación independiente.
+ * Cualquier copia, ingeniería inversa, modificación o alojamiento en un servidor de
+ * terceros sin licencia explícita del autor está estrictamente prohibido y puede dar
+ * lugar a acciones legales por infracción conforme al derecho europeo.
+ *
+ * PRIVACITÉ / PRIVACIDAD:
+ * Les données traitées par cette fonction sont temporaires et privées.
+ * Aucun stockage persistant de données personnelles n'est effectué.
+ */
+
+/**
+ * Cloudflare Pages Function — generates ephemeral TURN credentials
+ * via Cloudflare Calls TURN API.
+ *
+ * Required env secrets (set via Wrangler):
+ *   TURN_KEY_ID     — Key ID from Cloudflare Calls dashboard
+ *   TURN_API_TOKEN  — API Token for that key
+ */
+export async function onRequest(context) {
+    const { env } = context;
+
+    // If secrets are not set, return 503 so clients fall back gracefully
+    if (!env.TURN_KEY_ID || !env.TURN_API_TOKEN) {
+        return new Response(JSON.stringify({ error: 'TURN not configured' }), {
+            status: 503,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
+
+    try {
+        const response = await fetch(
+            `https://rtc.live.cloudflare.com/v1/turn/keys/${env.TURN_KEY_ID}/credentials/generate`,
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${env.TURN_API_TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ ttl: 86400 }) // credentials valid 24h
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(`Cloudflare TURN API returned ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        return new Response(JSON.stringify(data), {
+            headers: {
+                'Content-Type': 'application/json',
+                'Cache-Control': 'no-store'
+            }
+        });
+
+    } catch (err) {
+        return new Response(JSON.stringify({ error: err.message }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
+}
