@@ -46,6 +46,12 @@ Pour confidentialité et fiabilité réseau, les ressources suivantes sont déso
 	- Emplacement local fonts : [assets/boxicons/fonts/boxicons.woff2](assets/boxicons/fonts/boxicons.woff2), [assets/boxicons/fonts/boxicons.woff](assets/boxicons/fonts/boxicons.woff), [assets/boxicons/fonts/boxicons.ttf](assets/boxicons/fonts/boxicons.ttf), [assets/boxicons/fonts/boxicons.eot](assets/boxicons/fonts/boxicons.eot), [assets/boxicons/fonts/boxicons.svg](assets/boxicons/fonts/boxicons.svg)
 	- Chargement : [index.html](index.html), [retailer/index.html](retailer/index.html)
 
+- **Logos OK Mobility (officiels)**
+	- Source desktop : `https://okmobility.com/img/new-header/logos/ico-okm-white.svg`
+	- Source mobile condensée : `https://okmobility.com/img/new-header/logos/ico-okm-mobile-white.svg`
+	- Emplacement local : [assets/logos/okm-logo-white.svg](assets/logos/okm-logo-white.svg), [assets/logos/okm-logo-mobile-white.svg](assets/logos/okm-logo-mobile-white.svg)
+	- Chargement : [index.html](index.html), [retailer/index.html](retailer/index.html)
+
 > Note: conservez les versions d'origine et licences associées lors de futures mises à jour de ces assets.
 
 ## 🧭 Structure actuelle (repère rapide)

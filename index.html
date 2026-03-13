@@ -12,7 +12,7 @@
     <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css?v=23">
+    <link rel="stylesheet" href="style.css?v=24">
     
     <!-- PeerJS -->
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -33,8 +33,10 @@
         <header class="glass-header">
             <div class="header-brand">
                 <div class="logo">
-                    <img src="https://okmobility.com/img/logos/okmobility-imagotipo.svg" alt="OK Mobility Logo" class="logo-img logo-img-light">
-                    <img src="https://okmobility.com/img/logos/okmobility-imagotipo-white.svg" alt="OK Mobility Logo" class="logo-img logo-img-dark">
+                    <picture class="logo-picture">
+                        <source media="(max-width: 640px)" srcset="/assets/logos/okm-logo-mobile-white.svg">
+                        <img src="/assets/logos/okm-logo-white.svg" alt="OK Mobility Logo" class="logo-img logo-img-brand">
+                    </picture>
                 </div>
                 <span class="brand-slogan">The Global Mobility Platform</span>
             </div>
