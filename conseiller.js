@@ -670,8 +670,14 @@ function handleDisconnection() {
     if (state.isManualDisconnect) {
         state.isManualDisconnect = false;
         clearDisplayedData();
+        // Destroy the old peer so the previous code becomes unreachable,
+        // then spin up a new peer with a fresh session code.
+        if (state.peer) {
+            state.peer.destroy();
+            state.peer = null;
+        }
         showSetupView();
-        updateStatus('waiting');
+        initializePeer();
         return;
     }
 
@@ -693,8 +699,9 @@ function disconnectCurrentClient() {
         state.isManualDisconnect = false;
         state.connection = null;
         clearDisplayedData();
+        if (state.peer) { state.peer.destroy(); state.peer = null; }
         showSetupView();
-        updateStatus('waiting');
+        initializePeer();
     }
 }
 
