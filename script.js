@@ -808,6 +808,61 @@ const peerConfig = {
 
 const TURN_FETCH_TIMEOUT_MS = 3500;
 
+const rtcDiag = {
+    enabled: (() => {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('diag') === '1' || localStorage.getItem('okm_rtc_diag') === '1';
+        } catch {
+            return false;
+        }
+    })()
+};
+
+function diagLog(...args) {
+    if (!rtcDiag.enabled) return;
+    console.debug('[OKM-RTC][CLIENT]', ...args);
+}
+
+function getPeerConnectionFromDataConnection(connection) {
+    return connection?.peerConnection || connection?._pc || null;
+}
+
+async function logSelectedCandidatePair(connection, label) {
+    if (!rtcDiag.enabled || !connection) return;
+    const pc = getPeerConnectionFromDataConnection(connection);
+    if (!pc || typeof pc.getStats !== 'function') return;
+
+    try {
+        const stats = await pc.getStats();
+        let selectedPair = null;
+
+        stats.forEach((report) => {
+            if (report.type === 'candidate-pair' && (report.selected || report.nominated)) {
+                selectedPair = report;
+            }
+        });
+
+        if (!selectedPair) {
+            diagLog(label, 'No selected candidate pair yet');
+            return;
+        }
+
+        const localCandidate = stats.get(selectedPair.localCandidateId);
+        const remoteCandidate = stats.get(selectedPair.remoteCandidateId);
+
+        diagLog(label, {
+            protocol: selectedPair.protocol,
+            localCandidateType: localCandidate?.candidateType,
+            remoteCandidateType: remoteCandidate?.candidateType,
+            localAddress: localCandidate?.address,
+            remoteAddress: remoteCandidate?.address
+        });
+    } catch (err) {
+        diagLog('getStats failed:', err.message);
+    }
+}
+
 function normalizeIceServers(servers) {
     if (!servers) return [];
     const list = Array.isArray(servers) ? servers : [servers];
@@ -853,13 +908,16 @@ async function fetchTurnCredentials() {
         const data = await response.json();
 
         if (data && data.iceServers) {
+            diagLog('Using Cloudflare TURN credentials');
             return buildMergedIceServers(data.iceServers);
         }
     } catch (err) {
         clearTimeout(timeoutId);
         console.warn('Cloudflare TURN unavailable, using fallback:', err.message);
+        diagLog('Falling back to static TURN servers because:', err.message);
     }
 
+    diagLog('Using fallback TURN credentials');
     return peerConfig.iceServers;
 }
 
@@ -903,10 +961,12 @@ async function connectToAdvisor() {
     }
     
     const iceServers = await fetchTurnCredentials();
+    diagLog('ICE servers count:', iceServers.length);
     state.peer = new Peer({ config: { iceServers } });
     
     state.peer.on('open', () => {
         console.log('Client peer opened, connecting to advisor:', code);
+        diagLog('Peer opened, trying advisor code', code);
         
         // Connect to the advisor's peer
         state.advisorConnection = state.peer.connect(code, { reliable: true });
@@ -919,6 +979,9 @@ async function connectToAdvisor() {
             closeAdvisorModal();
             // Send current form data immediately
             sendFormDataToAdvisor(true);
+            setTimeout(() => {
+                logSelectedCandidatePair(state.advisorConnection, 'Selected path after connection open');
+            }, 1500);
         });
 
         state.advisorConnection.on('data', (data) => {
@@ -937,6 +1000,7 @@ async function connectToAdvisor() {
         
         state.advisorConnection.on('close', () => {
             console.log('Disconnected from advisor');
+            diagLog('Data connection closed');
             state.advisorConnected = false;
             state.lastSentPayload = null;
             updateClientStatus('disconnected');
@@ -944,6 +1008,7 @@ async function connectToAdvisor() {
         
         state.advisorConnection.on('error', (err) => {
             console.error('Connection error:', err);
+            diagLog('Data connection error:', err?.type || err?.message || err);
             state.advisorConnected = false;
             state.lastSentPayload = null;
             updateClientStatus('error');
@@ -952,6 +1017,7 @@ async function connectToAdvisor() {
     
     state.peer.on('error', (err) => {
         console.error('Peer error:', err);
+        diagLog('Peer error:', err?.type || err?.message || err);
         state.advisorConnected = false;
         updateClientStatus('error');
     });

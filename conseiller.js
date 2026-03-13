@@ -63,6 +63,61 @@ const config = {
 
 const TURN_FETCH_TIMEOUT_MS = 3500;
 
+const rtcDiag = {
+    enabled: (() => {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('diag') === '1' || localStorage.getItem('okm_rtc_diag') === '1';
+        } catch {
+            return false;
+        }
+    })()
+};
+
+function diagLog(...args) {
+    if (!rtcDiag.enabled) return;
+    console.debug('[OKM-RTC][ADVISOR]', ...args);
+}
+
+function getPeerConnectionFromDataConnection(connection) {
+    return connection?.peerConnection || connection?._pc || null;
+}
+
+async function logSelectedCandidatePair(connection, label) {
+    if (!rtcDiag.enabled || !connection) return;
+    const pc = getPeerConnectionFromDataConnection(connection);
+    if (!pc || typeof pc.getStats !== 'function') return;
+
+    try {
+        const stats = await pc.getStats();
+        let selectedPair = null;
+
+        stats.forEach((report) => {
+            if (report.type === 'candidate-pair' && (report.selected || report.nominated)) {
+                selectedPair = report;
+            }
+        });
+
+        if (!selectedPair) {
+            diagLog(label, 'No selected candidate pair yet');
+            return;
+        }
+
+        const localCandidate = stats.get(selectedPair.localCandidateId);
+        const remoteCandidate = stats.get(selectedPair.remoteCandidateId);
+
+        diagLog(label, {
+            protocol: selectedPair.protocol,
+            localCandidateType: localCandidate?.candidateType,
+            remoteCandidateType: remoteCandidate?.candidateType,
+            localAddress: localCandidate?.address,
+            remoteAddress: remoteCandidate?.address
+        });
+    } catch (err) {
+        diagLog('getStats failed:', err.message);
+    }
+}
+
 function normalizeIceServers(servers) {
     if (!servers) return [];
     const list = Array.isArray(servers) ? servers : [servers];
@@ -312,13 +367,16 @@ async function fetchTurnCredentials() {
         const data = await response.json();
 
         if (data && data.iceServers) {
+            diagLog('Using Cloudflare TURN credentials');
             return buildMergedIceServers(data.iceServers);
         }
     } catch (err) {
         clearTimeout(timeoutId);
         console.warn('Cloudflare TURN unavailable, using fallback:', err.message);
+        diagLog('Falling back to static TURN servers because:', err.message);
     }
 
+    diagLog('Using fallback TURN credentials');
     return config.iceServers;
 }
 
@@ -334,6 +392,7 @@ async function initializePeer() {
     
     // Fetch fresh TURN credentials (falls back to openrelay if unavailable)
     const iceServers = await fetchTurnCredentials();
+    diagLog('ICE servers count:', iceServers.length);
 
     // Create Peer with custom ICE servers
     state.peer = new Peer(state.sessionCode, {
@@ -358,6 +417,7 @@ async function initializePeer() {
         }
         
         console.log('Client connected:', conn.peer);
+        diagLog('Incoming connection from client:', conn.peer);
         state.connection = conn;
         updateStatus('connecting');
         
@@ -365,6 +425,9 @@ async function initializePeer() {
             console.log('Connection opened');
             updateStatus('connected');
             showLiveDataView();
+            setTimeout(() => {
+                logSelectedCandidatePair(state.connection, 'Selected path after connection open');
+            }, 1500);
         });
         
         conn.on('data', (data) => {
@@ -373,11 +436,13 @@ async function initializePeer() {
         
         conn.on('close', () => {
             console.log('Client disconnected');
+            diagLog('Data connection closed');
             handleDisconnection();
         });
         
         conn.on('error', (err) => {
             console.error('Connection error:', err);
+            diagLog('Data connection error:', err?.type || err?.message || err);
             handleDisconnection();
         });
     });
@@ -385,6 +450,7 @@ async function initializePeer() {
     // Peer error handling
     state.peer.on('error', (err) => {
         console.error('Peer error:', err);
+        diagLog('Peer error:', err?.type || err?.message || err);
         if (err.type === 'unavailable-id') {
             // ID collision - regenerate
             setTimeout(() => {
@@ -398,6 +464,7 @@ async function initializePeer() {
     
     state.peer.on('disconnected', () => {
         console.log('Peer disconnected from server');
+        diagLog('Peer disconnected from signaling server, reconnecting');
         // Try to reconnect
         if (state.peer && !state.peer.destroyed) {
             state.peer.reconnect();
