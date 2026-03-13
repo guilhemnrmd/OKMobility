@@ -1324,7 +1324,7 @@ input::placeholder {
     width: 42px;
     height: 42px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.98);
+    background: linear-gradient(135deg, #2054EA, #1B47C7);
     border: 3px solid rgba(255, 255, 255, 0.98);
     box-shadow: 0 8px 22px rgba(25, 51, 102, 0.18);
     display: flex;
@@ -1334,8 +1334,8 @@ input::placeholder {
 }
 
 .qr-center-badge img {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     object-fit: contain;
     display: block;
 }
