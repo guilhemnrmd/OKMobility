@@ -127,13 +127,12 @@ body {
    Ambient Background (LiquidGlass Reference)
    ========================================================================= */
 .ambient-background {
-    position: fixed;
-    top: calc(env(safe-area-inset-top) * -1);
-    right: calc(env(safe-area-inset-right) * -1);
-    bottom: calc(env(safe-area-inset-bottom) * -1);
-    left: calc(env(safe-area-inset-left) * -1);
-    z-index: -1;
+    position: absolute;
+    inset: 0;
+    min-height: 100%;
+    z-index: 0;
     overflow: hidden;
+    pointer-events: none;
     Filter: url('#goo'); /* SVG Filter could be added, but CSS blur is enough */
 }
 
