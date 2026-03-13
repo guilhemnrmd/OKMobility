@@ -47,15 +47,15 @@
     --color-border: rgba(0, 0, 0, 0.1);
     
     /* Liquid Glass Effects */
-    --glass-bg: rgba(255, 255, 255, 0.6);
+    --glass-bg: rgba(245, 249, 255, 0.74);
     --glass-border: rgba(255, 255, 255, 0.5);
-    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    --glass-shadow: 0 24px 64px rgba(31, 38, 135, 0.13), 0 8px 24px rgba(31, 38, 135, 0.07);
     --blur: blur(16px);
     
     /* Ambient Blobs for backgorund (OK Mobility vibe) */
     --blob-1: #2054EA;   /* Royal Blue */
     --blob-2: #05DBF3;   /* OK Cyan */
-    --blob-3: #17181D;   /* Dark Gray */
+    --blob-3: #4F46E5;   /* Indigo Violet */
 
     /* Metrics */
     --radius-lg: 24px;
@@ -171,7 +171,7 @@ body {
     -webkit-backdrop-filter: var(--blur);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
-    box-shadow: var(--glass-shadow);
+    box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.92);
     padding: var(--spacing-lg);
     z-index: 10;
     animation: slideUp var(--transition-spring);
@@ -183,7 +183,7 @@ body {
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255, 255, 255, 0.85);
 }
 
 @keyframes slideUp {
@@ -394,7 +394,7 @@ select {
     font-size: 2rem;
     font-weight: 700;
     margin-bottom: 4px;
-    background: linear-gradient(135deg, var(--color-text-primary) 0%, var(--color-text-secondary) 100%);
+    background: linear-gradient(125deg, var(--color-accent) 0%, #05C4E8 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -477,14 +477,14 @@ select {
 .input-with-icon select {
     width: 100%;
     padding: 14px 12px 14px 38px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--color-border);
-    background: rgba(255, 255, 255, 0.85); /* Brighter glass, no gray feel */
+    border-radius: var(--radius-md);
+    border: 1.5px solid rgba(32, 84, 234, 0.09);
+    background: rgba(255, 255, 255, 0.93);
     color: var(--color-text-primary);
     font-size: 0.95rem;
     line-height: 1.5;
     transition: all var(--transition-base);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) inset;
+    box-shadow: 0 2px 8px rgba(32, 84, 234, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
@@ -506,9 +506,16 @@ select {
 label {
     font-size: 0.85rem;
     font-weight: 600;
-    color: var(--color-text-primary);
-    opacity: 0.88;
-    margin-left: 4px; 
+    color: var(--color-text-secondary);
+    margin-left: 4px;
+}
+
+.input-wrapper > label {
+    font-size: 0.71rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--color-text-secondary);
 }
 
 /* New: Phone Split Container */
@@ -539,8 +546,8 @@ label {
 .input-with-icon textarea:focus,
 .input-with-icon select:focus {
     border-color: var(--color-accent);
-    background: #FFFFFF; /* Pure white focus for Light Mode */
-    box-shadow: 0 0 0 4px rgba(32, 84, 234, 0.15); /* OK Blue shadow */
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(32, 84, 234, 0.13), 0 4px 16px rgba(32, 84, 234, 0.09);
     outline: none;
 }
 
@@ -548,14 +555,20 @@ input:focus + i, .input-with-icon:focus-within i {
     color: var(--color-accent);
 }
 
+.input-with-icon:hover input:not(:focus),
+.custom-select-wrapper:not(:focus-within):hover {
+    border-color: rgba(32, 84, 234, 0.22);
+    box-shadow: 0 3px 12px rgba(32, 84, 234, 0.07);
+}
+
 /* Custom Select Overlay */
 .custom-select-wrapper {
     position: relative;
     height: 52px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--color-border);
-    background: rgba(255, 255, 255, 0.85); /* Brighter glass */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) inset;
+    border-radius: var(--radius-md);
+    border: 1.5px solid rgba(32, 84, 234, 0.09);
+    background: rgba(255, 255, 255, 0.93);
+    box-shadow: 0 2px 8px rgba(32, 84, 234, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     display: flex;
@@ -566,8 +579,8 @@ input:focus + i, .input-with-icon:focus-within i {
 
 .custom-select-wrapper:focus-within {
     border-color: var(--color-accent);
-    background: #FFFFFF; /* Pure white focus for Light Mode */
-    box-shadow: 0 0 0 4px rgba(32, 84, 234, 0.15); /* OK Blue shadow */
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(32, 84, 234, 0.13), 0 4px 16px rgba(32, 84, 234, 0.09);
 }
 
 /* Intelligent Dark Mode for inputs */
@@ -576,14 +589,17 @@ input:focus + i, .input-with-icon:focus-within i {
     .input-with-icon textarea,
     .input-with-icon select,
     .custom-select-wrapper {
-        background: rgba(255, 255, 255, 0.1); /* Subtle dark glass, NOT dead gray/black */
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.13);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
     
     .input-with-icon input:focus,
     .input-with-icon textarea:focus,
     .input-with-icon select:focus,
     .custom-select-wrapper:focus-within {
-        background: rgba(255, 255, 255, 0.18); /* Brighter on focus, but text stays readable */
+        background: rgba(255, 255, 255, 0.15);
+        border-color: var(--color-accent);
     }
 }
 
@@ -650,7 +666,7 @@ input::placeholder {
 .temp-address-wrapper {
     position: relative;
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     margin-bottom: var(--spacing-md);
     background: transparent;
     transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -1595,10 +1611,10 @@ button, .btn-primary, .btn-secondary {
 
 /* Stunning Premium Button */
 .btn-primary {
-    background: linear-gradient(135deg, var(--color-accent) 0%, #1538A1 100%);
+    background: linear-gradient(135deg, #3068FF 0%, #2054EA 50%, #1538A1 100%);
     color: #FFF;
-    box-shadow: 0 8px 24px -6px rgba(32, 84, 234, 0.45);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px -4px rgba(32, 84, 234, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     position: relative;
     overflow: hidden;
     text-transform: none;
@@ -1699,7 +1715,7 @@ button, .btn-primary, .btn-secondary {
     flex-direction: column;
     gap: 12px;
     background: rgba(255,255,255,0.4); /* Glass instead of dark gray */
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     padding: var(--spacing-sm);
     margin-bottom: var(--spacing-md);
     color: var(--color-text-primary);
