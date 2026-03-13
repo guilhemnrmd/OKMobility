@@ -128,7 +128,10 @@ body {
    ========================================================================= */
 .ambient-background {
     position: fixed;
-    inset: 0;
+    top: calc(env(safe-area-inset-top) * -1);
+    right: calc(env(safe-area-inset-right) * -1);
+    bottom: calc(env(safe-area-inset-bottom) * -1);
+    left: calc(env(safe-area-inset-left) * -1);
     z-index: -1;
     overflow: hidden;
     Filter: url('#goo'); /* SVG Filter could be added, but CSS blur is enough */
