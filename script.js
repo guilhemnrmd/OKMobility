@@ -811,7 +811,9 @@ function renderCountryNameSelect(langCode) {
         option.dataset.short = shortLabel;
         option.dataset.countryName = countryName;
 
-        if (c.cca2 === currentSelection || (!currentSelection && (c.cca2 === (langCode === 'es' ? 'CO' : 'ES') || index === 0))) {
+        const defaultCca2ByLang = { fr: 'FR', en: 'GB', es: 'CO', it: 'IT', pt: 'PT', de: 'DE', nl: 'NL' };
+        const defaultCca2 = defaultCca2ByLang[langCode] || 'FR';
+        if (c.cca2 === currentSelection || (!currentSelection && (c.cca2 === defaultCca2 || index === 0))) {
             option.selected = true;
             const display = document.getElementById('countryDisplay');
             if (display) display.textContent = shortLabel;
