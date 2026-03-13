@@ -1041,8 +1041,7 @@ function checkUrlForAdvisorCode() {
     const urlCode = new URLSearchParams(window.location.search).get('code');
     if (urlCode && dom.advisorCodeInput) {
         dom.advisorCodeInput.value = urlCode.toUpperCase();
-        openAdvisorModal();
-        // Auto-connect after a short delay
+        // Connect silently in background (no modal shown when code comes from QR)
         setTimeout(() => connectToAdvisor(), 600);
     }
 }
