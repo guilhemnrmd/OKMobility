@@ -189,12 +189,18 @@ const dom = {
     // Data values
     lblDataAddress: document.getElementById('lblDataAddress'),
     valAddress: document.getElementById('valAddress'),
-    lblDataZipCity: document.getElementById('lblDataZipCity'),
-    valZipCity: document.getElementById('valZipCity'),
+    lblDataCountry: document.getElementById('lblDataCountry'),
+    valCountry: document.getElementById('valCountry'),
+    lblDataZipCode: document.getElementById('lblDataZipCode'),
+    valZipCode: document.getElementById('valZipCode'),
+    lblDataCity: document.getElementById('lblDataCity'),
+    valCity: document.getElementById('valCity'),
     lblDataTempAddress: document.getElementById('lblDataTempAddress'),
     valTempAddress: document.getElementById('valTempAddress'),
     lblDataTempZipCity: document.getElementById('lblDataTempZipCity'),
     valTempZipCity: document.getElementById('valTempZipCity'),
+    lblDataPhoneCode: document.getElementById('lblDataPhoneCode'),
+    valPhoneCode: document.getElementById('valPhoneCode'),
     lblDataPhone: document.getElementById('lblDataPhone'),
     valPhone: document.getElementById('valPhone'),
     lblDataEmail: document.getElementById('lblDataEmail'),
@@ -216,14 +222,32 @@ const languageNames = {
 
 const incomingDataLimits = {
     address: 140,
+    country: 80,
     zipCode: 20,
     city: 80,
     tempAddress: 140,
     tempZipCode: 20,
     tempCity: 80,
-    phone: 40,
+    phoneCode: 10,
+    phoneNumber: 40,
+    phone: 60,
     email: 120
 };
+
+function splitPhoneParts(phoneValue) {
+    const value = sanitizeText(phoneValue, 60);
+    if (!value) return { phoneCode: '', phoneNumber: '' };
+
+    const match = value.match(/^(\+\d{1,5})\s*(.*)$/);
+    if (!match) {
+        return { phoneCode: '', phoneNumber: value };
+    }
+
+    return {
+        phoneCode: sanitizeText(match[1] || '', 10),
+        phoneNumber: sanitizeText(match[2] || '', 40)
+    };
+}
 
 function sanitizeText(value, maxLength) {
     if (typeof value !== 'string') return '';
@@ -555,6 +579,16 @@ function handleIncomingData(data) {
     const cleanData = sanitizeIncomingData(data);
     if (!Object.keys(cleanData).length) return;
 
+    if ((cleanData.phoneCode === undefined || cleanData.phoneNumber === undefined) && cleanData.phone) {
+        const parsed = splitPhoneParts(cleanData.phone);
+        if (cleanData.phoneCode === undefined && parsed.phoneCode) {
+            cleanData.phoneCode = parsed.phoneCode;
+        }
+        if (cleanData.phoneNumber === undefined && parsed.phoneNumber) {
+            cleanData.phoneNumber = parsed.phoneNumber;
+        }
+    }
+
     state.currentData = { ...state.currentData, ...cleanData };
 
     if (cleanData.language && languageNames[cleanData.language]) {
@@ -566,12 +600,20 @@ function handleIncomingData(data) {
         dom.valAddress.textContent = cleanData.address || '-';
         highlightField('valAddress');
     }
+
+    if (cleanData.country !== undefined) {
+        dom.valCountry.textContent = cleanData.country || '-';
+        highlightField('valCountry');
+    }
     
-    if (cleanData.zipCode !== undefined || cleanData.city !== undefined) {
-        const zip = cleanData.zipCode || state.currentData.zipCode || '';
-        const city = cleanData.city || state.currentData.city || '';
-        dom.valZipCity.textContent = `${zip} ${city}`.trim() || '-';
-        highlightField('valZipCity');
+    if (cleanData.zipCode !== undefined) {
+        dom.valZipCode.textContent = cleanData.zipCode || '-';
+        highlightField('valZipCode');
+    }
+
+    if (cleanData.city !== undefined) {
+        dom.valCity.textContent = cleanData.city || '-';
+        highlightField('valCity');
     }
     
     // Handle temporary address visibility
@@ -593,8 +635,13 @@ function handleIncomingData(data) {
         highlightField('valTempZipCity');
     }
     
-    if (cleanData.phone !== undefined) {
-        dom.valPhone.textContent = cleanData.phone || '-';
+    if (cleanData.phoneCode !== undefined) {
+        dom.valPhoneCode.textContent = cleanData.phoneCode || '-';
+        highlightField('valPhoneCode');
+    }
+
+    if (cleanData.phoneNumber !== undefined) {
+        dom.valPhone.textContent = cleanData.phoneNumber || '-';
         highlightField('valPhone');
     }
     
@@ -654,9 +701,12 @@ function disconnectCurrentClient() {
 function clearDisplayedData() {
     state.currentData = {};
     dom.valAddress.textContent = '-';
-    dom.valZipCity.textContent = '-';
+    dom.valCountry.textContent = '-';
+    dom.valZipCode.textContent = '-';
+    dom.valCity.textContent = '-';
     dom.valTempAddress.textContent = '-';
     dom.valTempZipCity.textContent = '-';
+    dom.valPhoneCode.textContent = '-';
     dom.valPhone.textContent = '-';
     dom.valEmail.textContent = '-';
     dom.rowTempAddress.style.display = 'none';
@@ -724,10 +774,13 @@ function copyToClipboard(text, buttonEl) {
 function copyFieldValue(field) {
     const values = {
         address: dom.valAddress.textContent,
-        zipCity: dom.valZipCity.textContent,
+        country: dom.valCountry.textContent,
+        zipCode: dom.valZipCode.textContent,
+        city: dom.valCity.textContent,
         tempAddress: dom.valTempAddress.textContent,
         tempZipCity: dom.valTempZipCity.textContent,
-        phone: dom.valPhone.textContent,
+        phoneCode: dom.valPhoneCode.textContent,
+        phoneNumber: dom.valPhone.textContent,
         email: dom.valEmail.textContent
     };
     return values[field] || '';
@@ -738,14 +791,17 @@ function copyAllData() {
     let text = '';
     
     if (data.address) text += `Dirección: ${data.address}\n`;
-    if (data.zipCode || data.city) text += `CP / Ciudad: ${data.zipCode || ''} ${data.city || ''}\n`;
+    if (data.country) text += `País: ${data.country}\n`;
+    if (data.zipCode) text += `CP: ${data.zipCode}\n`;
+    if (data.city) text += `Ciudad: ${data.city}\n`;
     
     if (data.hasTempAddress) {
         if (data.tempAddress) text += `Dirección temporal: ${data.tempAddress}\n`;
         if (data.tempZipCode || data.tempCity) text += `CP / Ciudad (temp): ${data.tempZipCode || ''} ${data.tempCity || ''}\n`;
     }
     
-    if (data.phone) text += `Teléfono: ${data.phone}\n`;
+    if (data.phoneCode) text += `Indicativo: ${data.phoneCode}\n`;
+    if (data.phoneNumber) text += `Teléfono: ${data.phoneNumber}\n`;
     if (data.email) text += `E-mail: ${data.email}\n`;
     
     return text.trim();

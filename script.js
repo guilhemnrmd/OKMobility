@@ -266,6 +266,7 @@ const state = {
     debounceTimer: null,
     addressSelected: false,
     globalCountriesData: [],
+    countrySelectedManually: false,
     phoneSelectedManually: false,
     // WebRTC / PeerJS
     peer: null,
@@ -287,6 +288,7 @@ const dom = {
     btnEdit: document.getElementById('btnEdit'),
     // Inputs Main Address
     address: document.getElementById('address'),
+    country: document.getElementById('country'),
     zipCode: document.getElementById('zipCode'),
     city: document.getElementById('city'),
     // Inputs Temp Address
@@ -303,6 +305,7 @@ const dom = {
     lblTempCity: document.getElementById('lblTempCity'),
     tempCity: document.getElementById('tempCity'),
     // Contact
+    countryCode: document.getElementById('countryCode'),
     phone: document.getElementById('phone'),
     email: document.getElementById('email'),
     // Advisor Connection (Modal)
@@ -342,6 +345,11 @@ function applyLanguage(langCode) {
     
     document.getElementById('lblAddress').textContent = t.address;
     dom.address.placeholder = t.addressPlaceholder;
+
+    const countryLabel = document.getElementById('lblCountry');
+    if (countryLabel) {
+        countryLabel.textContent = t.country || 'Country';
+    }
     
     // Temporary Address Texts
     dom.lblTempAddressCheck.textContent = t.tempAddressCheck;
@@ -361,6 +369,11 @@ function applyLanguage(langCode) {
     
     document.getElementById('lblCity').textContent = t.city;
     dom.city.placeholder = t.placeholderCity;
+
+    const phoneCodeLabel = document.getElementById('lblPhoneCode');
+    if (phoneCodeLabel) {
+        phoneCodeLabel.textContent = t.phoneCode || 'Dial code';
+    }
     
     document.getElementById('lblPhone').textContent = t.phone;
     dom.phone.placeholder = t.placeholderPhone;
@@ -399,7 +412,8 @@ function applyLanguage(langCode) {
     }
 
     if (state.globalCountriesData && state.globalCountriesData.length > 0) {
-        renderCountrySelect(langCode);
+        renderCountryNameSelect(langCode);
+        renderCountryCodeSelect(langCode);
     }
 }
 
@@ -433,12 +447,22 @@ function resetClientForm() {
     dom.form.style.display = 'flex';
     document.getElementById('pageTitle').textContent = i18n[state.lang].pageTitle;
 
-    // Reset phone country display to current select value
-    const countrySelect = document.getElementById('countryCode');
+    // Reset country displays to current select values
+    const countrySelect = dom.country;
     if (countrySelect) {
         const selectedOpt = countrySelect.options[countrySelect.selectedIndex];
         if (selectedOpt && selectedOpt.dataset.short) {
-            document.getElementById('countryCodeDisplay').textContent = selectedOpt.dataset.short;
+            const countryDisplay = document.getElementById('countryDisplay');
+            if (countryDisplay) countryDisplay.textContent = selectedOpt.dataset.short;
+        }
+    }
+
+    const phoneCodeSelect = dom.countryCode;
+    if (phoneCodeSelect) {
+        const selectedOpt = phoneCodeSelect.options[phoneCodeSelect.selectedIndex];
+        if (selectedOpt && selectedOpt.dataset.short) {
+            const phoneCodeDisplay = document.getElementById('countryCodeDisplay');
+            if (phoneCodeDisplay) phoneCodeDisplay.textContent = selectedOpt.dataset.short;
         }
     }
 
@@ -508,9 +532,14 @@ dom.form.addEventListener('submit', (e) => {
 
     const formData = new FormData(dom.form);
     const addr = formData.get('address');
+    const selectedCountryOption = dom.country ? dom.country.options[dom.country.selectedIndex] : null;
+    const countryLabel = selectedCountryOption
+        ? (selectedCountryOption.dataset.countryName || selectedCountryOption.textContent || '')
+        : '';
     
-    // Combine Phone Input
-    const fullPhone = `${formData.get('countryCode')} ${formData.get('phone')}`;
+    // Phone split fields
+    const phoneCode = `${formData.get('countryCode') || ''}`.trim();
+    const phoneNumber = `${formData.get('phone') || ''}`.trim();
 
     // Prepare Summary View with Beautiful UI Components (Forced to Spanish)
     const t = i18n['es'];
@@ -522,8 +551,16 @@ dom.form.addEventListener('submit', (e) => {
             <span class="summary-value">${addr}</span>
         </div>
         <div class="summary-row">
-            <span class="summary-label">${t.zipCode || 'CP'} / ${t.city || 'Ville'}</span>
-            <span class="summary-value">${formData.get('zipCode')} ${formData.get('city')}</span>
+            <span class="summary-label">${t.country || 'Pays'}</span>
+            <span class="summary-value">${countryLabel || '-'}</span>
+        </div>
+        <div class="summary-row">
+            <span class="summary-label">${t.zipCode || 'CP'}</span>
+            <span class="summary-value">${formData.get('zipCode') || '-'}</span>
+        </div>
+        <div class="summary-row">
+            <span class="summary-label">${t.city || 'Ville'}</span>
+            <span class="summary-value">${formData.get('city') || '-'}</span>
         </div>
     `;
 
@@ -544,8 +581,12 @@ dom.form.addEventListener('submit', (e) => {
     // Add Phone and Email
     summaryHTML += `
         <div class="summary-row">
-            <span class="summary-label">${t.phone || 'Tél'}</span>
-            <span class="summary-value">${fullPhone}</span>
+            <span class="summary-label">${t.phoneCode || 'Indicatif'}</span>
+            <span class="summary-value">${phoneCode || '-'}</span>
+        </div>
+        <div class="summary-row">
+            <span class="summary-label">${t.phone || 'Téléphone'}</span>
+            <span class="summary-value">${phoneNumber || '-'}</span>
         </div>
         <div class="summary-row">
             <span class="summary-label">${t.email || 'Email'}</span>
@@ -625,27 +666,44 @@ async function populateCountryCodes() {
 
         state.globalCountriesData = countries;
 
-        const select = document.getElementById('countryCode');
+        const countrySelect = dom.country;
+        const phoneCodeSelect = dom.countryCode;
+
+        if (countrySelect) {
+            countrySelect.addEventListener('change', (e) => {
+                state.countrySelectedManually = true;
+                const selectedOpt = e.target.options[e.target.selectedIndex];
+                if (selectedOpt && selectedOpt.dataset.short) {
+                    const countryDisplay = document.getElementById('countryDisplay');
+                    if (countryDisplay) countryDisplay.textContent = selectedOpt.dataset.short;
+                }
+            });
+        }
+
         // Update the overlay view when the native select changes (only bind once)
-        select.addEventListener('change', (e) => {
-            state.phoneSelectedManually = true;
-            const selectedOpt = e.target.options[e.target.selectedIndex];
-            if (selectedOpt && selectedOpt.dataset.short) {
-                document.getElementById('countryCodeDisplay').textContent = selectedOpt.dataset.short;
-            }
-        });
+        if (phoneCodeSelect) {
+            phoneCodeSelect.addEventListener('change', (e) => {
+                state.phoneSelectedManually = true;
+                const selectedOpt = e.target.options[e.target.selectedIndex];
+                if (selectedOpt && selectedOpt.dataset.short) {
+                    const phoneCodeDisplay = document.getElementById('countryCodeDisplay');
+                    if (phoneCodeDisplay) phoneCodeDisplay.textContent = selectedOpt.dataset.short;
+                }
+            });
+        }
 
         // Initial render
-        renderCountrySelect(state.lang);
+        renderCountryNameSelect(state.lang);
+        renderCountryCodeSelect(state.lang);
         
     } catch (error) {
         console.error('Error fetching country codes:', error);
     }
 }
 
-function renderCountrySelect(langCode) {
+function renderCountryCodeSelect(langCode) {
     if (!state.globalCountriesData || state.globalCountriesData.length === 0) return;
-    const select = document.getElementById('countryCode');
+    const select = dom.countryCode;
     const currentSelection = state.phoneSelectedManually ? select.value : null;
     const localeForDisplay = i18n[langCode] ? langCode : 'en';
     let displayNames = null;
@@ -692,7 +750,8 @@ function renderCountrySelect(langCode) {
         
         if (c.code === currentSelection || (!currentSelection && index === 0)) {
             option.selected = true;
-            document.getElementById('countryCodeDisplay').textContent = c.shortLabel;
+            const display = document.getElementById('countryCodeDisplay');
+            if (display) display.textContent = c.shortLabel;
             selectionRestored = true;
         }
         select.appendChild(option);
@@ -716,9 +775,48 @@ function renderCountrySelect(langCode) {
         
         if (!selectionRestored && c.code === currentSelection) {
             option.selected = true;
-            document.getElementById('countryCodeDisplay').textContent = c.shortLabel;
+            const display = document.getElementById('countryCodeDisplay');
+            if (display) display.textContent = c.shortLabel;
             selectionRestored = true;
         }
+        select.appendChild(option);
+    });
+}
+
+function renderCountryNameSelect(langCode) {
+    if (!state.globalCountriesData || state.globalCountriesData.length === 0 || !dom.country) return;
+
+    const select = dom.country;
+    const currentSelection = state.countrySelectedManually ? select.value : null;
+    const localeForDisplay = i18n[langCode] ? langCode : 'en';
+    let displayNames = null;
+
+    try {
+        displayNames = new Intl.DisplayNames([localeForDisplay], { type: 'region' });
+    } catch (_) {
+        displayNames = null;
+    }
+
+    const countries = [...state.globalCountriesData];
+    select.innerHTML = '';
+
+    countries.forEach((c, index) => {
+        const option = document.createElement('option');
+        const localizedName = displayNames ? displayNames.of(c.cca2) : c.name;
+        const countryName = localizedName || c.name;
+        const shortLabel = `${getFlagEmoji(c.cca2)} ${countryName}`;
+
+        option.value = c.cca2;
+        option.textContent = shortLabel;
+        option.dataset.short = shortLabel;
+        option.dataset.countryName = countryName;
+
+        if (c.cca2 === currentSelection || (!currentSelection && (c.cca2 === 'ES' || index === 0))) {
+            option.selected = true;
+            const display = document.getElementById('countryDisplay');
+            if (display) display.textContent = shortLabel;
+        }
+
         select.appendChild(option);
     });
 }
@@ -1089,9 +1187,12 @@ function clampText(value, maxLength) {
 function buildAdvisorPayload() {
     if (!state.advisorConnected || !state.advisorConnection) return;
     
-    const countryCode = document.getElementById('countryCode');
-    const selectedOption = countryCode ? countryCode.options[countryCode.selectedIndex] : null;
-    const phoneCode = selectedOption ? selectedOption.value : '+33';
+    const selectedPhoneOption = dom.countryCode ? dom.countryCode.options[dom.countryCode.selectedIndex] : null;
+    const selectedCountryOption = dom.country ? dom.country.options[dom.country.selectedIndex] : null;
+    const phoneCode = selectedPhoneOption ? selectedPhoneOption.value : '+33';
+    const countryName = selectedCountryOption
+        ? (selectedCountryOption.dataset.countryName || selectedCountryOption.textContent || '')
+        : '';
 
     const phoneValue = clampText(dom.phone?.value || '', 40);
     const formattedPhone = `${phoneCode} ${phoneValue}`.replace(/\s+/g, ' ').trim();
@@ -1099,12 +1200,15 @@ function buildAdvisorPayload() {
     return {
         language: state.lang,
         address: clampText(dom.address?.value || '', 140),
+        country: clampText(countryName, 80),
         zipCode: clampText(dom.zipCode?.value || '', 20),
         city: clampText(dom.city?.value || '', 80),
         hasTempAddress: Boolean(dom.hasTempAddress?.checked),
         tempAddress: clampText(dom.tempAddress?.value || '', 140),
         tempZipCode: clampText(dom.tempZipCode?.value || '', 20),
         tempCity: clampText(dom.tempCity?.value || '', 80),
+        phoneCode: clampText(phoneCode, 10),
+        phoneNumber: clampText(phoneValue, 40),
         phone: formattedPhone.slice(0, 40),
         email: clampText(dom.email?.value || '', 120)
     };
@@ -1152,7 +1256,7 @@ function debouncedSendToAdvisor() {
 // Attach input listeners to all form fields for real-time sync
 function attachRealTimeListeners() {
     const fields = [
-        dom.address, dom.zipCode, dom.city,
+        dom.address, dom.country, dom.zipCode, dom.city,
         dom.tempAddress, dom.tempZipCode, dom.tempCity,
         dom.phone, dom.email
     ];
@@ -1164,9 +1268,12 @@ function attachRealTimeListeners() {
     });
     
     // Also listen to country code changes
-    const countryCode = document.getElementById('countryCode');
-    if (countryCode) {
-        countryCode.addEventListener('change', debouncedSendToAdvisor);
+    if (dom.countryCode) {
+        dom.countryCode.addEventListener('change', debouncedSendToAdvisor);
+    }
+
+    if (dom.country) {
+        dom.country.addEventListener('change', debouncedSendToAdvisor);
     }
     
     // And temp address checkbox

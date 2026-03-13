@@ -79,6 +79,18 @@
                     </div>
                 </div>
 
+                <!-- Country -->
+                <div class="input-wrapper">
+                    <label for="country" id="lblCountry">Pays</label>
+                    <div class="custom-select-wrapper">
+                        <div id="countryDisplay" class="country-display">🇫🇷 France</div>
+                        <select id="country" name="country" class="overlay-select" aria-label="Country" required>
+                            <option value="FR" selected>🇫🇷 France</option>
+                        </select>
+                        <i class='bx bx-chevron-down select-arrow'></i>
+                    </div>
+                </div>
+
                 <!-- Postal Code & City -->
                 <div class="form-group-row">
                     <div class="input-wrapper zip-wrapper">
@@ -147,18 +159,21 @@
                     </div>
                 </div>
 
-                <!-- Phone Section with Country Code -->
-                <div class="input-wrapper">
-                    <label for="phone" id="lblPhone">Mobile Telephone Number</label>
-                    <div class="phone-split-container">
+                <!-- Phone Section with separate dial code and number -->
+                <div class="form-group-row">
+                    <div class="input-wrapper zip-wrapper">
+                        <label for="countryCode" id="lblPhoneCode">Indicatif</label>
                         <div class="phone-country-box custom-select-wrapper">
                             <div id="countryCodeDisplay" class="country-display">🇫🇷 +33</div>
-                            <select id="countryCode" name="countryCode" class="overlay-select" aria-label="Country Code">
+                            <select id="countryCode" name="countryCode" class="overlay-select" aria-label="Country Code" required>
                                 <option value="+33" selected>🇫🇷 France (+33)</option>
                             </select>
                             <i class='bx bx-chevron-down select-arrow'></i>
                         </div>
-                        <div class="input-with-icon phone-number-box">
+                    </div>
+                    <div class="input-wrapper city-wrapper">
+                        <label for="phone" id="lblPhone">Numéro de téléphone</label>
+                        <div class="input-with-icon">
                             <i class='bx bx-phone'></i>
                             <input type="tel" id="phone" name="phone" pattern="^[0-9\s]+$" placeholder="6 12 34 56 78" required>
                         </div>
@@ -224,6 +239,6 @@
         
     </main>
 
-    <script src="script.js?v=22"></script>
+    <script src="script.js?v=23"></script>
 </body>
 </html>

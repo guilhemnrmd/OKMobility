@@ -31,6 +31,23 @@ Cloudflare Pages est l'une des plateformes les plus rapides et sécurisées pour
 ### Mises à jour automatiques
 Une fois cette configuration terminée, **le lien entre GitHub et Cloudflare est permanent et automatique**. Dès qu'une modification est validée et transférée (push) sur la branche `main` du dépôt GitHub, Cloudflare déploiera instantanément la nouvelle version en moins d'une minute, sans aucune action de votre part !
 
+## 📦 Provenance des assets externes (self-hosted)
+
+Pour confidentialité et fiabilité réseau, les ressources suivantes sont désormais hébergées localement dans le dépôt :
+
+- **Inter (police principale)**
+	- Source : Google Fonts / Google Fonts static (`fonts.gstatic.com`)
+	- Emplacement local : [assets/fonts/inter/Inter-400.ttf](assets/fonts/inter/Inter-400.ttf), [assets/fonts/inter/Inter-500.ttf](assets/fonts/inter/Inter-500.ttf), [assets/fonts/inter/Inter-600.ttf](assets/fonts/inter/Inter-600.ttf), [assets/fonts/inter/Inter-700.ttf](assets/fonts/inter/Inter-700.ttf)
+	- Chargement : [style.css](style.css)
+
+- **Boxicons (icônes)**
+	- Source : `boxicons@2.1.4` (distribution npm/CDN)
+	- Emplacement local CSS : [assets/boxicons/css/boxicons.min.css](assets/boxicons/css/boxicons.min.css)
+	- Emplacement local fonts : [assets/boxicons/fonts/boxicons.woff2](assets/boxicons/fonts/boxicons.woff2), [assets/boxicons/fonts/boxicons.woff](assets/boxicons/fonts/boxicons.woff), [assets/boxicons/fonts/boxicons.ttf](assets/boxicons/fonts/boxicons.ttf), [assets/boxicons/fonts/boxicons.eot](assets/boxicons/fonts/boxicons.eot), [assets/boxicons/fonts/boxicons.svg](assets/boxicons/fonts/boxicons.svg)
+	- Chargement : [index.html](index.html), [conseiller.html](conseiller.html), [retailer/index.html](retailer/index.html)
+
+> Note: conservez les versions d'origine et licences associées lors de futures mises à jour de ces assets.
+
 ---
 
 Dernière mise à jour : 2026.
