@@ -123,6 +123,23 @@
     .qr-lightbox-frame {
         cursor: var(--app-cursor-click-url), pointer !important;
     }
+
+    a *,
+    button *,
+    [role="button"] *,
+    .btn-copy *,
+    .btn-copy-code *,
+    .btn-icon *,
+    .btn-link-status *,
+    .btn-reset *,
+    .custom-checkbox *,
+    .lang-selector *,
+    .overlay-select *,
+    .qr-code-frame *,
+    .qr-lightbox *,
+    .qr-lightbox-frame * {
+        cursor: var(--app-cursor-click-url), pointer !important;
+    }
 }
 
 * {
@@ -1351,15 +1368,14 @@ input::placeholder {
     background: #ffffff;
     border-radius: calc(var(--radius-sm) + 6px);
     box-shadow: 0 10px 26px rgba(25, 51, 102, 0.08);
-    cursor: var(--app-cursor-url), zoom-in;
-    transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 280ms ease;
+    cursor: var(--app-cursor-click-url), pointer;
+    transition: box-shadow 220ms ease;
     transform-origin: center;
     will-change: transform;
 }
 
 .qr-code-frame:hover {
-    transform: translateY(-2px) scale(1.03);
-    box-shadow: 0 18px 34px rgba(25, 51, 102, 0.15);
+    box-shadow: 0 14px 30px rgba(25, 51, 102, 0.12);
 }
 
 .qr-wrapper #qrCode {
@@ -1434,7 +1450,7 @@ input::placeholder {
     position: relative;
     z-index: 1;
     padding: 18px;
-    --qr-lightbox-scale: 0.84;
+    --qr-lightbox-scale: 1;
     --qr-lightbox-x: 0px;
     --qr-lightbox-y: 18px;
     --qr-lightbox-tilt-x: 0deg;
@@ -1446,7 +1462,7 @@ input::placeholder {
         rotateX(var(--qr-lightbox-tilt-x))
         rotateY(var(--qr-lightbox-tilt-y));
     opacity: 0;
-    cursor: var(--app-cursor-url), zoom-out;
+    cursor: var(--app-cursor-click-url), pointer;
     transform-style: preserve-3d;
     box-shadow: 0 32px 80px rgba(12, 20, 46, 0.32);
     transition: transform 420ms cubic-bezier(0.18, 0.9, 0.22, 1.08), opacity 260ms ease, box-shadow 320ms ease;
@@ -1461,11 +1477,11 @@ input::placeholder {
 
 @media (pointer: coarse) {
     .qr-code-frame {
-        cursor: zoom-in;
+        cursor: pointer;
     }
 
     .qr-lightbox-frame {
-        cursor: zoom-out;
+        cursor: pointer;
     }
 }
 
