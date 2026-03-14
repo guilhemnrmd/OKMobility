@@ -1904,17 +1904,20 @@ button, .btn-primary, .btn-secondary {
     }
 
     .glass-header {
-        flex-direction: column;
-        align-items: stretch;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
         gap: 10px;
     }
 
     .header-brand {
-        width: 100%;
+        width: auto;
+        flex: 0 0 auto;
     }
 
     .logo-img {
-        height: 22px;
+        height: 40px;
     }
 
     .brand-slogan {
@@ -1922,16 +1925,26 @@ button, .btn-primary, .btn-secondary {
     }
 
     .header-controls {
+        flex: 1 0 auto;
         width: 100%;
-        justify-content: space-between;
+        justify-content: flex-end;
+        flex-wrap: wrap;
         margin-left: 0;
+        gap: 8px;
     }
 
     .lang-selector {
-        flex: 1;
+        order: 3;
+        flex: 1 0 100%;
         min-width: 0;
         max-width: none;
         justify-content: center;
+    }
+
+    .header-controls > .btn-reset,
+    .header-controls > .btn-icon,
+    .header-controls > .btn-link-status {
+        order: 1;
     }
 
     .btn-reset,
