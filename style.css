@@ -71,8 +71,8 @@
     --transition-spring: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     --transition-smooth: 0.3s ease-in-out;
 
-    /* QR custom cursor (light mode default) */
-    --qr-cursor-url: url('/assets/cursors/qr-cursor-light-64.png') 8 6;
+    /* App custom cursor (light mode default) */
+    --app-cursor-url: url('/assets/cursors/qr-cursor-light-36.png') 4 3;
 }
 
 /* Dark Mode Support (Automatic) */
@@ -91,7 +91,15 @@
         --blob-2: #05DBF3;
         --blob-3: #2054EA;
 
-        --qr-cursor-url: url('/assets/cursors/qr-cursor-dark-64.png') 8 6;
+        --app-cursor-url: url('/assets/cursors/qr-cursor-dark-36.png') 4 3;
+    }
+}
+
+@media (pointer: fine) {
+    html,
+    body,
+    body * {
+        cursor: var(--app-cursor-url), auto !important;
     }
 }
 
@@ -1321,7 +1329,7 @@ input::placeholder {
     background: #ffffff;
     border-radius: calc(var(--radius-sm) + 6px);
     box-shadow: 0 10px 26px rgba(25, 51, 102, 0.08);
-    cursor: var(--qr-cursor-url), zoom-in;
+    cursor: var(--app-cursor-url), zoom-in;
     transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 280ms ease;
     transform-origin: center;
     will-change: transform;
@@ -1416,7 +1424,7 @@ input::placeholder {
         rotateX(var(--qr-lightbox-tilt-x))
         rotateY(var(--qr-lightbox-tilt-y));
     opacity: 0;
-    cursor: var(--qr-cursor-url), zoom-out;
+    cursor: var(--app-cursor-url), zoom-out;
     transform-style: preserve-3d;
     box-shadow: 0 32px 80px rgba(12, 20, 46, 0.32);
     transition: transform 420ms cubic-bezier(0.18, 0.9, 0.22, 1.08), opacity 260ms ease, box-shadow 320ms ease;
