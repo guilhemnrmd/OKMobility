@@ -156,6 +156,12 @@ const state = {
     currentData: {}
 };
 
+const qrMotionState = {
+    lastX: null,
+    lastY: null,
+    angle: 0
+};
+
 // ============================================================================
 // 2. DOM Elements
 // ============================================================================
@@ -177,6 +183,8 @@ const dom = {
     qrLightbox: document.getElementById('qrLightbox'),
     qrLightboxFrame: document.getElementById('qrLightboxFrame'),
     qrCodeLarge: document.getElementById('qrCodeLarge'),
+    qrMotionCursor: document.getElementById('qrMotionCursor'),
+    qrMotionCursorInner: document.getElementById('qrMotionCursorInner'),
     qrHint: document.getElementById('qrHint'),
     titleLiveData: document.getElementById('titleLiveData'),
     connectionStatus: document.getElementById('connectionStatus'),
@@ -383,6 +391,7 @@ function syncQrLightbox() {
 function openQrLightbox() {
     if (!dom.qrLightbox) return;
     syncQrLightbox();
+    resetQrLightboxTilt();
     dom.qrLightbox.classList.add('is-open');
     dom.qrLightbox.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
@@ -393,6 +402,66 @@ function closeQrLightbox() {
     dom.qrLightbox.classList.remove('is-open');
     dom.qrLightbox.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+    resetQrLightboxTilt();
+    hideQrMotionCursor();
+}
+
+function supportsFinePointer() {
+    return window.matchMedia('(pointer: fine)').matches;
+}
+
+function showQrMotionCursor() {
+    if (!supportsFinePointer() || !dom.qrMotionCursor) return;
+    dom.qrMotionCursor.classList.add('is-visible');
+}
+
+function hideQrMotionCursor() {
+    if (!dom.qrMotionCursor) return;
+    dom.qrMotionCursor.classList.remove('is-visible');
+    qrMotionState.lastX = null;
+    qrMotionState.lastY = null;
+}
+
+function updateQrMotionCursor(event) {
+    if (!supportsFinePointer() || !dom.qrMotionCursor || !dom.qrMotionCursorInner) return;
+
+    const { clientX, clientY } = event;
+
+    if (qrMotionState.lastX !== null && qrMotionState.lastY !== null) {
+        const deltaX = clientX - qrMotionState.lastX;
+        const deltaY = clientY - qrMotionState.lastY;
+
+        if (Math.abs(deltaX) + Math.abs(deltaY) > 1) {
+            qrMotionState.angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI) + 90;
+        }
+    }
+
+    qrMotionState.lastX = clientX;
+    qrMotionState.lastY = clientY;
+
+    dom.qrMotionCursor.style.transform = `translate3d(${clientX}px, ${clientY}px, 0)`;
+    dom.qrMotionCursorInner.style.transform = `rotate(${qrMotionState.angle}deg) scale(1)`;
+}
+
+function updateQrLightboxTilt(event) {
+    if (!dom.qrLightboxFrame || !dom.qrLightbox?.classList.contains('is-open')) return;
+
+    const rect = dom.qrLightboxFrame.getBoundingClientRect();
+    const ratioX = ((event.clientX - rect.left) / rect.width) - 0.5;
+    const ratioY = ((event.clientY - rect.top) / rect.height) - 0.5;
+
+    dom.qrLightboxFrame.style.setProperty('--qr-lightbox-tilt-x', `${ratioY * -8}deg`);
+    dom.qrLightboxFrame.style.setProperty('--qr-lightbox-tilt-y', `${ratioX * 8}deg`);
+    dom.qrLightboxFrame.style.setProperty('--qr-lightbox-x', `${ratioX * 8}px`);
+    dom.qrLightboxFrame.style.setProperty('--qr-lightbox-y', `${ratioY * 8}px`);
+}
+
+function resetQrLightboxTilt() {
+    if (!dom.qrLightboxFrame) return;
+    dom.qrLightboxFrame.style.removeProperty('--qr-lightbox-tilt-x');
+    dom.qrLightboxFrame.style.removeProperty('--qr-lightbox-tilt-y');
+    dom.qrLightboxFrame.style.removeProperty('--qr-lightbox-x');
+    dom.qrLightboxFrame.style.removeProperty('--qr-lightbox-y');
 }
 
 // ============================================================================
@@ -851,6 +920,9 @@ dom.btnCopyCode.addEventListener('click', () => {
 
 if (dom.qrCodeFrame) {
     dom.qrCodeFrame.addEventListener('click', openQrLightbox);
+    dom.qrCodeFrame.addEventListener('pointerenter', showQrMotionCursor);
+    dom.qrCodeFrame.addEventListener('pointermove', updateQrMotionCursor);
+    dom.qrCodeFrame.addEventListener('pointerleave', hideQrMotionCursor);
     dom.qrCodeFrame.addEventListener('keydown', (event) => {
         if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
@@ -861,6 +933,15 @@ if (dom.qrCodeFrame) {
 
 if (dom.qrLightbox) {
     dom.qrLightbox.addEventListener('click', closeQrLightbox);
+    dom.qrLightbox.addEventListener('pointerenter', showQrMotionCursor);
+    dom.qrLightbox.addEventListener('pointermove', (event) => {
+        updateQrMotionCursor(event);
+        updateQrLightboxTilt(event);
+    });
+    dom.qrLightbox.addEventListener('pointerleave', () => {
+        hideQrMotionCursor();
+        resetQrLightboxTilt();
+    });
 }
 
 if (dom.qrLightboxFrame) {
