@@ -422,6 +422,7 @@ function applyLanguage(langCode) {
         state.countrySelectedManually = false;
         renderCountryNameSelect(langCode);
         renderCountryCodeSelect(langCode);
+        syncPhoneCodeWithSelectedCountry();
     }
 }
 
@@ -692,6 +693,8 @@ async function populateCountryCodes() {
                     const countryDisplay = document.getElementById('countryDisplay');
                     if (countryDisplay) countryDisplay.textContent = selectedOpt.dataset.short;
                 }
+
+                syncPhoneCodeWithSelectedCountry();
             });
         }
 
@@ -710,9 +713,32 @@ async function populateCountryCodes() {
         // Initial render
         renderCountryNameSelect(state.lang);
         renderCountryCodeSelect(state.lang);
+        syncPhoneCodeWithSelectedCountry();
         
     } catch (error) {
         console.error('Error fetching country codes:', error);
+    }
+}
+
+function syncPhoneCodeWithSelectedCountry() {
+    if (state.phoneSelectedManually || !dom.country || !dom.countryCode || !state.globalCountriesData?.length) {
+        return;
+    }
+
+    const selectedCountryCca2 = dom.country.value;
+    if (!selectedCountryCca2) return;
+
+    const selectedCountryData = state.globalCountriesData.find(c => c.cca2 === selectedCountryCca2);
+    if (!selectedCountryData || !selectedCountryData.code) return;
+
+    const matchingOption = Array.from(dom.countryCode.options).find(opt => !opt.disabled && opt.value === selectedCountryData.code);
+    if (!matchingOption) return;
+
+    dom.countryCode.value = selectedCountryData.code;
+
+    const phoneCodeDisplay = document.getElementById('countryCodeDisplay');
+    if (phoneCodeDisplay) {
+        phoneCodeDisplay.textContent = matchingOption.dataset.short || selectedCountryData.shortLabel || `${getFlagEmoji(selectedCountryData.cca2)} ${selectedCountryData.code}`;
     }
 }
 
