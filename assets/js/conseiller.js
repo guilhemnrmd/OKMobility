@@ -156,12 +156,6 @@ const state = {
     currentData: {}
 };
 
-const qrMotionState = {
-    lastX: null,
-    lastY: null,
-    angle: 0
-};
-
 // ============================================================================
 // 2. DOM Elements
 // ============================================================================
@@ -183,8 +177,6 @@ const dom = {
     qrLightbox: document.getElementById('qrLightbox'),
     qrLightboxFrame: document.getElementById('qrLightboxFrame'),
     qrCodeLarge: document.getElementById('qrCodeLarge'),
-    qrMotionCursor: document.getElementById('qrMotionCursor'),
-    qrMotionCursorInner: document.getElementById('qrMotionCursorInner'),
     qrHint: document.getElementById('qrHint'),
     titleLiveData: document.getElementById('titleLiveData'),
     connectionStatus: document.getElementById('connectionStatus'),
@@ -403,44 +395,6 @@ function closeQrLightbox() {
     dom.qrLightbox.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
     resetQrLightboxTilt();
-    hideQrMotionCursor();
-}
-
-function supportsFinePointer() {
-    return window.matchMedia('(pointer: fine)').matches;
-}
-
-function showQrMotionCursor() {
-    if (!supportsFinePointer() || !dom.qrMotionCursor) return;
-    dom.qrMotionCursor.classList.add('is-visible');
-}
-
-function hideQrMotionCursor() {
-    if (!dom.qrMotionCursor) return;
-    dom.qrMotionCursor.classList.remove('is-visible');
-    qrMotionState.lastX = null;
-    qrMotionState.lastY = null;
-}
-
-function updateQrMotionCursor(event) {
-    if (!supportsFinePointer() || !dom.qrMotionCursor || !dom.qrMotionCursorInner) return;
-
-    const { clientX, clientY } = event;
-
-    if (qrMotionState.lastX !== null && qrMotionState.lastY !== null) {
-        const deltaX = clientX - qrMotionState.lastX;
-        const deltaY = clientY - qrMotionState.lastY;
-
-        if (Math.abs(deltaX) + Math.abs(deltaY) > 1) {
-            qrMotionState.angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI) + 90;
-        }
-    }
-
-    qrMotionState.lastX = clientX;
-    qrMotionState.lastY = clientY;
-
-    dom.qrMotionCursor.style.transform = `translate3d(${clientX}px, ${clientY}px, 0)`;
-    dom.qrMotionCursorInner.style.transform = `rotate(${qrMotionState.angle}deg) scale(1)`;
 }
 
 function updateQrLightboxTilt(event) {
@@ -920,9 +874,6 @@ dom.btnCopyCode.addEventListener('click', () => {
 
 if (dom.qrCodeFrame) {
     dom.qrCodeFrame.addEventListener('click', openQrLightbox);
-    dom.qrCodeFrame.addEventListener('pointerenter', showQrMotionCursor);
-    dom.qrCodeFrame.addEventListener('pointermove', updateQrMotionCursor);
-    dom.qrCodeFrame.addEventListener('pointerleave', hideQrMotionCursor);
     dom.qrCodeFrame.addEventListener('keydown', (event) => {
         if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
@@ -933,15 +884,8 @@ if (dom.qrCodeFrame) {
 
 if (dom.qrLightbox) {
     dom.qrLightbox.addEventListener('click', closeQrLightbox);
-    dom.qrLightbox.addEventListener('pointerenter', showQrMotionCursor);
-    dom.qrLightbox.addEventListener('pointermove', (event) => {
-        updateQrMotionCursor(event);
-        updateQrLightboxTilt(event);
-    });
-    dom.qrLightbox.addEventListener('pointerleave', () => {
-        hideQrMotionCursor();
-        resetQrLightboxTilt();
-    });
+    dom.qrLightbox.addEventListener('pointermove', updateQrLightboxTilt);
+    dom.qrLightbox.addEventListener('pointerleave', resetQrLightboxTilt);
 }
 
 if (dom.qrLightboxFrame) {

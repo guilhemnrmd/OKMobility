@@ -1446,61 +1446,6 @@ input::placeholder {
     height: auto !important;
 }
 
-.qr-motion-cursor {
-    position: fixed;
-    left: 0;
-    top: 0;
-    z-index: 140;
-    pointer-events: none;
-    opacity: 0;
-    transform: translate3d(-999px, -999px, 0);
-    transition: opacity 180ms ease;
-}
-
-.qr-motion-cursor.is-visible {
-    opacity: 1;
-}
-
-.qr-motion-cursor-inner {
-    width: 56px;
-    height: 56px;
-    border-radius: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.14);
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    box-shadow: 0 14px 34px rgba(8, 14, 30, 0.24);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    color: #ffffff;
-    transform: rotate(0deg) scale(0.92);
-    transition: transform 140ms ease-out, background 180ms ease, border-color 180ms ease;
-}
-
-.qr-motion-cursor.is-visible .qr-motion-cursor-inner {
-    transform: rotate(0deg) scale(1);
-}
-
-.qr-motion-cursor-inner i {
-    font-size: 1.45rem;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
-}
-
-@media (pointer: fine) {
-    .qr-code-frame,
-    .qr-lightbox,
-    .qr-lightbox-frame {
-        cursor: none;
-    }
-}
-
-@media (pointer: coarse) {
-    .qr-motion-cursor {
-        display: none;
-    }
-}
-
 /* Connection Status */
 .connection-status {
     display: flex;
