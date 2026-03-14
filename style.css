@@ -1926,7 +1926,7 @@ button, .btn-primary, .btn-secondary {
 
     .header-controls {
         flex: 1 0 auto;
-        width: 100%;
+        width: auto;
         justify-content: flex-end;
         flex-wrap: wrap;
         margin-left: 0;
@@ -1934,17 +1934,17 @@ button, .btn-primary, .btn-secondary {
     }
 
     .lang-selector {
-        order: 3;
-        flex: 1 0 100%;
-        min-width: 0;
-        max-width: none;
+        order: 1;
+        flex: 0 0 auto;
+        min-width: 120px;
+        max-width: 170px;
         justify-content: center;
     }
 
     .header-controls > .btn-reset,
     .header-controls > .btn-icon,
     .header-controls > .btn-link-status {
-        order: 1;
+        order: 2;
     }
 
     .btn-reset,
