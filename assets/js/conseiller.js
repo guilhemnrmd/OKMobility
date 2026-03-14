@@ -604,7 +604,7 @@ function updateStatus(status, message) {
 // 7. View Management
 // ============================================================================
 function showSetupView() {
-    dom.setupView.style.display = 'block';
+    dom.setupView.style.display = 'flex';
     dom.liveDataView.style.display = 'none';
     dom.disconnectedView.style.display = 'none';
 }
