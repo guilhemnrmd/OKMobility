@@ -73,6 +73,7 @@
 
     /* App custom cursor (light mode default) */
     --app-cursor-url: url('/assets/cursors/qr-cursor-light-36.png') 4 3;
+    --app-cursor-click-url: url('/assets/cursors/qr-cursor-click-light-36.png') 5 4;
 }
 
 /* Dark Mode Support (Automatic) */
@@ -92,6 +93,7 @@
         --blob-3: #2054EA;
 
         --app-cursor-url: url('/assets/cursors/qr-cursor-dark-36.png') 4 3;
+        --app-cursor-click-url: url('/assets/cursors/qr-cursor-click-dark-36.png') 5 4;
     }
 }
 
@@ -100,6 +102,26 @@
     body,
     body * {
         cursor: var(--app-cursor-url), auto !important;
+    }
+
+    a,
+    button,
+    [role="button"],
+    select,
+    summary,
+    label,
+    .btn-copy,
+    .btn-copy-code,
+    .btn-icon,
+    .btn-link-status,
+    .btn-reset,
+    .custom-checkbox,
+    .lang-selector,
+    .overlay-select,
+    .qr-code-frame,
+    .qr-lightbox,
+    .qr-lightbox-frame {
+        cursor: var(--app-cursor-click-url), pointer !important;
     }
 }
 
