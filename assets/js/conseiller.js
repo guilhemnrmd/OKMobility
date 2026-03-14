@@ -173,6 +173,10 @@ const dom = {
     codeLabel: document.getElementById('codeLabel'),
     sessionCode: document.getElementById('sessionCode'),
     qrCode: document.getElementById('qrCode'),
+    qrCodeFrame: document.getElementById('qrCodeFrame'),
+    qrLightbox: document.getElementById('qrLightbox'),
+    qrLightboxFrame: document.getElementById('qrLightboxFrame'),
+    qrCodeLarge: document.getElementById('qrCodeLarge'),
     qrHint: document.getElementById('qrHint'),
     titleLiveData: document.getElementById('titleLiveData'),
     connectionStatus: document.getElementById('connectionStatus'),
@@ -367,6 +371,28 @@ function generateQRCode(sessionCode) {
         colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.M
     });
+
+    syncQrLightbox();
+}
+
+function syncQrLightbox() {
+    if (!dom.qrCodeLarge || !dom.qrCode) return;
+    dom.qrCodeLarge.innerHTML = dom.qrCode.innerHTML;
+}
+
+function openQrLightbox() {
+    if (!dom.qrLightbox) return;
+    syncQrLightbox();
+    dom.qrLightbox.classList.add('is-open');
+    dom.qrLightbox.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeQrLightbox() {
+    if (!dom.qrLightbox) return;
+    dom.qrLightbox.classList.remove('is-open');
+    dom.qrLightbox.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
 }
 
 // ============================================================================
@@ -821,6 +847,30 @@ function copyAllData() {
 // Copy session code
 dom.btnCopyCode.addEventListener('click', () => {
     copyToClipboard(state.displayCode, dom.btnCopyCode);
+});
+
+if (dom.qrCodeFrame) {
+    dom.qrCodeFrame.addEventListener('click', openQrLightbox);
+    dom.qrCodeFrame.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openQrLightbox();
+        }
+    });
+}
+
+if (dom.qrLightbox) {
+    dom.qrLightbox.addEventListener('click', closeQrLightbox);
+}
+
+if (dom.qrLightboxFrame) {
+    dom.qrLightboxFrame.addEventListener('click', closeQrLightbox);
+}
+
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+        closeQrLightbox();
+    }
 });
 
 // Copy all data

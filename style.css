@@ -1316,6 +1316,13 @@ input::placeholder {
     background: #ffffff;
     border-radius: calc(var(--radius-sm) + 6px);
     box-shadow: 0 10px 26px rgba(25, 51, 102, 0.08);
+    cursor: zoom-in;
+    transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+}
+
+.qr-code-frame:hover {
+    transform: scale(1.02);
+    box-shadow: 0 14px 30px rgba(25, 51, 102, 0.12);
 }
 
 .qr-wrapper #qrCode {
@@ -1356,6 +1363,58 @@ input::placeholder {
 .qr-hint {
     font-size: 0.85rem;
     color: var(--color-text-secondary);
+}
+
+.qr-lightbox {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-smooth);
+    z-index: 120;
+}
+
+.qr-lightbox.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.qr-lightbox-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 14, 26, 0.58);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.qr-lightbox-frame {
+    position: relative;
+    z-index: 1;
+    padding: 18px;
+    transform: scale(0.88);
+    opacity: 0;
+    cursor: zoom-out;
+    transition: transform var(--transition-spring), opacity var(--transition-smooth);
+}
+
+.qr-lightbox.is-open .qr-lightbox-frame {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.qr-lightbox-frame #qrCodeLarge {
+    background: #ffffff;
+}
+
+.qr-lightbox-frame #qrCodeLarge img,
+.qr-lightbox-frame #qrCodeLarge canvas {
+    display: block;
+    width: min(78vw, 420px) !important;
+    height: auto !important;
 }
 
 /* Connection Status */
