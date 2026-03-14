@@ -37,6 +37,7 @@ const i18n = {
       "tempCity": "Ville",
       "zipCode": "Code Postal",
       "city": "Ville",
+    "phoneCode": "Indicatif téléphonique",
       "phone": "Téléphone Mobile",
       "email": "E-mail",
       "placeholderCity": "Paris",
@@ -70,6 +71,7 @@ const i18n = {
       "tempCity": "City",
       "zipCode": "Postal Code / Zip",
       "city": "City",
+    "phoneCode": "Calling code",
       "phone": "Mobile Telephone Number",
       "email": "E-mail",
       "placeholderCity": "London",
@@ -103,6 +105,7 @@ const i18n = {
       "tempCity": "Ciudad",
       "zipCode": "Código Postal / CP",
       "city": "Ciudad",
+    "phoneCode": "Prefijo telefónico",
       "phone": "Teléfono Móvil",
       "email": "E-mail",
       "placeholderCity": "Madrid",
@@ -136,6 +139,7 @@ const i18n = {
       "tempCity": "Città",
       "zipCode": "Codice Postale / CAP",
       "city": "Città",
+    "phoneCode": "Prefisso telefonico",
       "phone": "Telefono Cellulare",
       "email": "E-mail",
       "placeholderCity": "Roma",
@@ -169,6 +173,7 @@ const i18n = {
       "tempCity": "Cidade",
       "zipCode": "Código Postal",
       "city": "Cidade",
+    "phoneCode": "Indicativo telefónico",
       "phone": "Telemóvel",
       "email": "E-mail",
       "placeholderCity": "Lisboa",
@@ -202,6 +207,7 @@ const i18n = {
       "tempCity": "Stadt",
       "zipCode": "Postleitzahl / PLZ",
       "city": "Stadt",
+    "phoneCode": "Ländervorwahl",
       "phone": "Handynummer",
       "email": "E-Mail",
       "placeholderCity": "Berlin",
@@ -235,6 +241,7 @@ const i18n = {
             "tempCity": "Plaats",
             "zipCode": "Postcode",
             "city": "Plaats",
+            "phoneCode": "Landcode",
             "phone": "Mobiel telefoonnummer",
             "email": "E-mail",
             "placeholderCity": "Amsterdam",
@@ -372,7 +379,7 @@ function applyLanguage(langCode) {
 
     const phoneCodeLabel = document.getElementById('lblPhoneCode');
     if (phoneCodeLabel) {
-        phoneCodeLabel.textContent = t.phoneCode || 'Dial code';
+        phoneCodeLabel.textContent = t.phoneCode || 'Calling code';
     }
     
     document.getElementById('lblPhone').textContent = t.phone;
@@ -589,7 +596,7 @@ dom.form.addEventListener('submit', (e) => {
     // Add Phone and Email
     summaryHTML += `
         <div class="summary-row">
-            <span class="summary-label">${t.phoneCode || 'Indicatif'}</span>
+            <span class="summary-label">${t.phoneCode || 'Calling code'}</span>
             <span class="summary-value">${phoneCode || '-'}</span>
         </div>
         <div class="summary-row">

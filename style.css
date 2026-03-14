@@ -1299,6 +1299,7 @@ input::placeholder {
     justify-content: center;
     gap: 12px;
     padding: var(--spacing-md);
+    padding-right: 54px;
     position: relative;
 }
 
@@ -1325,8 +1326,8 @@ input::placeholder {
 .btn-copy-code {
     position: absolute;
     right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 10px;
+    transform: none;
     background: rgba(32, 84, 234, 0.1);
     border: none;
     border-radius: 8px;

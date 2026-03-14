@@ -856,7 +856,7 @@ function copyAllData() {
         if (data.tempZipCode || data.tempCity) text += `CP / Ciudad (temp): ${data.tempZipCode || ''} ${data.tempCity || ''}\n`;
     }
     
-    if (data.phoneCode) text += `Indicativo: ${data.phoneCode}\n`;
+    if (data.phoneCode) text += `Prefijo telefónico: ${data.phoneCode}\n`;
     if (data.phoneNumber) text += `Teléfono: ${data.phoneNumber}\n`;
     if (data.email) text += `E-mail: ${data.email}\n`;
     
