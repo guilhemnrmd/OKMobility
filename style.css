@@ -1531,7 +1531,7 @@ input::placeholder {
 
 .data-row {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     padding: 12px 8px;
     border-bottom: 1px solid var(--color-border);
@@ -1610,6 +1610,7 @@ input::placeholder {
     cursor: pointer;
     color: var(--color-text-secondary);
     font-size: 1rem;
+    margin-top: 2px;
     transition: all var(--transition-smooth);
 }
 
@@ -2155,6 +2156,7 @@ button, .btn-primary, .btn-secondary {
 
     .data-row .btn-copy {
         align-self: flex-end;
+        margin-top: 0;
     }
 
     .disconnected-card {
