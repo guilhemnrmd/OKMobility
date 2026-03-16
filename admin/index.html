@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+    <meta name="referrer" content="no-referrer">
+    <title>OKM Admin — Licences</title>
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css?v=41">
+    <style>
+        /* Admin-specific styles */
+        .admin-container {
+            max-width: 720px;
+        }
+
+        .admin-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .agency-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        .agency-card {
+            display: grid;
+            gap: 8px;
+            padding: var(--spacing-sm) var(--spacing-md);
+        }
+
+        .agency-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .agency-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--color-text-primary);
+        }
+
+        .agency-id {
+            font-size: 0.75rem;
+            font-family: 'SF Mono', 'Menlo', monospace;
+            color: var(--color-text-secondary);
+            margin-top: 2px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .badge-ok {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .badge-expired {
+            background: rgba(255, 59, 48, 0.15);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 59, 48, 0.3);
+        }
+
+        .agency-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 24px;
+            font-size: 0.82rem;
+            color: var(--color-text-secondary);
+        }
+
+        .agency-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .agency-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 0.82rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--color-border);
+            background: rgba(255,255,255,0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: var(--color-text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all var(--transition-smooth);
+            font-weight: 500;
+        }
+
+        .btn-sm:hover {
+            background: rgba(255,255,255,0.75);
+            border-color: var(--color-accent);
+            color: var(--color-accent);
+        }
+
+        .btn-sm.danger:hover {
+            border-color: #ff6b6b;
+            color: #ff6b6b;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .btn-sm {
+                background: rgba(28,28,30,0.5);
+                border-color: rgba(255,255,255,0.15);
+            }
+            .btn-sm:hover {
+                background: rgba(28,28,30,0.75);
+            }
+        }
+
+        /* Inline edit form */
+        .edit-form {
+            display: none;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+            padding-top: 12px;
+            border-top: 1px solid var(--color-border);
+            margin-top: 4px;
+        }
+        .edit-form.open { display: flex; }
+
+        .edit-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .edit-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .edit-field label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-text-secondary);
+        }
+
+        .edit-field input {
+            background: rgba(255,255,255,0.5);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            color: var(--color-text-primary);
+            font-family: inherit;
+            transition: border-color var(--transition-base);
+        }
+
+        .edit-field input:focus {
+            outline: none;
+            border-color: var(--color-accent);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .edit-field input {
+                background: rgba(28,28,30,0.5);
+                border-color: rgba(255,255,255,0.15);
+            }
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: var(--spacing-md);
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .admin-error {
+            padding: 14px;
+            border-radius: var(--radius-md);
+            background: rgba(255,59,48,0.1);
+            border: 1px solid rgba(255,59,48,0.2);
+            color: #ff6b6b;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-background">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <main class="glass-container admin-container">
+        <header class="glass-header">
+            <div class="header-brand">
+                <div class="logo">
+                    <picture class="logo-picture">
+                        <source media="(max-width: 640px)" srcset="/assets/logos/okm-logo-mobile-white.svg">
+                        <img src="/assets/logos/okm-logo-white.svg" alt="OK Mobility Logo" class="logo-img logo-img-brand">
+                    </picture>
+                </div>
+                <span class="brand-slogan">Admin — Licences</span>
+            </div>
+            <div class="header-controls">
+                <button id="btnAddAgency" class="btn-icon" title="Ajouter une agence" aria-label="Ajouter une agence">
+                    <i class='bx bx-plus'></i>
+                </button>
+                <button id="btnRefresh" class="btn-reset" title="Rafraîchir" aria-label="Rafraîchir">
+                    <i class='bx bx-refresh'></i>
+                </button>
+            </div>
+        </header>
+
+        <section class="form-content" style="flex-direction: column; gap: var(--spacing-md);">
+            <div class="title-wrapper">
+                <h1 class="gradient-text">Gestion des licences</h1>
+            </div>
+
+            <div id="adminError" class="admin-error" style="display:none;"></div>
+            <div id="loadingState" class="loading-state glass-panel">
+                <i class='bx bx-loader-alt bx-spin'></i> Chargement des agences…
+            </div>
+
+            <div id="agencyList" class="agency-list" style="display:none;"></div>
+        </section>
+    </main>
+
+    <!-- Add/Edit modal -->
+    <div id="addModalOverlay" class="modal-overlay" style="display:none;"></div>
+    <div id="addModal" class="advisor-modal glass-panel" role="dialog" aria-modal="true" style="display:none; width: min(94vw, 480px);">
+        <div class="modal-header">
+            <i class='bx bx-building-house' style="font-size:1.4rem;margin-right:8px;color:var(--color-accent);"></i>
+            <h2 id="addModalTitle">Nouvelle agence</h2>
+        </div>
+        <div class="edit-form open" id="addModalForm">
+            <div class="edit-row">
+                <div class="edit-field" style="grid-column: 1 / -1;">
+                    <label>ID (slug, ex: madrid_01)</label>
+                    <input type="text" id="newAgencyId" placeholder="valencia_aero_01" pattern="[a-z0-9_]+" maxlength="64">
+                </div>
+                <div class="edit-field" style="grid-column: 1 / -1;">
+                    <label>Nom complet</label>
+                    <input type="text" id="newAgencyName" placeholder="OK Mobility Valencia Aeropuerto" maxlength="120">
+                </div>
+            </div>
+            <div class="edit-row">
+                <div class="edit-field">
+                    <label>Expiration (YYYY-MM-DD)</label>
+                    <input type="date" id="newAgencyExpiry">
+                </div>
+                <div class="edit-field">
+                    <label>PIN (4-8 chiffres)</label>
+                    <input type="text" id="newAgencyPin" placeholder="2847" maxlength="8" inputmode="numeric">
+                </div>
+            </div>
+        </div>
+        <p id="addModalError" style="color:#ff6b6b;font-size:0.82rem;min-height:1.2em;"></p>
+        <div class="modal-actions">
+            <button id="addModalSave" class="btn-primary glass-btn">
+                <i class='bx bx-save'></i>
+                <span>Enregistrer</span>
+            </button>
+            <button id="addModalCancel" class="btn-secondary">Annuler</button>
+        </div>
+    </div>
+
+    <script src="/assets/js/admin.js?v=1"></script>
+</body>
+</html>

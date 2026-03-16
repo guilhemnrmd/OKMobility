@@ -128,3 +128,64 @@ Utiliser un revert:
 ---
 
 Dernière mise à jour : 2026.
+
+---
+
+## 🔐 Gestion des Licences (Usage Commercial)
+
+### Architecture
+Les licences sont stockées dans **Cloudflare KV** (`OKM_LICENSES`), côté serveur.  
+**Les clients ne peuvent pas modifier les données de licence** — elles ne sont accessibles que via l'API admin protégée par un token secret.
+
+### Structure d'une entrée KV
+```json
+// Clé : "agency:valencia_aero_01"
+{
+  "agencyName": "OK Mobility Valencia Aeropuerto",
+  "licenseExpiresAt": "2027-03-16T00:00:00Z",
+  "firstActivation": true,
+  "pin": "2847",
+  "licenseVersion": 1
+}
+```
+> **`licenseVersion`** : incrémenté à chaque modification. Invalide automatiquement le cache localStorage (30 jours) des terminaux concernés.
+
+### Panneau Admin
+URL : `https://ok-mobility-retailer.pages.dev/admin/?token=<ADMIN_TOKEN>`
+
+Fonctionnalités :
+- 📋 Lister toutes les agences avec statut (active / expirée)
+- ➕ Créer une nouvelle agence
+- ✏️ Modifier nom, date d'expiration, PIN
+- 🔄 Renouveler +1 an en un clic
+- 🔒 Révoquer instantanément une licence
+
+> **`ADMIN_TOKEN`** est défini comme variable d'environnement secrète dans les paramètres Cloudflare Pages. Ne jamais le commiter dans le code.
+
+### Initialisation (première fois)
+```bash
+# Prérequis : créer le KV namespace "OKM_LICENSES" dans le dashboard Cloudflare
+# Puis copier l'ID dans wrangler.toml
+
+export CLOUDFLARE_ACCOUNT_ID="votre_account_id"
+export CLOUDFLARE_API_TOKEN="votre_api_token"
+
+node setup/seed-kv.mjs <KV_NAMESPACE_ID>
+```
+
+### Renouveler une licence
+Via le panneau admin : bouton **"Renouveler +1 an"**.  
+Ou manuellement via le panneau admin → Modifier → changer la date.
+
+### Révoquer une licence
+Via le panneau admin : bouton **"Révoquer"**.  
+Le terminal sera bloqué dès que son cache localStorage expire (max 30 jours).  
+Pour un blocage immédiat, incrémenter `licenseVersion` dans KV.
+
+### Variables d'environnement requises
+| Variable | Description |
+|----------|-------------|
+| `OKM_LICENSES` | KV namespace binding (défini dans `wrangler.toml`) |
+| `TURN_KEY_ID` | Cloudflare Calls TURN key ID |
+| `TURN_API_TOKEN` | Cloudflare Calls TURN API token |
+| `ADMIN_TOKEN` | Token secret pour le panneau admin |

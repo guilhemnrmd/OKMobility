@@ -939,7 +939,35 @@ dom.langSelect.addEventListener('change', (e) => {
 });
 
 // ============================================================================
-// 12. Initialize
+// 12. Initialize — License gate runs first, then PeerJS
 // ============================================================================
 setRemoteLanguage(state.lang, false);
-initializePeer();
+
+if (typeof window.runLicenseGate === 'function') {
+    window.runLicenseGate()
+        .then(agencyId => {
+            // Display the agency name in the header slogan
+            const cached = (() => {
+                try {
+                    const raw = localStorage.getItem('okm_lic_' + agencyId);
+                    return raw ? JSON.parse(raw) : null;
+                } catch { return null; }
+            })();
+            const agencyName = cached?.agencyName || '';
+            if (agencyName) {
+                const slogan = document.querySelector('.brand-slogan');
+                if (slogan) {
+                    slogan.textContent = agencyName;
+                    slogan.title = agencyName;
+                }
+            }
+            initializePeer();
+        })
+        .catch(reason => {
+            // Gate blocked — do NOT initializePeer
+            console.warn('[OKM] License gate blocked startup:', reason);
+        });
+} else {
+    // Fallback — gate script not loaded (should not happen in prod)
+    initializePeer();
+}
