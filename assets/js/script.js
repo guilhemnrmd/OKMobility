@@ -342,7 +342,13 @@ function sanitizeAgencyId(id) {
 function sanitizeAgencyName(name) {
     if (typeof name !== 'string') return null;
 
-    const cleaned = name.trim().replace(/\s+/g, ' ').slice(0, 120);
+    const cleaned = name
+        .trim()
+        .replace(/^ok\s*mobility\s*/i, '')
+        .replace(/^[-:|]\s*/, '')
+        .replace(/\s+/g, ' ')
+        .slice(0, 120);
+
     return cleaned || null;
 }
 
