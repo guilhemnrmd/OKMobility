@@ -18,7 +18,8 @@ const RATE_LIMIT_MAX = 30;
 const rateLimitStore = new Map();
 
 const ALLOWED_ORIGINS = new Set([
-    'https://ok-mobility-retailer.pages.dev'
+    'https://ok-mobility-retailer.pages.dev',
+    'https://develop.ok-mobility-retailer.pages.dev'
 ]);
 const ALLOWED_HOST_SUFFIXES = ['.ok-mobility-retailer.pages.dev'];
 
@@ -40,11 +41,20 @@ function getTrustedOrigin(request) {
     const origin = request.headers.get('origin');
     if (isAllowedOrigin(origin)) return origin;
     const referer = request.headers.get('referer');
-    if (!referer) return null;
-    try {
-        const o = new URL(referer).origin;
-        return isAllowedOrigin(o) ? o : null;
-    } catch { return null; }
+    if (referer) {
+        try {
+            const o = new URL(referer).origin;
+            if (isAllowedOrigin(o)) return o;
+        } catch { /* ignore */ }
+    }
+    // Allow same-host requests without origin header (e.g. fetch() from QR-scanned page)
+    // Cloudflare sets cf-connecting-ip; also check the host header matches our domain
+    const host = request.headers.get('host') || '';
+    if (host === 'ok-mobility-retailer.pages.dev' ||
+        host.endsWith('.ok-mobility-retailer.pages.dev')) {
+        return 'https://' + host;
+    }
+    return null;
 }
 
 function isRateLimited(key) {
