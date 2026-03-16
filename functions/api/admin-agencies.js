@@ -6,11 +6,11 @@
  * Cloudflare Pages Function — Admin API for licence management
  * Protected by ADMIN_TOKEN env secret.
  *
- * GET  /api/admin-agencies?token=<ADMIN_TOKEN>
+ * GET  /api/admin-agencies
  *   → list all agencies
  *
- * POST /api/admin-agencies?token=<ADMIN_TOKEN>
- *   body: { action: 'upsert'|'revoke', agencyId, agencyName?, licenseExpiresAt?, pin?, licenseVersion? }
+ * POST /api/admin-agencies
+ *   body: { action: 'upsert'|'revoke', agencyId, agencyName?, licenseExpiresAt?, licenseVersion? }
  *   → update KV + bump licenseVersion (forces client cache invalidation)
  */
 
@@ -27,12 +27,24 @@ function sanitizeAgencyId(id) {
     return /^[a-z0-9_]{1,64}$/.test(id) ? id : null;
 }
 
+function getAdminToken(request) {
+    const authHeader = request.headers.get('authorization') || '';
+    if (authHeader.toLowerCase().startsWith('bearer ')) {
+        return authHeader.slice(7).trim();
+    }
+
+    const headerToken = request.headers.get('x-admin-token');
+    if (headerToken) {
+        return headerToken.trim();
+    }
+
+    const url = new URL(request.url);
+    return (url.searchParams.get('token') || '').trim();
+}
+
 export async function onRequest(context) {
     const { env, request } = context;
-
-    // Only allow from same origin (no CORS needed for admin)
-    const url = new URL(request.url);
-    const token = url.searchParams.get('token');
+    const token = getAdminToken(request);
 
     if (!env.ADMIN_TOKEN || token !== env.ADMIN_TOKEN) {
         return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -118,7 +130,6 @@ export async function onRequest(context) {
 
             const agencyName = typeof body.agencyName === 'string' ? body.agencyName.slice(0, 120) : null;
             const licenseExpiresAt = typeof body.licenseExpiresAt === 'string' ? body.licenseExpiresAt : null;
-            const pin = typeof body.pin === 'string' ? body.pin.slice(0, 8) : null;
 
             if (!agencyName || !licenseExpiresAt) {
                 return new Response(JSON.stringify({ error: 'agencyName and licenseExpiresAt are required' }), {
@@ -129,6 +140,7 @@ export async function onRequest(context) {
             // Load existing to preserve fields not being updated
             const raw = await env.OKM_LICENSES.get(`agency:${agencyId}`);
             const existing = raw ? JSON.parse(raw) : { firstActivation: true };
+            delete existing.pin;
 
             const updated = {
                 ...existing,
@@ -136,8 +148,6 @@ export async function onRequest(context) {
                 licenseExpiresAt,
                 licenseVersion: (existing.licenseVersion || 1) + 1
             };
-
-            if (pin) updated.pin = pin;
 
             await env.OKM_LICENSES.put(`agency:${agencyId}`, JSON.stringify(updated));
             return new Response(JSON.stringify({ success: true }), {

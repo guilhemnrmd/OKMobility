@@ -144,21 +144,25 @@ Les licences sont stockées dans **Cloudflare KV** (`OKM_LICENSES`), côté serv
   "agencyName": "OK Mobility Valencia Aeropuerto",
   "licenseExpiresAt": "2027-03-16T00:00:00Z",
   "firstActivation": true,
-  "pin": "2847",
   "licenseVersion": 1
 }
 ```
 > **`licenseVersion`** : incrémenté à chaque modification. Invalide automatiquement le cache localStorage (30 jours) des terminaux concernés.
 
 ### Panneau Admin
-URL : `https://ok-mobility-retailer.pages.dev/admin/?token=<ADMIN_TOKEN>`
+URL : `https://ok-mobility-retailer.pages.dev/admin/`
 
 Fonctionnalités :
 - 📋 Lister toutes les agences avec statut (active / expirée)
 - ➕ Créer une nouvelle agence
-- ✏️ Modifier nom, date d'expiration, PIN
+- ✏️ Modifier nom et date d'expiration
 - 🔄 Renouveler +1 an en un clic
 - 🔒 Révoquer instantanément une licence
+
+Authentification admin :
+- saisir le `ADMIN_TOKEN` dans le panneau admin
+- le token est conservé uniquement en `sessionStorage` du navigateur
+- un ancien lien `?token=<ADMIN_TOKEN>` reste accepté une fois, puis le token est retiré de l'URL
 
 > **`ADMIN_TOKEN`** est défini comme variable d'environnement secrète dans les paramètres Cloudflare Pages. Ne jamais le commiter dans le code.
 

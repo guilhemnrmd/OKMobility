@@ -211,6 +211,52 @@
             color: #ff6b6b;
             font-size: 0.9rem;
         }
+
+        .auth-gate {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-md);
+        }
+
+        .auth-gate-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 10px;
+        }
+
+        .auth-gate input {
+            background: rgba(255,255,255,0.5);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            font-size: 0.95rem;
+            color: var(--color-text-primary);
+            font-family: inherit;
+        }
+
+        .auth-gate input:focus {
+            outline: none;
+            border-color: var(--color-accent);
+        }
+
+        .auth-help {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .auth-gate input {
+                background: rgba(28,28,30,0.5);
+                border-color: rgba(255,255,255,0.15);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .auth-gate-row {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -232,6 +278,9 @@
                 <span class="brand-slogan">Admin — Licences</span>
             </div>
             <div class="header-controls">
+                <button id="btnLogout" class="btn-icon" title="Déconnexion" aria-label="Déconnexion" style="display:none;">
+                    <i class='bx bx-log-out'></i>
+                </button>
                 <button id="btnAddAgency" class="btn-icon" title="Ajouter une agence" aria-label="Ajouter une agence">
                     <i class='bx bx-plus'></i>
                 </button>
@@ -244,6 +293,21 @@
         <section class="form-content" style="flex-direction: column; gap: var(--spacing-md);">
             <div class="title-wrapper">
                 <h1 class="gradient-text">Gestion des licences</h1>
+            </div>
+
+            <div id="authGate" class="auth-gate glass-panel" style="display:none;">
+                <div>
+                    <h2 style="font-size:1rem; font-weight:700; margin-bottom:6px;">Accès administrateur</h2>
+                    <p class="auth-help">Saisissez le token admin. Il sera conservé uniquement pendant cette session du navigateur et retiré de l'URL.</p>
+                </div>
+                <div class="auth-gate-row">
+                    <input type="password" id="adminTokenInput" placeholder="ADMIN_TOKEN" autocomplete="off" spellcheck="false">
+                    <button id="adminTokenSubmit" class="btn-primary glass-btn">
+                        <i class='bx bx-lock-open-alt'></i>
+                        <span>Ouvrir</span>
+                    </button>
+                </div>
+                <div id="authGateError" class="admin-error" style="display:none;"></div>
             </div>
 
             <div id="adminError" class="admin-error" style="display:none;"></div>
@@ -278,10 +342,6 @@
                     <label>Expiration (YYYY-MM-DD)</label>
                     <input type="date" id="newAgencyExpiry">
                 </div>
-                <div class="edit-field">
-                    <label>PIN (4-8 chiffres)</label>
-                    <input type="text" id="newAgencyPin" placeholder="2847" maxlength="8" inputmode="numeric">
-                </div>
             </div>
         </div>
         <p id="addModalError" style="color:#ff6b6b;font-size:0.82rem;min-height:1.2em;"></p>
@@ -294,6 +354,6 @@
         </div>
     </div>
 
-    <script src="/assets/js/admin.js?v=1"></script>
+    <script src="/assets/js/admin.js?v=2"></script>
 </body>
 </html>

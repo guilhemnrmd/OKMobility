@@ -4,38 +4,49 @@
 
 /**
  * OKM Admin — Licence management JS
- * Accessible at /admin/?token=<ADMIN_TOKEN>
+ * Accessible at /admin/
  *
- * ADMIN_TOKEN must be set as a Cloudflare Pages env secret.
- * Share only the full URL (with token) to access this page.
+ * ADMIN_TOKEN is provided by the administrator and stored only in sessionStorage.
+ * A one-time bootstrap via /admin/?token=<ADMIN_TOKEN> is still supported and
+ * immediately stripped from the URL.
  */
 
 (() => {
     'use strict';
 
-    // ── Token ─────────────────────────────────────────────────────────────────
-    const params = new URLSearchParams(window.location.search);
-    const TOKEN = params.get('token') || '';
+    const SESSION_TOKEN_KEY = 'okm_admin_token';
 
-    if (!TOKEN) {
-        document.body.innerHTML = `
-            <div class="ambient-background"><div class="blob blob-1"></div><div class="blob blob-2"></div></div>
-            <main class="glass-container" style="max-width:400px;display:flex;align-items:center;justify-content:center;min-height:100dvh;">
-                <div class="glass-panel" style="padding:32px;text-align:center;">
-                    <i class='bx bx-lock' style="font-size:2rem;color:#ff6b6b;"></i>
-                    <h2 class="gradient-text" style="margin:12px 0 8px;">Accès restreint</h2>
-                    <p style="font-size:0.9rem;color:var(--color-text-secondary);">Ce panneau est réservé à l'administrateur.</p>
-                </div>
-            </main>`;
-        return;
+    function bootstrapTokenFromUrl() {
+        try {
+            const url = new URL(window.location.href);
+            const tokenFromUrl = url.searchParams.get('token');
+
+            if (tokenFromUrl) {
+                sessionStorage.setItem(SESSION_TOKEN_KEY, tokenFromUrl);
+                url.searchParams.delete('token');
+                window.history.replaceState({}, '', url.toString());
+                return tokenFromUrl;
+            }
+
+            return sessionStorage.getItem(SESSION_TOKEN_KEY) || '';
+        } catch {
+            return '';
+        }
     }
+
+    let token = bootstrapTokenFromUrl();
 
     // ── DOM ───────────────────────────────────────────────────────────────────
     const agencyList   = document.getElementById('agencyList');
     const loadingState = document.getElementById('loadingState');
     const adminError   = document.getElementById('adminError');
+    const authGate     = document.getElementById('authGate');
+    const authGateError = document.getElementById('authGateError');
+    const adminTokenInput = document.getElementById('adminTokenInput');
+    const adminTokenSubmit = document.getElementById('adminTokenSubmit');
     const btnRefresh   = document.getElementById('btnRefresh');
     const btnAdd       = document.getElementById('btnAddAgency');
+    const btnLogout    = document.getElementById('btnLogout');
 
     // Add/edit modal
     const addOverlay   = document.getElementById('addModalOverlay');
@@ -47,21 +58,54 @@
     const inId         = document.getElementById('newAgencyId');
     const inName       = document.getElementById('newAgencyName');
     const inExpiry     = document.getElementById('newAgencyExpiry');
-    const inPin        = document.getElementById('newAgencyPin');
 
     let editingId = null; // null = new agency
 
+    function setAuthenticatedUi(isAuthenticated) {
+        if (authGate) authGate.style.display = isAuthenticated ? 'none' : 'flex';
+        if (loadingState) loadingState.style.display = isAuthenticated ? 'flex' : 'none';
+        if (agencyList) agencyList.style.display = 'none';
+        if (btnAdd) btnAdd.style.display = isAuthenticated ? 'inline-flex' : 'none';
+        if (btnRefresh) btnRefresh.style.display = isAuthenticated ? 'inline-flex' : 'none';
+        if (btnLogout) btnLogout.style.display = isAuthenticated ? 'inline-flex' : 'none';
+    }
+
+    function clearToken() {
+        token = '';
+        try { sessionStorage.removeItem(SESSION_TOKEN_KEY); } catch { /* ignore */ }
+    }
+
+    function persistToken(value) {
+        token = value;
+        try { sessionStorage.setItem(SESSION_TOKEN_KEY, value); } catch { /* ignore */ }
+    }
+
+    function setAuthGateError(message) {
+        if (!authGateError) return;
+        authGateError.textContent = message;
+        authGateError.style.display = message ? 'block' : 'none';
+    }
+
+    function buildAuthHeaders(extraHeaders = {}) {
+        return {
+            ...extraHeaders,
+            'Authorization': `Bearer ${token}`
+        };
+    }
+
     // ── API calls ─────────────────────────────────────────────────────────────
     async function apiGet() {
-        const r = await fetch(`/api/admin-agencies?token=${encodeURIComponent(TOKEN)}`);
+        const r = await fetch('/api/admin-agencies', {
+            headers: buildAuthHeaders()
+        });
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
     }
 
     async function apiPost(body) {
-        const r = await fetch(`/api/admin-agencies?token=${encodeURIComponent(TOKEN)}`, {
+        const r = await fetch('/api/admin-agencies', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: buildAuthHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(body)
         });
         if (!r.ok) {
@@ -166,6 +210,13 @@
 
     // ── Load ──────────────────────────────────────────────────────────────────
     async function loadAgencies() {
+        if (!token) {
+            setAuthenticatedUi(false);
+            setAuthGateError('');
+            return;
+        }
+
+        setAuthenticatedUi(true);
         loadingState.style.display = 'flex';
         agencyList.style.display = 'none';
         adminError.style.display = 'none';
@@ -181,8 +232,15 @@
             loadingState.style.display = 'none';
             agencyList.style.display = 'flex';
         } catch (e) {
+            if (e.message === 'HTTP 401') {
+                clearToken();
+                loadingState.style.display = 'none';
+                setAuthenticatedUi(false);
+                setAuthGateError('Token invalide. Réessayez.');
+                return;
+            }
             loadingState.style.display = 'none';
-            adminError.textContent = 'Erreur de chargement : ' + e.message + '. Vérifiez votre token.';
+            adminError.textContent = 'Erreur de chargement : ' + e.message + '.';
             adminError.style.display = 'block';
         }
     }
@@ -201,7 +259,6 @@
         editingId = null;
         inId.value = '';
         inName.value = '';
-        inPin.value = '';
         const next = new Date();
         next.setMonth(next.getMonth() + 1);
         inExpiry.value = next.toISOString().slice(0, 10);
@@ -217,7 +274,6 @@
         editingId = a.id;
         inId.value = a.id;
         inName.value = a.agencyName || '';
-        inPin.value = '';
         inExpiry.value = a.licenseExpiresAt ? a.licenseExpiresAt.slice(0, 10) : '';
         inId.disabled = true;
         addTitle.textContent = 'Modifier l\'agence';
@@ -238,7 +294,6 @@
         const id = editingId || inId.value.trim().toLowerCase();
         const name = inName.value.trim();
         const expiry = inExpiry.value;
-        const pin = inPin.value.trim();
 
         if (!id || !/^[a-z0-9_]{1,64}$/.test(id)) {
             addError.textContent = 'ID invalide (lettres minuscules, chiffres, underscores, max 64 chars)';
@@ -256,7 +311,6 @@
             agencyName: name,
             licenseExpiresAt: new Date(expiry + 'T23:59:59Z').toISOString()
         };
-        if (pin) body.pin = pin;
 
         try {
             await apiPost(body);
@@ -275,6 +329,33 @@
     addOverlay.addEventListener('click', closeModal);
     btnAdd.addEventListener('click', openAddModal);
     btnRefresh.addEventListener('click', loadAgencies);
+    btnLogout.addEventListener('click', () => {
+        clearToken();
+        setAuthenticatedUi(false);
+        setAuthGateError('');
+        adminError.style.display = 'none';
+        if (adminTokenInput) adminTokenInput.value = '';
+    });
+
+    async function handleAuthSubmit() {
+        const candidate = adminTokenInput.value.trim();
+        if (!candidate) {
+            setAuthGateError('Token requis.');
+            return;
+        }
+
+        setAuthGateError('');
+        persistToken(candidate);
+        await loadAgencies();
+    }
+
+    adminTokenSubmit.addEventListener('click', handleAuthSubmit);
+    adminTokenInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            handleAuthSubmit();
+        }
+    });
 
     // ── Boot ───────────────────────────────────────────────────────────────────
     loadAgencies();
