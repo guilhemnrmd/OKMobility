@@ -25,7 +25,7 @@
 // 1. State & Configuration
 // ============================================================================
 const config = {
-    publicClientUrl: 'https://ok-mobility-retailer.pages.dev/',
+    publicClientUrl: window.location.origin + '/',
     peerPrefix: 'OKM-',
     codeLength: 6,
     iceServers: [

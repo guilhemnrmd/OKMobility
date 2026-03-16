@@ -29,7 +29,8 @@ const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 60;
 const rateLimitStore = new Map();
 const ALLOWED_ORIGINS = new Set([
-    'https://ok-mobility-retailer.pages.dev'
+    'https://ok-mobility-retailer.pages.dev',
+    'https://develop.ok-mobility-retailer.pages.dev'
 ]);
 const ALLOWED_HOST_SUFFIXES = ['.ok-mobility-retailer.pages.dev'];
 
@@ -70,14 +71,20 @@ function getTrustedOrigin(request) {
     if (isAllowedOrigin(origin)) return origin;
 
     const referer = request.headers.get('referer');
-    if (!referer) return null;
-
-    try {
-        const refererOrigin = new URL(referer).origin;
-        return isAllowedOrigin(refererOrigin) ? refererOrigin : null;
-    } catch {
-        return null;
+    if (referer) {
+        try {
+            const refererOrigin = new URL(referer).origin;
+            if (isAllowedOrigin(refererOrigin)) return refererOrigin;
+        } catch { /* ignore */ }
     }
+
+    // Allow same-host requests without origin header
+    const host = request.headers.get('host') || '';
+    if (host === 'ok-mobility-retailer.pages.dev' ||
+        host.endsWith('.ok-mobility-retailer.pages.dev')) {
+        return 'https://' + host;
+    }
+    return null;
 }
 
 function buildJsonHeaders(trustedOrigin) {
