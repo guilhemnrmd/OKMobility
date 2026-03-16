@@ -357,9 +357,16 @@ function generateQRCode(sessionCode) {
     // Clear previous QR code
     dom.qrCode.innerHTML = '';
     
-    // Build the client URL with the session code
+    // Build the client URL with the session code + agency (so client sees agency name)
     const clientPageUrl = new URL(config.publicClientUrl);
     clientPageUrl.searchParams.set('code', sessionCode);
+
+    // Inject agency if known (set by runLicenseGate via window._okmAgencyId)
+    const agencyId = window._okmAgencyId
+        || new URLSearchParams(window.location.search).get('agency')
+        || '';
+    if (agencyId) clientPageUrl.searchParams.set('agency', agencyId);
+
     const clientUrl = clientPageUrl.href;
     
     // Generate QR code
@@ -946,6 +953,9 @@ setRemoteLanguage(state.lang, false);
 if (typeof window.runLicenseGate === 'function') {
     window.runLicenseGate()
         .then(agencyId => {
+            // Make agencyId available to generateQRCode() for QR URL building
+            window._okmAgencyId = agencyId;
+
             // Display the agency name in the header slogan
             const cached = (() => {
                 try {
