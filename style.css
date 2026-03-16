@@ -292,16 +292,17 @@ body {
     grid-column: 1;
     grid-row: 1;
     min-height: 44px;
-    padding: 10px 18px;
+    padding: 0;
 }
 
 .logo-picture {
-    display: block;
+    display: flex;
+    align-items: center;
     line-height: 0;
 }
 
 .logo-img {
-    height: 22px;
+    height: 44px;
     width: auto;
 }
 
@@ -2176,11 +2177,11 @@ button, .btn-primary, .btn-secondary {
     .logo {
         min-width: 0;
         min-height: 40px;
-        padding: 8px 14px;
+        padding: 0;
     }
 
     .logo-img {
-        height: 20px;
+        height: 40px;
     }
 
     .brand-slogan {
