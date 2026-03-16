@@ -2162,14 +2162,15 @@ button, .btn-primary, .btn-secondary {
     .glass-header {
         flex-direction: row;
         flex-wrap: wrap;
-        align-items: center;
+        align-items: flex-start;
         justify-content: space-between;
         gap: 10px;
     }
 
     .header-brand {
-        width: auto;
-        flex: 0 0 auto;
+        width: 100%;
+        flex: 1 1 100%;
+        gap: 6px;
     }
 
     .logo-img {
@@ -2177,7 +2178,14 @@ button, .btn-primary, .btn-secondary {
     }
 
     .brand-slogan {
-        display: none;
+        display: block;
+        max-width: 100%;
+        font-size: 0.62rem;
+        line-height: 1.3;
+        letter-spacing: 0.03em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .header-controls {
