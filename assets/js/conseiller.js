@@ -355,6 +355,20 @@ function sanitizeAgencyId(id) {
     return /^[a-z0-9_]{1,64}$/.test(id) ? id : null;
 }
 
+function resolveAgencyId() {
+    const fromUrl = sanitizeAgencyId(new URLSearchParams(window.location.search).get('agency'));
+    if (fromUrl) return fromUrl;
+
+    try {
+        const fromStorage = sanitizeAgencyId(localStorage.getItem('okm_agency'));
+        if (fromStorage) return fromStorage;
+    } catch {
+        // Ignore storage access issues and continue without agency context.
+    }
+
+    return null;
+}
+
 // ============================================================================
 // 4. QR Code Generation
 // ============================================================================
@@ -367,7 +381,7 @@ function generateQRCode(sessionCode) {
     clientPageUrl.searchParams.set('code', sessionCode);
 
     // Keep agency context from retailer URL so client page can show the right agency name.
-    const agencyId = sanitizeAgencyId(new URLSearchParams(window.location.search).get('agency'));
+    const agencyId = resolveAgencyId();
     if (agencyId) {
         clientPageUrl.searchParams.set('agency', agencyId);
     }
