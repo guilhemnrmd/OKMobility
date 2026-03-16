@@ -4,20 +4,19 @@
  * License Gate — Runs before PeerJS initialisation on /retailer/
  *
  * Flow:
- *  1. Show agency pre-selection menu (no ?agency= needed in URL)
+ *  1. Read agencyId from localStorage (set once on first visit)
+ *     → If missing: show agency pre-selection dropdown (one-time only)
  *  2. Check localStorage cache (30-day validity + licenseVersion)
- *  3. If cache miss/expired → call /api/check-license
- *  4. If server says invalid/expired → show permanent error gate
- *  5. If firstActivation → show CGU modal (accept → POST /api/accept-terms)
- *  6. If device fingerprint differs from stored one → show PIN modal
- *  7. All done → resolve()  → caller runs initializePeer()
+ *     → If cache miss/expired: call /api/check-license
+ *  3. If server says invalid/expired → show permanent error gate
+ *  4. If firstActivation → show CGU modal → POST /api/accept-terms
+ *  5. All done → resolve() → caller runs initializePeer()
  */
 
 // ── Anti-DevTools: disable right-click and common shortcuts ──────────────────
 (function antiDevTools() {
     document.addEventListener('contextmenu', e => e.preventDefault());
     document.addEventListener('keydown', e => {
-        // Block F12, Ctrl+Shift+I/J/C/U, Cmd+Opt+I (macOS)
         if (
             e.key === 'F12' ||
             ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'j', 'c'].includes(e.key.toLowerCase())) ||
@@ -30,30 +29,30 @@
 
 // ── Constants ────────────────────────────────────────────────────────────────
 const CACHE_KEY_PREFIX   = 'okm_lic_';
-const FINGERPRINT_KEY    = 'okm_fp';
+const AGENCY_STORAGE_KEY = 'okm_agency';  // Persists selected agencyId
 const CACHE_TTL_MS       = 30 * 24 * 60 * 60 * 1000; // 30 days
 
-// Known agencies — only these appear in the pre-menu.
-// Agency names come from KV on first load; the menu uses this as a display helper.
+// Known agencies shown in the pre-menu (one-time agency selection).
+// Only shown on a device that hasn't selected an agency yet.
 const KNOWN_AGENCIES = [
-    { id: 'valencia_aero_01',      label: 'OK Mobility Valencia Aeropuerto' },
-    { id: 'valencia_sorolla_01',   label: 'OK Mobility Estación Joaquín Sorolla' }
+    { id: 'valencia_aero_01',    label: 'OK Mobility Valencia Aeropuerto' },
+    { id: 'valencia_sorolla_01', label: 'OK Mobility Estación Joaquín Sorolla' }
 ];
 
 // ── DOM helpers ───────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 
 function showGate(reason) {
-    const gate = $('licenseGate');
-    const icon = $('licenseGateIcon');
-    const title = $('licenseGateTitle');
-    const msg = $('licenseGateMsg');
+    const gate   = $('licenseGate');
+    const icon   = $('licenseGateIcon');
+    const title  = $('licenseGateTitle');
+    const msg    = $('licenseGateMsg');
 
     const states = {
         no_agency: {
             icon: 'bx-question-mark',
             title: 'Agencia no seleccionada',
-            text: 'No se ha podido determinar la agencia. Por favor escanee el QR correcto o contacte con soporte.'
+            text: 'No se ha podido determinar la agencia. Contacte con el soporte técnico.'
         },
         not_found: {
             icon: 'bx-block',
@@ -63,12 +62,12 @@ function showGate(reason) {
         expired: {
             icon: 'bx-time',
             title: 'Licencia expirada',
-            text: 'La licencia de esta agencia ha vencido. Por favor contacte con el proveedor para renovarla.'
+            text: 'La licencia de esta agencia ha vencido. Contacte con el proveedor para renovarla.'
         },
         error: {
             icon: 'bx-error-circle',
             title: 'Error de activación',
-            text: 'No se ha podido verificar la licencia. Compruebe su conexión y recargue la página.'
+            text: 'No se ha podido verificar la licencia. Compruebe su conexión e inténtelo de nuevo.'
         }
     };
 
@@ -77,23 +76,6 @@ function showGate(reason) {
     title.textContent = s.title;
     msg.textContent = s.text;
     gate.style.display = 'flex';
-}
-
-// ── Device fingerprint ────────────────────────────────────────────────────────
-function getDeviceFingerprint() {
-    const raw = [
-        navigator.userAgent,
-        screen.width + 'x' + screen.height,
-        Intl.DateTimeFormat().resolvedOptions().timeZone,
-        navigator.language
-    ].join('|');
-
-    // Fast non-cryptographic hash (djb2)
-    let hash = 5381;
-    for (let i = 0; i < raw.length; i++) {
-        hash = ((hash << 5) + hash) ^ raw.charCodeAt(i);
-    }
-    return (hash >>> 0).toString(36);
 }
 
 // ── localStorage cache ────────────────────────────────────────────────────────
@@ -111,8 +93,7 @@ function loadCache(agencyId) {
         const raw = localStorage.getItem(CACHE_KEY_PREFIX + agencyId);
         if (!raw) return null;
         const data = JSON.parse(raw);
-        const age = Date.now() - (data.cachedAt || 0);
-        return age < CACHE_TTL_MS ? data : null;
+        return (Date.now() - (data.cachedAt || 0)) < CACHE_TTL_MS ? data : null;
     } catch (_) {
         return null;
     }
@@ -135,22 +116,12 @@ async function apiAcceptTerms(agencyId) {
     return res.json();
 }
 
-async function apiVerifyPin(agencyId, pin) {
-    const res = await fetch('/api/verify-pin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ agencyId, pin })
-    });
-    if (!res.ok) return { valid: false };
-    return res.json();
-}
-
-// ── Pre-selection menu ────────────────────────────────────────────────────────
+// ── One-time agency pre-selection menu ───────────────────────────────────────
+// Only shown when no agencyId is stored in localStorage.
+// After selection, the ID is persisted — the menu never appears again.
 function buildAgencyMenu() {
     return new Promise(resolve => {
-        // Build overlay
         const overlay = document.createElement('div');
-        overlay.id = 'agencyMenuOverlay';
         overlay.className = 'modal-overlay';
 
         const modal = document.createElement('div');
@@ -160,22 +131,22 @@ function buildAgencyMenu() {
         modal.innerHTML = `
             <div class="modal-header">
                 <i class='bx bx-building-house' style="font-size:1.5rem;margin-right:8px;color:var(--color-accent);"></i>
-                <h2>Seleccionar agencia</h2>
+                <h2>Configuración inicial</h2>
             </div>
             <p style="font-size:0.9rem;color:var(--color-text-secondary);margin-bottom:4px;">
-                ¿En qué agencia se encuentra?
+                Seleccione la agencia a la que pertenece este terminal. Esto sólo se pregunta una vez.
             </p>
             <div class="custom-select-wrapper" style="width:100%;">
-                <select id="agencyMenuSelect" class="overlay-select" style="width:100%;">
+                <select id="_agencyMenuSel" class="overlay-select" style="width:100%;">
                     <option value="" disabled selected>— Seleccione su agencia —</option>
                     ${KNOWN_AGENCIES.map(a => `<option value="${a.id}">${a.label}</option>`).join('')}
                 </select>
                 <i class='bx bx-chevron-down select-arrow'></i>
             </div>
             <div class="modal-actions" style="margin-top:16px;">
-                <button id="agencyMenuConfirm" class="btn-primary glass-btn" disabled>
+                <button id="_agencyMenuBtn" class="btn-primary glass-btn" disabled>
                     <i class='bx bx-check-circle'></i>
-                    <span>Confirmar</span>
+                    <span>Confirmar agencia</span>
                 </button>
             </div>
         `;
@@ -183,16 +154,16 @@ function buildAgencyMenu() {
         document.body.appendChild(overlay);
         document.body.appendChild(modal);
 
-        const sel = modal.querySelector('#agencyMenuSelect');
-        const btn = modal.querySelector('#agencyMenuConfirm');
+        const sel = modal.querySelector('#_agencyMenuSel');
+        const btn = modal.querySelector('#_agencyMenuBtn');
 
-        sel.addEventListener('change', () => {
-            btn.disabled = !sel.value;
-        });
+        sel.addEventListener('change', () => { btn.disabled = !sel.value; });
 
         btn.addEventListener('click', () => {
             const id = sel.value;
             if (!id) return;
+            // Persist selection — never show again on this device
+            try { localStorage.setItem(AGENCY_STORAGE_KEY, id); } catch (_) {}
             overlay.remove();
             modal.remove();
             resolve(id);
@@ -220,83 +191,37 @@ function showTermsModal(agencyName) {
     });
 }
 
-// ── PIN modal ─────────────────────────────────────────────────────────────────
-function showPinModal(agencyId) {
-    return new Promise(resolve => {
-        const pinOverlay = $('pinModalOverlay');
-        const pinModal   = $('pinModal');
-        const pinInput   = $('pinInput');
-        const pinError   = $('pinError');
-        const pinSubmit  = $('pinBtnSubmit');
-
-        pinOverlay.style.display = 'block';
-        pinModal.style.display = 'flex';
-        pinInput.focus();
-
-        let attempts = 0;
-
-        async function tryPin() {
-            const pin = pinInput.value.trim();
-            if (!pin) return;
-
-            pinSubmit.disabled = true;
-            pinError.textContent = '';
-            pinSubmit.innerHTML = `<i class='bx bx-loader-alt bx-spin'></i><span>Verificando...</span>`;
-
-            try {
-                const result = await apiVerifyPin(agencyId, pin);
-                if (result.valid) {
-                    pinOverlay.style.display = 'none';
-                    pinModal.style.display = 'none';
-                    resolve();
-                } else {
-                    attempts++;
-                    if (attempts >= 5) {
-                        pinError.textContent = '⛔ Demasiados intentos. Contacte con soporte.';
-                        pinSubmit.disabled = true;
-                        return;
-                    }
-                    pinError.textContent = `PIN incorrecto (${attempts}/5). Inténtelo de nuevo.`;
-                    pinInput.value = '';
-                    pinInput.focus();
-                    pinSubmit.disabled = false;
-                    pinSubmit.innerHTML = `<i class='bx bx-log-in'></i><span>Verificar</span>`;
-                }
-            } catch {
-                pinError.textContent = 'Error de red. Compruebe su conexión.';
-                pinSubmit.disabled = false;
-                pinSubmit.innerHTML = `<i class='bx bx-log-in'></i><span>Verificar</span>`;
-            }
-        }
-
-        pinSubmit.addEventListener('click', tryPin);
-        pinInput.addEventListener('keydown', e => {
-            if (e.key === 'Enter') tryPin();
-        });
-    });
-}
-
 // ── Main gate function ────────────────────────────────────────────────────────
 /**
- * Call this BEFORE initializePeer().
- * Returns a promise that resolves with the agencyId when the terminal is cleared.
- * The caller should use the returned agencyId to set page context (title, etc.)
+ * Call BEFORE initializePeer().
+ * Resolves with agencyId when the terminal is cleared.
+ * Rejects (with reason string) if the terminal should be blocked.
  */
 window.runLicenseGate = async function () {
-    // 1. Get agencyId from URL or show pre-selection menu
+    const knownIds = KNOWN_AGENCIES.map(a => a.id);
+
+    // 1. Get agencyId — from URL param, localStorage, or one-time menu
     const urlParams = new URLSearchParams(window.location.search);
     let agencyId = urlParams.get('agency') || '';
 
-    const knownIds = KNOWN_AGENCIES.map(a => a.id);
     if (!agencyId || !knownIds.includes(agencyId)) {
+        // Try localStorage first (avoids re-showing the menu)
+        agencyId = localStorage.getItem(AGENCY_STORAGE_KEY) || '';
+    }
+
+    if (!agencyId || !knownIds.includes(agencyId)) {
+        // First time on this device — show one-time selection menu
         agencyId = await buildAgencyMenu();
-        // Update URL silently (no reload)
+    }
+
+    // Sync URL silently (useful for bookmarking / diagnostic)
+    try {
         const url = new URL(window.location.href);
         url.searchParams.set('agency', agencyId);
         window.history.replaceState({}, '', url.toString());
-    }
+    } catch (_) {}
 
-    // 2. Try local cache
+    // 2. Try local cache (30-day TTL)
     let license = loadCache(agencyId);
 
     if (!license) {
@@ -305,39 +230,32 @@ window.runLicenseGate = async function () {
             const result = await apiCheckLicense(agencyId);
             if (!result.valid) {
                 showGate(result.reason || 'not_found');
-                return Promise.reject('license_invalid');
+                return Promise.reject('license_invalid:' + (result.reason || 'unknown'));
             }
             saveCache(agencyId, result);
             license = result;
-        } catch {
-            // Network error — if we had a previous cache (even expired), let through
-            const staleRaw = (() => {
-                try { return JSON.parse(localStorage.getItem(CACHE_KEY_PREFIX + agencyId)); } catch { return null; }
-            })();
-            if (staleRaw?.valid) {
-                license = staleRaw;
-            } else {
+        } catch (fetchErr) {
+            // Network error — allow stale cache if available
+            try {
+                const stale = JSON.parse(localStorage.getItem(CACHE_KEY_PREFIX + agencyId));
+                if (stale?.valid) { license = stale; }
+                else { showGate('error'); return Promise.reject('license_network_error'); }
+            } catch {
                 showGate('error');
                 return Promise.reject('license_network_error');
             }
         }
     } else {
-        // Cache hit — still check licenseVersion server-side if possible
-        try {
-            const result = await apiCheckLicense(agencyId);
+        // Cache hit — run a background re-validation to catch revocations/renewals
+        apiCheckLicense(agencyId).then(result => {
             if (!result.valid) {
+                // Clear cache and show gate on next interaction
                 localStorage.removeItem(CACHE_KEY_PREFIX + agencyId);
                 showGate(result.reason || 'not_found');
-                return Promise.reject('license_revoked');
-            }
-            // Refresh cache if version changed
-            if ((result.licenseVersion || 1) > (license.licenseVersion || 1)) {
+            } else if ((result.licenseVersion || 1) > (license.licenseVersion || 1)) {
                 saveCache(agencyId, result);
-                license = result;
             }
-        } catch {
-            // Offline — continue with cached data
-        }
+        }).catch(() => { /* offline — continue with cached data */ });
     }
 
     // 4. First activation → CGU modal
@@ -345,21 +263,8 @@ window.runLicenseGate = async function () {
         await showTermsModal(license.agencyName || agencyId);
         try {
             await apiAcceptTerms(agencyId);
-            // Update cache — firstActivation now false
             saveCache(agencyId, { ...license, firstActivation: false });
-        } catch {
-            // Log silently, don't block
-        }
-    }
-
-    // 5. Device fingerprint check
-    const fp = getDeviceFingerprint();
-    const storedFp = localStorage.getItem(FINGERPRINT_KEY + '_' + agencyId);
-
-    if (storedFp !== fp) {
-        await showPinModal(agencyId);
-        // Store fingerprint after successful PIN
-        try { localStorage.setItem(FINGERPRINT_KEY + '_' + agencyId, fp); } catch (_) {}
+        } catch (_) { /* Log silently, don't block */ }
     }
 
     // Close any open modals

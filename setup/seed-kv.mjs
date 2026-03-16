@@ -38,7 +38,6 @@ const agencies = [
             agencyName: 'OK Mobility Valencia Aeropuerto',
             licenseExpiresAt: '2027-03-16T00:00:00Z',
             firstActivation: true,
-            pin: '2847',
             licenseVersion: 1
         }
     },
@@ -48,7 +47,6 @@ const agencies = [
             agencyName: 'OK Mobility Estación Joaquín Sorolla',
             licenseExpiresAt: '2027-03-16T00:00:00Z',
             firstActivation: true,
-            pin: '3916',
             licenseVersion: 1
         }
     }
@@ -79,12 +77,9 @@ async function main() {
         console.log('✅');
     }
     console.log('\n✨  Done! Both agencies are ready in KV.\n');
-    console.log('📝  QR Code URLs to give to each agency:');
+    console.log('📝  URLs à scanner pour chaque agence :');
     console.log('    Valencia Aeropuerto : /retailer/?agency=valencia_aero_01');
     console.log('    Joaquín Sorolla     : /retailer/?agency=valencia_sorolla_01\n');
-    console.log('🔒  PINs (à transmettre séparément et en sécurité):');
-    console.log('    Valencia Aeropuerto : 2847');
-    console.log('    Joaquín Sorolla     : 3916\n');
 }
 
 main().catch(e => { console.error('❌', e.message); process.exit(1); });
