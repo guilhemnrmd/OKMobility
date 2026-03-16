@@ -1366,3 +1366,40 @@ if (dom.advisorCodeInput) {
 // Initialize
 attachRealTimeListeners();
 checkUrlForAdvisorCode();
+
+// ============================================================================
+// Agency name display (when client scans a retailer QR code with ?agency=)
+// Shows agency name in the header slogan — purely informational / reassuring.
+// ============================================================================
+(async function maybeShowAgencyName() {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const agencyId = params.get('agency');
+        if (!agencyId || !/^[a-z0-9_]{1,64}$/.test(agencyId)) return;
+
+        // Try to read from localStorage cache first (set by license-gate.js on /retailer/)
+        const cacheKey = 'okm_lic_' + agencyId;
+        const cached = (() => {
+            try { return JSON.parse(localStorage.getItem(cacheKey)); } catch { return null; }
+        })();
+
+        let agencyName = cached?.agencyName || '';
+
+        if (!agencyName) {
+            // Fallback: ask the server — lightweight, fast
+            const res = await fetch(`/api/check-license?agency=${encodeURIComponent(agencyId)}`);
+            if (res.ok) {
+                const data = await res.json();
+                agencyName = data?.agencyName || '';
+            }
+        }
+
+        if (!agencyName) return;
+
+        const slogan = document.querySelector('.brand-slogan');
+        if (slogan) {
+            slogan.textContent = agencyName;
+            slogan.title = agencyName;
+        }
+    } catch (_) { /* Non-blocking — never break the main form */ }
+})();

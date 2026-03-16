@@ -10,8 +10,7 @@
  *
  * KV Namespace: OKM_LICENSES (bound as env.OKM_LICENSES)
  * KV Keys:
- *   agency:{id}                → license entry (JSON)
- *   sessions:{YYYY-MM-DD}:{id} → daily session counter (string number, TTL 25h)
+ *   agency:{id} → license entry (JSON)
  */
 
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
@@ -144,12 +143,11 @@ export async function onRequest(context) {
         });
     }
 
-    // Daily session counter
-    return new Response(JSON.stringify(licenseRaw ? {
+    return new Response(JSON.stringify({
         valid: true,
         agencyName: license.agencyName,
         firstActivation: license.firstActivation === true,
         licenseVersion: license.licenseVersion || 1
-    } : { valid: false, reason: 'not_found' }), { status: 200, headers: buildHeaders(trustedOrigin) });
+    }), { status: 200, headers: buildHeaders(trustedOrigin) });
 
 }
