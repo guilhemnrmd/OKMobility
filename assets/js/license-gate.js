@@ -137,6 +137,7 @@ function buildAgencyMenu() {
                 Seleccione la agencia a la que pertenece este terminal. Esto sólo se pregunta una vez.
             </p>
             <div class="custom-select-wrapper" style="width:100%;">
+                <div id="_agencyMenuDisplay" class="country-display">— Seleccione su agencia —</div>
                 <select id="_agencyMenuSel" class="overlay-select" style="width:100%;">
                     <option value="" disabled selected>— Seleccione su agencia —</option>
                     ${KNOWN_AGENCIES.map(a => `<option value="${a.id}">${a.label}</option>`).join('')}
@@ -156,8 +157,16 @@ function buildAgencyMenu() {
 
         const sel = modal.querySelector('#_agencyMenuSel');
         const btn = modal.querySelector('#_agencyMenuBtn');
+        const display = modal.querySelector('#_agencyMenuDisplay');
 
-        sel.addEventListener('change', () => { btn.disabled = !sel.value; });
+        sel.addEventListener('change', () => {
+            btn.disabled = !sel.value;
+
+            if (display) {
+                const selectedOption = sel.options[sel.selectedIndex];
+                display.textContent = selectedOption?.textContent || '— Seleccione su agencia —';
+            }
+        });
 
         btn.addEventListener('click', () => {
             const id = sel.value;
