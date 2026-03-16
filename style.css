@@ -288,7 +288,7 @@ body {
 .logo {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     grid-column: 1;
     grid-row: 1;
     min-height: 44px;
