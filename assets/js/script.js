@@ -280,12 +280,15 @@ const state = {
     advisorConnection: null,
     advisorConnected: false,
     sendDebounceTimer: null,
-    lastSentPayload: null
+    lastSentPayload: null,
+    agencyId: null,
+    agencyName: null
 };
 
 const dom = {
     html: document.documentElement,
     langSelect: document.getElementById('languageSelect'),
+    agencyBrandText: document.getElementById('agencyBrandText'),
     // Form and Views
     form: document.getElementById('clientForm'),
     summaryView: document.getElementById('summaryView'),
@@ -328,6 +331,45 @@ const dom = {
     clientStatusIndicator: document.getElementById('clientStatusIndicator'),
     clientStatusText: document.getElementById('clientStatusText')
 };
+
+const DEFAULT_BRAND_SLOGAN = 'The Global Mobility Platform';
+
+function sanitizeAgencyId(id) {
+    if (typeof id !== 'string') return null;
+    return /^[a-z0-9_]{1,64}$/.test(id) ? id : null;
+}
+
+function setAgencyBranding(agencyName) {
+    if (!dom.agencyBrandText) return;
+    dom.agencyBrandText.textContent = agencyName || DEFAULT_BRAND_SLOGAN;
+}
+
+async function hydrateAgencyBrandingFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const agencyId = sanitizeAgencyId(params.get('agency'));
+    state.agencyId = agencyId;
+
+    if (!agencyId) {
+        setAgencyBranding('');
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/check-license?agency=${encodeURIComponent(agencyId)}`);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const payload = await res.json();
+
+        if (payload?.valid && typeof payload.agencyName === 'string' && payload.agencyName.trim()) {
+            state.agencyName = payload.agencyName.trim().slice(0, 120);
+            setAgencyBranding(state.agencyName);
+            return;
+        }
+    } catch (err) {
+        console.warn('Unable to resolve agency branding:', err.message);
+    }
+
+    setAgencyBranding('');
+}
 
 // ============================================================================
 // 3. Language Switcher (i18n & RTL)
@@ -649,6 +691,7 @@ state.lang = sessionStorage.getItem('okm_lang') || detectUserLanguage();
 sessionStorage.removeItem('okm_lang');
 dom.langSelect.value = state.lang; // Sync UI Select box
 applyLanguage(state.lang);
+hydrateAgencyBrandingFromUrl();
 
 // ============================================================================
 // 7. Dynamic Data (Country Dial Codes)
@@ -1366,40 +1409,3 @@ if (dom.advisorCodeInput) {
 // Initialize
 attachRealTimeListeners();
 checkUrlForAdvisorCode();
-
-// ============================================================================
-// Agency name display (when client scans a retailer QR code with ?agency=)
-// Shows agency name in the header slogan — purely informational / reassuring.
-// ============================================================================
-(async function maybeShowAgencyName() {
-    try {
-        const params = new URLSearchParams(window.location.search);
-        const agencyId = params.get('agency');
-        if (!agencyId || !/^[a-z0-9_]{1,64}$/.test(agencyId)) return;
-
-        // Try to read from localStorage cache first (set by license-gate.js on /retailer/)
-        const cacheKey = 'okm_lic_' + agencyId;
-        const cached = (() => {
-            try { return JSON.parse(localStorage.getItem(cacheKey)); } catch { return null; }
-        })();
-
-        let agencyName = cached?.agencyName || '';
-
-        if (!agencyName) {
-            // Fallback: ask the server — lightweight, fast
-            const res = await fetch(`/api/check-license?agency=${encodeURIComponent(agencyId)}`);
-            if (res.ok) {
-                const data = await res.json();
-                agencyName = data?.agencyName || '';
-            }
-        }
-
-        if (!agencyName) return;
-
-        const slogan = document.querySelector('.brand-slogan');
-        if (slogan) {
-            slogan.textContent = agencyName;
-            slogan.title = agencyName;
-        }
-    } catch (_) { /* Non-blocking — never break the main form */ }
-})();

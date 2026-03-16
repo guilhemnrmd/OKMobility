@@ -25,7 +25,7 @@
 // 1. State & Configuration
 // ============================================================================
 const config = {
-    publicClientUrl: window.location.origin + '/',
+    publicClientUrl: 'https://ok-mobility-retailer.pages.dev/',
     peerPrefix: 'OKM-',
     codeLength: 6,
     iceServers: [
@@ -350,6 +350,11 @@ function generateSessionCode() {
     return code;
 }
 
+function sanitizeAgencyId(id) {
+    if (typeof id !== 'string') return null;
+    return /^[a-z0-9_]{1,64}$/.test(id) ? id : null;
+}
+
 // ============================================================================
 // 4. QR Code Generation
 // ============================================================================
@@ -357,15 +362,15 @@ function generateQRCode(sessionCode) {
     // Clear previous QR code
     dom.qrCode.innerHTML = '';
     
-    // Build the client URL with the session code + agency (so client sees agency name)
+    // Build the client URL with the session code
     const clientPageUrl = new URL(config.publicClientUrl);
     clientPageUrl.searchParams.set('code', sessionCode);
 
-    // Inject agency if known (set by runLicenseGate via window._okmAgencyId)
-    const agencyId = window._okmAgencyId
-        || new URLSearchParams(window.location.search).get('agency')
-        || '';
-    if (agencyId) clientPageUrl.searchParams.set('agency', agencyId);
+    // Keep agency context from retailer URL so client page can show the right agency name.
+    const agencyId = sanitizeAgencyId(new URLSearchParams(window.location.search).get('agency'));
+    if (agencyId) {
+        clientPageUrl.searchParams.set('agency', agencyId);
+    }
 
     const clientUrl = clientPageUrl.href;
     
@@ -946,38 +951,7 @@ dom.langSelect.addEventListener('change', (e) => {
 });
 
 // ============================================================================
-// 12. Initialize — License gate runs first, then PeerJS
+// 12. Initialize
 // ============================================================================
 setRemoteLanguage(state.lang, false);
-
-if (typeof window.runLicenseGate === 'function') {
-    window.runLicenseGate()
-        .then(agencyId => {
-            // Make agencyId available to generateQRCode() for QR URL building
-            window._okmAgencyId = agencyId;
-
-            // Display the agency name in the header slogan
-            const cached = (() => {
-                try {
-                    const raw = localStorage.getItem('okm_lic_' + agencyId);
-                    return raw ? JSON.parse(raw) : null;
-                } catch { return null; }
-            })();
-            const agencyName = cached?.agencyName || '';
-            if (agencyName) {
-                const slogan = document.querySelector('.brand-slogan');
-                if (slogan) {
-                    slogan.textContent = agencyName;
-                    slogan.title = agencyName;
-                }
-            }
-            initializePeer();
-        })
-        .catch(reason => {
-            // Gate blocked — do NOT initializePeer
-            console.warn('[OKM] License gate blocked startup:', reason);
-        });
-} else {
-    // Fallback — gate script not loaded (should not happen in prod)
-    initializePeer();
-}
+initializePeer();
