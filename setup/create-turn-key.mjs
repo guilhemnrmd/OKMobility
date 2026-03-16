@@ -19,7 +19,8 @@ const API_TOKEN  = process.env.CLOUDFLARE_API_TOKEN;
 const CF_EMAIL = process.env.CLOUDFLARE_EMAIL;
 const CF_GLOBAL_API_KEY = process.env.CLOUDFLARE_GLOBAL_API_KEY;
 const KEY_NAME   = process.env.TURN_KEY_NAME || 'OKMobility-WebRTC';
-const WRANGLER_PROJECT_NAME = process.env.WRANGLER_PROJECT_NAME || '';
+const DEFAULT_PAGES_PROJECT_NAME = 'ok-mobility-form';
+const WRANGLER_PROJECT_NAME = process.env.WRANGLER_PROJECT_NAME || DEFAULT_PAGES_PROJECT_NAME;
 const AUTO_DEPLOY = process.env.AUTO_DEPLOY === '1';
 
 const authHeaders = API_TOKEN
@@ -154,27 +155,16 @@ Vérifie :
   console.log('  API Token : [MASQUÉ — jamais affiché]');
   console.log('─'.repeat(60));
 
-  if (WRANGLER_PROJECT_NAME) {
-    console.log(`\n🔐  Enregistrement sécurisé des secrets dans Pages (${WRANGLER_PROJECT_NAME})...`);
-    await putPagesSecret('TURN_KEY_ID', keyId, WRANGLER_PROJECT_NAME);
-    await putPagesSecret('TURN_API_TOKEN', keyToken, WRANGLER_PROJECT_NAME);
-    console.log('✅  Secrets TURN enregistrés (sans affichage des valeurs).');
+  console.log(`\n🔐  Enregistrement sécurisé des secrets dans Pages (${WRANGLER_PROJECT_NAME})...`);
+  await putPagesSecret('TURN_KEY_ID', keyId, WRANGLER_PROJECT_NAME);
+  await putPagesSecret('TURN_API_TOKEN', keyToken, WRANGLER_PROJECT_NAME);
+  console.log('✅  Secrets TURN enregistrés (sans affichage des valeurs).');
+  console.log('ℹ️  Secrets Pages: liés au projet (production + preview de ce projet).');
 
-    if (AUTO_DEPLOY) {
-      console.log('\n📦  Déploiement en cours...');
-      await deployPages(WRANGLER_PROJECT_NAME);
-      console.log('✅  Déploiement terminé.');
-    }
-  } else {
-    console.log(`
-ℹ️  Mode sécurisé activé: le secret TURN n'est jamais affiché.
-
-Pour injecter automatiquement les secrets sans les copier-coller:
-  WRANGLER_PROJECT_NAME=ok-mobility-retailer node setup/create-turn-key.mjs
-
-Pour injecter + déployer automatiquement:
-  WRANGLER_PROJECT_NAME=ok-mobility-retailer AUTO_DEPLOY=1 node setup/create-turn-key.mjs
-`);
+  if (AUTO_DEPLOY) {
+    console.log('\n📦  Déploiement en cours...');
+    await deployPages(WRANGLER_PROJECT_NAME);
+    console.log('✅  Déploiement terminé.');
   }
 
   console.log(`
@@ -183,6 +173,10 @@ Pour injecter + déployer automatiquement:
   curl -s -o - -w "\\nHTTP %{http_code}\\n" -X POST \\
     -H "Origin: https://ok-mobility-retailer.pages.dev" \\
     https://ok-mobility-retailer.pages.dev/api/turn-credentials
+
+Exemples :
+  node setup/create-turn-key.mjs
+  WRANGLER_PROJECT_NAME=ok-mobility-form AUTO_DEPLOY=1 node setup/create-turn-key.mjs
 `);
 }
 
