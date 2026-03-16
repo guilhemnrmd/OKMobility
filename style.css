@@ -2167,9 +2167,11 @@ button, .btn-primary, .btn-secondary {
     }
 
     .header-brand {
-        width: auto;
+        display: contents;
+    }
+
+    .logo {
         min-width: 0;
-        gap: 6px;
     }
 
     .logo-img {
@@ -2186,6 +2188,7 @@ button, .btn-primary, .btn-secondary {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        margin-top: 2px;
     }
 
     .header-controls {
