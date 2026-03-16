@@ -1212,111 +1212,6 @@ input::placeholder {
 }
 
 /* =========================================================================
-   License Gate Overlay
-   ========================================================================= */
-
-.license-gate {
-    position: fixed;
-    inset: 0;
-    z-index: 200;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    background:
-        radial-gradient(circle at 40% 35%, rgba(32, 84, 234, 0.14), transparent 55%),
-        radial-gradient(circle at 70% 70%, rgba(255, 59, 48, 0.08), transparent 50%);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    animation: fadeIn var(--transition-base) forwards;
-}
-
-.license-gate-card {
-    max-width: 400px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: var(--spacing-sm);
-    padding: clamp(28px, 6vw, 44px);
-}
-
-.license-gate-icon {
-    width: 72px;
-    height: 72px;
-    border-radius: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, rgba(255, 59, 48, 0.18), rgba(255, 149, 0, 0.14));
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    box-shadow: 0 10px 24px rgba(255, 59, 48, 0.12);
-    color: #ff6b6b;
-    font-size: 2rem;
-    margin-bottom: 4px;
-}
-
-.license-gate-card h2 {
-    font-size: 1.3rem;
-    font-weight: 700;
-}
-
-.license-gate-card p {
-    font-size: 0.9rem;
-    color: var(--color-text-secondary);
-    line-height: 1.5;
-}
-
-.license-gate-contact a {
-    color: var(--color-accent);
-    text-decoration: none;
-}
-
-.license-gate-contact a:hover {
-    text-decoration: underline;
-}
-
-/* Terms modal body */
-.terms-body {
-    font-size: 0.88rem;
-    line-height: 1.6;
-    color: var(--color-text-secondary);
-    max-height: 240px;
-    overflow-y: auto;
-    padding-right: 4px;
-}
-
-.terms-body ul {
-    list-style: none;
-    padding: 0;
-    margin: 8px 0 0;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.terms-body li {
-    padding: 8px 12px;
-    background: rgba(32, 84, 234, 0.05);
-    border-radius: var(--radius-sm);
-    border-left: 2px solid rgba(32, 84, 234, 0.3);
-}
-
-@media (prefers-color-scheme: dark) {
-    .license-gate-icon {
-        background: linear-gradient(135deg, rgba(255, 69, 58, 0.2), rgba(255, 159, 10, 0.16));
-        border-color: rgba(255, 255, 255, 0.12);
-        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
-        color: #ff9a7a;
-    }
-    .terms-body li {
-        background: rgba(32, 84, 234, 0.1);
-        border-left-color: rgba(32, 84, 234, 0.5);
-    }
-}
-
-/* =========================================================================
    Conseiller (Advisor) Page Styles
    ========================================================================= */
 
@@ -2029,7 +1924,6 @@ button, .btn-primary, .btn-secondary {
 }
 
 
-.summary-actions {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
