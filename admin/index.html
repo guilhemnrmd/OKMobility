@@ -23,6 +23,125 @@
             flex-wrap: wrap;
         }
 
+        .toolbar-left,
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-note {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+        }
+
+        .btn-chip {
+            padding: 7px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--color-border);
+            background: rgba(255,255,255,0.45);
+            color: var(--color-text-primary);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-smooth);
+        }
+
+        .btn-chip:hover {
+            border-color: var(--color-accent);
+            color: var(--color-accent);
+            background: rgba(255,255,255,0.75);
+        }
+
+        .btn-chip.active {
+            border-color: var(--color-accent);
+            color: var(--color-accent);
+            background: rgba(0, 102, 204, 0.1);
+        }
+
+        .bulk-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: var(--spacing-sm) var(--spacing-md);
+        }
+
+        .bulk-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .bulk-date {
+            background: rgba(255,255,255,0.5);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            padding: 8px 10px;
+            color: var(--color-text-primary);
+            font-family: inherit;
+        }
+
+        .bulk-selection {
+            font-size: 0.82rem;
+            color: var(--color-text-secondary);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            color: var(--color-text-secondary);
+            padding: 4px 2px;
+        }
+
+        .archive-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .archive-list {
+            display: none;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        .archive-list.open {
+            display: flex;
+        }
+
+        .archive-toggle {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+        }
+
+        .select-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.76rem;
+            color: var(--color-text-secondary);
+            user-select: none;
+        }
+
+        .select-box input {
+            width: 14px;
+            height: 14px;
+            accent-color: var(--color-accent);
+            cursor: pointer;
+        }
+
         .agency-list {
             display: flex;
             flex-direction: column;
@@ -250,6 +369,20 @@
                 background: rgba(28,28,30,0.5);
                 border-color: rgba(255,255,255,0.15);
             }
+
+            .btn-chip {
+                background: rgba(28,28,30,0.45);
+                border-color: rgba(255,255,255,0.15);
+            }
+
+            .btn-chip:hover {
+                background: rgba(28,28,30,0.75);
+            }
+
+            .bulk-date {
+                background: rgba(28,28,30,0.5);
+                border-color: rgba(255,255,255,0.15);
+            }
         }
 
         @media (max-width: 640px) {
@@ -295,6 +428,34 @@
                 <h1 class="gradient-text">Gestion des licences</h1>
             </div>
 
+            <div class="admin-toolbar glass-panel" id="adminToolbar" style="display:none;">
+                <div class="toolbar-left">
+                    <button id="btnSelectAllVisible" class="btn-chip" type="button">Sélectionner visibles</button>
+                    <button id="btnClearSelection" class="btn-chip" type="button">Vider sélection</button>
+                </div>
+                <div class="toolbar-right">
+                    <span id="selectionCount" class="toolbar-note">0 sélectionnée</span>
+                </div>
+            </div>
+
+            <div id="bulkPanel" class="bulk-panel glass-panel" style="display:none;">
+                <div class="bulk-row">
+                    <strong>Modification en lot</strong>
+                    <span class="bulk-selection">(surtout utile pour l'expiration)</span>
+                </div>
+                <div class="bulk-row">
+                    <input type="date" id="bulkExpiryInput" class="bulk-date">
+                    <button id="btnBulkUpdateExpiry" class="btn-sm" type="button">
+                        <i class='bx bx-calendar-edit'></i>
+                        Appliquer la date
+                    </button>
+                    <button id="btnBulkRenewYear" class="btn-sm" type="button">
+                        <i class='bx bx-calendar-plus'></i>
+                        +1 an sur la sélection
+                    </button>
+                </div>
+            </div>
+
             <div id="authGate" class="auth-gate glass-panel" style="display:none;">
                 <div>
                     <h2 style="font-size:1rem; font-weight:700; margin-bottom:6px;">Accès administrateur</h2>
@@ -316,6 +477,14 @@
             </div>
 
             <div id="agencyList" class="agency-list" style="display:none;"></div>
+
+            <div id="expiredArchiveWrap" class="archive-wrap" style="display:none;">
+                <button id="btnExpiredArchive" class="btn-sm archive-toggle" type="button">
+                    <span><i class='bx bx-archive-in'></i> Expirées</span>
+                    <span><span id="expiredArchiveInfo">0</span> <span id="expiredArchiveChevron">▸</span></span>
+                </button>
+                <div id="expiredArchiveList" class="archive-list"></div>
+            </div>
         </section>
     </main>
 
@@ -354,6 +523,6 @@
         </div>
     </div>
 
-    <script src="/assets/js/admin.js?v=2"></script>
+    <script src="/assets/js/admin.js?v=3"></script>
 </body>
 </html>

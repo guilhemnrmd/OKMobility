@@ -47,6 +47,19 @@
     const btnRefresh   = document.getElementById('btnRefresh');
     const btnAdd       = document.getElementById('btnAddAgency');
     const btnLogout    = document.getElementById('btnLogout');
+    const adminToolbar = document.getElementById('adminToolbar');
+    const bulkPanel = document.getElementById('bulkPanel');
+    const selectionCount = document.getElementById('selectionCount');
+    const btnSelectAllVisible = document.getElementById('btnSelectAllVisible');
+    const btnClearSelection = document.getElementById('btnClearSelection');
+    const bulkExpiryInput = document.getElementById('bulkExpiryInput');
+    const btnBulkUpdateExpiry = document.getElementById('btnBulkUpdateExpiry');
+    const btnBulkRenewYear = document.getElementById('btnBulkRenewYear');
+    const expiredArchiveWrap = document.getElementById('expiredArchiveWrap');
+    const expiredArchiveList = document.getElementById('expiredArchiveList');
+    const btnExpiredArchive = document.getElementById('btnExpiredArchive');
+    const expiredArchiveInfo = document.getElementById('expiredArchiveInfo');
+    const expiredArchiveChevron = document.getElementById('expiredArchiveChevron');
 
     // Add/edit modal
     const addOverlay   = document.getElementById('addModalOverlay');
@@ -60,14 +73,42 @@
     const inExpiry     = document.getElementById('newAgencyExpiry');
 
     let editingId = null; // null = new agency
+    let agenciesCache = [];
+    let selectedAgencyIds = new Set();
 
     function setAuthenticatedUi(isAuthenticated) {
         if (authGate) authGate.style.display = isAuthenticated ? 'none' : 'flex';
         if (loadingState) loadingState.style.display = isAuthenticated ? 'flex' : 'none';
         if (agencyList) agencyList.style.display = 'none';
+        if (expiredArchiveWrap) expiredArchiveWrap.style.display = 'none';
+        if (adminToolbar) adminToolbar.style.display = isAuthenticated ? 'flex' : 'none';
+        if (bulkPanel) bulkPanel.style.display = isAuthenticated ? 'flex' : 'none';
         if (btnAdd) btnAdd.style.display = isAuthenticated ? 'inline-flex' : 'none';
         if (btnRefresh) btnRefresh.style.display = isAuthenticated ? 'inline-flex' : 'none';
         if (btnLogout) btnLogout.style.display = isAuthenticated ? 'inline-flex' : 'none';
+    }
+
+    function updateSelectionUi() {
+        const count = selectedAgencyIds.size;
+        if (selectionCount) {
+            selectionCount.textContent = `${count} sélectionnée${count > 1 ? 's' : ''}`;
+        }
+
+        if (btnBulkUpdateExpiry) btnBulkUpdateExpiry.disabled = count === 0;
+        if (btnBulkRenewYear) btnBulkRenewYear.disabled = count === 0;
+    }
+
+    function syncCardCheckboxes() {
+        document.querySelectorAll('.agency-select-checkbox').forEach((input) => {
+            const agencyId = input.dataset.agencyId;
+            input.checked = selectedAgencyIds.has(agencyId);
+        });
+        updateSelectionUi();
+    }
+
+    function setSelection(ids) {
+        selectedAgencyIds = new Set(ids);
+        syncCardCheckboxes();
     }
 
     function clearToken() {
@@ -140,10 +181,16 @@
                     <div class="agency-name">${escHtml(a.agencyName || a.id)}</div>
                     <div class="agency-id">${escHtml(a.id)}</div>
                 </div>
-                <span class="badge ${expired ? 'badge-expired' : 'badge-ok'}">
-                    <i class='bx ${expired ? 'bx-x-circle' : 'bx-check-circle'}'></i>
-                    ${expired ? 'Expirée' : 'Active'}
-                </span>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <label class="select-box">
+                        <input type="checkbox" class="agency-select-checkbox" data-agency-id="${escHtml(a.id)}">
+                        <span>Sélection</span>
+                    </label>
+                    <span class="badge ${expired ? 'badge-expired' : 'badge-ok'}">
+                        <i class='bx ${expired ? 'bx-x-circle' : 'bx-check-circle'}'></i>
+                        ${expired ? 'Expirée' : 'Active'}
+                    </span>
+                </div>
             </div>
             <div class="agency-meta">
                 <span><i class='bx bx-calendar'></i> Expiration&nbsp;: <strong>${formatDate(a.licenseExpiresAt)}</strong></span>
@@ -165,6 +212,17 @@
                 <!-- inline edit, opened by JS -->
             </div>
         `;
+
+        const selectInput = card.querySelector('.agency-select-checkbox');
+        selectInput.checked = selectedAgencyIds.has(a.id);
+        selectInput.addEventListener('change', () => {
+            if (selectInput.checked) {
+                selectedAgencyIds.add(a.id);
+            } else {
+                selectedAgencyIds.delete(a.id);
+            }
+            updateSelectionUi();
+        });
 
         // Edit
         card.querySelector('.btn-edit').addEventListener('click', () => openEditModal(a));
@@ -223,14 +281,41 @@
 
         try {
             const data = await apiGet();
+            agenciesCache = Array.isArray(data.agencies) ? data.agencies.slice() : [];
+
+            const byId = new Set(agenciesCache.map((a) => a.id));
+            selectedAgencyIds.forEach((id) => {
+                if (!byId.has(id)) selectedAgencyIds.delete(id);
+            });
+
+            const activeAgencies = agenciesCache.filter((a) => !isExpired(a.licenseExpiresAt));
+            const expiredAgencies = agenciesCache.filter((a) => isExpired(a.licenseExpiresAt));
+
             agencyList.innerHTML = '';
-            if (!data.agencies || data.agencies.length === 0) {
+            expiredArchiveList.innerHTML = '';
+
+            if (agenciesCache.length === 0) {
                 agencyList.innerHTML = '<p style="color:var(--color-text-secondary);text-align:center;padding:20px;">Aucune agence configurée.</p>';
+                expiredArchiveWrap.style.display = 'none';
             } else {
-                data.agencies.forEach(a => agencyList.appendChild(renderAgency(a)));
+                if (activeAgencies.length > 0) {
+                    const title = document.createElement('div');
+                    title.className = 'section-title';
+                    title.innerHTML = `<span>Actives</span><span>${activeAgencies.length}</span>`;
+                    agencyList.appendChild(title);
+                    activeAgencies.forEach((a) => agencyList.appendChild(renderAgency(a)));
+                } else {
+                    agencyList.innerHTML = '<p style="color:var(--color-text-secondary);text-align:center;padding:12px 20px;">Aucune licence active.</p>';
+                }
+
+                expiredArchiveInfo.textContent = String(expiredAgencies.length);
+                expiredArchiveWrap.style.display = expiredAgencies.length > 0 ? 'flex' : 'none';
+
+                expiredAgencies.forEach((a) => expiredArchiveList.appendChild(renderAgency(a)));
             }
             loadingState.style.display = 'none';
             agencyList.style.display = 'flex';
+            syncCardCheckboxes();
         } catch (e) {
             if (e.message === 'HTTP 401') {
                 clearToken();
@@ -329,11 +414,126 @@
     addOverlay.addEventListener('click', closeModal);
     btnAdd.addEventListener('click', openAddModal);
     btnRefresh.addEventListener('click', loadAgencies);
+    btnSelectAllVisible.addEventListener('click', () => {
+        const ids = [];
+        document.querySelectorAll('.agency-select-checkbox').forEach((input) => {
+            if (input.offsetParent !== null) {
+                ids.push(input.dataset.agencyId);
+            }
+        });
+        setSelection(ids);
+    });
+
+    btnClearSelection.addEventListener('click', () => {
+        selectedAgencyIds.clear();
+        syncCardCheckboxes();
+    });
+
+    btnExpiredArchive.addEventListener('click', () => {
+        expiredArchiveList.classList.toggle('open');
+        const isOpen = expiredArchiveList.classList.contains('open');
+        if (expiredArchiveChevron) expiredArchiveChevron.textContent = isOpen ? '▾' : '▸';
+    });
+
+    btnBulkUpdateExpiry.addEventListener('click', async () => {
+        const ids = Array.from(selectedAgencyIds);
+        if (ids.length === 0) {
+            showMsg('Sélection vide.', true);
+            return;
+        }
+
+        if (!bulkExpiryInput.value) {
+            showMsg('Choisis une date d\'expiration pour la modification en lot.', true);
+            return;
+        }
+
+        if (!confirm(`Appliquer la date ${bulkExpiryInput.value} à ${ids.length} agence(s) ?`)) return;
+
+        btnBulkUpdateExpiry.disabled = true;
+        const targetIso = new Date(`${bulkExpiryInput.value}T23:59:59Z`).toISOString();
+        let ok = 0;
+        let fail = 0;
+
+        try {
+            for (const id of ids) {
+                const agency = agenciesCache.find((a) => a.id === id);
+                if (!agency) {
+                    fail += 1;
+                    continue;
+                }
+
+                try {
+                    await apiPost({
+                        action: 'upsert',
+                        agencyId: agency.id,
+                        agencyName: agency.agencyName,
+                        licenseExpiresAt: targetIso
+                    });
+                    ok += 1;
+                } catch {
+                    fail += 1;
+                }
+            }
+
+            showMsg(`Mise à jour en lot terminée: ${ok} succès, ${fail} échec(s).`, fail > 0);
+            await loadAgencies();
+        } finally {
+            btnBulkUpdateExpiry.disabled = false;
+        }
+    });
+
+    btnBulkRenewYear.addEventListener('click', async () => {
+        const ids = Array.from(selectedAgencyIds);
+        if (ids.length === 0) {
+            showMsg('Sélection vide.', true);
+            return;
+        }
+
+        if (!confirm(`Ajouter +1 an à ${ids.length} agence(s) sélectionnée(s) ?`)) return;
+
+        btnBulkRenewYear.disabled = true;
+        let ok = 0;
+        let fail = 0;
+
+        try {
+            for (const id of ids) {
+                const agency = agenciesCache.find((a) => a.id === id);
+                if (!agency) {
+                    fail += 1;
+                    continue;
+                }
+
+                try {
+                    const current = agency.licenseExpiresAt ? new Date(agency.licenseExpiresAt) : new Date();
+                    const renewed = new Date(Math.max(current, new Date()));
+                    renewed.setFullYear(renewed.getFullYear() + 1);
+                    await apiPost({
+                        action: 'upsert',
+                        agencyId: agency.id,
+                        agencyName: agency.agencyName,
+                        licenseExpiresAt: renewed.toISOString()
+                    });
+                    ok += 1;
+                } catch {
+                    fail += 1;
+                }
+            }
+
+            showMsg(`Renouvellement en lot terminé: ${ok} succès, ${fail} échec(s).`, fail > 0);
+            await loadAgencies();
+        } finally {
+            btnBulkRenewYear.disabled = false;
+        }
+    });
+
     btnLogout.addEventListener('click', () => {
         clearToken();
         setAuthenticatedUi(false);
         setAuthGateError('');
         adminError.style.display = 'none';
+        selectedAgencyIds.clear();
+        agenciesCache = [];
+        updateSelectionUi();
         if (adminTokenInput) adminTokenInput.value = '';
     });
 
@@ -356,6 +556,8 @@
             handleAuthSubmit();
         }
     });
+
+    updateSelectionUi();
 
     // ── Boot ───────────────────────────────────────────────────────────────────
     loadAgencies();
