@@ -339,6 +339,13 @@ function sanitizeAgencyId(id) {
     return /^[a-z0-9_]{1,64}$/.test(id) ? id : null;
 }
 
+function sanitizeAgencyName(name) {
+    if (typeof name !== 'string') return null;
+
+    const cleaned = name.trim().replace(/\s+/g, ' ').slice(0, 120);
+    return cleaned || null;
+}
+
 function setAgencyBranding(agencyName) {
     if (!dom.agencyBrandText) return;
     dom.agencyBrandText.textContent = agencyName || DEFAULT_BRAND_SLOGAN;
@@ -347,10 +354,18 @@ function setAgencyBranding(agencyName) {
 async function hydrateAgencyBrandingFromUrl() {
     const params = new URLSearchParams(window.location.search);
     const agencyId = sanitizeAgencyId(params.get('agency'));
+    const agencyNameFromQr = sanitizeAgencyName(params.get('agencyName'));
     state.agencyId = agencyId;
+    state.agencyName = agencyNameFromQr;
+
+    if (agencyNameFromQr) {
+        setAgencyBranding(agencyNameFromQr);
+    }
 
     if (!agencyId) {
-        setAgencyBranding('');
+        if (!agencyNameFromQr) {
+            setAgencyBranding('');
+        }
         return;
     }
 
@@ -360,7 +375,7 @@ async function hydrateAgencyBrandingFromUrl() {
         const payload = await res.json();
 
         if (payload?.valid && typeof payload.agencyName === 'string' && payload.agencyName.trim()) {
-            state.agencyName = payload.agencyName.trim().slice(0, 120);
+            state.agencyName = sanitizeAgencyName(payload.agencyName);
             setAgencyBranding(state.agencyName);
             return;
         }
@@ -368,7 +383,9 @@ async function hydrateAgencyBrandingFromUrl() {
         console.warn('Unable to resolve agency branding:', err.message);
     }
 
-    setAgencyBranding('');
+    if (!agencyNameFromQr) {
+        setAgencyBranding('');
+    }
 }
 
 // ============================================================================

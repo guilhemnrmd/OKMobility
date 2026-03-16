@@ -369,6 +369,34 @@ function resolveAgencyId() {
     return null;
 }
 
+function sanitizeAgencyName(name) {
+    if (typeof name !== 'string') return null;
+
+    const cleaned = name.trim().replace(/\s+/g, ' ').slice(0, 120);
+    return cleaned || null;
+}
+
+function resolveAgencyName() {
+    const slogan = document.querySelector('.brand-slogan');
+    const sloganText = sanitizeAgencyName(slogan?.textContent || '');
+    if (sloganText && sloganText !== 'Vista Asesor') {
+        return sloganText;
+    }
+
+    const agencyId = resolveAgencyId();
+    if (!agencyId) return null;
+
+    try {
+        const raw = localStorage.getItem('okm_lic_' + agencyId);
+        if (!raw) return null;
+
+        const cached = JSON.parse(raw);
+        return sanitizeAgencyName(cached?.agencyName || '');
+    } catch {
+        return null;
+    }
+}
+
 // ============================================================================
 // 4. QR Code Generation
 // ============================================================================
@@ -384,6 +412,11 @@ function generateQRCode(sessionCode) {
     const agencyId = resolveAgencyId();
     if (agencyId) {
         clientPageUrl.searchParams.set('agency', agencyId);
+    }
+
+    const agencyName = resolveAgencyName();
+    if (agencyName) {
+        clientPageUrl.searchParams.set('agencyName', agencyName);
     }
 
     const clientUrl = clientPageUrl.href;
