@@ -103,9 +103,10 @@
     body * {
         cursor: var(--app-cursor-url), auto !important;
     }
-
-    a,
-    button,
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: flex-start;
+    gap: 10px 12px;
     [role="button"],
     select,
     summary,
@@ -116,10 +117,7 @@
     .btn-link-status,
     .btn-reset,
     .custom-checkbox,
-    .lang-selector,
-    .overlay-select,
-    .qr-code-frame,
-    .qr-lightbox,
+    display: contents;
     .qr-lightbox-frame {
         cursor: var(--app-cursor-click-url), pointer !important;
     }
@@ -159,6 +157,9 @@ body {
     color: var(--color-text-primary);
     line-height: 1.5;
     min-height: 100vh;
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -271,25 +272,25 @@ body {
    Header & Typography
    ========================================================================= */
 .glass-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: flex-start;
+    gap: 10px 12px;
     margin-bottom: var(--spacing-lg);
     border-bottom: 1px solid var(--color-border);
     padding-bottom: var(--spacing-sm);
 }
 
 .header-brand {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
+    display: contents;
 }
 
 .logo {
     display: flex;
     align-items: center;
     justify-content: center;
+    grid-column: 1;
+    grid-row: 1;
     min-height: 44px;
     padding: 10px 18px;
 }
@@ -309,6 +310,8 @@ body {
 }
 
 .brand-slogan {
+    grid-column: 1 / -1;
+    grid-row: 2;
     font-size: 0.74rem;
     font-weight: 600;
     letter-spacing: 0.05em;
@@ -319,6 +322,9 @@ body {
 .header-controls {
     display: flex;
     align-items: center;
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
     gap: 10px;
 }
 
@@ -336,12 +342,17 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    grid-column: 1 / -1;
+    grid-row: 2;
     cursor: pointer;
     padding: 0;
     transition: all var(--transition-smooth);
     flex-shrink: 0;
 }
 
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
 .btn-reset:hover {
     background: rgba(255, 255, 255, 0.75);
     box-shadow: 0 6px 20px rgba(32, 84, 234, 0.15);
@@ -859,8 +870,7 @@ input::placeholder {
     display: block;
 }
 
-.info-btn {
-    background: none;
+        gap: 12px;
     border: none;
     color: var(--color-accent);
     font-size: 1.3rem;
@@ -2073,17 +2083,10 @@ button, .btn-primary, .btn-secondary {
     }
 
     .glass-header {
-        flex-wrap: wrap;
-        align-items: flex-start;
         gap: 12px;
     }
 
-    .header-brand {
-        max-width: 100%;
-    }
-
     .header-controls {
-        margin-left: auto;
         flex-wrap: wrap;
         justify-content: flex-end;
         gap: 8px;
@@ -2163,9 +2166,6 @@ button, .btn-primary, .btn-secondary {
     }
 
     .glass-header {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        align-items: flex-start;
         gap: 10px;
     }
 
@@ -2175,8 +2175,6 @@ button, .btn-primary, .btn-secondary {
 
     .logo {
         min-width: 0;
-        grid-column: 1;
-        grid-row: 1;
         min-height: 40px;
         padding: 8px 14px;
     }
@@ -2202,8 +2200,6 @@ button, .btn-primary, .btn-secondary {
     .header-controls {
         flex: 0 0 auto;
         width: auto;
-        grid-column: 2;
-        grid-row: 1;
         justify-content: flex-end;
         flex-wrap: wrap;
         margin-left: 0;
