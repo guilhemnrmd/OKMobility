@@ -40,6 +40,8 @@
     const agencyList   = document.getElementById('agencyList');
     const loadingState = document.getElementById('loadingState');
     const adminError   = document.getElementById('adminError');
+    const adminToast   = document.getElementById('adminToast');
+    const adminSyncIndicator = document.getElementById('adminSyncIndicator');
     const authGate     = document.getElementById('authGate');
     const authGateError = document.getElementById('authGateError');
     const adminTokenInput = document.getElementById('adminTokenInput');
@@ -75,6 +77,9 @@
     let editingId = null; // null = new agency
     let agenciesCache = [];
     let selectedAgencyIds = new Set();
+    let toastTimer = null;
+    let syncTimer = null;
+    let lastRenderedSnapshot = '[]';
 
     function setAuthenticatedUi(isAuthenticated) {
         if (authGate) authGate.style.display = isAuthenticated ? 'none' : 'flex';
@@ -86,6 +91,31 @@
         if (btnAdd) btnAdd.style.display = isAuthenticated ? 'inline-flex' : 'none';
         if (btnRefresh) btnRefresh.style.display = isAuthenticated ? 'inline-flex' : 'none';
         if (btnLogout) btnLogout.style.display = isAuthenticated ? 'inline-flex' : 'none';
+        if (!isAuthenticated && adminSyncIndicator) {
+            adminSyncIndicator.classList.remove('active');
+        }
+    }
+
+    function normalizeAgenciesForSnapshot(agencies) {
+        return agencies
+            .map((a) => ({
+                id: a.id || '',
+                agencyName: a.agencyName || '',
+                licenseExpiresAt: a.licenseExpiresAt || null,
+                firstActivation: !!a.firstActivation,
+                licenseVersion: a.licenseVersion || 1,
+                revokedAt: a.revokedAt || null
+            }))
+            .sort((a, b) => String(a.id).localeCompare(String(b.id)));
+    }
+
+    function snapshotAgencies(agencies) {
+        return JSON.stringify(normalizeAgenciesForSnapshot(agencies));
+    }
+
+    function setSyncIndicator(active) {
+        if (!adminSyncIndicator) return;
+        adminSyncIndicator.classList.toggle('active', !!active);
     }
 
     function updateSelectionUi() {
@@ -114,6 +144,10 @@
     function clearToken() {
         token = '';
         try { sessionStorage.removeItem(SESSION_TOKEN_KEY); } catch { /* ignore */ }
+        if (syncTimer) {
+            clearTimeout(syncTimer);
+            syncTimer = null;
+        }
     }
 
     function persistToken(value) {
@@ -248,7 +282,7 @@
                 });
                 renderAgenciesFromCache();
                 showMsg(`✅ Licence renouvelée jusqu'au ${formatDate(renewed.toISOString())}`);
-                scheduleBackgroundSync();
+                scheduleSilentSync();
             } catch (e) {
                 showMsg('❌ Erreur : ' + e.message, true);
             }
@@ -262,7 +296,7 @@
                 applyRevokeLocally(a.id);
                 renderAgenciesFromCache();
                 showMsg(`🔒 Licence révoquée.`);
-                scheduleBackgroundSync();
+                scheduleSilentSync();
             } catch (e) {
                 showMsg('❌ Erreur : ' + e.message, true);
             }
@@ -309,6 +343,7 @@
 
         agencyList.style.display = 'flex';
         syncCardCheckboxes();
+        lastRenderedSnapshot = snapshotAgencies(agenciesCache);
     }
 
     function applyUpsertLocally({ agencyId, agencyName, licenseExpiresAt }) {
@@ -345,13 +380,40 @@
         };
     }
 
-    function scheduleBackgroundSync() {
-        // KV reads can be eventually consistent; retry a few times before settling.
-        [1500, 4000, 8000].forEach((delay) => {
-            setTimeout(() => {
-                loadAgencies().catch(() => {});
-            }, delay);
-        });
+    function scheduleSilentSync() {
+        if (syncTimer) clearTimeout(syncTimer);
+        syncTimer = setTimeout(() => {
+            silentSync().catch(() => {});
+        }, 3000);
+    }
+
+    async function silentSync(forceRender = false) {
+        if (!token) return;
+
+        setSyncIndicator(true);
+        try {
+            const data = await apiGet();
+            const nextAgencies = Array.isArray(data.agencies) ? data.agencies.slice() : [];
+            const oldSnapshot = snapshotAgencies(agenciesCache);
+            const newSnapshot = snapshotAgencies(nextAgencies);
+
+            if (forceRender || oldSnapshot !== newSnapshot) {
+                agenciesCache = nextAgencies;
+                renderAgenciesFromCache();
+            }
+        } catch (e) {
+            if (e.message === 'HTTP 401') {
+                clearToken();
+                setAuthenticatedUi(false);
+                setAuthGateError('Token invalide. Réessayez.');
+                return;
+            }
+            if (forceRender) {
+                showMsg('Erreur de synchronisation : ' + e.message + '.', true);
+            }
+        } finally {
+            setSyncIndicator(false);
+        }
     }
 
     // ── Load ──────────────────────────────────────────────────────────────────
@@ -370,7 +432,10 @@
         try {
             const data = await apiGet();
             agenciesCache = Array.isArray(data.agencies) ? data.agencies.slice() : [];
-            renderAgenciesFromCache();
+            const currentSnapshot = snapshotAgencies(agenciesCache);
+            if (lastRenderedSnapshot !== currentSnapshot) {
+                renderAgenciesFromCache();
+            }
             loadingState.style.display = 'none';
         } catch (e) {
             if (e.message === 'HTTP 401') {
@@ -387,12 +452,25 @@
     }
 
     function showMsg(text, isErr = false) {
-        adminError.textContent = text;
-        adminError.style.background = isErr ? 'rgba(255,59,48,0.1)' : 'rgba(34,197,94,0.1)';
-        adminError.style.borderColor = isErr ? 'rgba(255,59,48,0.2)' : 'rgba(34,197,94,0.2)';
-        adminError.style.color = isErr ? '#ff6b6b' : '#22c55e';
-        adminError.style.display = 'block';
-        setTimeout(() => { adminError.style.display = 'none'; }, 4000);
+        if (!adminToast) {
+            adminError.textContent = text;
+            adminError.style.background = isErr ? 'rgba(255,59,48,0.1)' : 'rgba(34,197,94,0.1)';
+            adminError.style.borderColor = isErr ? 'rgba(255,59,48,0.2)' : 'rgba(34,197,94,0.2)';
+            adminError.style.color = isErr ? '#ff6b6b' : '#22c55e';
+            adminError.style.display = 'block';
+            setTimeout(() => { adminError.style.display = 'none'; }, 4000);
+            return;
+        }
+
+        if (toastTimer) clearTimeout(toastTimer);
+        adminToast.textContent = text;
+        adminToast.classList.remove('success', 'error', 'show');
+        adminToast.classList.add(isErr ? 'error' : 'success');
+        adminToast.classList.add('show');
+
+        toastTimer = setTimeout(() => {
+            adminToast.classList.remove('show');
+        }, 3800);
     }
 
     // ── Add/Edit modal helpers ─────────────────────────────────────────────────
@@ -459,7 +537,7 @@
             renderAgenciesFromCache();
             closeModal();
             showMsg(`✅ Agence "${name}" enregistrée.`);
-            scheduleBackgroundSync();
+            scheduleSilentSync();
         } catch (e) {
             addError.textContent = 'Erreur : ' + e.message;
         } finally {
@@ -471,7 +549,9 @@
     addCancel.addEventListener('click', closeModal);
     addOverlay.addEventListener('click', closeModal);
     btnAdd.addEventListener('click', openAddModal);
-    btnRefresh.addEventListener('click', loadAgencies);
+    btnRefresh.addEventListener('click', () => {
+        silentSync(true);
+    });
     if (btnSelectAllVisible) {
         btnSelectAllVisible.addEventListener('click', () => {
             const ids = [];
@@ -541,7 +621,7 @@
             }
 
             showMsg(`Mise à jour en lot terminée: ${ok} succès, ${fail} échec(s).`, fail > 0);
-            await loadAgencies();
+            scheduleSilentSync();
         } finally {
             btnBulkUpdateExpiry.disabled = false;
         }
@@ -587,7 +667,7 @@
             }
 
             showMsg(`Renouvellement en lot terminé: ${ok} succès, ${fail} échec(s).`, fail > 0);
-            await loadAgencies();
+            scheduleSilentSync();
         } finally {
             btnBulkRenewYear.disabled = false;
         }
@@ -599,8 +679,10 @@
         setAuthenticatedUi(false);
         setAuthGateError('');
         adminError.style.display = 'none';
+        if (adminToast) adminToast.classList.remove('show');
         selectedAgencyIds.clear();
         agenciesCache = [];
+        lastRenderedSnapshot = '[]';
         updateSelectionUi();
         if (adminTokenInput) adminTokenInput.value = '';
     });

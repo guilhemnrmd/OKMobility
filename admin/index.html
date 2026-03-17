@@ -36,6 +36,36 @@
             color: var(--color-text-secondary);
         }
 
+        .sync-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            color: var(--color-text-secondary);
+            opacity: 0;
+            transform: translateY(-2px);
+            transition: opacity var(--transition-base), transform var(--transition-base);
+            pointer-events: none;
+        }
+
+        .sync-indicator.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .sync-indicator i {
+            font-size: 1rem;
+        }
+
+        .sync-indicator.active i {
+            animation: spin-sync 0.8s linear infinite;
+        }
+
+        @keyframes spin-sync {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         .btn-chip {
             padding: 7px 12px;
             border-radius: 999px;
@@ -390,6 +420,41 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        .admin-toast {
+            position: fixed;
+            top: 14px;
+            left: 50%;
+            transform: translate(-50%, -10px);
+            z-index: 1000;
+            width: min(92vw, 560px);
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.25);
+            background: rgba(15, 23, 42, 0.92);
+            color: #f8fafc;
+            font-size: 0.88rem;
+            line-height: 1.35;
+            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.22);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity var(--transition-base), transform var(--transition-base);
+        }
+
+        .admin-toast.show {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+
+        .admin-toast.success {
+            border-color: rgba(34, 197, 94, 0.35);
+        }
+
+        .admin-toast.error {
+            border-color: rgba(255, 59, 48, 0.35);
+        }
     </style>
 </head>
 <body>
@@ -434,6 +499,10 @@
                     <button id="btnClearSelection" class="btn-chip" type="button">Vider sélection</button>
                 </div>
                 <div class="toolbar-right">
+                    <span id="adminSyncIndicator" class="sync-indicator" aria-live="polite">
+                        <i class='bx bx-refresh'></i>
+                        <span>Sync...</span>
+                    </span>
                     <span id="selectionCount" class="toolbar-note">0 sélectionnée</span>
                 </div>
             </div>
@@ -523,6 +592,8 @@
         </div>
     </div>
 
-    <script src="/assets/js/admin.js?v=4"></script>
+    <div id="adminToast" class="admin-toast" role="status" aria-live="polite"></div>
+
+    <script src="/assets/js/admin.js?v=5"></script>
 </body>
 </html>

@@ -34,11 +34,38 @@ const CACHE_TTL_MS       = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 // Known agencies shown in the pre-menu (one-time agency selection).
 // Only shown on a device that hasn't selected an agency yet.
-const KNOWN_AGENCIES = [
+// This static list is used as FALLBACK only if the dynamic API call fails.
+const FALLBACK_AGENCIES = [
     { id: 'valencia_aero_01',    label: 'OK Mobility Valencia Aeropuerto' },
     { id: 'valencia_sorolla_01', label: 'OK Mobility Estación Joaquín Sorolla' }
 ];
 
+const AGENCIES_SESSION_KEY = 'okm_agencies_list';
+
+async function fetchAgenciesList() {
+    // Check sessionStorage cache first
+    try {
+        const cached = sessionStorage.getItem(AGENCIES_SESSION_KEY);
+        if (cached) {
+            const data = JSON.parse(cached);
+            if (Array.isArray(data) && data.length > 0) return data;
+        }
+    } catch (_) {}
+
+    // Fetch from API
+    try {
+        const res = await fetch(`/api/list-agencies?ts=${Date.now()}`);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const json = await res.json();
+        if (Array.isArray(json.agencies) && json.agencies.length > 0) {
+            try { sessionStorage.setItem(AGENCIES_SESSION_KEY, JSON.stringify(json.agencies)); } catch (_) {}
+            return json.agencies;
+        }
+    } catch (_) {}
+
+    // Fallback to static list
+    return FALLBACK_AGENCIES;
+}
 // ── DOM helpers ───────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 
@@ -119,7 +146,7 @@ async function apiAcceptTerms(agencyId) {
 // ── One-time agency pre-selection menu ───────────────────────────────────────
 // Only shown when no agencyId is stored in localStorage.
 // After selection, the ID is persisted — the menu never appears again.
-function buildAgencyMenu() {
+function buildAgencyMenu(agencies) {
     return new Promise(resolve => {
         const overlay = document.createElement('div');
         overlay.className = 'modal-overlay';
@@ -140,7 +167,7 @@ function buildAgencyMenu() {
                 <div id="_agencyMenuDisplay" class="country-display">— Seleccione su agencia —</div>
                 <select id="_agencyMenuSel" class="overlay-select" style="width:100%;">
                     <option value="" disabled selected>— Seleccione su agencia —</option>
-                    ${KNOWN_AGENCIES.map(a => `<option value="${a.id}">${a.label}</option>`).join('')}
+                    ${agencies.map(a => `<option value="${a.id}">${a.label}</option>`).join('')}
                 </select>
                 <i class='bx bx-chevron-down select-arrow'></i>
             </div>
@@ -207,7 +234,9 @@ function showTermsModal(agencyName) {
  * Rejects (with reason string) if the terminal should be blocked.
  */
 window.runLicenseGate = async function () {
-    const knownIds = KNOWN_AGENCIES.map(a => a.id);
+    // Fetch the dynamic agency list from the server (fallback to static list)
+    const agencies = await fetchAgenciesList();
+    const knownIds = agencies.map(a => a.id);
 
     // 1. Get agencyId — from URL param, localStorage, or one-time menu
     const urlParams = new URLSearchParams(window.location.search);
@@ -220,7 +249,7 @@ window.runLicenseGate = async function () {
 
     if (!agencyId || !knownIds.includes(agencyId)) {
         // First time on this device — show one-time selection menu
-        agencyId = await buildAgencyMenu();
+        agencyId = await buildAgencyMenu(agencies);
     }
 
     // Sync URL silently (useful for bookmarking / diagnostic)
