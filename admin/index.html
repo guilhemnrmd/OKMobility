@@ -249,6 +249,60 @@
             flex-wrap: wrap;
         }
 
+        .agency-logs {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 4px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--color-border);
+        }
+
+        .agency-logs.open {
+            display: flex;
+        }
+
+        .agency-logs-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            color: var(--color-text-secondary);
+        }
+
+        .agency-logs-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 180px;
+            overflow: auto;
+            padding-right: 2px;
+        }
+
+        .agency-log-item {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 10px;
+            font-size: 0.78rem;
+            color: var(--color-text-secondary);
+            background: rgba(255,255,255,0.35);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            padding: 6px 8px;
+        }
+
+        .agency-log-item strong {
+            color: var(--color-text-primary);
+            font-weight: 600;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .agency-log-item {
+                background: rgba(28,28,30,0.45);
+                border-color: rgba(255,255,255,0.14);
+            }
+        }
+
         .btn-sm {
             padding: 6px 14px;
             font-size: 0.82rem;

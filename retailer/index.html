@@ -28,7 +28,7 @@
                         <img src="/assets/logos/okm-logo-white.svg" alt="OK Mobility Logo" class="logo-img logo-img-brand">
                     </picture>
                 </div>
-                <span class="brand-slogan">Vista Asesor</span>
+                <span class="brand-slogan" id="retailerAgencyBrandText" data-default-slogan="The Global Mobility Platform">The Global Mobility Platform</span>
             </div>
             <div class="header-controls">
                 <div class="lang-selector">
@@ -230,6 +230,10 @@
             </div>
             <h2 id="licenseGateTitle" class="gradient-text">Acceso no autorizado</h2>
             <p id="licenseGateMsg">Este terminal no dispone de una licencia activa.</p>
+            <button id="licenseGateActionBtn" class="btn-primary glass-btn" style="display:none; margin-top: 12px;">
+                <i class='bx bx-left-arrow-alt'></i>
+                <span>Seleccionar otra agencia</span>
+            </button>
             <p class="license-gate-contact">Contacto: <a href="mailto:guilhem.normand@icloud.com">guilhem.normand@icloud.com</a></p>
         </div>
     </div>
@@ -261,7 +265,7 @@
         </div>
     </div>
 
-    <script src="/assets/js/license-gate.js?v=4"></script>
+    <script src="/assets/js/license-gate.js?v=5"></script>
     <script src="/assets/js/conseiller.js?v=21"></script>
 </body>
 </html>

@@ -385,8 +385,16 @@ function sanitizeAgencyName(name) {
 function resolveAgencyName() {
     const slogan = document.querySelector('.brand-slogan');
     const sloganText = sanitizeAgencyName(slogan?.textContent || '');
-    if (sloganText && sloganText !== 'Vista Asesor') {
+    const defaultSlogan = sanitizeAgencyName(slogan?.dataset?.defaultSlogan || 'Vista Asesor');
+    if (sloganText && sloganText !== defaultSlogan) {
         return sloganText;
+    }
+
+    try {
+        const fromStorageName = sanitizeAgencyName(localStorage.getItem('okm_agency_name'));
+        if (fromStorageName) return fromStorageName;
+    } catch {
+        // Ignore storage issues.
     }
 
     const agencyId = resolveAgencyId();

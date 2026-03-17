@@ -184,13 +184,37 @@ export async function onRequest(context) {
             if (!raw) continue;
             try {
                 const data = JSON.parse(raw);
+                let stats = null;
+                try {
+                    const statsRaw = await env.OKM_LICENSES.get(`stats:${key.name.replace('agency:', '')}`);
+                    if (statsRaw) stats = JSON.parse(statsRaw);
+                } catch {
+                    stats = null;
+                }
+
                 agencies.push({
                     id: key.name.replace('agency:', ''),
                     agencyName: data.agencyName,
                     licenseExpiresAt: data.licenseExpiresAt,
                     firstActivation: data.firstActivation,
                     licenseVersion: data.licenseVersion || 1,
-                    revokedAt: data.revokedAt || null
+                    revokedAt: data.revokedAt || null,
+                    telemetry: {
+                        uniqueDevices30d: Number.isFinite(stats?.uniqueDevices30d) ? stats.uniqueDevices30d : 0,
+                        totalChecks: Number.isFinite(stats?.totalChecks) ? stats.totalChecks : 0,
+                        lastSeenAt: stats?.lastSeenAt || null,
+                        lastSeenCountry: stats?.lastSeenCountry || null,
+                        recentEvents: Array.isArray(stats?.recentEvents)
+                            ? stats.recentEvents
+                                .filter((evt) => evt && typeof evt === 'object')
+                                .map((evt) => ({
+                                    at: typeof evt.at === 'string' ? evt.at : null,
+                                    country: typeof evt.country === 'string' ? evt.country : 'XX',
+                                    device: typeof evt.device === 'string' ? evt.device : 'unknown'
+                                }))
+                                .slice(0, 30)
+                            : []
+                    }
                     // NOTE: PIN is intentionally omitted from the list response
                 });
             } catch { /* skip corrupted entries */ }

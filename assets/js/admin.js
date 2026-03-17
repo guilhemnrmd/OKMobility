@@ -204,11 +204,31 @@
         });
     }
 
+    function formatDateTime(dateStr) {
+        if (!dateStr) return '—';
+        return new Date(dateStr).toLocaleString('fr-FR', {
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', second: '2-digit'
+        });
+    }
+
     function renderAgency(a) {
         const expired = isExpired(a.licenseExpiresAt);
+        const isRevoked = !!a.revokedAt;
         const card = document.createElement('div');
         card.className = 'agency-card glass-panel';
         card.dataset.id = a.id;
+
+        const recentEvents = Array.isArray(a.telemetry?.recentEvents) ? a.telemetry.recentEvents : [];
+        const logsListHtml = recentEvents.length > 0
+            ? recentEvents.map((evt) => `
+                <div class="agency-log-item">
+                    <span><i class='bx bx-time-five'></i> <strong>${formatDateTime(evt.at)}</strong></span>
+                    <span><i class='bx bx-world'></i> ${escHtml(evt.country || 'XX')}</span>
+                    <span><i class='bx bx-devices'></i> ${escHtml(evt.device || 'unknown')}</span>
+                </div>
+            `).join('')
+            : '<div class="agency-log-item"><span>Aucun log de connexion disponible.</span></div>';
 
         card.innerHTML = `
             <div class="agency-card-header">
@@ -231,6 +251,8 @@
                 <span><i class='bx bx-calendar'></i> Expiration&nbsp;: <strong>${formatDate(a.licenseExpiresAt)}</strong></span>
                 <span><i class='bx bx-git-repo-forked'></i> v${a.licenseVersion || 1}</span>
                 <span><i class='bx bx-${a.firstActivation ? 'radio-circle' : 'check-circle'}'></i> ${a.firstActivation ? 'CGU en attente' : 'CGU acceptées'}</span>
+                <span><i class='bx bx-devices'></i> Postes (30j)&nbsp;: <strong>${a.telemetry?.uniqueDevices30d || 0}</strong></span>
+                <span><i class='bx bx-world'></i> Zone&nbsp;: <strong>${a.telemetry?.lastSeenCountry || '—'}</strong></span>
             </div>
             <div class="agency-actions">
                 <button class="btn-sm btn-edit">
@@ -242,6 +264,16 @@
                 <button class="btn-sm danger btn-revoke">
                     <i class='bx bx-block'></i> Révoquer
                 </button>
+                <button class="btn-sm btn-logs">
+                    <i class='bx bx-list-ul'></i> Logs
+                </button>
+                ${isRevoked ? `<button class="btn-sm danger btn-delete" title="Supprimer définitivement cette licence révoquée">
+                    <i class='bx bx-trash'></i> Supprimer
+                </button>` : ''}
+            </div>
+            <div class="agency-logs" id="logs_${escHtml(a.id)}">
+                <div class="agency-logs-title">Connexions récentes</div>
+                <div class="agency-logs-list">${logsListHtml}</div>
             </div>
             <div class="edit-form" id="ef_${escHtml(a.id)}">
                 <!-- inline edit, opened by JS -->
@@ -282,7 +314,6 @@
                 });
                 renderAgenciesFromCache();
                 showMsg(`✅ Licence renouvelée jusqu'au ${formatDate(renewed.toISOString())}`);
-                scheduleSilentSync();
             } catch (e) {
                 showMsg('❌ Erreur : ' + e.message, true);
             }
@@ -296,11 +327,38 @@
                 applyRevokeLocally(a.id);
                 renderAgenciesFromCache();
                 showMsg(`🔒 Licence révoquée.`);
-                scheduleSilentSync();
             } catch (e) {
                 showMsg('❌ Erreur : ' + e.message, true);
             }
         });
+
+        // Delete (only for revoked licenses)
+        const deleteBtn = card.querySelector('.btn-delete');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', async () => {
+                if (!confirm(`🗑️ Supprimer définitivement la licence "${a.agencyName}" ? Cette action est irréversible.`)) return;
+                try {
+                    await apiPost({ action: 'delete', agencyId: a.id });
+                    applyDeleteLocally(a.id);
+                    renderAgenciesFromCache();
+                    showMsg(`🗑️ Licence supprimée définitivement.`);
+                } catch (e) {
+                    showMsg('❌ Erreur : ' + e.message, true);
+                }
+            });
+        }
+
+        const logsBtn = card.querySelector('.btn-logs');
+        const logsPanel = card.querySelector('.agency-logs');
+        if (logsBtn && logsPanel) {
+            logsBtn.addEventListener('click', () => {
+                logsPanel.classList.toggle('open');
+                const isOpen = logsPanel.classList.contains('open');
+                logsBtn.innerHTML = isOpen
+                    ? "<i class='bx bx-x'></i> Fermer logs"
+                    : "<i class='bx bx-list-ul'></i> Logs";
+            });
+        }
 
         return card;
     }
@@ -376,8 +434,15 @@
         agenciesCache[idx] = {
             ...previous,
             licenseExpiresAt: '2000-01-01T00:00:00Z',
-            licenseVersion: (previous.licenseVersion || 1) + 1
+            licenseVersion: (previous.licenseVersion || 1) + 1,
+            revokedAt: new Date().toISOString()
         };
+    }
+
+    function applyDeleteLocally(agencyId) {
+        const idx = agenciesCache.findIndex((a) => a.id === agencyId);
+        if (idx === -1) return;
+        agenciesCache.splice(idx, 1);
     }
 
     function scheduleSilentSync() {
@@ -537,7 +602,6 @@
             renderAgenciesFromCache();
             closeModal();
             showMsg(`✅ Agence "${name}" enregistrée.`);
-            scheduleSilentSync();
         } catch (e) {
             addError.textContent = 'Erreur : ' + e.message;
         } finally {
@@ -621,7 +685,6 @@
             }
 
             showMsg(`Mise à jour en lot terminée: ${ok} succès, ${fail} échec(s).`, fail > 0);
-            scheduleSilentSync();
         } finally {
             btnBulkUpdateExpiry.disabled = false;
         }
@@ -667,7 +730,6 @@
             }
 
             showMsg(`Renouvellement en lot terminé: ${ok} succès, ${fail} échec(s).`, fail > 0);
-            scheduleSilentSync();
         } finally {
             btnBulkRenewYear.disabled = false;
         }

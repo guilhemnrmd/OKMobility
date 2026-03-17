@@ -72,8 +72,8 @@
     --transition-smooth: 0.3s ease-in-out;
 
     /* App custom cursor (light mode default) */
-    --app-cursor-url: url('/assets/cursors/qr-cursor-light-36.png') 4 3;
-    --app-cursor-click-url: url('/assets/cursors/qr-cursor-click-light-36.png') 5 4;
+    --app-cursor-url: url('/assets/cursors/qr-cursor-light-24.png') 2 2;
+    --app-cursor-click-url: url('/assets/cursors/qr-cursor-click-light-24.png') 3 3;
 }
 
 /* Dark Mode Support (Automatic) */
@@ -92,8 +92,8 @@
         --blob-2: #05DBF3;
         --blob-3: #2054EA;
 
-        --app-cursor-url: url('/assets/cursors/qr-cursor-dark-36.png') 4 3;
-        --app-cursor-click-url: url('/assets/cursors/qr-cursor-click-dark-36.png') 5 4;
+        --app-cursor-url: url('/assets/cursors/qr-cursor-dark-24.png') 2 2;
+        --app-cursor-click-url: url('/assets/cursors/qr-cursor-click-dark-24.png') 3 3;
     }
 }
 

@@ -30,6 +30,7 @@
 // ── Constants ────────────────────────────────────────────────────────────────
 const CACHE_KEY_PREFIX   = 'okm_lic_';
 const AGENCY_STORAGE_KEY = 'okm_agency';  // Persists selected agencyId
+const AGENCY_NAME_STORAGE_KEY = 'okm_agency_name';
 const CACHE_TTL_MS       = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 // Known agencies shown in the pre-menu (one-time agency selection).
@@ -41,27 +42,58 @@ const FALLBACK_AGENCIES = [
 ];
 
 const AGENCIES_SESSION_KEY = 'okm_agencies_list';
+const AGENCIES_CACHE_TTL_MS = 60 * 1000;
+
+function readAgenciesFromSession() {
+    try {
+        const raw = sessionStorage.getItem(AGENCIES_SESSION_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+
+        // Backward compatibility with old format: direct array.
+        if (Array.isArray(parsed) && parsed.length > 0) {
+            return { agencies: parsed, cachedAt: 0 };
+        }
+
+        if (!parsed || typeof parsed !== 'object') return null;
+        if (!Array.isArray(parsed.agencies) || parsed.agencies.length === 0) return null;
+        if (typeof parsed.cachedAt !== 'number') return null;
+
+        return parsed;
+    } catch (_) {
+        return null;
+    }
+}
+
+function writeAgenciesToSession(agencies) {
+    try {
+        sessionStorage.setItem(AGENCIES_SESSION_KEY, JSON.stringify({
+            agencies,
+            cachedAt: Date.now()
+        }));
+    } catch (_) {}
+}
 
 async function fetchAgenciesList() {
-    // Check sessionStorage cache first
-    try {
-        const cached = sessionStorage.getItem(AGENCIES_SESSION_KEY);
-        if (cached) {
-            const data = JSON.parse(cached);
-            if (Array.isArray(data) && data.length > 0) return data;
-        }
-    } catch (_) {}
+    const cached = readAgenciesFromSession();
 
-    // Fetch from API
+    // Always try API first so new/re-activated agencies appear immediately.
     try {
-        const res = await fetch(`/api/list-agencies?ts=${Date.now()}`);
+        const res = await fetch(`/api/list-agencies?ts=${Date.now()}`, { cache: 'no-store' });
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const json = await res.json();
         if (Array.isArray(json.agencies) && json.agencies.length > 0) {
-            try { sessionStorage.setItem(AGENCIES_SESSION_KEY, JSON.stringify(json.agencies)); } catch (_) {}
+            writeAgenciesToSession(json.agencies);
             return json.agencies;
         }
     } catch (_) {}
+
+    // Fallback to recent session cache when API is temporarily unavailable.
+    if (cached && cached.agencies.length > 0) {
+        const isRecent = (Date.now() - cached.cachedAt) < AGENCIES_CACHE_TTL_MS;
+        if (isRecent) return cached.agencies;
+        return cached.agencies;
+    }
 
     // Fallback to static list
     return FALLBACK_AGENCIES;
@@ -69,32 +101,58 @@ async function fetchAgenciesList() {
 // ── DOM helpers ───────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 
+function sanitizeAgencyName(name) {
+    if (typeof name !== 'string') return null;
+
+    const cleaned = name
+        .trim()
+        .replace(/^ok\s*mobility\s*/i, '')
+        .replace(/^[-:|]\s*/, '')
+        .replace(/\s+/g, ' ')
+        .slice(0, 120);
+
+    return cleaned || null;
+}
+
+function applyRetailerAgencyBranding(agencyName) {
+    const slogan = document.getElementById('retailerAgencyBrandText');
+    if (!slogan) return;
+
+    const fallback = slogan.dataset.defaultSlogan || 'Vista Asesor';
+    slogan.textContent = agencyName || fallback;
+}
+
 function showGate(reason) {
     const gate   = $('licenseGate');
     const icon   = $('licenseGateIcon');
     const title  = $('licenseGateTitle');
     const msg    = $('licenseGateMsg');
+    const actionBtn = $('licenseGateActionBtn');
 
     const states = {
         no_agency: {
             icon: 'bx-question-mark',
             title: 'Agencia no seleccionada',
-            text: 'No se ha podido determinar la agencia. Contacte con el soporte técnico.'
+            text: 'No se ha podido determinar la agencia. Contacte con el soporte técnico.',
+            showAction: false
         },
         not_found: {
             icon: 'bx-block',
             title: 'Terminal no autorizado',
-            text: 'Este terminal no dispone de una licencia activa. Contacte con el proveedor.'
+            text: 'Este terminal no dispone de una licencia activa. Contacte con el proveedor.',
+            showAction: false
         },
         expired: {
             icon: 'bx-time',
             title: 'Licencia expirada',
-            text: 'La licencia de esta agencia ha vencido. Contacte con el proveedor para renovarla.'
+            text: 'La licencia de esta agencia ha vencido. Contacte con el proveedor para renovarla.',
+            showAction: true
         },
         error: {
             icon: 'bx-error-circle',
             title: 'Error de activación',
-            text: 'No se ha podido verificar la licencia. Compruebe su conexión e inténtelo de nuevo.'
+            text: 'No se ha podido verificar la licencia. Compruebe su conexión e inténtelo de nuevo.',
+            showAction: false
         }
     };
 
@@ -102,6 +160,7 @@ function showGate(reason) {
     icon.innerHTML = `<i class='bx ${s.icon}'></i>`;
     title.textContent = s.title;
     msg.textContent = s.text;
+    actionBtn.style.display = s.showAction ? 'inline-flex' : 'none';
     gate.style.display = 'flex';
 }
 
@@ -146,7 +205,7 @@ async function apiAcceptTerms(agencyId) {
 // ── One-time agency pre-selection menu ───────────────────────────────────────
 // Only shown when no agencyId is stored in localStorage.
 // After selection, the ID is persisted — the menu never appears again.
-function buildAgencyMenu(agencies) {
+function buildAgencyMenu(initialAgencies) {
     return new Promise(resolve => {
         const overlay = document.createElement('div');
         overlay.className = 'modal-overlay';
@@ -167,7 +226,7 @@ function buildAgencyMenu(agencies) {
                 <div id="_agencyMenuDisplay" class="country-display">— Seleccione su agencia —</div>
                 <select id="_agencyMenuSel" class="overlay-select" style="width:100%;">
                     <option value="" disabled selected>— Seleccione su agencia —</option>
-                    ${agencies.map(a => `<option value="${a.id}">${a.label}</option>`).join('')}
+                    ${initialAgencies.map(a => `<option value="${a.id}">${a.label}</option>`).join('')}
                 </select>
                 <i class='bx bx-chevron-down select-arrow'></i>
             </div>
@@ -186,6 +245,32 @@ function buildAgencyMenu(agencies) {
         const btn = modal.querySelector('#_agencyMenuBtn');
         const display = modal.querySelector('#_agencyMenuDisplay');
 
+        function renderAgencyOptions(agencies, selectedId = '') {
+            const options = ['<option value="" disabled>— Seleccione su agencia —</option>']
+                .concat(agencies.map((a) => `<option value="${a.id}">${a.label}</option>`));
+
+            sel.innerHTML = options.join('');
+
+            if (selectedId && agencies.some((a) => a.id === selectedId)) {
+                sel.value = selectedId;
+            } else {
+                sel.value = '';
+            }
+
+            const selectedOption = sel.options[sel.selectedIndex];
+            display.textContent = selectedOption?.textContent || '— Seleccione su agencia —';
+            btn.disabled = !sel.value;
+        }
+
+        async function refreshAgencyOptions() {
+            const previouslySelected = sel.value || '';
+            const agencies = await fetchAgenciesList();
+            renderAgencyOptions(agencies, previouslySelected);
+        }
+
+        // Force a refresh when the modal appears.
+        refreshAgencyOptions().catch(() => {});
+
         sel.addEventListener('change', () => {
             btn.disabled = !sel.value;
 
@@ -193,6 +278,15 @@ function buildAgencyMenu(agencies) {
                 const selectedOption = sel.options[sel.selectedIndex];
                 display.textContent = selectedOption?.textContent || '— Seleccione su agencia —';
             }
+        });
+
+        // Refresh list when user interacts with the dropdown.
+        sel.addEventListener('focus', () => {
+            refreshAgencyOptions().catch(() => {});
+        });
+
+        sel.addEventListener('click', () => {
+            refreshAgencyOptions().catch(() => {});
         });
 
         btn.addEventListener('click', () => {
@@ -296,6 +390,14 @@ window.runLicenseGate = async function () {
         }).catch(() => { /* offline — continue with cached data */ });
     }
 
+    // Keep agency display name in retailer header and storage for QR propagation.
+    const agencyName = sanitizeAgencyName(license?.agencyName || '');
+    applyRetailerAgencyBranding(agencyName);
+    try {
+        if (agencyName) localStorage.setItem(AGENCY_NAME_STORAGE_KEY, agencyName);
+        else localStorage.removeItem(AGENCY_NAME_STORAGE_KEY);
+    } catch (_) {}
+
     // 4. First activation → CGU modal
     if (license.firstActivation) {
         await showTermsModal(license.agencyName || agencyId);
@@ -313,3 +415,25 @@ window.runLicenseGate = async function () {
 
     return agencyId;
 };
+
+// Refresh agency list at page load so first modal opening uses fresh data.
+fetchAgenciesList().catch(() => {});
+
+// ── Setup button listener for agency reset ───────────────────────────────────
+const licenseGateActionBtn = $('licenseGateActionBtn');
+if (licenseGateActionBtn) {
+    licenseGateActionBtn.addEventListener('click', () => {
+        // Clear the stored agency ID
+        try { localStorage.removeItem(AGENCY_STORAGE_KEY); } catch (_) {}
+        try { localStorage.removeItem(AGENCY_NAME_STORAGE_KEY); } catch (_) {}
+        try { sessionStorage.removeItem(AGENCIES_SESSION_KEY); } catch (_) {}
+        // Clear all agency-specific caches
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith(CACHE_KEY_PREFIX)) {
+                try { localStorage.removeItem(key); } catch (_) {}
+            }
+        });
+        // Reload to trigger agency selection flow again
+        window.location.href = window.location.pathname;
+    });
+}
