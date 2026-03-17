@@ -103,10 +103,7 @@
     body * {
         cursor: var(--app-cursor-url), auto !important;
     }
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: flex-start;
-    gap: 10px 12px;
+
     [role="button"],
     select,
     summary,
@@ -117,7 +114,16 @@
     .btn-link-status,
     .btn-reset,
     .custom-checkbox,
-    display: contents;
+    .lang-selector,
+    .overlay-select,
+    .qr-code-frame,
+    .qr-lightbox,
+    .qr-lightbox-frame,
+    a,
+    button {
+        cursor: var(--app-cursor-click-url), pointer !important;
+    }
+
     .qr-lightbox-frame {
         cursor: var(--app-cursor-click-url), pointer !important;
     }
@@ -156,18 +162,15 @@ body {
     background-color: var(--color-bg-primary);
     color: var(--color-text-primary);
     line-height: 1.5;
-    min-height: 100vh;
-    grid-column: 2;
-    grid-row: 1;
-    justify-self: end;
     display: flex;
     justify-content: center;
     align-items: center;
     overflow-x: hidden;
     position: relative;
     min-height: 100vh;
-    min-height: 100dvh;
     min-height: -webkit-fill-available;
+    min-height: 100svh;
+    min-height: 100dvh;
     padding-top: calc(var(--spacing-sm) + env(safe-area-inset-top));
     padding-right: calc(var(--spacing-sm) + env(safe-area-inset-right));
     padding-bottom: calc(var(--spacing-sm) + env(safe-area-inset-bottom));
@@ -351,9 +354,6 @@ body {
     flex-shrink: 0;
 }
 
-    grid-column: 2;
-    grid-row: 1;
-    justify-self: end;
 .btn-reset:hover {
     background: rgba(255, 255, 255, 0.75);
     box-shadow: 0 6px 20px rgba(32, 84, 234, 0.15);
