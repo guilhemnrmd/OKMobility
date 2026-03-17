@@ -136,8 +136,9 @@
 
     // ── API calls ─────────────────────────────────────────────────────────────
     async function apiGet() {
-        const r = await fetch('/api/admin-agencies', {
-            headers: buildAuthHeaders()
+        const r = await fetch(`/api/admin-agencies?ts=${Date.now()}`, {
+            headers: buildAuthHeaders(),
+            cache: 'no-store'
         });
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
@@ -240,8 +241,14 @@
                     agencyName: a.agencyName,
                     licenseExpiresAt: renewed.toISOString()
                 });
+                applyUpsertLocally({
+                    agencyId: a.id,
+                    agencyName: a.agencyName,
+                    licenseExpiresAt: renewed.toISOString()
+                });
+                renderAgenciesFromCache();
                 showMsg(`✅ Licence renouvelée jusqu'au ${formatDate(renewed.toISOString())}`);
-                await loadAgencies();
+                scheduleBackgroundSync();
             } catch (e) {
                 showMsg('❌ Erreur : ' + e.message, true);
             }
@@ -252,8 +259,10 @@
             if (!confirm(`⚠️ Révoquer la licence "${a.agencyName}" ? Le terminal sera immédiatement bloqué (dans les 30 jours de cache).`)) return;
             try {
                 await apiPost({ action: 'revoke', agencyId: a.id });
+                applyRevokeLocally(a.id);
+                renderAgenciesFromCache();
                 showMsg(`🔒 Licence révoquée.`);
-                await loadAgencies();
+                scheduleBackgroundSync();
             } catch (e) {
                 showMsg('❌ Erreur : ' + e.message, true);
             }
@@ -264,6 +273,82 @@
 
     function escHtml(str) {
         return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function renderAgenciesFromCache() {
+        const byId = new Set(agenciesCache.map((a) => a.id));
+        selectedAgencyIds.forEach((id) => {
+            if (!byId.has(id)) selectedAgencyIds.delete(id);
+        });
+
+        const activeAgencies = agenciesCache.filter((a) => !isExpired(a.licenseExpiresAt));
+        const expiredAgencies = agenciesCache.filter((a) => isExpired(a.licenseExpiresAt));
+
+        agencyList.innerHTML = '';
+        expiredArchiveList.innerHTML = '';
+
+        if (agenciesCache.length === 0) {
+            agencyList.innerHTML = '<p style="color:var(--color-text-secondary);text-align:center;padding:20px;">Aucune agence configurée.</p>';
+            expiredArchiveWrap.style.display = 'none';
+        } else {
+            if (activeAgencies.length > 0) {
+                const title = document.createElement('div');
+                title.className = 'section-title';
+                title.innerHTML = `<span>Actives</span><span>${activeAgencies.length}</span>`;
+                agencyList.appendChild(title);
+                activeAgencies.forEach((a) => agencyList.appendChild(renderAgency(a)));
+            } else {
+                agencyList.innerHTML = '<p style="color:var(--color-text-secondary);text-align:center;padding:12px 20px;">Aucune licence active.</p>';
+            }
+
+            expiredArchiveInfo.textContent = String(expiredAgencies.length);
+            expiredArchiveWrap.style.display = expiredAgencies.length > 0 ? 'flex' : 'none';
+
+            expiredAgencies.forEach((a) => expiredArchiveList.appendChild(renderAgency(a)));
+        }
+
+        agencyList.style.display = 'flex';
+        syncCardCheckboxes();
+    }
+
+    function applyUpsertLocally({ agencyId, agencyName, licenseExpiresAt }) {
+        const idx = agenciesCache.findIndex((a) => a.id === agencyId);
+        if (idx === -1) {
+            agenciesCache.push({
+                id: agencyId,
+                agencyName,
+                licenseExpiresAt,
+                firstActivation: true,
+                licenseVersion: 1
+            });
+            return;
+        }
+
+        const previous = agenciesCache[idx];
+        agenciesCache[idx] = {
+            ...previous,
+            agencyName,
+            licenseExpiresAt,
+            licenseVersion: (previous.licenseVersion || 1) + 1
+        };
+    }
+
+    function applyRevokeLocally(agencyId) {
+        const idx = agenciesCache.findIndex((a) => a.id === agencyId);
+        if (idx === -1) return;
+
+        const previous = agenciesCache[idx];
+        agenciesCache[idx] = {
+            ...previous,
+            licenseExpiresAt: '2000-01-01T00:00:00Z',
+            licenseVersion: (previous.licenseVersion || 1) + 1
+        };
+    }
+
+    function scheduleBackgroundSync() {
+        setTimeout(() => {
+            loadAgencies().catch(() => {});
+        }, 1000);
     }
 
     // ── Load ──────────────────────────────────────────────────────────────────
@@ -282,40 +367,8 @@
         try {
             const data = await apiGet();
             agenciesCache = Array.isArray(data.agencies) ? data.agencies.slice() : [];
-
-            const byId = new Set(agenciesCache.map((a) => a.id));
-            selectedAgencyIds.forEach((id) => {
-                if (!byId.has(id)) selectedAgencyIds.delete(id);
-            });
-
-            const activeAgencies = agenciesCache.filter((a) => !isExpired(a.licenseExpiresAt));
-            const expiredAgencies = agenciesCache.filter((a) => isExpired(a.licenseExpiresAt));
-
-            agencyList.innerHTML = '';
-            expiredArchiveList.innerHTML = '';
-
-            if (agenciesCache.length === 0) {
-                agencyList.innerHTML = '<p style="color:var(--color-text-secondary);text-align:center;padding:20px;">Aucune agence configurée.</p>';
-                expiredArchiveWrap.style.display = 'none';
-            } else {
-                if (activeAgencies.length > 0) {
-                    const title = document.createElement('div');
-                    title.className = 'section-title';
-                    title.innerHTML = `<span>Actives</span><span>${activeAgencies.length}</span>`;
-                    agencyList.appendChild(title);
-                    activeAgencies.forEach((a) => agencyList.appendChild(renderAgency(a)));
-                } else {
-                    agencyList.innerHTML = '<p style="color:var(--color-text-secondary);text-align:center;padding:12px 20px;">Aucune licence active.</p>';
-                }
-
-                expiredArchiveInfo.textContent = String(expiredAgencies.length);
-                expiredArchiveWrap.style.display = expiredAgencies.length > 0 ? 'flex' : 'none';
-
-                expiredAgencies.forEach((a) => expiredArchiveList.appendChild(renderAgency(a)));
-            }
+            renderAgenciesFromCache();
             loadingState.style.display = 'none';
-            agencyList.style.display = 'flex';
-            syncCardCheckboxes();
         } catch (e) {
             if (e.message === 'HTTP 401') {
                 clearToken();
@@ -399,9 +452,11 @@
 
         try {
             await apiPost(body);
+            applyUpsertLocally(body);
+            renderAgenciesFromCache();
             closeModal();
-            await loadAgencies();
             showMsg(`✅ Agence "${name}" enregistrée.`);
+            scheduleBackgroundSync();
         } catch (e) {
             addError.textContent = 'Erreur : ' + e.message;
         } finally {
