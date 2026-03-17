@@ -825,7 +825,7 @@ function renderCountryCodeSelect(langCode) {
     let priorityCca2 = [];
     switch (langCode) {
         case 'en': priorityCca2 = ['GB', 'US', 'CA', 'AU', 'IE', 'NZ']; break;
-        case 'es': priorityCca2 = ['CO', 'ES', 'MX', 'AR', 'CL', 'PE', 'VE']; break;
+        case 'es': priorityCca2 = ['ES', 'CO', 'MX', 'AR', 'CL', 'PE', 'VE']; break;
         case 'fr': priorityCca2 = ['FR', 'BE', 'CH', 'CA', 'LU', 'MC']; break;
         case 'it': priorityCca2 = ['IT', 'CH', 'SM', 'VA']; break;
         case 'pt': priorityCca2 = ['PT', 'BR', 'AO', 'MZ', 'CV']; break;
@@ -918,7 +918,7 @@ function renderCountryNameSelect(langCode) {
         option.dataset.short = shortLabel;
         option.dataset.countryName = countryName;
 
-        const defaultCca2ByLang = { fr: 'FR', en: 'GB', es: 'CO', it: 'IT', pt: 'PT', de: 'DE', nl: 'NL' };
+        const defaultCca2ByLang = { fr: 'FR', en: 'GB', es: 'ES', it: 'IT', pt: 'PT', de: 'DE', nl: 'NL' };
         const defaultCca2 = defaultCca2ByLang[langCode] || 'FR';
         if (c.cca2 === currentSelection || (!currentSelection && (c.cca2 === defaultCca2 || index === 0))) {
             option.selected = true;
