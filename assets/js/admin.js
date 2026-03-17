@@ -346,9 +346,12 @@
     }
 
     function scheduleBackgroundSync() {
-        setTimeout(() => {
-            loadAgencies().catch(() => {});
-        }, 1000);
+        // KV reads can be eventually consistent; retry a few times before settling.
+        [1500, 4000, 8000].forEach((delay) => {
+            setTimeout(() => {
+                loadAgencies().catch(() => {});
+            }, delay);
+        });
     }
 
     // ── Load ──────────────────────────────────────────────────────────────────
@@ -469,28 +472,35 @@
     addOverlay.addEventListener('click', closeModal);
     btnAdd.addEventListener('click', openAddModal);
     btnRefresh.addEventListener('click', loadAgencies);
-    btnSelectAllVisible.addEventListener('click', () => {
-        const ids = [];
-        document.querySelectorAll('.agency-select-checkbox').forEach((input) => {
-            if (input.offsetParent !== null) {
-                ids.push(input.dataset.agencyId);
-            }
+    if (btnSelectAllVisible) {
+        btnSelectAllVisible.addEventListener('click', () => {
+            const ids = [];
+            document.querySelectorAll('.agency-select-checkbox').forEach((input) => {
+                if (input.offsetParent !== null) {
+                    ids.push(input.dataset.agencyId);
+                }
+            });
+            setSelection(ids);
         });
-        setSelection(ids);
-    });
+    }
 
-    btnClearSelection.addEventListener('click', () => {
-        selectedAgencyIds.clear();
-        syncCardCheckboxes();
-    });
+    if (btnClearSelection) {
+        btnClearSelection.addEventListener('click', () => {
+            selectedAgencyIds.clear();
+            syncCardCheckboxes();
+        });
+    }
 
-    btnExpiredArchive.addEventListener('click', () => {
-        expiredArchiveList.classList.toggle('open');
-        const isOpen = expiredArchiveList.classList.contains('open');
-        if (expiredArchiveChevron) expiredArchiveChevron.textContent = isOpen ? '▾' : '▸';
-    });
+    if (btnExpiredArchive) {
+        btnExpiredArchive.addEventListener('click', () => {
+            expiredArchiveList.classList.toggle('open');
+            const isOpen = expiredArchiveList.classList.contains('open');
+            if (expiredArchiveChevron) expiredArchiveChevron.textContent = isOpen ? '▾' : '▸';
+        });
+    }
 
-    btnBulkUpdateExpiry.addEventListener('click', async () => {
+    if (btnBulkUpdateExpiry) {
+        btnBulkUpdateExpiry.addEventListener('click', async () => {
         const ids = Array.from(selectedAgencyIds);
         if (ids.length === 0) {
             showMsg('Sélection vide.', true);
@@ -535,9 +545,11 @@
         } finally {
             btnBulkUpdateExpiry.disabled = false;
         }
-    });
+        });
+    }
 
-    btnBulkRenewYear.addEventListener('click', async () => {
+    if (btnBulkRenewYear) {
+        btnBulkRenewYear.addEventListener('click', async () => {
         const ids = Array.from(selectedAgencyIds);
         if (ids.length === 0) {
             showMsg('Sélection vide.', true);
@@ -579,7 +591,8 @@
         } finally {
             btnBulkRenewYear.disabled = false;
         }
-    });
+        });
+    }
 
     btnLogout.addEventListener('click', () => {
         clearToken();
