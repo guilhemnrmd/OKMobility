@@ -1730,6 +1730,7 @@ input::placeholder {
 
 /* Live Data Table */
 .live-data-table {
+    width: 100%;
     padding: var(--spacing-sm);
 }
 
