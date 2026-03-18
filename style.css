@@ -529,6 +529,7 @@ select {
 
 
 .title-wrapper {
+    width: 100%;
     margin-bottom: var(--spacing-lg);
 }
 
@@ -1408,6 +1409,7 @@ input::placeholder {
     flex-direction: column;
     gap: var(--spacing-md);
     min-height: 100%;
+    width: 100%;
 }
 
 .setup-view,
