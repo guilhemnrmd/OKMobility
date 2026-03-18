@@ -122,6 +122,56 @@ function applyRetailerAgencyBranding(agencyName) {
     slogan.textContent = agencyName || fallback;
 }
 
+function calculateExpirationStatus(expiresAtISO) {
+    if (!expiresAtISO) return { status: 'unknown', message: '' };
+
+    const expiresAt = new Date(expiresAtISO);
+    if (Number.isNaN(expiresAt.getTime())) return { status: 'unknown', message: '' };
+
+    const now = Date.now();
+    const diffMs = expiresAt.getTime() - now;
+
+    if (diffMs <= 0) {
+        return { status: 'expired', message: 'Licencia expirada' };
+    }
+
+    const daysRemaining = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+
+    let status = 'ok';
+    let message = '';
+
+    if (daysRemaining >= 60) {
+        const months = Math.floor(daysRemaining / 30);
+        message = `Licencia activa: ${months} ${months > 1 ? 'meses' : 'mes'} restantes`;
+        status = months <= 2 ? 'warning' : 'ok';
+    } else if (daysRemaining >= 14) {
+        const weeks = Math.floor(daysRemaining / 7);
+        message = `Licencia activa: ${weeks} ${weeks > 1 ? 'semanas' : 'semana'} restantes`;
+        status = weeks <= 2 ? 'warning' : 'ok';
+    } else {
+        message = `Licencia activa: ${daysRemaining} ${daysRemaining > 1 ? 'días' : 'día'} restantes`;
+        status = daysRemaining <= 3 ? 'critical' : 'warning';
+    }
+
+    return { status, message };
+}
+
+function displayLicenseStatus(expiresAtISO) {
+    const note = document.getElementById('licenseStatusInline');
+    if (!note) return;
+
+    const expiration = calculateExpirationStatus(expiresAtISO);
+
+    if (expiration.status === 'unknown') {
+        note.style.display = 'none';
+        return;
+    }
+
+    note.textContent = expiration.message;
+    note.className = `license-status-note license-status-${expiration.status}`;
+    note.style.display = 'block';
+}
+
 function showGate(reason) {
     const gate   = $('licenseGate');
     const icon   = $('licenseGateIcon');
@@ -386,6 +436,8 @@ window.runLicenseGate = async function () {
                 showGate(result.reason || 'not_found');
             } else if ((result.licenseVersion || 1) > (license.licenseVersion || 1)) {
                 saveCache(agencyId, result);
+                // Update expiration status if license version changed
+                displayLicenseStatus(result?.licenseExpiresAt);
             }
         }).catch(() => { /* offline — continue with cached data */ });
     }
@@ -397,6 +449,9 @@ window.runLicenseGate = async function () {
         if (agencyName) localStorage.setItem(AGENCY_NAME_STORAGE_KEY, agencyName);
         else localStorage.removeItem(AGENCY_NAME_STORAGE_KEY);
     } catch (_) {}
+    
+    // Display license expiration status discreetly in header.
+    displayLicenseStatus(license?.licenseExpiresAt);
 
     // 4. First activation → CGU modal
     if (license.firstActivation) {

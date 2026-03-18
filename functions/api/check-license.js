@@ -251,6 +251,7 @@ export async function onRequest(context) {
     return new Response(JSON.stringify({
         valid: true,
         agencyName: license.agencyName,
+        licenseExpiresAt: license.licenseExpiresAt || null,
         firstActivation: license.firstActivation === true,
         licenseVersion: license.licenseVersion || 1
     }), { status: 200, headers: buildHeaders(trustedOrigin) });

@@ -79,6 +79,22 @@
                     </div>
                     <p id="qrHint" class="qr-hint">Escanear para conectar</p>
                 </div>
+
+                <div class="setup-trust-panel glass-panel">
+                    <p id="licenseStatusInline" class="license-status-note" style="display:none;"></p>
+
+                    <p id="advisorLegalText" class="legal-text legal-text-compact">
+                        Uso interno autorizado exclusivamente. No se almacena ninguna información del cliente en servidores externos.
+                    </p>
+
+                    <p class="legal-text legal-text-gdpr">
+                        OK MOBILITY GROUP, S.L.U. es el Responsable del tratamiento de los datos personales del Interesado y le informa de que estos datos se tratarán de conformidad con lo dispuesto en el Reglamento (UE) 2016/679, de 27 de abril (GDPR), y la Ley Orgánica 3/2018, de 5 de diciembre (LOPDG).
+                    </p>
+
+                    <p id="advisorCopyrightText" class="legal-text legal-text-copyright">
+                        © 2026 Guilhem Normand — Todos los derechos reservados
+                    </p>
+                </div>
             </div>
 
             <div class="qr-lightbox" id="qrLightbox" aria-hidden="true">
@@ -195,9 +211,6 @@
                     </button>
                 </div>
 
-                <p id="advisorLegalText" class="legal-text">
-                    Los datos mostrados provienen directamente del dispositivo del cliente mediante conexión cifrada P2P (WebRTC). No se almacena ninguna información en servidores externos.
-                </p>
             </div>
 
             <div id="disconnectedView" class="disconnected-view" style="display: none;">
@@ -217,6 +230,7 @@
                     </button>
                 </div>
             </div>
+
         </section>
     </main>
 
@@ -265,7 +279,7 @@
         </div>
     </div>
 
-    <script src="/assets/js/license-gate.js?v=5"></script>
+    <script src="/assets/js/license-gate.js?v=6"></script>
     <script src="/assets/js/conseiller.js?v=21"></script>
 </body>
 </html>
