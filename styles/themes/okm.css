@@ -1,0 +1,118 @@
+/* =========================================================================
+   OK Mobility — Semantic Theme Tokens
+   All values reference primitives from styles/primitives.css.
+   ========================================================================= */
+
+:root {
+
+  /* -----------------------------------------------------------------------
+     Brand
+     ----------------------------------------------------------------------- */
+  --brand-primary:       var(--blue-500);       /* #2054EA */
+  --brand-primary-dark:  var(--blue-600);       /* #1B47C7 */
+  --brand-primary-light: var(--blue-300);       /* #8DADF0 */
+  --brand-secondary:     var(--cyan-400);       /* #22D3EE */
+  --brand-gradient:      linear-gradient(125deg, var(--blue-500) 0%, var(--cyan-400) 100%);
+
+  /* -----------------------------------------------------------------------
+     Ambient Blobs
+     ----------------------------------------------------------------------- */
+  --blob-color-1: var(--blue-500);   /* Royal Blue  */
+  --blob-color-2: var(--cyan-300);   /* OK Cyan     */
+  --blob-color-3: #4F46E5;           /* Indigo Violet (not in scale) */
+
+  /* -----------------------------------------------------------------------
+     Surfaces
+     ----------------------------------------------------------------------- */
+  --surface-page:    #FFFFFF;
+  --surface-raised:  rgba(245, 249, 255, 0.74);
+  --surface-overlay: rgba(0, 0, 0, 0.4);
+  --surface-subtle:  var(--gray-50);
+
+  /* -----------------------------------------------------------------------
+     Text
+     ----------------------------------------------------------------------- */
+  --text-primary:   #17181D;                 /* OK Dark Gray */
+  --text-secondary: #5B6070;
+  --text-tertiary:  var(--gray-400);
+  --text-on-brand:  #FFFFFF;
+  --text-link:      var(--blue-500);
+
+  /* -----------------------------------------------------------------------
+     Borders
+     ----------------------------------------------------------------------- */
+  --border-subtle:  rgba(0, 0, 0, 0.06);
+  --border-default: rgba(0, 0, 0, 0.1);
+  --border-strong:  rgba(0, 0, 0, 0.2);
+  --border-brand:   var(--blue-500);
+
+  /* -----------------------------------------------------------------------
+     States
+     ----------------------------------------------------------------------- */
+  --state-success:        #22C55E;
+  --state-success-bg:     rgba(34, 197, 94, 0.15);
+  --state-success-border: rgba(34, 197, 94, 0.3);
+
+  --state-error:          #ff6b6b;
+  --state-error-bg:       rgba(255, 59, 48, 0.15);
+  --state-error-border:   rgba(255, 59, 48, 0.2);
+
+  --state-warning:        #F59E0B;
+  --state-warning-bg:     rgba(245, 158, 11, 0.15);
+  --state-warning-border: rgba(245, 158, 11, 0.3);
+
+  --state-info:           #3b82f6;
+  --state-info-bg:        rgba(59, 130, 246, 0.1);
+
+  /* -----------------------------------------------------------------------
+     Glass Effect (Liquid Glass UI)
+     ----------------------------------------------------------------------- */
+  --glass-blur:        blur(16px);
+  --glass-bg:          rgba(245, 249, 255, 0.74);
+  --glass-border:      rgba(255, 255, 255, 0.5);
+  --glass-inset-top:   rgba(255, 255, 255, 0.82);
+  --glass-inset-edge:  rgba(255, 255, 255, 0.3);
+  --glass-shadow:      0 24px 64px rgba(31, 38, 135, 0.13), 0 8px 24px rgba(31, 38, 135, 0.07);
+
+  /* -----------------------------------------------------------------------
+     Typography
+     ----------------------------------------------------------------------- */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'SF Mono', 'Menlo', monospace;
+
+  --font-weight-normal:   400;
+  --font-weight-medium:   500;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
+
+  /* -----------------------------------------------------------------------
+     Cursors
+     ----------------------------------------------------------------------- */
+  --cursor-default: auto;
+  --cursor-pointer: pointer;
+}
+
+/* =========================================================================
+   Dark Mode Overrides
+   ========================================================================= */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface-page:   #17181D;
+    --surface-raised: rgba(28, 28, 30, 0.6);
+    --surface-subtle: rgba(255, 255, 255, 0.04);
+
+    --text-primary:   #FFFFFF;
+    --text-secondary: #D0D4DE;
+    --text-tertiary:  rgba(255, 255, 255, 0.4);
+
+    --border-subtle:  rgba(255, 255, 255, 0.08);
+    --border-default: rgba(255, 255, 255, 0.15);
+    --border-strong:  rgba(255, 255, 255, 0.3);
+
+    --glass-bg:     rgba(28, 28, 30, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+
+    --blob-color-3: var(--blue-500);
+  }
+}

@@ -8,7 +8,9 @@
     <title>OKM Admin — Licences</title>
     <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
     <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
-    <link rel="stylesheet" href="/style.css?v=41">
+    <link rel="stylesheet" href="/styles/primitives.css">
+    <link rel="stylesheet" href="/styles/themes/okm.css">
+    <link rel="stylesheet" href="/style.css?v=42">
     <style>
         /* Admin-specific styles */
         .admin-container {
@@ -33,38 +35,38 @@
 
         .toolbar-note {
             font-size: 0.8rem;
-            color: var(--color-text-secondary);
+            color: var(--text-secondary);
         }
 
         .btn-chip {
             padding: 7px 12px;
-            border-radius: 999px;
-            border: 1px solid var(--color-border);
+            border-radius: var(--radius-full);
+            border: 1px solid var(--border-default);
             background: rgba(255,255,255,0.45);
-            color: var(--color-text-primary);
+            color: var(--text-primary);
             font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all var(--transition-smooth);
+            transition: all var(--transition-base);
         }
 
         .btn-chip:hover {
-            border-color: var(--color-accent);
-            color: var(--color-accent);
+            border-color: var(--brand-primary);
+            color: var(--brand-primary);
             background: rgba(255,255,255,0.75);
         }
 
         .btn-chip.active {
-            border-color: var(--color-accent);
-            color: var(--color-accent);
-            background: rgba(0, 102, 204, 0.1);
+            border-color: var(--brand-primary);
+            color: var(--brand-primary);
+            background: color-mix(in srgb, var(--brand-primary) 10%, transparent);
         }
 
         .bulk-panel {
             display: flex;
             flex-direction: column;
             gap: 10px;
-            padding: var(--spacing-sm) var(--spacing-md);
+            padding: var(--space-4) var(--space-6);
         }
 
         .bulk-row {
@@ -76,16 +78,16 @@
 
         .bulk-date {
             background: rgba(255,255,255,0.5);
-            border: 1px solid var(--color-border);
+            border: 1px solid var(--border-default);
             border-radius: var(--radius-sm);
             padding: 8px 10px;
-            color: var(--color-text-primary);
+            color: var(--text-primary);
             font-family: inherit;
         }
 
         .bulk-selection {
             font-size: 0.82rem;
-            color: var(--color-text-secondary);
+            color: var(--text-secondary);
         }
 
         .section-title {
@@ -97,7 +99,7 @@
             font-weight: 700;
             letter-spacing: 0.03em;
             text-transform: uppercase;
-            color: var(--color-text-secondary);
+            color: var(--text-secondary);
             padding: 4px 2px;
         }
 
@@ -110,7 +112,7 @@
         .archive-list {
             display: none;
             flex-direction: column;
-            gap: var(--spacing-sm);
+            gap: var(--space-4);
         }
 
         .archive-list.open {
@@ -131,27 +133,27 @@
             align-items: center;
             gap: 6px;
             font-size: 0.76rem;
-            color: var(--color-text-secondary);
+            color: var(--text-secondary);
             user-select: none;
         }
 
         .select-box input {
             width: 14px;
             height: 14px;
-            accent-color: var(--color-accent);
+            accent-color: var(--brand-primary);
             cursor: pointer;
         }
 
         .agency-list {
             display: flex;
             flex-direction: column;
-            gap: var(--spacing-sm);
+            gap: var(--space-4);
         }
 
         .agency-card {
             display: grid;
             gap: 8px;
-            padding: var(--spacing-sm) var(--spacing-md);
+            padding: var(--space-4) var(--space-6);
         }
 
         .agency-card-header {
@@ -164,13 +166,13 @@
         .agency-name {
             font-size: 1rem;
             font-weight: 700;
-            color: var(--color-text-primary);
+            color: var(--text-primary);
         }
 
         .agency-id {
             font-size: 0.75rem;
             font-family: 'SF Mono', 'Menlo', monospace;
-            color: var(--color-text-secondary);
+            color: var(--text-secondary);
             margin-top: 2px;
         }
 
@@ -179,7 +181,7 @@
             align-items: center;
             gap: 4px;
             padding: 4px 10px;
-            border-radius: 999px;
+            border-radius: var(--radius-full);
             font-size: 0.72rem;
             font-weight: 600;
             letter-spacing: 0.03em;
@@ -188,15 +190,15 @@
         }
 
         .badge-ok {
-            background: rgba(34, 197, 94, 0.15);
-            color: #22c55e;
-            border: 1px solid rgba(34, 197, 94, 0.3);
+            background: var(--state-success-bg);
+            color: var(--state-success);
+            border: 1px solid var(--state-success-border);
         }
 
         .badge-expired {
-            background: rgba(255, 59, 48, 0.15);
-            color: #ff6b6b;
-            border: 1px solid rgba(255, 59, 48, 0.3);
+            background: var(--state-error-bg);
+            color: var(--state-error);
+            border: 1px solid var(--state-error-border);
         }
 
         .agency-meta {
@@ -204,7 +206,7 @@
             flex-wrap: wrap;
             gap: 8px 24px;
             font-size: 0.82rem;
-            color: var(--color-text-secondary);
+            color: var(--text-secondary);
         }
 
         .agency-meta span {
@@ -223,28 +225,28 @@
             padding: 6px 14px;
             font-size: 0.82rem;
             border-radius: var(--radius-sm);
-            border: 1px solid var(--color-border);
+            border: 1px solid var(--border-default);
             background: rgba(255,255,255,0.5);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
-            color: var(--color-text-primary);
+            color: var(--text-primary);
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 6px;
-            transition: all var(--transition-smooth);
+            transition: all var(--transition-base);
             font-weight: 500;
         }
 
         .btn-sm:hover {
             background: rgba(255,255,255,0.75);
-            border-color: var(--color-accent);
-            color: var(--color-accent);
+            border-color: var(--brand-primary);
+            color: var(--brand-primary);
         }
 
         .btn-sm.danger:hover {
-            border-color: #ff6b6b;
-            color: #ff6b6b;
+            border-color: var(--state-error);
+            color: var(--state-error);
         }
 
         @media (prefers-color-scheme: dark) {
@@ -261,9 +263,9 @@
         .edit-form {
             display: none;
             flex-direction: column;
-            gap: var(--spacing-sm);
+            gap: var(--space-4);
             padding-top: 12px;
-            border-top: 1px solid var(--color-border);
+            border-top: 1px solid var(--border-default);
             margin-top: 4px;
         }
         .edit-form.open { display: flex; }
@@ -285,23 +287,23 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: var(--color-text-secondary);
+            color: var(--text-secondary);
         }
 
         .edit-field input {
             background: rgba(255,255,255,0.5);
-            border: 1px solid var(--color-border);
+            border: 1px solid var(--border-default);
             border-radius: var(--radius-sm);
             padding: 8px 12px;
             font-size: 0.9rem;
-            color: var(--color-text-primary);
+            color: var(--text-primary);
             font-family: inherit;
             transition: border-color var(--transition-base);
         }
 
         .edit-field input:focus {
             outline: none;
-            border-color: var(--color-accent);
+            border-color: var(--brand-primary);
         }
 
         @media (prefers-color-scheme: dark) {
@@ -313,8 +315,8 @@
 
         .loading-state {
             text-align: center;
-            padding: var(--spacing-md);
-            color: var(--color-text-secondary);
+            padding: var(--space-6);
+            color: var(--text-secondary);
             font-size: 0.95rem;
             display: flex;
             align-items: center;
@@ -325,17 +327,17 @@
         .admin-error {
             padding: 14px;
             border-radius: var(--radius-md);
-            background: rgba(255,59,48,0.1);
-            border: 1px solid rgba(255,59,48,0.2);
-            color: #ff6b6b;
+            background: var(--state-error-bg);
+            border: 1px solid var(--state-error-border);
+            color: var(--state-error);
             font-size: 0.9rem;
         }
 
         .auth-gate {
             display: flex;
             flex-direction: column;
-            gap: var(--spacing-sm);
-            padding: var(--spacing-md);
+            gap: var(--space-4);
+            padding: var(--space-6);
         }
 
         .auth-gate-row {
@@ -346,22 +348,22 @@
 
         .auth-gate input {
             background: rgba(255,255,255,0.5);
-            border: 1px solid var(--color-border);
+            border: 1px solid var(--border-default);
             border-radius: var(--radius-sm);
             padding: 10px 12px;
             font-size: 0.95rem;
-            color: var(--color-text-primary);
+            color: var(--text-primary);
             font-family: inherit;
         }
 
         .auth-gate input:focus {
             outline: none;
-            border-color: var(--color-accent);
+            border-color: var(--brand-primary);
         }
 
         .auth-help {
             font-size: 0.8rem;
-            color: var(--color-text-secondary);
+            color: var(--text-secondary);
         }
 
         @media (prefers-color-scheme: dark) {
@@ -390,6 +392,9 @@
                 grid-template-columns: 1fr;
             }
         }
+        .auth-gate-title { font-size: var(--text-base); font-weight: var(--font-weight-bold); margin-bottom: var(--space-2); }
+        .edit-field--full { grid-column: 1 / -1; }
+
     </style>
 </head>
 <body>
@@ -423,7 +428,7 @@
             </div>
         </header>
 
-        <section class="form-content" style="flex-direction: column; gap: var(--spacing-md);">
+        <section class="form-content" style="flex-direction: column; gap: var(--space-6);">
             <div class="title-wrapper">
                 <h1 class="gradient-text">Gestion des licences</h1>
             </div>
@@ -458,7 +463,7 @@
 
             <div id="authGate" class="auth-gate glass-panel" style="display:none;">
                 <div>
-                    <h2 style="font-size:1rem; font-weight:700; margin-bottom:6px;">Accès administrateur</h2>
+                    <h2 class="auth-gate-title">Accès administrateur</h2>
                     <p class="auth-help">Saisissez le token admin. Il sera conservé uniquement pendant cette session du navigateur et retiré de l'URL.</p>
                 </div>
                 <div class="auth-gate-row">
@@ -492,16 +497,16 @@
     <div id="addModalOverlay" class="modal-overlay" style="display:none;"></div>
     <div id="addModal" class="advisor-modal glass-panel" role="dialog" aria-modal="true" style="display:none; width: min(94vw, 480px);">
         <div class="modal-header">
-            <i class='bx bx-building-house' style="font-size:1.4rem;margin-right:8px;color:var(--color-accent);"></i>
+            <i class='bx bx-building-house' style="font-size:1.4rem;margin-right:8px;color:var(--brand-primary);"></i>
             <h2 id="addModalTitle">Nouvelle agence</h2>
         </div>
         <div class="edit-form open" id="addModalForm">
             <div class="edit-row">
-                <div class="edit-field" style="grid-column: 1 / -1;">
+                <div class="edit-field edit-field--full">
                     <label>ID (slug, ex: madrid_01)</label>
                     <input type="text" id="newAgencyId" placeholder="valencia_aero_01" pattern="[a-z0-9_]+" maxlength="64">
                 </div>
-                <div class="edit-field" style="grid-column: 1 / -1;">
+                <div class="edit-field edit-field--full">
                     <label>Nom complet</label>
                     <input type="text" id="newAgencyName" placeholder="OK Mobility Valencia Aeropuerto" maxlength="120">
                 </div>
@@ -513,7 +518,7 @@
                 </div>
             </div>
         </div>
-        <p id="addModalError" style="color:#ff6b6b;font-size:0.82rem;min-height:1.2em;"></p>
+        <p id="addModalError" style="color:var(--state-error);font-size:0.82rem;min-height:1.2em;"></p>
         <div class="modal-actions">
             <button id="addModalSave" class="btn-primary glass-btn">
                 <i class='bx bx-save'></i>
