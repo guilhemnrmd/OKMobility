@@ -36,7 +36,7 @@ const CACHE_TTL_MS       = 30 * 24 * 60 * 60 * 1000; // 30 days
 // Known agencies shown in the pre-menu (one-time agency selection).
 // Only shown on a device that hasn't selected an agency yet.
 // This static list is used as FALLBACK only if the dynamic API call fails.
-const FALLBACK_AGENCIES = [
+const FALLBACK_AGENCIES = window.BRAND?.fallbackAgencies || [
     { id: 'valencia_aero_01',    label: 'OK Mobility Valencia Aeropuerto' },
     { id: 'valencia_sorolla_01', label: 'OK Mobility Estación Joaquín Sorolla' }
 ];

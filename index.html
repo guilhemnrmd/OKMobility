@@ -12,8 +12,11 @@
     <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css?v=41">
+    <link rel="stylesheet" href="style.css?v=42">
     
+    <!-- Brand Config (white-label) -->
+    <script src="/assets/js/brand-config.js"></script>
+
     <!-- PeerJS -->
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 </head>
@@ -77,8 +80,9 @@
                     <label for="address" id="lblAddress">Adresse de résidence</label>
                     <div class="input-with-icon">
                         <i class='bx bx-map'></i>
-                        <input type="text" id="address" name="address" placeholder="15 Rue de Rivoli" required>
+                        <input type="text" id="address" name="address" placeholder="15 Rue de Rivoli" autocomplete="off" required>
                     </div>
+                    <ul class="address-suggestions" id="addressSuggestions" role="listbox"></ul>
                 </div>
 
                 <!-- Country -->
@@ -138,8 +142,9 @@
                                 <label for="tempAddress" id="lblTempAddress">Adresse temporaire</label>
                                 <div class="input-with-icon">
                                     <i class='bx bx-map-pin'></i>
-                                    <input type="text" id="tempAddress" name="tempAddress" placeholder="Hotel Plaza">
+                                    <input type="text" id="tempAddress" name="tempAddress" placeholder="Hotel Plaza" autocomplete="off">
                                 </div>
+                                <ul class="address-suggestions" id="tempAddressSuggestions" role="listbox"></ul>
                             </div>
                             <div class="form-group-row">
                                 <div class="input-wrapper zip-wrapper">
@@ -178,6 +183,35 @@
                         <div class="input-with-icon">
                             <i class='bx bx-phone'></i>
                             <input type="tel" id="phone" name="phone" pattern="^[0-9\s]+$" placeholder="6 12 34 56 78" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Second Phone Toggle -->
+                <div class="phone2-toggle-row">
+                    <button type="button" id="btnTogglePhone2" class="btn-add-field">
+                        <i class='bx bx-plus-circle'></i>
+                        <span id="lblPhone2Toggle">Añadir segundo teléfono</span>
+                    </button>
+                </div>
+
+                <!-- Second Phone Section (optional) -->
+                <div id="phone2Section" class="form-group-row" style="display: none;">
+                    <div class="input-wrapper zip-wrapper">
+                        <label for="countryCode2" id="lblPhoneCode2">Indicatif</label>
+                        <div class="phone-country-box custom-select-wrapper">
+                            <div id="countryCode2Display" class="country-display">🇫🇷 +33</div>
+                            <select id="countryCode2" name="countryCode2" class="overlay-select" aria-label="Country Code 2">
+                                <option value="+33">🇫🇷 France (+33)</option>
+                            </select>
+                            <i class='bx bx-chevron-down select-arrow'></i>
+                        </div>
+                    </div>
+                    <div class="input-wrapper city-wrapper">
+                        <label for="phone2" id="lblPhone2">2e téléphone (optionnel)</label>
+                        <div class="input-with-icon">
+                            <i class='bx bx-phone'></i>
+                            <input type="tel" id="phone2" name="phone2" pattern="^[0-9\s]+$" placeholder="6 12 34 56 78">
                         </div>
                     </div>
                 </div>
@@ -241,6 +275,6 @@
         
     </main>
 
-    <script src="/assets/js/script.js?v=27"></script>
+    <script src="/assets/js/script.js?v=28"></script>
 </body>
 </html>

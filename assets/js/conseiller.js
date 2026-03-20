@@ -153,7 +153,8 @@ const state = {
     sessionCode: null,
     displayCode: null,
     qrCodeInstance: null,
-    currentData: {}
+    currentData: {},
+    mapDebounceTimer: null
 };
 
 // ============================================================================
@@ -207,11 +208,20 @@ const dom = {
     valPhoneCode: document.getElementById('valPhoneCode'),
     lblDataPhone: document.getElementById('lblDataPhone'),
     valPhone: document.getElementById('valPhone'),
+    phoneWarning: document.getElementById('phoneWarning'),
+    // Second phone
+    lblDataPhone2Code: document.getElementById('lblDataPhone2Code'),
+    valPhone2Code: document.getElementById('valPhone2Code'),
+    lblDataPhone2: document.getElementById('lblDataPhone2'),
+    valPhone2: document.getElementById('valPhone2'),
+    phone2Warning: document.getElementById('phone2Warning'),
     lblDataEmail: document.getElementById('lblDataEmail'),
     valEmail: document.getElementById('valEmail'),
     // Rows (for showing/hiding temp address)
     rowTempAddress: document.getElementById('rowTempAddress'),
-    rowTempZipCity: document.getElementById('rowTempZipCity')
+    rowTempZipCity: document.getElementById('rowTempZipCity'),
+    rowPhone2: document.getElementById('rowPhone2'),
+    rowPhone2Number: document.getElementById('rowPhone2Number')
 };
 
 const languageNames = {
@@ -235,8 +245,23 @@ const incomingDataLimits = {
     phoneCode: 10,
     phoneNumber: 40,
     phone: 60,
+    phone2Code: 10,
+    phone2Number: 40,
     email: 120
 };
+
+function isPhoneValid(dialCode, number) {
+    if (!number) return true; // empty = no warning
+    const lpn = window.libphonenumber;
+    if (!lpn || !lpn.isValidPhoneNumber) return true; // lib not loaded = no warning
+    const full = `${dialCode} ${number}`.replace(/\s+/g, ' ').trim();
+    try { return lpn.isValidPhoneNumber(full); } catch (_) { return true; }
+}
+
+function updatePhoneWarning(warningEl, dialCode, number) {
+    if (!warningEl) return;
+    warningEl.style.display = (!number || isPhoneValid(dialCode, number)) ? 'none' : 'inline-flex';
+}
 
 function splitPhoneParts(phoneValue) {
     const value = sanitizeText(phoneValue, 60);
@@ -434,7 +459,8 @@ function generateQRCode(sessionCode) {
     }
 
     const clientUrl = clientPageUrl.href;
-    
+    state.clientUrl = clientUrl;
+
     // Generate QR code
     state.qrCodeInstance = new QRCode(dom.qrCode, {
         text: clientUrl,
@@ -449,8 +475,16 @@ function generateQRCode(sessionCode) {
 }
 
 function syncQrLightbox() {
-    if (!dom.qrCodeLarge || !dom.qrCode) return;
-    dom.qrCodeLarge.innerHTML = dom.qrCode.innerHTML;
+    if (!dom.qrCodeLarge || !state.clientUrl) return;
+    dom.qrCodeLarge.innerHTML = '';
+    new QRCode(dom.qrCodeLarge, {
+        text: state.clientUrl,
+        width: 420,
+        height: 420,
+        colorDark: '#193366',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+    });
 }
 
 function openQrLightbox() {
@@ -718,6 +752,12 @@ function handleIncomingData(data) {
     }
     
     // Update displayed values
+    // Trigger map refresh when any address field changes
+    const addrFields = ['address', 'country', 'zipCode', 'city', 'hasTempAddress', 'tempAddress', 'tempZipCode', 'tempCity'];
+    if (addrFields.some(k => cleanData[k] !== undefined)) {
+        scheduleMapRefresh();
+    }
+
     if (cleanData.address !== undefined) {
         dom.valAddress.textContent = cleanData.address || '-';
         highlightField('valAddress');
@@ -727,7 +767,7 @@ function handleIncomingData(data) {
         dom.valCountry.textContent = cleanData.country || '-';
         highlightField('valCountry');
     }
-    
+
     if (cleanData.zipCode !== undefined) {
         dom.valZipCode.textContent = cleanData.zipCode || '-';
         highlightField('valZipCode');
@@ -765,8 +805,33 @@ function handleIncomingData(data) {
     if (cleanData.phoneNumber !== undefined) {
         dom.valPhone.textContent = cleanData.phoneNumber || '-';
         highlightField('valPhone');
+        const dialCode = state.currentData.phoneCode || '';
+        updatePhoneWarning(dom.phoneWarning, dialCode, cleanData.phoneNumber);
     }
-    
+
+    if (cleanData.phoneCode !== undefined && cleanData.phoneNumber === undefined) {
+        // dial code changed — re-evaluate warning with existing number
+        const number = state.currentData.phoneNumber || '';
+        updatePhoneWarning(dom.phoneWarning, cleanData.phoneCode, number);
+    }
+
+    if (cleanData.phone2Code !== undefined || cleanData.phone2Number !== undefined) {
+        const hasPhone2 = (cleanData.phone2Code || state.currentData.phone2Code || '') || (cleanData.phone2Number || state.currentData.phone2Number || '');
+        if (dom.rowPhone2) dom.rowPhone2.style.display = hasPhone2 ? 'flex' : 'none';
+        if (dom.rowPhone2Number) dom.rowPhone2Number.style.display = hasPhone2 ? 'flex' : 'none';
+        if (cleanData.phone2Code !== undefined) {
+            dom.valPhone2Code.textContent = cleanData.phone2Code || '-';
+            highlightField('valPhone2Code');
+        }
+        if (cleanData.phone2Number !== undefined) {
+            dom.valPhone2.textContent = cleanData.phone2Number || '-';
+            highlightField('valPhone2');
+        }
+        const dial2 = cleanData.phone2Code ?? state.currentData.phone2Code ?? '';
+        const num2 = cleanData.phone2Number ?? state.currentData.phone2Number ?? '';
+        updatePhoneWarning(dom.phone2Warning, dial2, num2);
+    }
+
     if (cleanData.email !== undefined) {
         dom.valEmail.textContent = cleanData.email || '-';
         highlightField('valEmail');
@@ -837,9 +902,16 @@ function clearDisplayedData() {
     dom.valTempZipCity.textContent = '-';
     dom.valPhoneCode.textContent = '-';
     dom.valPhone.textContent = '-';
+    if (dom.phoneWarning) dom.phoneWarning.style.display = 'none';
+    if (dom.valPhone2Code) dom.valPhone2Code.textContent = '-';
+    if (dom.valPhone2) dom.valPhone2.textContent = '-';
+    if (dom.phone2Warning) dom.phone2Warning.style.display = 'none';
     dom.valEmail.textContent = '-';
     dom.rowTempAddress.style.display = 'none';
     dom.rowTempZipCity.style.display = 'none';
+    if (dom.rowPhone2) dom.rowPhone2.style.display = 'none';
+    if (dom.rowPhone2Number) dom.rowPhone2Number.style.display = 'none';
+    hideAddressMap();
 }
 
 function clearSessionData() {
@@ -881,7 +953,131 @@ function restartSession() {
 }
 
 // ============================================================================
-// 10. Copy Functions
+// 10. Address Map (Leaflet + OpenStreetMap + Photon geocoding)
+// ============================================================================
+let mapInstance   = null;
+let mainMarker    = null;
+let tempMarker    = null;
+
+const TEMP_ICON = new Promise(resolve => {
+    // Built after Leaflet loads
+    document.addEventListener('DOMContentLoaded', () => resolve(), { once: true });
+});
+
+function getLeafletIcon(color) {
+    // Leaflet default icon with a CSS hue-rotate trick via className on the pane
+    return L.icon({
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+        iconSize:    [25, 41],
+        iconAnchor:  [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize:  [41, 41],
+        className: color === 'temp' ? 'leaflet-marker-icon-temp' : ''
+    });
+}
+
+function ensureMap() {
+    if (mapInstance) return;
+    mapInstance = L.map('addressMap', {
+        zoomControl: true,
+        scrollWheelZoom: false,
+        attributionControl: true
+    });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://openstreetmap.org" target="_blank">OpenStreetMap</a>',
+        maxZoom: 19
+    }).addTo(mapInstance);
+}
+
+async function geocode(query) {
+    if (!query || query.length < 5) return null;
+    try {
+        const params = new URLSearchParams({ q: query, limit: 1, lang: 'en' });
+        const resp = await fetch(`https://photon.komoot.io/api/?${params}`);
+        if (!resp.ok) return null;
+        const data = await resp.json();
+        const f = data.features?.[0];
+        if (!f) return null;
+        const [lon, lat] = f.geometry.coordinates;
+        return { lat, lon };
+    } catch (_) { return null; }
+}
+
+function buildMainQuery(data) {
+    return [data.address, data.zipCode, data.city, data.country].filter(Boolean).join(', ');
+}
+
+function buildTempQuery(data) {
+    return [data.tempAddress, data.tempZipCode, data.tempCity].filter(Boolean).join(', ');
+}
+
+async function refreshMap() {
+    const data  = state.currentData;
+    const query = buildMainQuery(data);
+
+    if (!query || !data.address) {
+        hideAddressMap();
+        return;
+    }
+
+    const coords = await geocode(query);
+    if (!coords) { hideAddressMap(); return; }
+
+    showAddressMap();
+    ensureMap();
+    setTimeout(() => mapInstance.invalidateSize(), 10);
+
+    if (mainMarker) { mainMarker.remove(); mainMarker = null; }
+    mainMarker = L.marker([coords.lat, coords.lon], { icon: getLeafletIcon('main') })
+        .addTo(mapInstance)
+        .bindPopup(`<strong>${data.address || ''}</strong><br>${[data.zipCode, data.city, data.country].filter(Boolean).join(', ')}`);
+
+    if (tempMarker) { tempMarker.remove(); tempMarker = null; }
+
+    const tempBadge = document.getElementById('addressMapTempBadge');
+
+    if (data.hasTempAddress && data.tempAddress) {
+        const tq     = buildTempQuery(data);
+        const tcoords = await geocode(tq);
+        if (tcoords) {
+            tempMarker = L.marker([tcoords.lat, tcoords.lon], { icon: getLeafletIcon('temp') })
+                .addTo(mapInstance)
+                .bindPopup(`<strong>${data.tempAddress}</strong><br>${[data.tempZipCode, data.tempCity].filter(Boolean).join(', ')}`);
+            if (tempBadge) tempBadge.style.display = 'inline-flex';
+            // Fit both markers
+            const group = L.featureGroup([mainMarker, tempMarker]);
+            mapInstance.fitBounds(group.getBounds().pad(0.3));
+        } else {
+            if (tempBadge) tempBadge.style.display = 'none';
+            mapInstance.setView([coords.lat, coords.lon], 15);
+        }
+    } else {
+        if (tempBadge) tempBadge.style.display = 'none';
+        mapInstance.setView([coords.lat, coords.lon], 15);
+    }
+}
+
+function showAddressMap() {
+    const w = document.getElementById('addressMapWrapper');
+    if (w) w.style.display = 'block';
+}
+
+function hideAddressMap() {
+    const w = document.getElementById('addressMapWrapper');
+    if (w) w.style.display = 'none';
+    if (mainMarker) { mainMarker.remove(); mainMarker = null; }
+    if (tempMarker) { tempMarker.remove(); tempMarker = null; }
+}
+
+function scheduleMapRefresh() {
+    clearTimeout(state.mapDebounceTimer);
+    state.mapDebounceTimer = setTimeout(refreshMap, 900);
+}
+
+// ============================================================================
+// 11. Copy Functions
 // ============================================================================
 function copyToClipboard(text, buttonEl) {
     navigator.clipboard.writeText(text).then(() => {
@@ -910,6 +1106,8 @@ function copyFieldValue(field) {
         tempZipCity: dom.valTempZipCity.textContent,
         phoneCode: dom.valPhoneCode.textContent,
         phoneNumber: dom.valPhone.textContent,
+        phone2Code: dom.valPhone2Code?.textContent || '',
+        phone2Number: dom.valPhone2?.textContent || '',
         email: dom.valEmail.textContent
     };
     return values[field] || '';
@@ -931,6 +1129,7 @@ function copyAllData() {
     
     if (data.phoneCode) text += `Prefijo telefónico: ${data.phoneCode}\n`;
     if (data.phoneNumber) text += `Teléfono: ${data.phoneNumber}\n`;
+    if (data.phone2Number) text += `2º Teléfono: ${data.phone2Code ? data.phone2Code + ' ' : ''}${data.phone2Number}\n`;
     if (data.email) text += `E-mail: ${data.email}\n`;
     
     return text.trim();
@@ -957,8 +1156,7 @@ if (dom.qrCodeFrame) {
 
 if (dom.qrLightbox) {
     dom.qrLightbox.addEventListener('click', closeQrLightbox);
-    dom.qrLightbox.addEventListener('pointermove', updateQrLightboxTilt);
-    dom.qrLightbox.addEventListener('pointerleave', resetQrLightboxTilt);
+    document.addEventListener('pointermove', updateQrLightboxTilt);
 }
 
 if (dom.qrLightboxFrame) {

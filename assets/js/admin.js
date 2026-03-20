@@ -521,7 +521,9 @@
             adminError.textContent = text;
             adminError.style.background = isErr ? 'rgba(255,59,48,0.1)' : 'rgba(34,197,94,0.1)';
             adminError.style.borderColor = isErr ? 'rgba(255,59,48,0.2)' : 'rgba(34,197,94,0.2)';
-            adminError.style.color = isErr ? '#ff6b6b' : '#22c55e';
+            adminError.style.color = '';
+            adminError.classList.toggle('text-error', isErr);
+            adminError.classList.toggle('text-success', !isErr);
             adminError.style.display = 'block';
             setTimeout(() => { adminError.style.display = 'none'; }, 4000);
             return;

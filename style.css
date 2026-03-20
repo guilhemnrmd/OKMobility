@@ -34,9 +34,26 @@
     font-display: swap;
 }
 
+@font-face {
+    font-family: 'Outfit';
+    src: url('/assets/fonts/outfit/Outfit-600.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Outfit';
+    src: url('/assets/fonts/outfit/Outfit-700.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
 :root {
-    /* Airbnb DLS Inspired Typography */
+    /* Typography */
     --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-family-display: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     
     /* OK Mobility Brand Colors */
     --color-bg-primary: #FFFFFF;
@@ -67,7 +84,22 @@
     --spacing-md: 24px;
     --spacing-lg: 32px;
     
+    /* Status Colors */
+    --color-status-ok: #1f9f45;
+    --color-status-warning: #cf7c1a;
+    --color-status-critical: #d93a31;
+    --color-status-expired: #5b6070;
+    --color-error: #ff6b6b;
+
+    /* Gradient & Accent Variants */
+    --color-accent-rgb: 32, 84, 234;
+    --color-accent-light: #3068FF;
+    --color-accent-dark: var(--color-accent-dark);
+    --color-gradient-end: #05C4E8;
+    --color-success-dark: var(--color-success-dark);
+
     /* Animations */
+    --transition-base: 0.2s ease;
     --transition-spring: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     --transition-smooth: 0.3s ease-in-out;
 
@@ -92,10 +124,47 @@
         --blob-2: #05DBF3;
         --blob-3: #2054EA;
 
+        /* Status Colors (Dark) */
+        --color-status-ok: #66d089;
+        --color-status-warning: #ffc171;
+        --color-status-critical: #ff8f88;
+
         --app-cursor-url: url('/assets/cursors/qr-cursor-dark-24.png') 2 2;
         --app-cursor-click-url: url('/assets/cursors/qr-cursor-click-dark-24.png') 3 3;
     }
 }
+
+/* =========================================================================
+   White-Label Theme System
+
+   To create a new brand theme:
+   1. Add a html.theme-<name> block below with your brand's CSS variable overrides
+   2. Set theme: 'theme-<name>' in your brand-config.js
+
+   The specificity of html.theme-xxx beats :root, so overrides apply automatically.
+   Dark mode overrides go inside a @media (prefers-color-scheme: dark) block.
+   ========================================================================= */
+
+/* Example partner theme (uncomment and customize for a real partner):
+html.theme-partner-example {
+    --color-accent: #E91E63;
+    --color-accent-rgb: 233, 30, 99;
+    --color-accent-light: #F06292;
+    --color-accent-dark: #880E4F;
+    --color-gradient-end: #FF5722;
+    --blob-1: #E91E63;
+    --blob-2: #FF5722;
+    --blob-3: #9C27B0;
+}
+
+@media (prefers-color-scheme: dark) {
+    html.theme-partner-example {
+        --blob-1: #C2185B;
+        --blob-2: #E64A19;
+        --blob-3: #7B1FA2;
+    }
+}
+*/
 
 @media (pointer: fine) {
     html,
@@ -191,6 +260,8 @@ body {
     z-index: -1;
     overflow: hidden;
     pointer-events: none;
+    transition: transform 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+    will-change: transform;
     transform: translateZ(0);
     Filter: url('#goo'); /* SVG Filter could be added, but CSS blur is enough */
 }
@@ -348,34 +419,20 @@ body {
 }
 
 .license-status-ok {
-    color: #1f9f45;
+    color: var(--color-status-ok);
 }
 
 .license-status-warning {
-    color: #cf7c1a;
+    color: var(--color-status-warning);
 }
 
 .license-status-critical {
-    color: #d93a31;
+    color: var(--color-status-critical);
     font-weight: 600;
 }
 
 .license-status-expired {
-    color: #5b6070;
-}
-
-@media (prefers-color-scheme: dark) {
-    .license-status-ok {
-        color: #66d089;
-    }
-
-    .license-status-warning {
-        color: #ffc171;
-    }
-
-    .license-status-critical {
-        color: #ff8f88;
-    }
+    color: var(--color-status-expired);
 }
 
 .header-controls {
@@ -395,7 +452,7 @@ body {
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 4px 16px rgba(32, 84, 234, 0.1);
+    box-shadow: 0 4px 16px rgba(var(--color-accent-rgb), 0.1);
     color: var(--color-text-secondary);
     font-size: 1.25rem;
     display: flex;
@@ -405,15 +462,16 @@ body {
     grid-row: 2;
     cursor: pointer;
     padding: 0;
-    transition: all var(--transition-smooth);
+    transition: all var(--transition-spring);
     flex-shrink: 0;
 }
 
 .btn-reset:hover {
     background: rgba(255, 255, 255, 0.75);
-    box-shadow: 0 6px 20px rgba(32, 84, 234, 0.15);
+    box-shadow: 0 6px 20px rgba(var(--color-accent-rgb), 0.15);
     border-color: rgba(255, 255, 255, 0.7);
     color: var(--color-accent);
+    transform: scale(1.06);
     transform: rotate(30deg);
 }
 
@@ -463,7 +521,7 @@ body {
     padding: 10px 18px;
     border-radius: 50px;
     border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 4px 16px rgba(32, 84, 234, 0.1);
+    box-shadow: 0 4px 16px rgba(var(--color-accent-rgb), 0.1);
     transition: all var(--transition-smooth);
     cursor: pointer;
     user-select: none;
@@ -471,7 +529,7 @@ body {
 
 .lang-selector:hover {
     background: rgba(255, 255, 255, 0.75);
-    box-shadow: 0 6px 20px rgba(32, 84, 234, 0.15);
+    box-shadow: 0 6px 20px rgba(var(--color-accent-rgb), 0.15);
     border-color: rgba(255, 255, 255, 0.7);
 }
 
@@ -534,10 +592,12 @@ select {
 }
 
 .gradient-text {
+    font-family: var(--font-family-display);
     font-size: 2rem;
     font-weight: 700;
+    letter-spacing: -0.02em;
     margin-bottom: 4px;
-    background: linear-gradient(125deg, var(--color-accent) 0%, #05C4E8 100%);
+    background: linear-gradient(125deg, var(--color-accent) 0%, var(--color-gradient-end) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -600,6 +660,68 @@ select {
     width: 100%;
 }
 
+/* Address autocomplete dropdown — position: fixed set by JS to bypass backdrop-filter stacking context */
+.address-suggestions {
+    position: fixed;
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md, 10px);
+    list-style: none;
+    margin: 0;
+    padding: 4px 0;
+    z-index: 9999;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+    display: none;
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+@media (prefers-color-scheme: dark) {
+    .address-suggestions {
+        background: #1e1e2e;
+    }
+}
+
+.address-suggestions.open {
+    display: block;
+}
+
+.suggestion-item {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 14px;
+    cursor: pointer;
+    gap: 2px;
+    border-bottom: 1px solid var(--color-border);
+    transition: background 120ms;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:hover,
+.suggestion-item.focused {
+    background: rgba(var(--color-accent-rgb), 0.07);
+}
+
+.suggestion-main {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+.suggestion-sub {
+    font-size: 0.76rem;
+    color: var(--color-text-secondary);
+}
+
+@media (prefers-color-scheme: dark) {
+    .address-suggestions {
+        background: var(--color-surface-elevated, #1e1e2e);
+    }
+}
+
 .input-with-icon {
     position: relative;
     display: flex;
@@ -621,14 +743,14 @@ select {
     width: 100%;
     padding: 14px 12px 14px 38px;
     border-radius: var(--radius-md);
-    border: 1px solid rgba(32, 84, 234, 0.09);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.09);
     background: rgba(255, 255, 255, 0.93);
     color: var(--color-text-primary);
     font-size: 0.95rem;
     line-height: 1.5;
     transition: all var(--transition-base);
     box-shadow:
-        0 2px 8px rgba(32, 84, 234, 0.04),
+        0 2px 8px rgba(var(--color-accent-rgb), 0.04),
         inset 0 0.75px 0 rgba(255, 255, 255, 0.88),
         inset 0 -0.5px 0 rgba(255, 255, 255, 0.15),
         inset 0.5px 0 0 rgba(255, 255, 255, 0.38),
@@ -667,6 +789,36 @@ label {
 }
 
 /* New: Phone Split Container */
+/* Second phone toggle */
+.phone2-toggle-row {
+    display: flex;
+    align-items: center;
+    margin-top: -4px;
+}
+
+.btn-add-field {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    padding: 6px 2px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--color-accent);
+    cursor: pointer;
+    opacity: 0.75;
+    transition: opacity 150ms ease;
+}
+
+.btn-add-field:hover {
+    opacity: 1;
+}
+
+.btn-add-field i {
+    font-size: 1rem;
+}
+
 .phone-split-container {
     display: flex;
     gap: var(--spacing-sm);
@@ -695,7 +847,7 @@ label {
 .input-with-icon select:focus {
     border-color: var(--color-accent);
     background: #FFFFFF;
-    box-shadow: 0 0 0 3px rgba(32, 84, 234, 0.13), 0 4px 16px rgba(32, 84, 234, 0.09);
+    box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.13), 0 4px 16px rgba(var(--color-accent-rgb), 0.09);
     outline: none;
 }
 
@@ -705,8 +857,8 @@ input:focus + i, .input-with-icon:focus-within i {
 
 .input-with-icon:hover input:not(:focus),
 .custom-select-wrapper:not(:focus-within):hover {
-    border-color: rgba(32, 84, 234, 0.22);
-    box-shadow: 0 3px 12px rgba(32, 84, 234, 0.07);
+    border-color: rgba(var(--color-accent-rgb), 0.22);
+    box-shadow: 0 3px 12px rgba(var(--color-accent-rgb), 0.07);
 }
 
 /* Custom Select Overlay */
@@ -714,10 +866,10 @@ input:focus + i, .input-with-icon:focus-within i {
     position: relative;
     height: 52px;
     border-radius: var(--radius-md);
-    border: 1px solid rgba(32, 84, 234, 0.09);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.09);
     background: rgba(255, 255, 255, 0.93);
     box-shadow:
-        0 2px 8px rgba(32, 84, 234, 0.04),
+        0 2px 8px rgba(var(--color-accent-rgb), 0.04),
         inset 0 0.75px 0 rgba(255, 255, 255, 0.88),
         inset 0 -0.5px 0 rgba(255, 255, 255, 0.15),
         inset 0.5px 0 0 rgba(255, 255, 255, 0.38),
@@ -733,7 +885,7 @@ input:focus + i, .input-with-icon:focus-within i {
 .custom-select-wrapper:focus-within {
     border-color: var(--color-accent);
     background: #FFFFFF;
-    box-shadow: 0 0 0 3px rgba(32, 84, 234, 0.13), 0 4px 16px rgba(32, 84, 234, 0.09);
+    box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.13), 0 4px 16px rgba(var(--color-accent-rgb), 0.09);
 }
 
 /* Intelligent Dark Mode for inputs */
@@ -1015,7 +1167,7 @@ input::placeholder {
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 4px 16px rgba(32, 84, 234, 0.1);
+    box-shadow: 0 4px 16px rgba(var(--color-accent-rgb), 0.1);
     color: var(--color-text-secondary);
     font-size: 1.25rem;
     display: flex;
@@ -1023,19 +1175,20 @@ input::placeholder {
     justify-content: center;
     cursor: pointer;
     padding: 0;
-    transition: all var(--transition-smooth);
+    transition: all var(--transition-spring);
     flex-shrink: 0;
 }
 
 .btn-icon:hover {
     background: rgba(255, 255, 255, 0.75);
-    box-shadow: 0 6px 20px rgba(32, 84, 234, 0.15);
+    box-shadow: 0 6px 20px rgba(var(--color-accent-rgb), 0.15);
     border-color: rgba(255, 255, 255, 0.7);
     color: var(--color-accent);
+    transform: scale(1.06);
 }
 
 .btn-icon:active {
-    transform: scale(0.95);
+    transform: scale(0.93);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -1061,7 +1214,7 @@ input::placeholder {
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 4px 16px rgba(32, 84, 234, 0.1);
+    box-shadow: 0 4px 16px rgba(var(--color-accent-rgb), 0.1);
     color: var(--color-text-secondary);
     font-size: 1.25rem;
     display: flex;
@@ -1077,7 +1230,7 @@ input::placeholder {
 
 .btn-link-status:hover {
     background: rgba(255, 255, 255, 0.75);
-    box-shadow: 0 6px 20px rgba(32, 84, 234, 0.15);
+    box-shadow: 0 6px 20px rgba(var(--color-accent-rgb), 0.15);
     border-color: rgba(255, 255, 255, 0.7);
 }
 
@@ -1253,7 +1406,18 @@ input::placeholder {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
-    animation: fadeIn var(--transition-base) forwards;
+    animation: modalSpringIn var(--transition-spring) forwards;
+}
+
+@keyframes modalSpringIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -48%) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
 }
 
 .modal-header {
@@ -1264,8 +1428,10 @@ input::placeholder {
 }
 
 .modal-header h2 {
+    font-family: var(--font-family-display);
     font-size: 1.1rem;
     font-weight: 700;
+    letter-spacing: -0.01em;
 }
 
 .modal-desc {
@@ -1294,7 +1460,7 @@ input::placeholder {
     justify-content: center;
     padding: 24px;
     background:
-        radial-gradient(circle at 40% 35%, rgba(32, 84, 234, 0.14), transparent 55%),
+        radial-gradient(circle at 40% 35%, rgba(var(--color-accent-rgb), 0.14), transparent 55%),
         radial-gradient(circle at 70% 70%, rgba(255, 59, 48, 0.08), transparent 50%);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -1328,8 +1494,10 @@ input::placeholder {
 }
 
 .license-gate-card h2 {
+    font-family: var(--font-family-display);
     font-size: 1.3rem;
     font-weight: 700;
+    letter-spacing: -0.01em;
 }
 
 .license-gate-card p {
@@ -1368,9 +1536,9 @@ input::placeholder {
 
 .terms-body li {
     padding: 8px 12px;
-    background: rgba(32, 84, 234, 0.05);
+    background: rgba(var(--color-accent-rgb), 0.05);
     border-radius: var(--radius-sm);
-    border-left: 2px solid rgba(32, 84, 234, 0.3);
+    border-left: 2px solid rgba(var(--color-accent-rgb), 0.3);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -1381,8 +1549,8 @@ input::placeholder {
         color: #ff9a7a;
     }
     .terms-body li {
-        background: rgba(32, 84, 234, 0.1);
-        border-left-color: rgba(32, 84, 234, 0.5);
+        background: rgba(var(--color-accent-rgb), 0.1);
+        border-left-color: rgba(var(--color-accent-rgb), 0.5);
     }
 }
 
@@ -1502,9 +1670,9 @@ input::placeholder {
 .btn-copy-code {
     position: absolute;
     right: 10px;
-    top: 10px;
-    transform: none;
-    background: rgba(32, 84, 234, 0.1);
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(var(--color-accent-rgb), 0.1);
     border: none;
     border-radius: 8px;
     width: 36px;
@@ -1519,7 +1687,7 @@ input::placeholder {
 }
 
 .btn-copy-code:hover {
-    background: rgba(32, 84, 234, 0.2);
+    background: rgba(var(--color-accent-rgb), 0.2);
 }
 
 .btn-copy-code.copied {
@@ -1647,7 +1815,7 @@ input::placeholder {
     position: absolute;
     inset: 0;
     background:
-        radial-gradient(circle at 50% 50%, rgba(32, 84, 234, 0.18), transparent 42%),
+        radial-gradient(circle at 50% 50%, rgba(var(--color-accent-rgb), 0.18), transparent 42%),
         rgba(10, 14, 26, 0.62);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -1695,12 +1863,23 @@ input::placeholder {
 .qr-lightbox-frame::before {
     content: '';
     position: absolute;
-    inset: -18px;
-    border-radius: 28px;
-    background: radial-gradient(circle, rgba(32, 84, 234, 0.18), transparent 64%);
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle, rgba(var(--color-accent-rgb), 0.22), transparent 64%);
     z-index: -1;
     opacity: 0.85;
-    filter: blur(20px);
+    filter: blur(16px);
+}
+
+.qr-lightbox-frame .qr-center-badge {
+    width: 90px;
+    height: 90px;
+    border-width: 5px;
+}
+
+.qr-lightbox-frame .qr-center-badge img {
+    width: 52px;
+    height: 52px;
 }
 
 .qr-lightbox-frame #qrCodeLarge {
@@ -1712,6 +1891,62 @@ input::placeholder {
     display: block;
     width: min(78vw, 420px) !important;
     height: auto !important;
+}
+
+/* ─── Address Map (retailer) ─────────────────────────────────────────────── */
+.address-map-wrapper {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+}
+
+.address-map-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.address-map-header i {
+    font-size: 0.95rem;
+    color: var(--color-accent);
+}
+
+.map-temp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    background: rgba(var(--color-accent-rgb), 0.1);
+    border-radius: 20px;
+    padding: 2px 8px;
+}
+
+.address-map-container {
+    width: 100%;
+    height: 220px;
+    display: block;
+}
+
+/* Leaflet attribution — keep it minimal */
+.leaflet-control-attribution {
+    font-size: 0.6rem !important;
+    opacity: 0.6;
+}
+
+/* Custom marker colours — applied via icon className */
+.leaflet-marker-icon-temp {
+    filter: hue-rotate(280deg) saturate(1.4); /* purple for temp address */
 }
 
 /* Connection Status */
@@ -1750,15 +1985,29 @@ input::placeholder {
 }
 
 .data-row.temp-address-row {
-    background: rgba(32, 84, 234, 0.03);
+    background: rgba(var(--color-accent-rgb), 0.03);
     border-radius: var(--radius-sm);
     margin: 4px 0;
 }
 
 @media (prefers-color-scheme: dark) {
     .data-row.temp-address-row {
-        background: rgba(32, 84, 234, 0.08);
+        background: rgba(var(--color-accent-rgb), 0.08);
     }
+}
+
+.phone-warning {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #e67e22;
+    margin-top: 2px;
+}
+
+.phone-warning i {
+    font-size: 0.9rem;
 }
 
 .data-info {
@@ -1800,7 +2049,7 @@ input::placeholder {
 }
 
 @keyframes highlightPulse {
-    0% { background: rgba(32, 84, 234, 0.3); }
+    0% { background: rgba(var(--color-accent-rgb), 0.3); }
     100% { background: transparent; }
 }
 
@@ -1822,7 +2071,7 @@ input::placeholder {
 }
 
 .btn-copy:hover {
-    background: rgba(32, 84, 234, 0.15);
+    background: rgba(var(--color-accent-rgb), 0.15);
     color: var(--color-accent);
 }
 
@@ -1879,7 +2128,7 @@ input::placeholder {
 .mode-card:hover {
     transform: translateY(-2px);
     border-color: var(--color-accent);
-    box-shadow: 0 8px 24px rgba(32, 84, 234, 0.15);
+    box-shadow: 0 8px 24px rgba(var(--color-accent-rgb), 0.15);
 }
 
 .mode-card:active {
@@ -1898,12 +2147,12 @@ input::placeholder {
 }
 
 .mode-icon.advisor-icon {
-    background: linear-gradient(135deg, var(--color-accent), #1538A1);
+    background: linear-gradient(135deg, var(--color-accent), var(--color-accent-dark));
     color: white;
 }
 
 .mode-icon.client-icon {
-    background: linear-gradient(135deg, #34C759, #248A3D);
+    background: linear-gradient(135deg, #34C759, var(--color-success-dark));
     color: white;
 }
 
@@ -1999,9 +2248,9 @@ button, .btn-primary, .btn-secondary {
 
 /* Stunning Premium Button */
 .btn-primary {
-    background: linear-gradient(135deg, #3068FF 0%, #2054EA 50%, #1538A1 100%);
+    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-light) 50%, var(--color-gradient-end) 100%);
     color: #FFF;
-    box-shadow: 0 8px 32px -4px rgba(32, 84, 234, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px -4px rgba(var(--color-accent-rgb), 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.18);
     border: 1px solid rgba(255, 255, 255, 0.12);
     position: relative;
     overflow: hidden;
@@ -2021,11 +2270,11 @@ button, .btn-primary, .btn-secondary {
 
 .btn-primary:active {
     transform: scale(0.96);
-    box-shadow: 0 4px 12px -4px rgba(32, 84, 234, 0.4);
+    box-shadow: 0 4px 12px -4px rgba(var(--color-accent-rgb), 0.4);
 }
 
 .btn-primary:hover {
-    box-shadow: 0 12px 28px -6px rgba(32, 84, 234, 0.6);
+    box-shadow: 0 12px 28px -6px rgba(var(--color-accent-rgb), 0.6);
 }
 
 .btn-primary:hover::after {
@@ -2083,8 +2332,10 @@ button, .btn-primary, .btn-secondary {
 }
 
 .summary-header h2 {
+    font-family: var(--font-family-display);
     font-size: 1.3rem;
     font-weight: 700;
+    letter-spacing: -0.01em;
     background: linear-gradient(135deg, var(--color-text-primary) 0%, var(--color-text-secondary) 100%);
     -webkit-background-clip: text;
     background-clip: text;
@@ -2168,6 +2419,34 @@ button, .btn-primary, .btn-secondary {
     opacity: 0.55;
     margin-top: 6px;
     letter-spacing: 0.01em;
+}
+
+/* =========================================================================
+   Branded Loading Spinner
+   ========================================================================= */
+
+.brand-spinner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-accent), var(--color-gradient-end));
+    animation: brandPulse 1.4s ease-in-out infinite;
+}
+
+.brand-spinner::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--color-bg-primary);
+}
+
+@keyframes brandPulse {
+    0%, 100% { transform: scale(1); opacity: 0.85; }
+    50% { transform: scale(1.15); opacity: 1; }
 }
 
 /* =========================================================================
@@ -2377,6 +2656,10 @@ button, .btn-primary, .btn-secondary {
         top: 10px;
         right: 10px;
         transform: none;
+    }
+
+    .session-code-display {
+        padding-right: 12px;
     }
 
     .qr-center-badge {
