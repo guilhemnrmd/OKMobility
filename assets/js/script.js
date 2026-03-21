@@ -1587,9 +1587,9 @@ function formatStreetAddress(housenumber, street, countryCode) {
     return `${street} ${housenumber}`;
 }
 
-async function fetchPhotonSuggestions(query, langCode, countryCode) {
-    const params = new URLSearchParams({ q: query, limit: 6, lang: langCode });
-    if (countryCode) params.set('countrycodes', countryCode.toLowerCase());
+async function fetchPhotonSuggestions(query, langCode) {
+    const photonLang = ['de', 'en', 'fr'].includes(langCode) ? langCode : 'default';
+    const params = new URLSearchParams({ q: query, limit: 6, lang: photonLang });
     const resp = await fetch(`https://photon.komoot.io/api/?${params}`);
     if (!resp.ok) return [];
     const data = await resp.json();
@@ -1598,7 +1598,7 @@ async function fetchPhotonSuggestions(query, langCode, countryCode) {
 
 function buildSuggestionItem(feature) {
     const p = feature.properties || {};
-    const cc = p.country_code || '';
+    const cc = p.countrycode || p.country_code || '';
     const street = p.street || p.name || '';
     const line1 = formatStreetAddress(p.housenumber || '', street, cc);
     const cityPart = p.city || p.town || p.village || '';
@@ -1629,8 +1629,8 @@ function renderAddressSuggestions(features, listEl, onSelect) {
 
 function positionList(inputEl, listEl) {
     const rect = inputEl.getBoundingClientRect();
-    listEl.style.top   = `${rect.bottom + window.scrollY + 3}px`;
-    listEl.style.left  = `${rect.left + window.scrollX}px`;
+    listEl.style.top   = `${rect.bottom + 3}px`;
+    listEl.style.left  = `${rect.left}px`;
     listEl.style.width = `${rect.width}px`;
 }
 
@@ -1644,7 +1644,7 @@ function initAddressAutocomplete() {
     document.body.appendChild(mainList);
     document.body.appendChild(tempList);
 
-    function bindField(inputEl, listEl, getCountry) {
+    function bindField(inputEl, listEl) {
         if (!inputEl || !listEl) return;
         let timer = null;
 
@@ -1654,7 +1654,7 @@ function initAddressAutocomplete() {
             if (q.length < 3) { listEl.classList.remove('open'); return; }
             timer = setTimeout(async () => {
                 try {
-                    const features = await fetchPhotonSuggestions(q, state.lang, getCountry());
+                    const features = await fetchPhotonSuggestions(q, state.lang);
                     positionList(inputEl, listEl);
                     renderAddressSuggestions(features, listEl, (formatted, props) => {
                         inputEl.value = formatted;
@@ -1677,10 +1677,8 @@ function initAddressAutocomplete() {
         inputEl.addEventListener('keydown', (e) => { if (e.key === 'Escape') listEl.classList.remove('open'); });
     }
 
-    // Main address: filter by client's selected country
-    bindField(mainInput, mainList, () => dom.country?.value || '');
-    // Temp address: no country filter (local hotel/Airbnb near the agency)
-    bindField(tempInput, tempList, () => '');
+    bindField(mainInput, mainList);
+    bindField(tempInput, tempList);
 
     // Reposition on scroll/resize
     window.addEventListener('scroll', () => {
