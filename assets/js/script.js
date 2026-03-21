@@ -1644,7 +1644,7 @@ function initAddressAutocomplete() {
     document.body.appendChild(mainList);
     document.body.appendChild(tempList);
 
-    function bindField(inputEl, listEl) {
+    function bindField(inputEl, listEl, getCountry) {
         if (!inputEl || !listEl) return;
         let timer = null;
 
@@ -1654,7 +1654,13 @@ function initAddressAutocomplete() {
             if (q.length < 3) { listEl.classList.remove('open'); return; }
             timer = setTimeout(async () => {
                 try {
-                    const features = await fetchPhotonSuggestions(q, state.lang);
+                    const countryCode = getCountry ? getCountry() : '';
+                    let features = await fetchPhotonSuggestions(q, state.lang);
+                    if (countryCode) {
+                        features = features.filter(f =>
+                            (f.properties?.countrycode || '').toLowerCase() === countryCode.toLowerCase()
+                        );
+                    }
                     positionList(inputEl, listEl);
                     renderAddressSuggestions(features, listEl, (formatted, props) => {
                         inputEl.value = formatted;
@@ -1677,7 +1683,7 @@ function initAddressAutocomplete() {
         inputEl.addEventListener('keydown', (e) => { if (e.key === 'Escape') listEl.classList.remove('open'); });
     }
 
-    bindField(mainInput, mainList);
+    bindField(mainInput, mainList, () => dom.country?.value || '');
     bindField(tempInput, tempList);
 
     // Reposition on scroll/resize
