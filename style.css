@@ -674,7 +674,8 @@ select {
 }
 
 .address-suggestions.open {
-    max-height: 320px;
+    max-height: 192px;
+    overflow-y: auto;
 }
 
 .suggestion-item {
