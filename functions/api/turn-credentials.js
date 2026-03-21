@@ -28,12 +28,6 @@ const TURN_TTL_SECONDS = 600; // 10 minutes
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 60;
 const rateLimitStore = new Map();
-const ALLOWED_ORIGINS = new Set([
-    'https://ok-mobility-retailer.pages.dev',
-    'https://develop.ok-mobility-retailer.pages.dev'
-]);
-const ALLOWED_HOST_SUFFIXES = ['.ok-mobility-retailer.pages.dev'];
-
 function getClientIp(request) {
     return request.headers.get('cf-connecting-ip') || 'unknown';
 }
@@ -52,39 +46,32 @@ function isRateLimited(key) {
     return entry.count > RATE_LIMIT_MAX_REQUESTS;
 }
 
-function isAllowedOrigin(originValue) {
-    if (!originValue) return false;
-
-    try {
-        const url = new URL(originValue);
-        if (url.protocol !== 'https:') return false;
-
-        if (ALLOWED_ORIGINS.has(url.origin)) return true;
-        return ALLOWED_HOST_SUFFIXES.some((suffix) => url.hostname.endsWith(suffix));
-    } catch {
-        return false;
-    }
-}
-
+/**
+ * Domain-agnostic origin check — works with any custom domain or pages.dev URL.
+ */
 function getTrustedOrigin(request) {
+    const requestHost = request.headers.get('host') || '';
+    const sameOrigin = 'https://' + requestHost;
+
     const origin = request.headers.get('origin');
-    if (isAllowedOrigin(origin)) return origin;
+    if (origin) {
+        try {
+            const url = new URL(origin);
+            if (url.origin === sameOrigin) return origin;
+            const rootHost = requestHost.split('.').slice(-3).join('.');
+            if (url.hostname.endsWith(rootHost)) return origin;
+        } catch { /* ignore */ }
+    }
 
     const referer = request.headers.get('referer');
     if (referer) {
         try {
-            const refererOrigin = new URL(referer).origin;
-            if (isAllowedOrigin(refererOrigin)) return refererOrigin;
+            const refOrigin = new URL(referer).origin;
+            if (refOrigin === sameOrigin) return refOrigin;
         } catch { /* ignore */ }
     }
 
-    // Allow same-host requests without origin header
-    const host = request.headers.get('host') || '';
-    if (host === 'ok-mobility-retailer.pages.dev' ||
-        host.endsWith('.ok-mobility-retailer.pages.dev')) {
-        return 'https://' + host;
-    }
-    return null;
+    return sameOrigin;
 }
 
 function buildJsonHeaders(trustedOrigin) {

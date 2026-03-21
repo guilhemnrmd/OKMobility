@@ -10,30 +10,32 @@
  * Updates agency:{agencyId} → firstActivation: false
  */
 
-const ALLOWED_ORIGINS = new Set([
-    'https://ok-mobility-retailer.pages.dev'
-]);
-const ALLOWED_HOST_SUFFIXES = ['.ok-mobility-retailer.pages.dev'];
-
-function isAllowedOrigin(value) {
-    if (!value) return false;
-    try {
-        const url = new URL(value);
-        if (url.protocol !== 'https:') return false;
-        if (ALLOWED_ORIGINS.has(url.origin)) return true;
-        return ALLOWED_HOST_SUFFIXES.some(s => url.hostname.endsWith(s));
-    } catch { return false; }
-}
-
+/**
+ * Domain-agnostic origin check — works with any custom domain or pages.dev URL.
+ */
 function getTrustedOrigin(request) {
+    const requestHost = request.headers.get('host') || '';
+    const sameOrigin = 'https://' + requestHost;
+
     const origin = request.headers.get('origin');
-    if (isAllowedOrigin(origin)) return origin;
+    if (origin) {
+        try {
+            const url = new URL(origin);
+            if (url.origin === sameOrigin) return origin;
+            const rootHost = requestHost.split('.').slice(-3).join('.');
+            if (url.hostname.endsWith(rootHost)) return origin;
+        } catch { /* ignore */ }
+    }
+
     const referer = request.headers.get('referer');
-    if (!referer) return null;
-    try {
-        const o = new URL(referer).origin;
-        return isAllowedOrigin(o) ? o : null;
-    } catch { return null; }
+    if (referer) {
+        try {
+            const refOrigin = new URL(referer).origin;
+            if (refOrigin === sameOrigin) return refOrigin;
+        } catch { /* ignore */ }
+    }
+
+    return sameOrigin;
 }
 
 function buildHeaders(trustedOrigin) {

@@ -60,7 +60,7 @@ function getAllowedOrigins(env) {
     if (fromEnv.length > 0) return new Set(fromEnv);
 
     return new Set([
-        'https://ok-mobility-retailer.pages.dev',
+        'https://okmobility.pages.dev',
         'http://localhost:8788',
         'http://127.0.0.1:8788'
     ]);
