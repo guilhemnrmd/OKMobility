@@ -1027,7 +1027,12 @@ async function refreshMap() {
 
     showAddressMap();
     ensureMap();
-    setTimeout(() => mapInstance.invalidateSize(), 10);
+    // Wait for the browser to layout the container before telling Leaflet to recalculate
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            mapInstance.invalidateSize();
+        });
+    });
 
     if (mainMarker) { mainMarker.remove(); mainMarker = null; }
     mainMarker = L.marker([coords.lat, coords.lon], { icon: getLeafletIcon('main') })
