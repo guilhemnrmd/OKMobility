@@ -1998,6 +1998,7 @@ input::placeholder {
 .live-data-table {
     width: 100%;
     padding: var(--spacing-sm);
+    overflow: hidden; /* required: lets the map wrapper negative-margin bleed stay inside the panel */
 }
 
 .data-row {

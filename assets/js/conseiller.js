@@ -989,7 +989,8 @@ function ensureMap() {
     });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© <a href="https://openstreetmap.org" target="_blank">OpenStreetMap</a>',
-        maxZoom: 19
+        maxZoom: 19,
+        keepBuffer: 4       // preload 4 extra tile rows/cols around viewport when panning
     }).addTo(mapInstance);
 
     // ResizeObserver reliably handles size changes (hidden→visible, responsive, etc.)
@@ -1043,6 +1044,10 @@ async function refreshMap() {
 
     // 3. Now create the map (container has real dimensions)
     ensureMap();
+
+    // 4. Force Leaflet to re-measure the container — catches any residual layout pass
+    //    that could have shifted the container between show() and ensureMap()
+    mapInstance.invalidateSize({ animate: false, pan: false });
 
     if (mainMarker) { mainMarker.remove(); mainMarker = null; }
     mainMarker = L.marker([coords.lat, coords.lon], { icon: getLeafletIcon('main') })
