@@ -1669,6 +1669,11 @@ function initAddressAutocomplete() {
                         if (inputEl === mainInput) {
                             if (zip  && dom.zipCode)  dom.zipCode.value  = zip;
                             if (city && dom.city)      dom.city.value     = city;
+                            const cc = (props.countrycode || props.country_code || '').toUpperCase();
+                            if (cc && dom.country && dom.country.value !== cc) {
+                                dom.country.value = cc;
+                                dom.country.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
                         } else {
                             if (zip  && dom.tempZipCode)  dom.tempZipCode.value  = zip;
                             if (city && dom.tempCity)      dom.tempCity.value     = city;
