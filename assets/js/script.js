@@ -1606,10 +1606,10 @@ function buildSuggestionItem(feature) {
     return { line1, line2, props: p };
 }
 
-function renderAddressSuggestions(features, listEl, onSelect) {
+function renderAddressSuggestions(features, listEl, onSelect, closeList) {
     listEl.innerHTML = '';
     const items = features.map(buildSuggestionItem).filter(i => i.line1);
-    if (!items.length) { listEl.classList.remove('open'); return; }
+    if (!items.length) { closeList(); return; }
 
     items.forEach((item, idx) => {
         const li = document.createElement('li');
@@ -1620,18 +1620,11 @@ function renderAddressSuggestions(features, listEl, onSelect) {
         li.addEventListener('mousedown', (e) => {
             e.preventDefault();
             onSelect(item.line1, item.props);
-            listEl.classList.remove('open');
+            closeList();
         });
         listEl.appendChild(li);
     });
     listEl.classList.add('open');
-}
-
-function positionList(inputEl, listEl) {
-    const rect = inputEl.getBoundingClientRect();
-    listEl.style.top   = `${rect.bottom + 3}px`;
-    listEl.style.left  = `${rect.left}px`;
-    listEl.style.width = `${rect.width}px`;
 }
 
 function initAddressAutocomplete() {
@@ -1640,18 +1633,25 @@ function initAddressAutocomplete() {
     const tempInput  = dom.tempAddress;
     const tempList   = document.getElementById('tempAddressSuggestions');
 
-    // Move lists to body so they're never clipped by any ancestor overflow/stacking context
-    document.body.appendChild(mainList);
-    document.body.appendChild(tempList);
-
-    function bindField(inputEl, listEl, getCountry) {
+    // overflowEl: .temp-address-content-inner has overflow:hidden for its slide animation;
+    // temporarily set to visible while suggestions are open so they aren't clipped.
+    function bindField(inputEl, listEl, getCountry, overflowEl) {
         if (!inputEl || !listEl) return;
         let timer = null;
+
+        function closeList() {
+            listEl.classList.remove('open');
+            if (overflowEl) {
+                listEl.addEventListener('transitionend', () => {
+                    overflowEl.style.overflow = '';
+                }, { once: true });
+            }
+        }
 
         inputEl.addEventListener('input', () => {
             const q = inputEl.value.trim();
             clearTimeout(timer);
-            if (q.length < 3) { listEl.classList.remove('open'); return; }
+            if (q.length < 3) { closeList(); return; }
             timer = setTimeout(async () => {
                 try {
                     const countryCode = getCountry ? getCountry() : '';
@@ -1661,7 +1661,7 @@ function initAddressAutocomplete() {
                             (f.properties?.countrycode || '').toLowerCase() === countryCode.toLowerCase()
                         );
                     }
-                    positionList(inputEl, listEl);
+                    if (overflowEl) overflowEl.style.overflow = 'visible';
                     renderAddressSuggestions(features, listEl, (formatted, props) => {
                         inputEl.value = formatted;
                         const zip  = props.postcode || '';
@@ -1679,27 +1679,19 @@ function initAddressAutocomplete() {
                             if (city && dom.tempCity)      dom.tempCity.value     = city;
                         }
                         debouncedSendToAdvisor();
-                    });
+                    }, closeList);
+                    if (overflowEl && !listEl.classList.contains('open')) overflowEl.style.overflow = '';
                 } catch (_) { /* network error — silent */ }
             }, 380);
         });
 
-        inputEl.addEventListener('blur',    () => setTimeout(() => listEl.classList.remove('open'), 160));
-        inputEl.addEventListener('keydown', (e) => { if (e.key === 'Escape') listEl.classList.remove('open'); });
+        inputEl.addEventListener('blur',    () => setTimeout(() => closeList(), 160));
+        inputEl.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeList(); });
     }
 
+    const tempInner = document.querySelector('.temp-address-content-inner');
     bindField(mainInput, mainList, () => dom.country?.value || '');
-    bindField(tempInput, tempList);
-
-    // Reposition on scroll/resize
-    window.addEventListener('scroll', () => {
-        if (mainList.classList.contains('open'))  positionList(mainInput, mainList);
-        if (tempList.classList.contains('open'))  positionList(tempInput, tempList);
-    }, { passive: true });
-    window.addEventListener('resize', () => {
-        if (mainList.classList.contains('open'))  positionList(mainInput, mainList);
-        if (tempList.classList.contains('open'))  positionList(tempInput, tempList);
-    });
+    bindField(tempInput, tempList, null, tempInner);
 }
 
 // Initialize
