@@ -980,15 +980,25 @@ function getLeafletIcon(color) {
 
 function ensureMap() {
     if (mapInstance) return;
-    mapInstance = L.map('addressMap', {
+    const container = document.getElementById('addressMap');
+    mapInstance = L.map(container, {
         zoomControl: true,
         scrollWheelZoom: false,
-        attributionControl: true
+        attributionControl: true,
+        trackResize: false       // we use ResizeObserver instead
     });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© <a href="https://openstreetmap.org" target="_blank">OpenStreetMap</a>',
         maxZoom: 19
     }).addTo(mapInstance);
+
+    // ResizeObserver reliably handles size changes (hidden→visible, responsive, etc.)
+    const ro = new ResizeObserver(() => {
+        if (container.offsetWidth > 0 && container.offsetHeight > 0) {
+            mapInstance.invalidateSize({ animate: false, pan: false });
+        }
+    });
+    ro.observe(container);
 }
 
 async function geocode(query) {
@@ -1025,14 +1035,14 @@ async function refreshMap() {
     const coords = await geocode(query);
     if (!coords) { hideAddressMap(); return; }
 
+    // 1. Make the container visible FIRST so the browser can compute its dimensions
     showAddressMap();
+
+    // 2. Wait for the browser to complete layout, THEN create/update the map
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+    // 3. Now create the map (container has real dimensions)
     ensureMap();
-    // Wait for the browser to layout the container before telling Leaflet to recalculate
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            mapInstance.invalidateSize();
-        });
-    });
 
     if (mainMarker) { mainMarker.remove(); mainMarker = null; }
     mainMarker = L.marker([coords.lat, coords.lon], { icon: getLeafletIcon('main') })
@@ -1051,7 +1061,6 @@ async function refreshMap() {
                 .addTo(mapInstance)
                 .bindPopup(`<strong>${data.tempAddress}</strong><br>${[data.tempZipCode, data.tempCity].filter(Boolean).join(', ')}`);
             if (tempBadge) tempBadge.style.display = 'inline-flex';
-            // Fit both markers
             const group = L.featureGroup([mainMarker, tempMarker]);
             mapInstance.fitBounds(group.getBounds().pad(0.3));
         } else {

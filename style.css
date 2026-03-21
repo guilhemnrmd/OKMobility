@@ -1896,8 +1896,7 @@ input::placeholder {
 /* ─── Address Map (retailer) ─────────────────────────────────────────────── */
 .address-map-wrapper {
     overflow: hidden;
-    margin: 4px -var(--spacing-sm) -var(--spacing-sm);
-    margin: 4px calc(-1 * var(--spacing-sm)) calc(-1 * var(--spacing-sm));
+    margin: 8px -16px -16px;
     border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
 
