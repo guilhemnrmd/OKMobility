@@ -154,7 +154,6 @@ const state = {
     displayCode: null,
     qrCodeInstance: null,
     currentData: {},
-    mapDebounceTimer: null
 };
 
 // ============================================================================
@@ -752,12 +751,6 @@ function handleIncomingData(data) {
     }
     
     // Update displayed values
-    // Trigger map refresh when any address field changes
-    const addrFields = ['address', 'country', 'zipCode', 'city', 'hasTempAddress', 'tempAddress', 'tempZipCode', 'tempCity'];
-    if (addrFields.some(k => cleanData[k] !== undefined)) {
-        scheduleMapRefresh();
-    }
-
     if (cleanData.address !== undefined) {
         dom.valAddress.textContent = cleanData.address || '-';
         highlightField('valAddress');
@@ -911,8 +904,8 @@ function clearDisplayedData() {
     dom.rowTempZipCity.style.display = 'none';
     if (dom.rowPhone2) dom.rowPhone2.style.display = 'none';
     if (dom.rowPhone2Number) dom.rowPhone2Number.style.display = 'none';
-    hideAddressMap();
 }
+
 
 function clearSessionData() {
     clearDisplayedData();
@@ -953,145 +946,7 @@ function restartSession() {
 }
 
 // ============================================================================
-// 10. Address Map (Leaflet + OpenStreetMap + Photon geocoding)
-// ============================================================================
-let mapInstance   = null;
-let mainMarker    = null;
-let tempMarker    = null;
-
-const TEMP_ICON = new Promise(resolve => {
-    // Built after Leaflet loads
-    document.addEventListener('DOMContentLoaded', () => resolve(), { once: true });
-});
-
-function getLeafletIcon(color) {
-    // Leaflet default icon with a CSS hue-rotate trick via className on the pane
-    return L.icon({
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-        iconSize:    [25, 41],
-        iconAnchor:  [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize:  [41, 41],
-        className: color === 'temp' ? 'leaflet-marker-icon-temp' : ''
-    });
-}
-
-function ensureMap() {
-    if (mapInstance) return;
-    const container = document.getElementById('addressMap');
-    mapInstance = L.map(container, {
-        zoomControl: true,
-        scrollWheelZoom: false,
-        attributionControl: true,
-        trackResize: false       // we use ResizeObserver instead
-    });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© <a href="https://openstreetmap.org" target="_blank">OpenStreetMap</a>',
-        maxZoom: 19
-    }).addTo(mapInstance);
-
-    // ResizeObserver reliably handles size changes (hidden→visible, responsive, etc.)
-    const ro = new ResizeObserver(() => {
-        if (container.offsetWidth > 0 && container.offsetHeight > 0) {
-            mapInstance.invalidateSize({ animate: false, pan: false });
-        }
-    });
-    ro.observe(container);
-}
-
-async function geocode(query) {
-    if (!query || query.length < 5) return null;
-    try {
-        const params = new URLSearchParams({ q: query, limit: 1, lang: 'en' });
-        const resp = await fetch(`https://photon.komoot.io/api/?${params}`);
-        if (!resp.ok) return null;
-        const data = await resp.json();
-        const f = data.features?.[0];
-        if (!f) return null;
-        const [lon, lat] = f.geometry.coordinates;
-        return { lat, lon };
-    } catch (_) { return null; }
-}
-
-function buildMainQuery(data) {
-    return [data.address, data.zipCode, data.city, data.country].filter(Boolean).join(', ');
-}
-
-function buildTempQuery(data) {
-    return [data.tempAddress, data.tempZipCode, data.tempCity].filter(Boolean).join(', ');
-}
-
-async function refreshMap() {
-    const data  = state.currentData;
-    const query = buildMainQuery(data);
-
-    if (!query || !data.address) {
-        hideAddressMap();
-        return;
-    }
-
-    const coords = await geocode(query);
-    if (!coords) { hideAddressMap(); return; }
-
-    // 1. Make the container visible FIRST so the browser can compute its dimensions
-    showAddressMap();
-
-    // 2. Wait for the browser to complete layout, THEN create/update the map
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-
-    // 3. Now create the map (container has real dimensions)
-    ensureMap();
-
-    if (mainMarker) { mainMarker.remove(); mainMarker = null; }
-    mainMarker = L.marker([coords.lat, coords.lon], { icon: getLeafletIcon('main') })
-        .addTo(mapInstance)
-        .bindPopup(`<strong>${data.address || ''}</strong><br>${[data.zipCode, data.city, data.country].filter(Boolean).join(', ')}`);
-
-    if (tempMarker) { tempMarker.remove(); tempMarker = null; }
-
-    const tempBadge = document.getElementById('addressMapTempBadge');
-
-    if (data.hasTempAddress && data.tempAddress) {
-        const tq     = buildTempQuery(data);
-        const tcoords = await geocode(tq);
-        if (tcoords) {
-            tempMarker = L.marker([tcoords.lat, tcoords.lon], { icon: getLeafletIcon('temp') })
-                .addTo(mapInstance)
-                .bindPopup(`<strong>${data.tempAddress}</strong><br>${[data.tempZipCode, data.tempCity].filter(Boolean).join(', ')}`);
-            if (tempBadge) tempBadge.style.display = 'inline-flex';
-            const group = L.featureGroup([mainMarker, tempMarker]);
-            mapInstance.fitBounds(group.getBounds().pad(0.3));
-        } else {
-            if (tempBadge) tempBadge.style.display = 'none';
-            mapInstance.setView([coords.lat, coords.lon], 15);
-        }
-    } else {
-        if (tempBadge) tempBadge.style.display = 'none';
-        mapInstance.setView([coords.lat, coords.lon], 15);
-    }
-}
-
-function showAddressMap() {
-    const w = document.getElementById('addressMapWrapper');
-    if (w) w.style.display = 'block';
-}
-
-function hideAddressMap() {
-    const w = document.getElementById('addressMapWrapper');
-    if (w) w.style.display = 'none';
-    if (mainMarker) { mainMarker.remove(); mainMarker = null; }
-    if (tempMarker) { tempMarker.remove(); tempMarker = null; }
-}
-
-function scheduleMapRefresh() {
-    clearTimeout(state.mapDebounceTimer);
-    state.mapDebounceTimer = setTimeout(refreshMap, 900);
-}
-
-// ============================================================================
-// 11. Copy Functions
+// 10. Copy Functions
 // ============================================================================
 function copyToClipboard(text, buttonEl) {
     navigator.clipboard.writeText(text).then(() => {
