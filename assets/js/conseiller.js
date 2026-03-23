@@ -28,7 +28,10 @@ const config = {
     publicClientUrl: (() => {
         if (typeof window === 'undefined') return 'https://okmobility.pages.dev/';
         const { hostname, origin } = window.location;
-        if (hostname === 'localhost' || hostname === '127.0.0.1') return 'https://okmobility.pages.dev/';
+        // localhost and preview deployments (hash.okmobility.pages.dev) → always use prod
+        if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.okmobility.pages.dev')) {
+            return 'https://okmobility.pages.dev/';
+        }
         return origin + '/';
     })(),
     peerPrefix: 'OKM-',
