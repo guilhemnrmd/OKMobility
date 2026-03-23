@@ -1,0 +1,72 @@
+name: Delete Cloudflare Pages project entirely
+
+on:
+  workflow_dispatch:
+    inputs:
+      project_name:
+        description: 'Name of the Cloudflare Pages project to delete'
+        required: true
+        default: 'ok-mobility-form'
+      confirm:
+        description: 'Type "DELETE" to confirm'
+        required: true
+
+jobs:
+  delete-project:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "DELETE" ]; then
+            echo "❌ Confirmation manquante. Écris DELETE pour confirmer."
+            exit 1
+          fi
+
+      - name: Delete all deployments then the project
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ff6231688658a3f9acaa90fec7b3a218
+          PROJECT_NAME: ${{ github.event.inputs.project_name }}
+        run: |
+          set -euo pipefail
+
+          echo "🗑️  Suppression du projet Pages: $PROJECT_NAME"
+
+          # 1. Récupérer tous les déploiements
+          page=1
+          all_deployments="[]"
+          while true; do
+            response=$(curl -s -f \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PROJECT_NAME/deployments?per_page=25&page=$page")
+            count=$(echo "$response" | jq '.result | length')
+            all_deployments=$(echo "$all_deployments $(echo "$response" | jq '.result')" | jq -s '.[0] + .[1]')
+            [ "$count" -lt 25 ] && break
+            page=$((page + 1))
+          done
+
+          total=$(echo "$all_deployments" | jq 'length')
+          echo "📋 $total déploiements trouvés"
+
+          # 2. Supprimer chaque déploiement (force=true pour les prod)
+          while IFS= read -r id; do
+            echo "  Deleting deployment $id"
+            curl -s -o /dev/null -X DELETE \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PROJECT_NAME/deployments/$id?force=true"
+          done < <(echo "$all_deployments" | jq -r '.[].id')
+
+          echo "✅ Déploiements supprimés"
+
+          # 3. Supprimer le projet
+          echo "🔥 Suppression du projet $PROJECT_NAME..."
+          del=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PROJECT_NAME")
+
+          if [ "$del" = "200" ] || [ "$del" = "204" ]; then
+            echo "✅ Projet $PROJECT_NAME supprimé définitivement."
+          else
+            echo "⚠️  HTTP $del — le projet n'a peut-être pas pu être supprimé."
+            exit 1
+          fi
