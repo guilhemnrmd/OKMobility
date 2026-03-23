@@ -25,7 +25,12 @@
 // 1. State & Configuration
 // ============================================================================
 const config = {
-    publicClientUrl: 'https://ok-mobility-retailer.pages.dev/',
+    publicClientUrl: (() => {
+        if (typeof window === 'undefined') return 'https://okmobility.pages.dev/';
+        const { hostname, origin } = window.location;
+        if (hostname === 'localhost' || hostname === '127.0.0.1') return 'https://okmobility.pages.dev/';
+        return origin + '/';
+    })(),
     peerPrefix: 'OKM-',
     codeLength: 6,
     iceServers: [
