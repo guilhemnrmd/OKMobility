@@ -2,23 +2,21 @@
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
     <meta name="referrer" content="same-origin">
     <title>OK Mobility</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
     
-    <!-- Modern Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Boxicons for elegant icons -->
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <!-- Boxicons (self-hosted) -->
+    <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css?v=16">
+    <link rel="stylesheet" href="style.css?v=42">
     
+    <!-- Brand Config (white-label) -->
+    <script src="/assets/js/brand-config.js"></script>
+
     <!-- PeerJS -->
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 </head>
@@ -38,10 +36,12 @@
         <header class="glass-header">
             <div class="header-brand">
                 <div class="logo">
-                    <img src="https://okmobility.com/img/logos/okmobility-imagotipo.svg" alt="OK Mobility Logo" class="logo-img logo-img-light">
-                    <img src="https://okmobility.com/img/logos/okmobility-imagotipo-white.svg" alt="OK Mobility Logo" class="logo-img logo-img-dark">
+                    <picture class="logo-picture">
+                        <source media="(max-width: 640px)" srcset="/assets/logos/okm-logo-mobile-white.svg">
+                        <img src="/assets/logos/okm-logo-white.svg" alt="OK Mobility Logo" class="logo-img logo-img-brand">
+                    </picture>
                 </div>
-                <span class="brand-slogan">The Global Mobility Platform</span>
+                <span class="brand-slogan" id="agencyBrandText">The Global Mobility Platform</span>
             </div>
             
             <div class="header-controls">
@@ -80,7 +80,20 @@
                     <label for="address" id="lblAddress">Adresse de résidence</label>
                     <div class="input-with-icon">
                         <i class='bx bx-map'></i>
-                        <input type="text" id="address" name="address" placeholder="15 Rue de Rivoli" required>
+                        <input type="text" id="address" name="address" placeholder="15 Rue de Rivoli" autocomplete="off" required>
+                    </div>
+                    <ul class="address-suggestions" id="addressSuggestions" role="listbox"></ul>
+                </div>
+
+                <!-- Country -->
+                <div class="input-wrapper">
+                    <label for="country" id="lblCountry">Pays</label>
+                    <div class="custom-select-wrapper">
+                        <div id="countryDisplay" class="country-display">🇫🇷 France</div>
+                        <select id="country" name="country" class="overlay-select" aria-label="Country" required>
+                            <option value="FR" selected>🇫🇷 France</option>
+                        </select>
+                        <i class='bx bx-chevron-down select-arrow'></i>
                     </div>
                 </div>
 
@@ -129,8 +142,9 @@
                                 <label for="tempAddress" id="lblTempAddress">Adresse temporaire</label>
                                 <div class="input-with-icon">
                                     <i class='bx bx-map-pin'></i>
-                                    <input type="text" id="tempAddress" name="tempAddress" placeholder="Hotel Plaza">
+                                    <input type="text" id="tempAddress" name="tempAddress" placeholder="Hotel Plaza" autocomplete="off">
                                 </div>
+                                <ul class="address-suggestions" id="tempAddressSuggestions" role="listbox"></ul>
                             </div>
                             <div class="form-group-row">
                                 <div class="input-wrapper zip-wrapper">
@@ -152,20 +166,52 @@
                     </div>
                 </div>
 
-                <!-- Phone Section with Country Code -->
-                <div class="input-wrapper">
-                    <label for="phone" id="lblPhone">Mobile Telephone Number</label>
-                    <div class="phone-split-container">
+                <!-- Phone Section with separate dial code and number -->
+                <div class="form-group-row">
+                    <div class="input-wrapper zip-wrapper">
+                        <label for="countryCode" id="lblPhoneCode">Indicatif</label>
                         <div class="phone-country-box custom-select-wrapper">
                             <div id="countryCodeDisplay" class="country-display">🇫🇷 +33</div>
-                            <select id="countryCode" name="countryCode" class="overlay-select" aria-label="Country Code">
+                            <select id="countryCode" name="countryCode" class="overlay-select" aria-label="Country Code" required>
                                 <option value="+33" selected>🇫🇷 France (+33)</option>
                             </select>
                             <i class='bx bx-chevron-down select-arrow'></i>
                         </div>
-                        <div class="input-with-icon phone-number-box">
+                    </div>
+                    <div class="input-wrapper city-wrapper">
+                        <label for="phone" id="lblPhone">Numéro de téléphone</label>
+                        <div class="input-with-icon">
                             <i class='bx bx-phone'></i>
                             <input type="tel" id="phone" name="phone" pattern="^[0-9\s]+$" placeholder="6 12 34 56 78" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Second Phone Toggle -->
+                <div class="phone2-toggle-row">
+                    <button type="button" id="btnTogglePhone2" class="btn-add-field">
+                        <i class='bx bx-plus-circle'></i>
+                        <span id="lblPhone2Toggle">Añadir segundo teléfono</span>
+                    </button>
+                </div>
+
+                <!-- Second Phone Section (optional) -->
+                <div id="phone2Section" class="form-group-row" style="display: none;">
+                    <div class="input-wrapper zip-wrapper">
+                        <label for="countryCode2" id="lblPhoneCode2">Indicatif</label>
+                        <div class="phone-country-box custom-select-wrapper">
+                            <div id="countryCode2Display" class="country-display">🇫🇷 +33</div>
+                            <select id="countryCode2" name="countryCode2" class="overlay-select" aria-label="Country Code 2">
+                                <option value="+33">🇫🇷 France (+33)</option>
+                            </select>
+                            <i class='bx bx-chevron-down select-arrow'></i>
+                        </div>
+                    </div>
+                    <div class="input-wrapper city-wrapper">
+                        <label for="phone2" id="lblPhone2">2e téléphone (optionnel)</label>
+                        <div class="input-with-icon">
+                            <i class='bx bx-phone'></i>
+                            <input type="tel" id="phone2" name="phone2" pattern="^[0-9\s]+$" placeholder="6 12 34 56 78">
                         </div>
                     </div>
                 </div>
@@ -229,6 +275,6 @@
         
     </main>
 
-    <script src="script.js?v=20"></script>
+    <script src="/assets/js/script.js?v=28"></script>
 </body>
 </html>

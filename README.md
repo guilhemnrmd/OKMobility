@@ -31,6 +31,165 @@ Cloudflare Pages est l'une des plateformes les plus rapides et sécurisées pour
 ### Mises à jour automatiques
 Une fois cette configuration terminée, **le lien entre GitHub et Cloudflare est permanent et automatique**. Dès qu'une modification est validée et transférée (push) sur la branche `main` du dépôt GitHub, Cloudflare déploiera instantanément la nouvelle version en moins d'une minute, sans aucune action de votre part !
 
+## 📦 Provenance des assets externes (self-hosted)
+
+Pour confidentialité et fiabilité réseau, les ressources suivantes sont désormais hébergées localement dans le dépôt :
+
+- **Inter (police principale)**
+	- Source : Google Fonts / Google Fonts static (`fonts.gstatic.com`)
+	- Emplacement local : [assets/fonts/inter/Inter-400.ttf](assets/fonts/inter/Inter-400.ttf), [assets/fonts/inter/Inter-500.ttf](assets/fonts/inter/Inter-500.ttf), [assets/fonts/inter/Inter-600.ttf](assets/fonts/inter/Inter-600.ttf), [assets/fonts/inter/Inter-700.ttf](assets/fonts/inter/Inter-700.ttf)
+	- Chargement : [style.css](style.css)
+
+- **Boxicons (icônes)**
+	- Source : `boxicons@2.1.4` (distribution npm/CDN)
+	- Emplacement local CSS : [assets/boxicons/css/boxicons.min.css](assets/boxicons/css/boxicons.min.css)
+	- Emplacement local fonts : [assets/boxicons/fonts/boxicons.woff2](assets/boxicons/fonts/boxicons.woff2), [assets/boxicons/fonts/boxicons.woff](assets/boxicons/fonts/boxicons.woff), [assets/boxicons/fonts/boxicons.ttf](assets/boxicons/fonts/boxicons.ttf), [assets/boxicons/fonts/boxicons.eot](assets/boxicons/fonts/boxicons.eot), [assets/boxicons/fonts/boxicons.svg](assets/boxicons/fonts/boxicons.svg)
+	- Chargement : [index.html](index.html), [retailer/index.html](retailer/index.html)
+
+- **Logos OK Mobility (officiels)**
+	- Source desktop : `https://okmobility.com/img/new-header/logos/ico-okm-white.svg`
+	- Source mobile condensée : `https://okmobility.com/img/new-header/logos/ico-okm-mobile-white.svg`
+	- Emplacement local : [assets/logos/okm-logo-white.svg](assets/logos/okm-logo-white.svg), [assets/logos/okm-logo-mobile-white.svg](assets/logos/okm-logo-mobile-white.svg)
+	- Chargement : [index.html](index.html), [retailer/index.html](retailer/index.html)
+
+> Note: conservez les versions d'origine et licences associées lors de futures mises à jour de ces assets.
+
+## 🧭 Structure actuelle (repère rapide)
+
+- **Client (page publique)** : [index.html](index.html)
+- **Conseiller (page interne)** : [retailer/index.html](retailer/index.html)
+- **Styles partagés** : [style.css](style.css)
+- **JS Client** : [assets/js/script.js](assets/js/script.js)
+- **JS Conseiller** : [assets/js/conseiller.js](assets/js/conseiller.js)
+- **Favicon** : [assets/favicon.ico](assets/favicon.ico)
+- **Headers de sécurité Cloudflare Pages** : [_headers](_headers)
+- **Redirections** : [_redirects](_redirects)
+- **API TURN (Cloudflare Functions)** : [functions/api/turn-credentials.js](functions/api/turn-credentials.js)
+
+## 🔐 Durcissement sécurité (100% compatible plan gratuit)
+
+Le projet applique une protection « raisonnable » gratuite. Objectif: limiter la réutilisation abusive et protéger les secrets, tout en restant simple à maintenir.
+
+### 1) En-têtes HTTP de sécurité
+Configurés dans [_headers](_headers):
+
+- `Content-Security-Policy` (CSP) stricte
+- `X-Frame-Options: DENY` + `frame-ancestors 'none'`
+- `X-Content-Type-Options: nosniff`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy` restrictive
+- `X-Robots-Tag` + meta robots anti-indexation
+
+### 2) Endpoint TURN renforcé
+Implémenté dans [functions/api/turn-credentials.js](functions/api/turn-credentials.js):
+
+- Vérification d'origine (`origin` / `referer`) sur domaine autorisé
+- Support `OPTIONS` (preflight CORS)
+- Limitation de débit par IP mémoire (fenêtre glissante)
+- Réponses JSON sans cache (`Cache-Control: no-store`)
+
+### 3) Limite importante à connaître
+Un code exécuté côté navigateur n'est **jamais** incopiable à 100%. La bonne stratégie est:
+
+- secrets et logique sensible côté API/serveur
+- durcissement côté front pour compliquer la copie opportuniste
+- évolution progressive sans verrouiller le projet
+
+## ↩️ Revenir en arrière sans se perdre
+
+Oui, retour arrière possible à tout moment grâce à Git.
+
+### Cas A — Annuler le dernier commit (sans réécrire l'historique partagé)
+
+Utiliser un revert:
+
+- `git log --oneline -n 10`
+- `git revert <sha_du_commit_a_annuler>`
+- `git push`
+
+### Cas B — Revenir temporairement à une ancienne version pour test local
+
+- `git checkout <sha_ancien>`
+- tester
+- `git checkout main`
+
+### Cas C — Restaurer un fichier précis
+
+- `git checkout <sha_ancien> -- path/du/fichier`
+- `git commit -m "restore: path/du/fichier depuis <sha>"`
+- `git push`
+
+### Bonne pratique recommandée pour les prochaines évolutions
+
+- Créer une branche de travail par changement important (`feature/...`, `chore/...`, `security/...`)
+- Valider puis fusionner dans `main` quand c'est stable
+- Déployer ensuite pour garder un historique clair et réversible
+
 ---
 
 Dernière mise à jour : 2026.
+
+---
+
+## 🔐 Gestion des Licences (Usage Commercial)
+
+### Architecture
+Les licences sont stockées dans **Cloudflare KV** (`OKM_LICENSES`), côté serveur.  
+**Les clients ne peuvent pas modifier les données de licence** — elles ne sont accessibles que via l'API admin protégée par un token secret.
+
+### Structure d'une entrée KV
+```json
+// Clé : "agency:valencia_aero_01"
+{
+  "agencyName": "OK Mobility Valencia Aeropuerto",
+  "licenseExpiresAt": "2027-03-16T00:00:00Z",
+  "firstActivation": true,
+  "licenseVersion": 1
+}
+```
+> **`licenseVersion`** : incrémenté à chaque modification. Invalide automatiquement le cache localStorage (30 jours) des terminaux concernés.
+
+### Panneau Admin
+URL : `https://ok-mobility-retailer.pages.dev/admin/`
+
+Fonctionnalités :
+- 📋 Lister toutes les agences avec statut (active / expirée)
+- ➕ Créer une nouvelle agence
+- ✏️ Modifier nom et date d'expiration
+- 🔄 Renouveler +1 an en un clic
+- 🔒 Révoquer instantanément une licence
+
+Authentification admin :
+- saisir le `ADMIN_TOKEN` dans le panneau admin
+- le token est conservé uniquement en `sessionStorage` du navigateur
+- un ancien lien `?token=<ADMIN_TOKEN>` reste accepté une fois, puis le token est retiré de l'URL
+
+> **`ADMIN_TOKEN`** est défini comme variable d'environnement secrète dans les paramètres Cloudflare Pages. Ne jamais le commiter dans le code.
+
+### Initialisation (première fois)
+```bash
+# Prérequis : créer le KV namespace "OKM_LICENSES" dans le dashboard Cloudflare
+# Puis copier l'ID dans wrangler.toml
+
+export CLOUDFLARE_ACCOUNT_ID="votre_account_id"
+export CLOUDFLARE_API_TOKEN="votre_api_token"
+
+node setup/seed-kv.mjs <KV_NAMESPACE_ID>
+```
+
+### Renouveler une licence
+Via le panneau admin : bouton **"Renouveler +1 an"**.  
+Ou manuellement via le panneau admin → Modifier → changer la date.
+
+### Révoquer une licence
+Via le panneau admin : bouton **"Révoquer"**.  
+Le terminal sera bloqué dès que son cache localStorage expire (max 30 jours).  
+Pour un blocage immédiat, incrémenter `licenseVersion` dans KV.
+
+### Variables d'environnement requises
+| Variable | Description |
+|----------|-------------|
+| `OKM_LICENSES` | KV namespace binding (défini dans `wrangler.toml`) |
+| `TURN_KEY_ID` | Cloudflare Calls TURN key ID |
+| `TURN_API_TOKEN` | Cloudflare Calls TURN API token |
+| `ADMIN_TOKEN` | Token secret pour le panneau admin |

@@ -1,0 +1,8 @@
+name = "okmobility"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "."
+
+[[kv_namespaces]]
+binding = "OKM_LICENSES"
+id = "8edd81d0d2e248bda2a399197c4d179e"
+preview_id = "b971db86aee54e92a44a79925ca1bd89"

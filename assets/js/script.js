@@ -37,7 +37,12 @@ const i18n = {
       "tempCity": "Ville",
       "zipCode": "Code Postal",
       "city": "Ville",
+    "phoneCode": "Indicatif téléphonique",
       "phone": "Téléphone Mobile",
+      "phone2": "2e téléphone (optionnel)",
+      "phone2Toggle": "Ajouter un 2e téléphone",
+      "phone2ToggleRemove": "Supprimer le 2e téléphone",
+      "phoneInvalid": "Numéro de téléphone invalide pour ce pays.",
       "email": "E-mail",
       "placeholderCity": "Paris",
       "placeholderZip": "75001",
@@ -70,7 +75,12 @@ const i18n = {
       "tempCity": "City",
       "zipCode": "Postal Code / Zip",
       "city": "City",
+    "phoneCode": "Calling code",
       "phone": "Mobile Telephone Number",
+      "phone2": "2nd phone (optional)",
+      "phone2Toggle": "Add a 2nd phone number",
+      "phone2ToggleRemove": "Remove 2nd phone number",
+      "phoneInvalid": "Invalid phone number for this country.",
       "email": "E-mail",
       "placeholderCity": "London",
       "placeholderZip": "SW1A 1AA",
@@ -103,7 +113,12 @@ const i18n = {
       "tempCity": "Ciudad",
       "zipCode": "Código Postal / CP",
       "city": "Ciudad",
+    "phoneCode": "Prefijo telefónico",
       "phone": "Teléfono Móvil",
+      "phone2": "2º teléfono (opcional)",
+      "phone2Toggle": "Añadir 2º teléfono",
+      "phone2ToggleRemove": "Quitar 2º teléfono",
+      "phoneInvalid": "Número de teléfono inválido para este país.",
       "email": "E-mail",
       "placeholderCity": "Madrid",
       "placeholderZip": "28001",
@@ -136,7 +151,12 @@ const i18n = {
       "tempCity": "Città",
       "zipCode": "Codice Postale / CAP",
       "city": "Città",
+    "phoneCode": "Prefisso telefonico",
       "phone": "Telefono Cellulare",
+      "phone2": "2° telefono (opzionale)",
+      "phone2Toggle": "Aggiungi 2° telefono",
+      "phone2ToggleRemove": "Rimuovi 2° telefono",
+      "phoneInvalid": "Numero di telefono non valido per questo paese.",
       "email": "E-mail",
       "placeholderCity": "Roma",
       "placeholderZip": "00118",
@@ -169,7 +189,12 @@ const i18n = {
       "tempCity": "Cidade",
       "zipCode": "Código Postal",
       "city": "Cidade",
+    "phoneCode": "Indicativo telefónico",
       "phone": "Telemóvel",
+      "phone2": "2º telefone (opcional)",
+      "phone2Toggle": "Adicionar 2º telefone",
+      "phone2ToggleRemove": "Remover 2º telefone",
+      "phoneInvalid": "Número de telefone inválido para este país.",
       "email": "E-mail",
       "placeholderCity": "Lisboa",
       "placeholderZip": "1000-001",
@@ -202,7 +227,12 @@ const i18n = {
       "tempCity": "Stadt",
       "zipCode": "Postleitzahl / PLZ",
       "city": "Stadt",
+    "phoneCode": "Ländervorwahl",
       "phone": "Handynummer",
+      "phone2": "2. Telefon (optional)",
+      "phone2Toggle": "2. Telefonnummer hinzufügen",
+      "phone2ToggleRemove": "2. Telefonnummer entfernen",
+      "phoneInvalid": "Ungültige Telefonnummer für dieses Land.",
       "email": "E-Mail",
       "placeholderCity": "Berlin",
       "placeholderZip": "10115",
@@ -235,7 +265,12 @@ const i18n = {
             "tempCity": "Plaats",
             "zipCode": "Postcode",
             "city": "Plaats",
+            "phoneCode": "Landcode",
             "phone": "Mobiel telefoonnummer",
+            "phone2": "2e telefoonnummer (optioneel)",
+            "phone2Toggle": "2e telefoonnummer toevoegen",
+            "phone2ToggleRemove": "2e telefoonnummer verwijderen",
+            "phoneInvalid": "Ongeldig telefoonnummer voor dit land.",
             "email": "E-mail",
             "placeholderCity": "Amsterdam",
             "placeholderZip": "1012 LG",
@@ -258,6 +293,13 @@ const i18n = {
     }
 };
 
+// Override i18n legalText from brand config (white-label support)
+if (window.BRAND?.legalText) {
+    for (const [lang, text] of Object.entries(window.BRAND.legalText)) {
+        if (i18n[lang]) i18n[lang].legalText = text;
+    }
+}
+
 // ============================================================================
 // 2. DOM Elements & State
 // ============================================================================
@@ -266,18 +308,23 @@ const state = {
     debounceTimer: null,
     addressSelected: false,
     globalCountriesData: [],
+    countrySelectedManually: false,
     phoneSelectedManually: false,
+    phone2Visible: false,
     // WebRTC / PeerJS
     peer: null,
     advisorConnection: null,
     advisorConnected: false,
     sendDebounceTimer: null,
-    lastSentPayload: null
+    lastSentPayload: null,
+    agencyId: null,
+    agencyName: null
 };
 
 const dom = {
     html: document.documentElement,
     langSelect: document.getElementById('languageSelect'),
+    agencyBrandText: document.getElementById('agencyBrandText'),
     // Form and Views
     form: document.getElementById('clientForm'),
     summaryView: document.getElementById('summaryView'),
@@ -287,6 +334,7 @@ const dom = {
     btnEdit: document.getElementById('btnEdit'),
     // Inputs Main Address
     address: document.getElementById('address'),
+    country: document.getElementById('country'),
     zipCode: document.getElementById('zipCode'),
     city: document.getElementById('city'),
     // Inputs Temp Address
@@ -303,7 +351,13 @@ const dom = {
     lblTempCity: document.getElementById('lblTempCity'),
     tempCity: document.getElementById('tempCity'),
     // Contact
+    countryCode: document.getElementById('countryCode'),
     phone: document.getElementById('phone'),
+    // Second phone (optional)
+    phone2Section: document.getElementById('phone2Section'),
+    btnTogglePhone2: document.getElementById('btnTogglePhone2'),
+    countryCode2: document.getElementById('countryCode2'),
+    phone2: document.getElementById('phone2'),
     email: document.getElementById('email'),
     // Advisor Connection (Modal)
     btnOpenAdvisorModal: document.getElementById('btnOpenAdvisorModal'),
@@ -318,6 +372,68 @@ const dom = {
     clientStatusIndicator: document.getElementById('clientStatusIndicator'),
     clientStatusText: document.getElementById('clientStatusText')
 };
+
+const DEFAULT_BRAND_SLOGAN = window.BRAND?.slogan || 'The Global Mobility Platform';
+
+function sanitizeAgencyId(id) {
+    if (typeof id !== 'string') return null;
+    return /^[a-z0-9_]{1,64}$/.test(id) ? id : null;
+}
+
+function sanitizeAgencyName(name) {
+    if (typeof name !== 'string') return null;
+
+    const cleaned = name
+        .trim()
+        .replace(/^ok\s*mobility\s*/i, '')
+        .replace(/^[-:|]\s*/, '')
+        .replace(/\s+/g, ' ')
+        .slice(0, 120);
+
+    return cleaned || null;
+}
+
+function setAgencyBranding(agencyName) {
+    if (!dom.agencyBrandText) return;
+    dom.agencyBrandText.textContent = agencyName || DEFAULT_BRAND_SLOGAN;
+}
+
+async function hydrateAgencyBrandingFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const agencyId = sanitizeAgencyId(params.get('agency'));
+    const agencyNameFromQr = sanitizeAgencyName(params.get('agencyName'));
+    state.agencyId = agencyId;
+    state.agencyName = agencyNameFromQr;
+
+    if (agencyNameFromQr) {
+        setAgencyBranding(agencyNameFromQr);
+    }
+
+    if (!agencyId) {
+        if (!agencyNameFromQr) {
+            setAgencyBranding('');
+        }
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/check-license?agency=${encodeURIComponent(agencyId)}`);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const payload = await res.json();
+
+        if (payload?.valid && typeof payload.agencyName === 'string' && payload.agencyName.trim()) {
+            state.agencyName = sanitizeAgencyName(payload.agencyName);
+            setAgencyBranding(state.agencyName);
+            return;
+        }
+    } catch (err) {
+        console.warn('Unable to resolve agency branding:', err.message);
+    }
+
+    if (!agencyNameFromQr) {
+        setAgencyBranding('');
+    }
+}
 
 // ============================================================================
 // 3. Language Switcher (i18n & RTL)
@@ -342,6 +458,11 @@ function applyLanguage(langCode) {
     
     document.getElementById('lblAddress').textContent = t.address;
     dom.address.placeholder = t.addressPlaceholder;
+
+    const countryLabel = document.getElementById('lblCountry');
+    if (countryLabel) {
+        countryLabel.textContent = t.country || 'Country';
+    }
     
     // Temporary Address Texts
     dom.lblTempAddressCheck.textContent = t.tempAddressCheck;
@@ -361,10 +482,27 @@ function applyLanguage(langCode) {
     
     document.getElementById('lblCity').textContent = t.city;
     dom.city.placeholder = t.placeholderCity;
+
+    const phoneCodeLabel = document.getElementById('lblPhoneCode');
+    if (phoneCodeLabel) {
+        phoneCodeLabel.textContent = t.phoneCode || 'Calling code';
+    }
     
     document.getElementById('lblPhone').textContent = t.phone;
     dom.phone.placeholder = t.placeholderPhone;
-    
+
+    const lblPhone2 = document.getElementById('lblPhone2');
+    if (lblPhone2) lblPhone2.textContent = t.phone2 || '2nd phone (optional)';
+    if (dom.phone2) dom.phone2.placeholder = t.placeholderPhone || '';
+    const lblPhone2Toggle = document.getElementById('lblPhone2Toggle');
+    if (lblPhone2Toggle) {
+        lblPhone2Toggle.textContent = state.phone2Visible
+            ? (t.phone2ToggleRemove || 'Remove 2nd phone')
+            : (t.phone2Toggle || 'Add a 2nd phone number');
+    }
+    const lblPhoneCode2 = document.getElementById('lblPhoneCode2');
+    if (lblPhoneCode2) lblPhoneCode2.textContent = t.phoneCode || 'Calling code';
+
     document.getElementById('lblEmail').textContent = t.email;
     dom.email.placeholder = t.placeholderEmail;
     
@@ -399,7 +537,11 @@ function applyLanguage(langCode) {
     }
 
     if (state.globalCountriesData && state.globalCountriesData.length > 0) {
-        renderCountrySelect(langCode);
+        state.countrySelectedManually = false;
+        renderCountryNameSelect(langCode);
+        renderCountryCodeSelect(langCode);
+        syncPhone2CodeToPhone1();
+        syncPhoneCodeWithSelectedCountry();
     }
 }
 
@@ -421,6 +563,13 @@ function resetClientForm() {
     // Clear form fields without reloading (keep advisor connection alive)
     dom.form.reset();
 
+    // Reset second phone section
+    setPhone2Visible(false);
+
+    // Hide autocomplete dropdowns
+    document.getElementById('addressSuggestions')?.classList.remove('open');
+    document.getElementById('tempAddressSuggestions')?.classList.remove('open');
+
     // Reset temp address section
     dom.tempAddressSection.classList.remove('expanded');
     document.getElementById('tempAddressWrapper').classList.remove('active');
@@ -433,12 +582,29 @@ function resetClientForm() {
     dom.form.style.display = 'flex';
     document.getElementById('pageTitle').textContent = i18n[state.lang].pageTitle;
 
-    // Reset phone country display to current select value
-    const countrySelect = document.getElementById('countryCode');
+    // Reset country to language default
+    state.countrySelectedManually = false;
+    if (state.globalCountriesData && state.globalCountriesData.length > 0) {
+        renderCountryNameSelect(state.lang);
+        renderCountryCodeSelect(state.lang);
+    }
+
+    // Reset country displays to current select values
+    const countrySelect = dom.country;
     if (countrySelect) {
         const selectedOpt = countrySelect.options[countrySelect.selectedIndex];
         if (selectedOpt && selectedOpt.dataset.short) {
-            document.getElementById('countryCodeDisplay').textContent = selectedOpt.dataset.short;
+            const countryDisplay = document.getElementById('countryDisplay');
+            if (countryDisplay) countryDisplay.textContent = selectedOpt.dataset.short;
+        }
+    }
+
+    const phoneCodeSelect = dom.countryCode;
+    if (phoneCodeSelect) {
+        const selectedOpt = phoneCodeSelect.options[phoneCodeSelect.selectedIndex];
+        if (selectedOpt && selectedOpt.dataset.short) {
+            const phoneCodeDisplay = document.getElementById('countryCodeDisplay');
+            if (phoneCodeDisplay) phoneCodeDisplay.textContent = selectedOpt.dataset.short;
         }
     }
 
@@ -508,9 +674,16 @@ dom.form.addEventListener('submit', (e) => {
 
     const formData = new FormData(dom.form);
     const addr = formData.get('address');
+    const selectedCountryOption = dom.country ? dom.country.options[dom.country.selectedIndex] : null;
+    const countryLabel = selectedCountryOption
+        ? (selectedCountryOption.dataset.countryName || selectedCountryOption.textContent || '')
+        : '';
     
-    // Combine Phone Input
-    const fullPhone = `${formData.get('countryCode')} ${formData.get('phone')}`;
+    // Phone split fields
+    const phoneCode = `${formData.get('countryCode') || ''}`.trim();
+    const phoneNumber = `${formData.get('phone') || ''}`.trim();
+    const phone2Code = state.phone2Visible ? `${formData.get('countryCode2') || ''}`.trim() : '';
+    const phone2Number = state.phone2Visible ? `${formData.get('phone2') || ''}`.trim() : '';
 
     // Prepare Summary View with Beautiful UI Components (Forced to Spanish)
     const t = i18n['es'];
@@ -522,8 +695,16 @@ dom.form.addEventListener('submit', (e) => {
             <span class="summary-value">${addr}</span>
         </div>
         <div class="summary-row">
-            <span class="summary-label">${t.zipCode || 'CP'} / ${t.city || 'Ville'}</span>
-            <span class="summary-value">${formData.get('zipCode')} ${formData.get('city')}</span>
+            <span class="summary-label">${t.country || 'Pays'}</span>
+            <span class="summary-value">${countryLabel || '-'}</span>
+        </div>
+        <div class="summary-row">
+            <span class="summary-label">${t.zipCode || 'CP'}</span>
+            <span class="summary-value">${formData.get('zipCode') || '-'}</span>
+        </div>
+        <div class="summary-row">
+            <span class="summary-label">${t.city || 'Ville'}</span>
+            <span class="summary-value">${formData.get('city') || '-'}</span>
         </div>
     `;
 
@@ -544,9 +725,29 @@ dom.form.addEventListener('submit', (e) => {
     // Add Phone and Email
     summaryHTML += `
         <div class="summary-row">
-            <span class="summary-label">${t.phone || 'Tél'}</span>
-            <span class="summary-value">${fullPhone}</span>
+            <span class="summary-label">${t.phoneCode || 'Calling code'}</span>
+            <span class="summary-value">${phoneCode || '-'}</span>
         </div>
+        <div class="summary-row">
+            <span class="summary-label">${t.phone || 'Téléphone'}</span>
+            <span class="summary-value">${phoneNumber || '-'}</span>
+        </div>
+    `;
+
+    if (state.phone2Visible && (phone2Code || phone2Number)) {
+        summaryHTML += `
+        <div class="summary-row">
+            <span class="summary-label">${t.phoneCode || 'Calling code'} (2)</span>
+            <span class="summary-value">${phone2Code || '-'}</span>
+        </div>
+        <div class="summary-row">
+            <span class="summary-label">${t.phone2 || '2nd phone'}</span>
+            <span class="summary-value">${phone2Number || '-'}</span>
+        </div>
+        `;
+    }
+
+    summaryHTML += `
         <div class="summary-row">
             <span class="summary-label">${t.email || 'Email'}</span>
             <span class="summary-value">${formData.get('email')}</span>
@@ -592,6 +793,7 @@ state.lang = sessionStorage.getItem('okm_lang') || detectUserLanguage();
 sessionStorage.removeItem('okm_lang');
 dom.langSelect.value = state.lang; // Sync UI Select box
 applyLanguage(state.lang);
+hydrateAgencyBrandingFromUrl();
 
 // ============================================================================
 // 7. Dynamic Data (Country Dial Codes)
@@ -625,27 +827,88 @@ async function populateCountryCodes() {
 
         state.globalCountriesData = countries;
 
-        const select = document.getElementById('countryCode');
+        const countrySelect = dom.country;
+        const phoneCodeSelect = dom.countryCode;
+
+        if (countrySelect) {
+            countrySelect.addEventListener('change', (e) => {
+                state.countrySelectedManually = true;
+                const selectedOpt = e.target.options[e.target.selectedIndex];
+                if (selectedOpt && selectedOpt.dataset.short) {
+                    const countryDisplay = document.getElementById('countryDisplay');
+                    if (countryDisplay) countryDisplay.textContent = selectedOpt.dataset.short;
+                }
+
+                syncPhoneCodeWithSelectedCountry();
+            });
+        }
+
         // Update the overlay view when the native select changes (only bind once)
-        select.addEventListener('change', (e) => {
-            state.phoneSelectedManually = true;
-            const selectedOpt = e.target.options[e.target.selectedIndex];
-            if (selectedOpt && selectedOpt.dataset.short) {
-                document.getElementById('countryCodeDisplay').textContent = selectedOpt.dataset.short;
-            }
-        });
+        if (phoneCodeSelect) {
+            phoneCodeSelect.addEventListener('change', (e) => {
+                state.phoneSelectedManually = true;
+                const selectedOpt = e.target.options[e.target.selectedIndex];
+                if (selectedOpt && selectedOpt.dataset.short) {
+                    const phoneCodeDisplay = document.getElementById('countryCodeDisplay');
+                    if (phoneCodeDisplay) phoneCodeDisplay.textContent = selectedOpt.dataset.short;
+                }
+            });
+        }
 
         // Initial render
-        renderCountrySelect(state.lang);
+        renderCountryNameSelect(state.lang);
+        renderCountryCodeSelect(state.lang);
+        syncPhone2CodeToPhone1();
+        syncPhoneCodeWithSelectedCountry();
         
     } catch (error) {
         console.error('Error fetching country codes:', error);
     }
 }
 
-function renderCountrySelect(langCode) {
+function syncPhone2CodeToPhone1() {
+    if (!dom.countryCode || !dom.countryCode2) return;
+    const currentVal = dom.countryCode2.value;
+    dom.countryCode2.innerHTML = dom.countryCode.innerHTML;
+    // Keep previous selection if valid, otherwise mirror phone1
+    const hasVal = currentVal && Array.from(dom.countryCode2.options).some(o => o.value === currentVal);
+    if (hasVal) {
+        dom.countryCode2.value = currentVal;
+    } else {
+        dom.countryCode2.value = dom.countryCode.value;
+    }
+    const display2 = document.getElementById('countryCode2Display');
+    if (display2) {
+        const opt = dom.countryCode2.options[dom.countryCode2.selectedIndex];
+        if (opt?.dataset.short) display2.textContent = opt.dataset.short;
+    }
+}
+
+function syncPhoneCodeWithSelectedCountry() {
+    if (state.phoneSelectedManually || !dom.country || !dom.countryCode || !state.globalCountriesData?.length) {
+        return;
+    }
+
+    const selectedCountryCca2 = dom.country.value;
+    if (!selectedCountryCca2) return;
+
+    const selectedCountryData = state.globalCountriesData.find(c => c.cca2 === selectedCountryCca2);
+    if (!selectedCountryData || !selectedCountryData.code) return;
+
+    const matchingOption = Array.from(dom.countryCode.options).find(opt => !opt.disabled && opt.value === selectedCountryData.code);
+    if (!matchingOption) return;
+
+    dom.countryCode.value = selectedCountryData.code;
+
+    const phoneCodeDisplay = document.getElementById('countryCodeDisplay');
+    if (phoneCodeDisplay) {
+        phoneCodeDisplay.textContent = matchingOption.dataset.short || selectedCountryData.shortLabel || `${getFlagEmoji(selectedCountryData.cca2)} ${selectedCountryData.code}`;
+    }
+}
+
+function renderCountryCodeSelect(langCode) {
     if (!state.globalCountriesData || state.globalCountriesData.length === 0) return;
-    const select = document.getElementById('countryCode');
+    const select = dom.countryCode;
     const currentSelection = state.phoneSelectedManually ? select.value : null;
     const localeForDisplay = i18n[langCode] ? langCode : 'en';
     let displayNames = null;
@@ -660,7 +923,7 @@ function renderCountrySelect(langCode) {
     let priorityCca2 = [];
     switch (langCode) {
         case 'en': priorityCca2 = ['GB', 'US', 'CA', 'AU', 'IE', 'NZ']; break;
-        case 'es': priorityCca2 = ['ES', 'MX', 'AR', 'CO', 'CL', 'PE', 'VE']; break;
+        case 'es': priorityCca2 = ['ES', 'CO', 'MX', 'AR', 'CL', 'PE', 'VE']; break;
         case 'fr': priorityCca2 = ['FR', 'BE', 'CH', 'CA', 'LU', 'MC']; break;
         case 'it': priorityCca2 = ['IT', 'CH', 'SM', 'VA']; break;
         case 'pt': priorityCca2 = ['PT', 'BR', 'AO', 'MZ', 'CV']; break;
@@ -692,7 +955,8 @@ function renderCountrySelect(langCode) {
         
         if (c.code === currentSelection || (!currentSelection && index === 0)) {
             option.selected = true;
-            document.getElementById('countryCodeDisplay').textContent = c.shortLabel;
+            const display = document.getElementById('countryCodeDisplay');
+            if (display) display.textContent = c.shortLabel;
             selectionRestored = true;
         }
         select.appendChild(option);
@@ -716,9 +980,50 @@ function renderCountrySelect(langCode) {
         
         if (!selectionRestored && c.code === currentSelection) {
             option.selected = true;
-            document.getElementById('countryCodeDisplay').textContent = c.shortLabel;
+            const display = document.getElementById('countryCodeDisplay');
+            if (display) display.textContent = c.shortLabel;
             selectionRestored = true;
         }
+        select.appendChild(option);
+    });
+}
+
+function renderCountryNameSelect(langCode) {
+    if (!state.globalCountriesData || state.globalCountriesData.length === 0 || !dom.country) return;
+
+    const select = dom.country;
+    const currentSelection = state.countrySelectedManually ? select.value : null;
+    const localeForDisplay = i18n[langCode] ? langCode : 'en';
+    let displayNames = null;
+
+    try {
+        displayNames = new Intl.DisplayNames([localeForDisplay], { type: 'region' });
+    } catch (_) {
+        displayNames = null;
+    }
+
+    const countries = [...state.globalCountriesData];
+    select.innerHTML = '';
+
+    countries.forEach((c, index) => {
+        const option = document.createElement('option');
+        const localizedName = displayNames ? displayNames.of(c.cca2) : c.name;
+        const countryName = localizedName || c.name;
+        const shortLabel = `${getFlagEmoji(c.cca2)} ${countryName}`;
+
+        option.value = c.cca2;
+        option.textContent = shortLabel;
+        option.dataset.short = shortLabel;
+        option.dataset.countryName = countryName;
+
+        const defaultCca2ByLang = { fr: 'FR', en: 'GB', es: 'ES', it: 'IT', pt: 'PT', de: 'DE', nl: 'NL' };
+        const defaultCca2 = defaultCca2ByLang[langCode] || 'FR';
+        if (c.cca2 === currentSelection || (!currentSelection && (c.cca2 === defaultCca2 || index === 0))) {
+            option.selected = true;
+            const display = document.getElementById('countryDisplay');
+            if (display) display.textContent = shortLabel;
+        }
+
         select.appendChild(option);
     });
 }
@@ -806,28 +1111,118 @@ const peerConfig = {
     ]
 };
 
+const TURN_FETCH_TIMEOUT_MS = 3500;
+
+const rtcDiag = {
+    enabled: (() => {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('diag') === '1' || localStorage.getItem('okm_rtc_diag') === '1';
+        } catch {
+            return false;
+        }
+    })()
+};
+
+function diagLog(...args) {
+    if (!rtcDiag.enabled) return;
+    console.debug('[OKM-RTC][CLIENT]', ...args);
+}
+
+function getPeerConnectionFromDataConnection(connection) {
+    return connection?.peerConnection || connection?._pc || null;
+}
+
+async function logSelectedCandidatePair(connection, label) {
+    if (!rtcDiag.enabled || !connection) return;
+    const pc = getPeerConnectionFromDataConnection(connection);
+    if (!pc || typeof pc.getStats !== 'function') return;
+
+    try {
+        const stats = await pc.getStats();
+        let selectedPair = null;
+
+        stats.forEach((report) => {
+            if (report.type === 'candidate-pair' && (report.selected || report.nominated)) {
+                selectedPair = report;
+            }
+        });
+
+        if (!selectedPair) {
+            diagLog(label, 'No selected candidate pair yet');
+            return;
+        }
+
+        const localCandidate = stats.get(selectedPair.localCandidateId);
+        const remoteCandidate = stats.get(selectedPair.remoteCandidateId);
+
+        diagLog(label, {
+            protocol: selectedPair.protocol,
+            localCandidateType: localCandidate?.candidateType,
+            remoteCandidateType: remoteCandidate?.candidateType,
+            localAddress: localCandidate?.address,
+            remoteAddress: remoteCandidate?.address
+        });
+    } catch (err) {
+        diagLog('getStats failed:', err.message);
+    }
+}
+
+function normalizeIceServers(servers) {
+    if (!servers) return [];
+    const list = Array.isArray(servers) ? servers : [servers];
+    return list.filter((server) => {
+        if (!server || typeof server !== 'object') return false;
+        return typeof server.urls === 'string' || Array.isArray(server.urls);
+    });
+}
+
+function buildMergedIceServers(dynamicServers) {
+    const baseStun = [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun.cloudflare.com:3478' }
+    ];
+
+    const cloudflareServers = normalizeIceServers(dynamicServers);
+    const fallbackTurnServers = peerConfig.iceServers.filter((server) => {
+        if (!server || !server.urls) return false;
+        const urls = Array.isArray(server.urls) ? server.urls : [server.urls];
+        return urls.some((url) => typeof url === 'string' && (url.startsWith('turn:') || url.startsWith('turns:')));
+    });
+
+    return [...baseStun, ...cloudflareServers, ...fallbackTurnServers];
+}
+
 // Fetch ephemeral Cloudflare TURN credentials.
 // Falls back to the hardcoded openrelay servers if the API is unavailable.
 async function fetchTurnCredentials() {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TURN_FETCH_TIMEOUT_MS);
+
     try {
         const response = await fetch('/api/turn-credentials', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal
         });
+
+        clearTimeout(timeoutId);
         if (!response.ok) throw new Error('HTTP ' + response.status);
+
         const data = await response.json();
-        if (data.iceServers) {
-            // Cloudflare returns a single iceServers object — merge with STUN
-            return [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'stun:stun.cloudflare.com:3478' },
-                data.iceServers
-            ];
+
+        if (data && data.iceServers) {
+            diagLog('Using Cloudflare TURN credentials');
+            return buildMergedIceServers(data.iceServers);
         }
     } catch (err) {
+        clearTimeout(timeoutId);
         console.warn('Cloudflare TURN unavailable, using fallback:', err.message);
+        diagLog('Falling back to static TURN servers because:', err.message);
     }
+
+    diagLog('Using fallback TURN credentials');
     return peerConfig.iceServers;
 }
 
@@ -851,8 +1246,7 @@ function checkUrlForAdvisorCode() {
     const urlCode = new URLSearchParams(window.location.search).get('code');
     if (urlCode && dom.advisorCodeInput) {
         dom.advisorCodeInput.value = urlCode.toUpperCase();
-        openAdvisorModal();
-        // Auto-connect after a short delay
+        // Connect silently in background (no modal shown when code comes from QR)
         setTimeout(() => connectToAdvisor(), 600);
     }
 }
@@ -871,10 +1265,12 @@ async function connectToAdvisor() {
     }
     
     const iceServers = await fetchTurnCredentials();
+    diagLog('ICE servers count:', iceServers.length);
     state.peer = new Peer({ config: { iceServers } });
     
     state.peer.on('open', () => {
         console.log('Client peer opened, connecting to advisor:', code);
+        diagLog('Peer opened, trying advisor code', code);
         
         // Connect to the advisor's peer
         state.advisorConnection = state.peer.connect(code, { reliable: true });
@@ -887,6 +1283,9 @@ async function connectToAdvisor() {
             closeAdvisorModal();
             // Send current form data immediately
             sendFormDataToAdvisor(true);
+            setTimeout(() => {
+                logSelectedCandidatePair(state.advisorConnection, 'Selected path after connection open');
+            }, 1500);
         });
 
         state.advisorConnection.on('data', (data) => {
@@ -905,6 +1304,7 @@ async function connectToAdvisor() {
         
         state.advisorConnection.on('close', () => {
             console.log('Disconnected from advisor');
+            diagLog('Data connection closed');
             state.advisorConnected = false;
             state.lastSentPayload = null;
             updateClientStatus('disconnected');
@@ -912,6 +1312,7 @@ async function connectToAdvisor() {
         
         state.advisorConnection.on('error', (err) => {
             console.error('Connection error:', err);
+            diagLog('Data connection error:', err?.type || err?.message || err);
             state.advisorConnected = false;
             state.lastSentPayload = null;
             updateClientStatus('error');
@@ -920,6 +1321,7 @@ async function connectToAdvisor() {
     
     state.peer.on('error', (err) => {
         console.error('Peer error:', err);
+        diagLog('Peer error:', err?.type || err?.message || err);
         state.advisorConnected = false;
         updateClientStatus('error');
     });
@@ -991,9 +1393,12 @@ function clampText(value, maxLength) {
 function buildAdvisorPayload() {
     if (!state.advisorConnected || !state.advisorConnection) return;
     
-    const countryCode = document.getElementById('countryCode');
-    const selectedOption = countryCode ? countryCode.options[countryCode.selectedIndex] : null;
-    const phoneCode = selectedOption ? selectedOption.value : '+33';
+    const selectedPhoneOption = dom.countryCode ? dom.countryCode.options[dom.countryCode.selectedIndex] : null;
+    const selectedCountryOption = dom.country ? dom.country.options[dom.country.selectedIndex] : null;
+    const phoneCode = selectedPhoneOption ? selectedPhoneOption.value : '+33';
+    const countryName = selectedCountryOption
+        ? (selectedCountryOption.dataset.countryName || selectedCountryOption.textContent || '')
+        : '';
 
     const phoneValue = clampText(dom.phone?.value || '', 40);
     const formattedPhone = `${phoneCode} ${phoneValue}`.replace(/\s+/g, ' ').trim();
@@ -1001,13 +1406,18 @@ function buildAdvisorPayload() {
     return {
         language: state.lang,
         address: clampText(dom.address?.value || '', 140),
+        country: clampText(countryName, 80),
         zipCode: clampText(dom.zipCode?.value || '', 20),
         city: clampText(dom.city?.value || '', 80),
         hasTempAddress: Boolean(dom.hasTempAddress?.checked),
         tempAddress: clampText(dom.tempAddress?.value || '', 140),
         tempZipCode: clampText(dom.tempZipCode?.value || '', 20),
         tempCity: clampText(dom.tempCity?.value || '', 80),
+        phoneCode: clampText(phoneCode, 10),
+        phoneNumber: clampText(phoneValue, 40),
         phone: formattedPhone.slice(0, 40),
+        phone2Code: state.phone2Visible ? clampText(dom.countryCode2?.value || '', 10) : '',
+        phone2Number: state.phone2Visible ? clampText(dom.phone2?.value || '', 40) : '',
         email: clampText(dom.email?.value || '', 120)
     };
 }
@@ -1051,12 +1461,13 @@ function debouncedSendToAdvisor() {
     }, 300);
 }
 
+
 // Attach input listeners to all form fields for real-time sync
 function attachRealTimeListeners() {
     const fields = [
-        dom.address, dom.zipCode, dom.city,
+        dom.address, dom.country, dom.zipCode, dom.city,
         dom.tempAddress, dom.tempZipCode, dom.tempCity,
-        dom.phone, dom.email
+        dom.phone, dom.phone2, dom.email
     ];
     
     fields.forEach(field => {
@@ -1066,9 +1477,23 @@ function attachRealTimeListeners() {
     });
     
     // Also listen to country code changes
-    const countryCode = document.getElementById('countryCode');
-    if (countryCode) {
-        countryCode.addEventListener('change', debouncedSendToAdvisor);
+    if (dom.countryCode) {
+        dom.countryCode.addEventListener('change', debouncedSendToAdvisor);
+    }
+
+    if (dom.countryCode2) {
+        dom.countryCode2.addEventListener('change', (e) => {
+            const display = document.getElementById('countryCode2Display');
+            if (display) {
+                const opt = e.target.options[e.target.selectedIndex];
+                if (opt?.dataset.short) display.textContent = opt.dataset.short;
+            }
+            debouncedSendToAdvisor();
+        });
+    }
+
+    if (dom.country) {
+        dom.country.addEventListener('change', debouncedSendToAdvisor);
     }
     
     // And temp address checkbox
@@ -1077,6 +1502,28 @@ function attachRealTimeListeners() {
             setTimeout(sendFormDataToAdvisor, 100);
         });
     }
+}
+
+// Second phone toggle
+function setPhone2Visible(visible) {
+    state.phone2Visible = visible;
+    if (dom.phone2Section) dom.phone2Section.style.display = visible ? 'flex' : 'none';
+    if (!visible && dom.phone2) dom.phone2.value = '';
+    const t = i18n[state.lang] || i18n['es'];
+    const lblToggle = document.getElementById('lblPhone2Toggle');
+    const btnToggle = dom.btnTogglePhone2;
+    if (lblToggle) lblToggle.textContent = visible ? (t.phone2ToggleRemove || 'Remove 2nd phone') : (t.phone2Toggle || 'Add a 2nd phone number');
+    if (btnToggle) {
+        const icon = btnToggle.querySelector('i');
+        if (icon) icon.className = visible ? 'bx bx-minus-circle' : 'bx bx-plus-circle';
+    }
+}
+
+if (dom.btnTogglePhone2) {
+    dom.btnTogglePhone2.addEventListener('click', () => {
+        setPhone2Visible(!state.phone2Visible);
+        debouncedSendToAdvisor();
+    });
 }
 
 // Modal controls
@@ -1116,6 +1563,138 @@ if (dom.advisorCodeInput) {
     });
 }
 
+// ============================================================================
+// Address Autocomplete — Photon API (OpenStreetMap, EU-hosted, no key needed)
+// ============================================================================
+
+/**
+ * Format a street address per country convention:
+ *   FR/GB/US/CA/AU → "15 Rue de Rivoli"   (number before)
+ *   ES/IT/PT/BR    → "Gran Vía, 15"        (number after, comma)
+ *   DE/NL/SE/...   → "Alexanderplatz 4"    (number after, no comma)
+ */
+function formatStreetAddress(housenumber, street, countryCode) {
+    if (!street) return housenumber || '';
+    if (!housenumber) return street;
+    const cc = (countryCode || '').toLowerCase();
+    if (['es', 'it', 'pt', 'br', 'ar', 'mx', 'co', 'cl', 'pe', 'uy'].includes(cc)) {
+        return `${street}, ${housenumber}`;
+    }
+    if (['fr', 'be', 'gb', 'us', 'ca', 'au', 'nz', 'ie', 'lu'].includes(cc)) {
+        return `${housenumber} ${street}`;
+    }
+    // DE, NL, AT, CH, DK, SE, NO, FI, PL, CZ, SK, HU, RO, HR, SI, GR, TR…
+    return `${street} ${housenumber}`;
+}
+
+async function fetchPhotonSuggestions(query, langCode) {
+    const photonLang = ['de', 'en', 'fr'].includes(langCode) ? langCode : 'default';
+    const params = new URLSearchParams({ q: query, limit: 6, lang: photonLang });
+    const resp = await fetch(`https://photon.komoot.io/api/?${params}`);
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    return data.features || [];
+}
+
+function buildSuggestionItem(feature) {
+    const p = feature.properties || {};
+    const cc = p.countrycode || p.country_code || '';
+    const street = p.street || p.name || '';
+    const line1 = formatStreetAddress(p.housenumber || '', street, cc);
+    const cityPart = p.city || p.town || p.village || '';
+    const line2 = [p.postcode, cityPart, p.country].filter(Boolean).join(', ');
+    return { line1, line2, props: p };
+}
+
+function renderAddressSuggestions(features, listEl, onSelect, closeList) {
+    listEl.innerHTML = '';
+    const items = features.map(buildSuggestionItem).filter(i => i.line1);
+    if (!items.length) { closeList(); return; }
+
+    items.forEach((item, idx) => {
+        const li = document.createElement('li');
+        li.className = 'suggestion-item';
+        li.setAttribute('role', 'option');
+        li.dataset.idx = idx;
+        li.innerHTML = `<span class="suggestion-main">${item.line1}</span><span class="suggestion-sub">${item.line2}</span>`;
+        li.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            onSelect(item.line1, item.props);
+            closeList();
+        });
+        listEl.appendChild(li);
+    });
+    listEl.classList.add('open');
+}
+
+function initAddressAutocomplete() {
+    const mainInput  = dom.address;
+    const mainList   = document.getElementById('addressSuggestions');
+    const tempInput  = dom.tempAddress;
+    const tempList   = document.getElementById('tempAddressSuggestions');
+
+    // overflowEl: .temp-address-content-inner has overflow:hidden for its slide animation;
+    // temporarily set to visible while suggestions are open so they aren't clipped.
+    function bindField(inputEl, listEl, getCountry, overflowEl) {
+        if (!inputEl || !listEl) return;
+        let timer = null;
+
+        function closeList() {
+            listEl.classList.remove('open');
+            if (overflowEl) {
+                listEl.addEventListener('transitionend', () => {
+                    overflowEl.style.overflow = '';
+                }, { once: true });
+            }
+        }
+
+        inputEl.addEventListener('input', () => {
+            const q = inputEl.value.trim();
+            clearTimeout(timer);
+            if (q.length < 3) { closeList(); return; }
+            timer = setTimeout(async () => {
+                try {
+                    const countryCode = getCountry ? getCountry() : '';
+                    let features = await fetchPhotonSuggestions(q, state.lang);
+                    if (countryCode) {
+                        features = features.filter(f =>
+                            (f.properties?.countrycode || '').toLowerCase() === countryCode.toLowerCase()
+                        );
+                    }
+                    if (overflowEl) overflowEl.style.overflow = 'visible';
+                    renderAddressSuggestions(features, listEl, (formatted, props) => {
+                        inputEl.value = formatted;
+                        const zip  = props.postcode || '';
+                        const city = props.city || props.town || props.village || '';
+                        if (inputEl === mainInput) {
+                            if (zip  && dom.zipCode)  dom.zipCode.value  = zip;
+                            if (city && dom.city)      dom.city.value     = city;
+                            const cc = (props.countrycode || props.country_code || '').toUpperCase();
+                            if (cc && dom.country && dom.country.value !== cc) {
+                                dom.country.value = cc;
+                                dom.country.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
+                        } else {
+                            if (zip  && dom.tempZipCode)  dom.tempZipCode.value  = zip;
+                            if (city && dom.tempCity)      dom.tempCity.value     = city;
+                        }
+                        debouncedSendToAdvisor();
+                    }, closeList);
+                    if (overflowEl && !listEl.classList.contains('open')) overflowEl.style.overflow = '';
+                } catch (_) { /* network error — silent */ }
+            }, 380);
+        });
+
+        inputEl.addEventListener('blur',    () => setTimeout(() => closeList(), 160));
+        inputEl.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeList(); });
+    }
+
+    const tempInner = document.querySelector('.temp-address-content-inner');
+    bindField(mainInput, mainList, () => dom.country?.value || '');
+    bindField(tempInput, tempList, null, tempInner);
+}
+
 // Initialize
 attachRealTimeListeners();
+initAddressAutocomplete();
 checkUrlForAdvisorCode();

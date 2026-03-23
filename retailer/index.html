@@ -2,18 +2,19 @@
 <html lang="es" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
     <meta name="referrer" content="same-origin">
     <title>OK Mobility - Conseiller</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="/style.css?v=16">
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css?v=42">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="/assets/js/brand-config.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/libphonenumber-js@1.11.18/bundle/libphonenumber-js.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
     <div class="ambient-background">
@@ -26,10 +27,12 @@
         <header class="glass-header">
             <div class="header-brand">
                 <div class="logo">
-                    <img src="https://okmobility.com/img/logos/okmobility-imagotipo.svg" alt="OK Mobility Logo" class="logo-img logo-img-light">
-                    <img src="https://okmobility.com/img/logos/okmobility-imagotipo-white.svg" alt="OK Mobility Logo" class="logo-img logo-img-dark">
+                    <picture class="logo-picture">
+                        <source media="(max-width: 640px)" srcset="/assets/logos/okm-logo-mobile-white.svg">
+                        <img src="/assets/logos/okm-logo-white.svg" alt="OK Mobility Logo" class="logo-img logo-img-brand">
+                    </picture>
                 </div>
-                <span class="brand-slogan">Vista Asesor</span>
+                <span class="brand-slogan" id="retailerAgencyBrandText" data-default-slogan="The Global Mobility Platform">The Global Mobility Platform</span>
             </div>
             <div class="header-controls">
                 <div class="lang-selector">
@@ -72,13 +75,39 @@
                 </div>
 
                 <div class="qr-wrapper glass-panel">
-                    <div class="qr-code-frame">
+                    <div class="qr-code-frame" id="qrCodeFrame" role="button" tabindex="0" aria-label="Agrandir le QR code">
                         <div id="qrCode"></div>
                         <div class="qr-center-badge" aria-hidden="true">
-                            <img src="/favicon.ico" alt="OK Mobility">
+                            <img src="/assets/logos/okm-logo-mobile-white.svg" alt="OK Mobility">
                         </div>
                     </div>
                     <p id="qrHint" class="qr-hint">Escanear para conectar</p>
+                </div>
+
+                <div class="setup-trust-panel glass-panel">
+                    <p id="licenseStatusInline" class="license-status-note" style="display:none;"></p>
+
+                    <p id="advisorLegalText" class="legal-text legal-text-compact">
+                        Uso interno autorizado exclusivamente. No se almacena ninguna información del cliente en servidores externos.
+                    </p>
+
+                    <p class="legal-text legal-text-gdpr">
+                        OK MOBILITY GROUP, S.L.U. es el Responsable del tratamiento de los datos personales del Interesado y le informa de que estos datos se tratarán de conformidad con lo dispuesto en el Reglamento (UE) 2016/679, de 27 de abril (GDPR), y la Ley Orgánica 3/2018, de 5 de diciembre (LOPDG).
+                    </p>
+
+                    <p id="advisorCopyrightText" class="legal-text legal-text-copyright">
+                        © 2026 Guilhem Normand — Todos los derechos reservados
+                    </p>
+                </div>
+            </div>
+
+            <div class="qr-lightbox" id="qrLightbox" aria-hidden="true">
+                <div class="qr-lightbox-backdrop"></div>
+                <div class="qr-lightbox-frame qr-code-frame" id="qrLightboxFrame">
+                    <div id="qrCodeLarge"></div>
+                    <div class="qr-center-badge" aria-hidden="true">
+                        <img src="/assets/logos/okm-logo-mobile-white.svg" alt="OK Mobility">
+                    </div>
                 </div>
             </div>
 
@@ -98,12 +127,32 @@
                         </button>
                     </div>
 
-                    <div class="data-row" id="rowZipCity">
+                    <div class="data-row" id="rowCountry">
                         <div class="data-info">
-                            <span id="lblDataZipCity" class="data-label">CP / Ciudad</span>
-                            <span class="data-value" id="valZipCity">-</span>
+                            <span id="lblDataCountry" class="data-label">País</span>
+                            <span class="data-value" id="valCountry">-</span>
                         </div>
-                        <button class="btn-copy" data-field="zipCity" title="Copiar">
+                        <button class="btn-copy" data-field="country" title="Copiar">
+                            <i class='bx bx-copy'></i>
+                        </button>
+                    </div>
+
+                    <div class="data-row" id="rowZipCode">
+                        <div class="data-info">
+                            <span id="lblDataZipCode" class="data-label">CP</span>
+                            <span class="data-value" id="valZipCode">-</span>
+                        </div>
+                        <button class="btn-copy" data-field="zipCode" title="Copiar">
+                            <i class='bx bx-copy'></i>
+                        </button>
+                    </div>
+
+                    <div class="data-row" id="rowCity">
+                        <div class="data-info">
+                            <span id="lblDataCity" class="data-label">Ciudad</span>
+                            <span class="data-value" id="valCity">-</span>
+                        </div>
+                        <button class="btn-copy" data-field="city" title="Copiar">
                             <i class='bx bx-copy'></i>
                         </button>
                     </div>
@@ -130,10 +179,42 @@
 
                     <div class="data-row" id="rowPhone">
                         <div class="data-info">
+                            <span id="lblDataPhoneCode" class="data-label">Prefijo telefónico</span>
+                            <span class="data-value" id="valPhoneCode">-</span>
+                        </div>
+                        <button class="btn-copy" data-field="phoneCode" title="Copiar">
+                            <i class='bx bx-copy'></i>
+                        </button>
+                    </div>
+
+                    <div class="data-row" id="rowPhoneNumber">
+                        <div class="data-info">
                             <span id="lblDataPhone" class="data-label">Teléfono</span>
                             <span class="data-value" id="valPhone">-</span>
+                            <span id="phoneWarning" class="phone-warning" style="display:none;" title="Formato de número inválido"><i class='bx bx-error-circle'></i></span>
                         </div>
-                        <button class="btn-copy" data-field="phone" title="Copiar">
+                        <button class="btn-copy" data-field="phoneNumber" title="Copiar">
+                            <i class='bx bx-copy'></i>
+                        </button>
+                    </div>
+
+                    <div class="data-row" id="rowPhone2" style="display: none;">
+                        <div class="data-info">
+                            <span id="lblDataPhone2Code" class="data-label">Prefijo 2º tel.</span>
+                            <span class="data-value" id="valPhone2Code">-</span>
+                        </div>
+                        <button class="btn-copy" data-field="phone2Code" title="Copiar">
+                            <i class='bx bx-copy'></i>
+                        </button>
+                    </div>
+
+                    <div class="data-row" id="rowPhone2Number" style="display: none;">
+                        <div class="data-info">
+                            <span id="lblDataPhone2" class="data-label">2º Teléfono</span>
+                            <span class="data-value" id="valPhone2">-</span>
+                            <span id="phone2Warning" class="phone-warning" style="display:none;" title="Formato de número inválido"><i class='bx bx-error-circle'></i></span>
+                        </div>
+                        <button class="btn-copy" data-field="phone2Number" title="Copiar">
                             <i class='bx bx-copy'></i>
                         </button>
                     </div>
@@ -147,6 +228,18 @@
                             <i class='bx bx-copy'></i>
                         </button>
                     </div>
+
+                    <!-- Address Map — embedded in data table -->
+                    <div id="addressMapWrapper" class="address-map-wrapper" style="display:none;">
+                        <div class="address-map-header">
+                            <i class='bx bx-map-alt'></i>
+                            <span id="addressMapLabel">Dirección en el mapa</span>
+                            <span id="addressMapTempBadge" class="map-temp-badge" style="display:none;">
+                                <i class='bx bx-map-pin'></i> Dirección temporal
+                            </span>
+                        </div>
+                        <div id="addressMap" class="address-map-container"></div>
+                    </div>
                 </div>
 
                 <div class="form-actions">
@@ -156,9 +249,6 @@
                     </button>
                 </div>
 
-                <p id="advisorLegalText" class="legal-text">
-                    Los datos mostrados provienen directamente del dispositivo del cliente mediante conexión cifrada P2P (WebRTC). No se almacena ninguna información en servidores externos.
-                </p>
             </div>
 
             <div id="disconnectedView" class="disconnected-view" style="display: none;">
@@ -178,9 +268,56 @@
                     </button>
                 </div>
             </div>
+
         </section>
     </main>
 
-    <script src="/conseiller.js?v=7"></script>
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- LICENSE GATE OVERLAY (shown by JS if not licensed)          -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div id="licenseGate" class="license-gate" aria-live="polite" style="display:none;">
+        <div class="license-gate-card glass-panel">
+            <div class="license-gate-icon" id="licenseGateIcon">
+                <i class='bx bx-lock' aria-hidden="true"></i>
+            </div>
+            <h2 id="licenseGateTitle" class="gradient-text">Acceso no autorizado</h2>
+            <p id="licenseGateMsg">Este terminal no dispone de una licencia activa.</p>
+            <button id="licenseGateActionBtn" class="btn-primary glass-btn" style="display:none; margin-top: 12px;">
+                <i class='bx bx-left-arrow-alt'></i>
+                <span>Seleccionar otra agencia</span>
+            </button>
+            <p class="license-gate-contact">Contacto: <a href="mailto:guilhem.normand@icloud.com">guilhem.normand@icloud.com</a></p>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- TERMS MODAL (first activation only)                         -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div id="termsModalOverlay" class="modal-overlay" style="display:none;"></div>
+    <div id="termsModal" class="advisor-modal glass-panel" role="dialog" aria-modal="true" aria-labelledby="termsModalTitle" style="display:none;">
+        <div class="modal-header">
+            <i class='bx bx-shield-quarter' style="font-size:1.5rem; margin-right:8px; color:var(--color-accent);"></i>
+            <h2 id="termsModalTitle">Condiciones de uso de la licencia</h2>
+        </div>
+        <div class="terms-body">
+            <p>Al activar este terminal, usted acepta los siguientes términos:</p>
+            <ul>
+                <li>🔒 La licencia está asociada a <strong id="termsAgencyName">esta agencia</strong> únicamente.</li>
+                <li>🚫 Está prohibido compartir, copiar o reutilizar el acceso en otros terminales o agencias sin licencia adicional.</li>
+                <li>📊 El uso es monitoreado. Cualquier uso abusivo podrá resultar en la suspensión del servicio.</li>
+                <li>📄 El proveedor es <strong>Guilhem Normand</strong> — software independiente, no afiliado a OK Mobility Group.</li>
+            </ul>
+            <p style="margin-top:12px; font-size:0.8rem; opacity:0.7;">Esta aceptación queda registrada con fecha, hora e IP del terminal.</p>
+        </div>
+        <div class="modal-actions">
+            <button id="termsBtnAccept" class="btn-primary glass-btn">
+                <i class='bx bx-check-circle'></i>
+                <span>Acepto — Activar terminal</span>
+            </button>
+        </div>
+    </div>
+
+    <script src="/assets/js/license-gate.js?v=6"></script>
+    <script src="/assets/js/conseiller.js?v=22"></script>
 </body>
 </html>

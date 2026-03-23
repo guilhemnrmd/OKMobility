@@ -28,7 +28,6 @@ const TURN_TTL_SECONDS = 600; // 10 minutes
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 60;
 const rateLimitStore = new Map();
-
 function getClientIp(request) {
     return request.headers.get('cf-connecting-ip') || 'unknown';
 }
@@ -47,28 +46,87 @@ function isRateLimited(key) {
     return entry.count > RATE_LIMIT_MAX_REQUESTS;
 }
 
+/**
+ * Domain-agnostic origin check — works with any custom domain or pages.dev URL.
+ */
+function getTrustedOrigin(request) {
+    const requestHost = request.headers.get('host') || '';
+    const sameOrigin = 'https://' + requestHost;
+
+    const origin = request.headers.get('origin');
+    if (origin) {
+        try {
+            const url = new URL(origin);
+            if (url.origin === sameOrigin) return origin;
+            const rootHost = requestHost.split('.').slice(-3).join('.');
+            if (url.hostname.endsWith(rootHost)) return origin;
+        } catch { /* ignore */ }
+    }
+
+    const referer = request.headers.get('referer');
+    if (referer) {
+        try {
+            const refOrigin = new URL(referer).origin;
+            if (refOrigin === sameOrigin) return refOrigin;
+        } catch { /* ignore */ }
+    }
+
+    return sameOrigin;
+}
+
+function buildJsonHeaders(trustedOrigin) {
+    const headers = {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store',
+        'X-Content-Type-Options': 'nosniff',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        'Cross-Origin-Resource-Policy': 'same-origin',
+        'Vary': 'Origin'
+    };
+
+    if (trustedOrigin) {
+        headers['Access-Control-Allow-Origin'] = trustedOrigin;
+        headers['Access-Control-Allow-Methods'] = 'POST, OPTIONS';
+        headers['Access-Control-Allow-Headers'] = 'Content-Type';
+        headers['Access-Control-Max-Age'] = '600';
+    }
+
+    return headers;
+}
+
 export async function onRequest(context) {
     const { env, request } = context;
+
+    const trustedOrigin = getTrustedOrigin(request);
+
+    if (request.method === 'OPTIONS') {
+        if (!trustedOrigin) {
+            return new Response(JSON.stringify({ error: 'Forbidden origin' }), {
+                status: 403,
+                headers: buildJsonHeaders(null)
+            });
+        }
+
+        return new Response(null, {
+            status: 204,
+            headers: buildJsonHeaders(trustedOrigin)
+        });
+    }
 
     if (request.method !== 'POST') {
         return new Response(JSON.stringify({ error: 'Method Not Allowed' }), {
             status: 405,
             headers: {
-                'Content-Type': 'application/json',
-                'Allow': 'POST'
+                ...buildJsonHeaders(trustedOrigin),
+                'Allow': 'POST, OPTIONS'
             }
         });
     }
 
-    const allowedOrigins = new Set([
-        'https://ok-mobility-retailer.pages.dev'
-    ]);
-
-    const origin = request.headers.get('origin');
-    if (origin && !allowedOrigins.has(origin)) {
+    if (!trustedOrigin) {
         return new Response(JSON.stringify({ error: 'Forbidden origin' }), {
             status: 403,
-            headers: { 'Content-Type': 'application/json' }
+            headers: buildJsonHeaders(null)
         });
     }
 
@@ -76,7 +134,7 @@ export async function onRequest(context) {
     if (isRateLimited(clientKey)) {
         return new Response(JSON.stringify({ error: 'Too Many Requests' }), {
             status: 429,
-            headers: { 'Content-Type': 'application/json' }
+            headers: buildJsonHeaders(trustedOrigin)
         });
     }
 
@@ -84,7 +142,7 @@ export async function onRequest(context) {
     if (!env.TURN_KEY_ID || !env.TURN_API_TOKEN) {
         return new Response(JSON.stringify({ error: 'TURN not configured' }), {
             status: 503,
-            headers: { 'Content-Type': 'application/json' }
+            headers: buildJsonHeaders(trustedOrigin)
         });
     }
 
@@ -108,16 +166,13 @@ export async function onRequest(context) {
         const data = await response.json();
 
         return new Response(JSON.stringify(data), {
-            headers: {
-                'Content-Type': 'application/json',
-                'Cache-Control': 'no-store'
-            }
+            headers: buildJsonHeaders(trustedOrigin)
         });
 
     } catch (err) {
         return new Response(JSON.stringify({ error: err.message }), {
             status: 500,
-            headers: { 'Content-Type': 'application/json' }
+            headers: buildJsonHeaders(trustedOrigin)
         });
     }
 }
