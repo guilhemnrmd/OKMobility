@@ -87,27 +87,6 @@ async function deployPages(projectName) {
 async function main() {
   console.log(`\n🔑  Création de la clé TURN "${KEY_NAME}"…\n`);
 
-  // 0. Vérifier que le token voit bien l'account
-  const accountsRes = await fetch('https://api.cloudflare.com/client/v4/accounts', {
-    headers: {
-      ...authHeaders,
-      'Content-Type': 'application/json'
-    }
-  });
-  const accountsJson = await accountsRes.json();
-  const accounts = Array.isArray(accountsJson?.result) ? accountsJson.result : [];
-
-  if (!accountsRes.ok || !accountsJson.success || accounts.length === 0) {
-    console.error(`
-❌  Le token est valide mais ne voit aucun compte Cloudflare.
-
-Corrige le token avec ces réglages exacts :
-  - Permission: Account | Cloudflare Calls | Edit
-  - Account Resources: Include | Specific account | ${ACCOUNT_ID}
-`);
-    process.exit(1);
-  }
-
   // 1. Créer la clé TURN
   const createRes = await fetch(
     `https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/calls/turn_keys`,
