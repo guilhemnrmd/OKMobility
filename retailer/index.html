@@ -9,12 +9,12 @@
     <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
     <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
     <link rel="stylesheet" href="/style.css?v=42">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
     <script src="/assets/js/brand-config.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/libphonenumber-js@1.11.18/bundle/libphonenumber-js.min.js"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 </head>
 <body>
     <div class="ambient-background">
@@ -107,6 +107,20 @@
                     <div id="qrCodeLarge"></div>
                     <div class="qr-center-badge" aria-hidden="true">
                         <img src="/assets/logos/okm-logo-mobile-white.svg" alt="OK Mobility">
+                    </div>
+                </div>
+            </div>
+
+            <div class="map-lightbox" id="mapLightbox" aria-hidden="true">
+                <div class="map-lightbox-backdrop"></div>
+                <div class="map-lightbox-inner">
+                    <div id="addressMapLarge" class="map-lightbox-container"></div>
+                    <div class="map-lightbox-overlay">
+                        <i class='bx bx-map-alt'></i>
+                        <span id="mapLightboxLabel" class="address-map-overlay-text"></span>
+                        <button class="address-map-expand-btn" id="mapLightboxCloseBtn" aria-label="Réduire la carte">
+                            <i class='bx bx-exit-fullscreen'></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -231,14 +245,17 @@
 
                     <!-- Address Map — embedded in data table -->
                     <div id="addressMapWrapper" class="address-map-wrapper" style="display:none;">
-                        <div class="address-map-header">
+                        <div id="addressMap" class="address-map-container"></div>
+                        <div class="address-map-overlay">
                             <i class='bx bx-map-alt'></i>
-                            <span id="addressMapLabel">Dirección en el mapa</span>
+                            <span id="addressMapLabel" class="address-map-overlay-text"></span>
                             <span id="addressMapTempBadge" class="map-temp-badge" style="display:none;">
                                 <i class='bx bx-map-pin'></i> Dirección temporal
                             </span>
+                            <button class="address-map-expand-btn" id="addressMapExpandBtn" aria-label="Agrandir la carte">
+                                <i class='bx bx-fullscreen'></i>
+                            </button>
                         </div>
-                        <div id="addressMap" class="address-map-container"></div>
                     </div>
                 </div>
 
