@@ -27,12 +27,9 @@
 const config = {
     publicClientUrl: (() => {
         if (typeof window === 'undefined') return 'https://okmobility.pages.dev/';
-        const { hostname, origin } = window.location;
-        // localhost and preview deployments (hash.okmobility.pages.dev) → always use prod
-        if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.okmobility.pages.dev')) {
-            return 'https://okmobility.pages.dev/';
-        }
-        return origin + '/';
+        // Always use the current origin so the QR code points to the right environment
+        // (prod → prod, Cloudflare preview → preview, localhost → localhost)
+        return window.location.origin + '/';
     })(),
     peerPrefix: 'OKM-',
     codeLength: 6,
@@ -975,7 +972,7 @@ function ensureMap() {
     const token = window.BRAND?.maps?.jawgToken ?? '';
     mapInstance = new maplibregl.Map({
         container: 'addressMap',
-        style: `https://tile.jawg.io/jawg-streets.json?access-token=${token}`,
+        style: `https://api.jawg.io/styles/jawg-streets.json?access-token=${token}`,
         zoom: 13,
         center: [2.3522, 48.8566],  // Paris default
         scrollZoom: false,
@@ -1117,7 +1114,7 @@ function openMapLightbox() {
 
     mapLightboxInstance = new maplibregl.Map({
         container: 'addressMapLarge',
-        style: `https://tile.jawg.io/jawg-streets.json?access-token=${token}`,
+        style: `https://api.jawg.io/styles/jawg-streets.json?access-token=${token}`,
         center: [center.lng, center.lat],
         zoom,
         scrollZoom: true
