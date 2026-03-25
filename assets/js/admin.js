@@ -253,6 +253,8 @@
                 <span><i class='bx bx-${a.firstActivation ? 'radio-circle' : 'check-circle'}'></i> ${a.firstActivation ? 'CGU en attente' : 'CGU acceptées'}</span>
                 <span><i class='bx bx-devices'></i> Postes (30j)&nbsp;: <strong>${a.telemetry?.uniqueDevices30d || 0}</strong></span>
                 <span><i class='bx bx-world'></i> Zone&nbsp;: <strong>${a.telemetry?.lastSeenCountry || '—'}</strong></span>
+                ${a.agencyAddress ? `<span><i class='bx bx-map-pin'></i> ${escHtml(a.agencyAddress)}</span>` : ''}
+                ${a.agencyLanguage ? `<span><i class='bx bx-globe'></i> ${escHtml(a.agencyLanguage.toUpperCase())}</span>` : ''}
             </div>
             <div class="agency-actions">
                 <button class="btn-sm btn-edit">
@@ -404,13 +406,15 @@
         lastRenderedSnapshot = snapshotAgencies(agenciesCache);
     }
 
-    function applyUpsertLocally({ agencyId, agencyName, licenseExpiresAt }) {
+    function applyUpsertLocally({ agencyId, agencyName, licenseExpiresAt, agencyAddress, agencyLanguage }) {
         const idx = agenciesCache.findIndex((a) => a.id === agencyId);
         if (idx === -1) {
             agenciesCache.push({
                 id: agencyId,
                 agencyName,
                 licenseExpiresAt,
+                agencyAddress: agencyAddress || null,
+                agencyLanguage: agencyLanguage || null,
                 firstActivation: true,
                 licenseVersion: 1
             });
@@ -422,6 +426,8 @@
             ...previous,
             agencyName,
             licenseExpiresAt,
+            agencyAddress: agencyAddress !== undefined ? agencyAddress : (previous.agencyAddress || null),
+            agencyLanguage: agencyLanguage !== undefined ? agencyLanguage : (previous.agencyLanguage || null),
             licenseVersion: (previous.licenseVersion || 1) + 1
         };
     }
@@ -561,6 +567,8 @@
         inId.value = a.id;
         inName.value = a.agencyName || '';
         inExpiry.value = a.licenseExpiresAt ? a.licenseExpiresAt.slice(0, 10) : '';
+        document.getElementById('newAgencyAddress').value = a.agencyAddress || '';
+        document.getElementById('newAgencyLanguage').value = a.agencyLanguage || '';
         inId.disabled = true;
         addTitle.textContent = 'Modifier l\'agence';
         addError.textContent = '';
@@ -595,7 +603,9 @@
             action: 'upsert',
             agencyId: id,
             agencyName: name,
-            licenseExpiresAt: new Date(expiry + 'T23:59:59Z').toISOString()
+            licenseExpiresAt: new Date(expiry + 'T23:59:59Z').toISOString(),
+            agencyAddress: document.getElementById('newAgencyAddress').value.trim() || null,
+            agencyLanguage: document.getElementById('newAgencyLanguage').value || null,
         };
 
         try {

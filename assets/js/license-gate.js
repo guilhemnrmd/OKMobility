@@ -449,7 +449,13 @@ window.runLicenseGate = async function () {
         if (agencyName) localStorage.setItem(AGENCY_NAME_STORAGE_KEY, agencyName);
         else localStorage.removeItem(AGENCY_NAME_STORAGE_KEY);
     } catch (_) {}
-    
+
+    const agencyLanguage = license?.agencyLanguage || null;
+    try {
+        if (agencyLanguage) localStorage.setItem('okm_agency_language', agencyLanguage);
+        else localStorage.removeItem('okm_agency_language');
+    } catch (_) {}
+
     // Display license expiration status discreetly in header.
     displayLicenseStatus(license?.licenseExpiresAt);
 

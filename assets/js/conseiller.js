@@ -966,6 +966,7 @@ function restartSession() {
 let mapInstance = null;
 let mainMarker  = null;
 let tempMarker  = null;
+let agencyCenter = null;  // [lon, lat] — geocoded from agencyAddress after license gate
 
 function ensureMap() {
     if (mapInstance) return;
@@ -974,7 +975,7 @@ function ensureMap() {
         container: 'addressMap',
         style: `https://api.jawg.io/styles/jawg-streets.json?access-token=${token}`,
         zoom: 13,
-        center: [2.3522, 48.8566],  // Paris default
+        center: agencyCenter ?? [2.3522, 48.8566],  // Agency location or Paris fallback
         scrollZoom: false,
         attributionControl: true,
         trackResize: false
@@ -1314,6 +1315,35 @@ if (typeof window.runLicenseGate === 'function') {
                     slogan.title = agencyName;
                 }
             }
+
+            // ── Agency address → default map center ──────────────────────────
+            const agencyAddress = cached?.agencyAddress || null;
+            if (agencyAddress) {
+                const SESSION_KEY = 'okm_agency_center_' + agencyId;
+                const cachedCenter = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
+                if (cachedCenter) {
+                    agencyCenter = cachedCenter;
+                } else {
+                    geocode(agencyAddress).then(coords => {
+                        if (coords) {
+                            agencyCenter = [coords.lon, coords.lat];
+                            try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(agencyCenter)); } catch (_) {}
+                        }
+                    });
+                }
+            }
+
+            // ── Agency language → pre-select language selector ───────────────
+            const agencyLanguage = cached?.agencyLanguage || null;
+            if (agencyLanguage && dom.langSelect) {
+                const validLangs = ['en', 'fr', 'es', 'it', 'pt', 'de', 'nl'];
+                if (validLangs.includes(agencyLanguage)) {
+                    dom.langSelect.value = agencyLanguage;
+                    state.lang = agencyLanguage;
+                    if (dom.langDisplay) dom.langDisplay.textContent = languageNames[agencyLanguage] || agencyLanguage;
+                }
+            }
+            // ─────────────────────────────────────────────────────────────────
 
             initializePeer();
         })
