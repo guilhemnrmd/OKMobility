@@ -60,6 +60,9 @@ function getTrustedOrigin(request) {
             if (url.origin === sameOrigin) return origin;
             const rootHost = requestHost.split('.').slice(-3).join('.');
             if (url.hostname.endsWith(rootHost)) return origin;
+            // Allow localhost for local development (conseiller running locally
+            // but fetching TURN credentials from the production deployment)
+            if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') return origin;
         } catch { /* ignore */ }
     }
 

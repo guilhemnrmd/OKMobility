@@ -4,7 +4,7 @@
   X-Frame-Options: DENY
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), accelerometer=(), gyroscope=(), magnetometer=()
   X-Robots-Tag: noindex, nofollow, noarchive, nosnippet, noimageindex
-  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://okmobility.com https://*.tile.openstreetmap.org https://unpkg.com; font-src 'self' data:; connect-src 'self' https://restcountries.com https://*.peerjs.com wss://*.peerjs.com https://photon.komoot.io; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: https://okmobility.com https://*.tile.openstreetmap.org https://unpkg.com; font-src 'self' data:; connect-src 'self' https://okmobility.pages.dev https://restcountries.com https://*.peerjs.com wss://*.peerjs.com https://photon.komoot.io; upgrade-insecure-requests
 
 /index.html
   Cache-Control: no-store
