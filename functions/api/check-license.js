@@ -249,7 +249,9 @@ export async function onRequest(context) {
         agencyName: license.agencyName,
         licenseExpiresAt: license.licenseExpiresAt || null,
         firstActivation: license.firstActivation === true,
-        licenseVersion: license.licenseVersion || 1
+        licenseVersion: license.licenseVersion || 1,
+        agencyAddress: license.agencyAddress || null,
+        agencyLanguage: license.agencyLanguage || null,
     }), { status: 200, headers: buildHeaders(trustedOrigin) });
 
 }

@@ -27,9 +27,9 @@
 const config = {
     publicClientUrl: (() => {
         if (typeof window === 'undefined') return 'https://okmobility.pages.dev/';
-        const { hostname, origin } = window.location;
-        if (hostname === 'localhost' || hostname === '127.0.0.1') return 'https://okmobility.pages.dev/';
-        return origin + '/';
+        // Always use the current origin so the QR code points to the right environment
+        // (prod → prod, Cloudflare preview → preview, localhost → localhost)
+        return window.location.origin + '/';
     })(),
     peerPrefix: 'OKM-',
     codeLength: 6,
@@ -183,6 +183,9 @@ const dom = {
     qrLightbox: document.getElementById('qrLightbox'),
     qrLightboxFrame: document.getElementById('qrLightboxFrame'),
     qrCodeLarge: document.getElementById('qrCodeLarge'),
+    addressMapExpandBtn: document.getElementById('addressMapExpandBtn'),
+    mapLightbox:         document.getElementById('mapLightbox'),
+    mapLightboxCloseBtn: document.getElementById('mapLightboxCloseBtn'),
     qrHint: document.getElementById('qrHint'),
     titleLiveData: document.getElementById('titleLiveData'),
     connectionStatus: document.getElementById('connectionStatus'),
@@ -962,59 +965,52 @@ function restartSession() {
 }
 
 // ============================================================================
-// 10. Address Map (Leaflet + OpenStreetMap + Photon geocoding)
+// 10. Address Map (MapLibre GL + JawgMaps vector tiles + Places geocoding)
 // ============================================================================
-let mapInstance   = null;
-let mainMarker    = null;
-let tempMarker    = null;
-
-const TEMP_ICON = new Promise(resolve => {
-    // Built after Leaflet loads
-    document.addEventListener('DOMContentLoaded', () => resolve(), { once: true });
-});
-
-function getLeafletIcon(color) {
-    // Leaflet default icon with a CSS hue-rotate trick via className on the pane
-    return L.icon({
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-        iconSize:    [25, 41],
-        iconAnchor:  [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize:  [41, 41],
-        className: color === 'temp' ? 'leaflet-marker-icon-temp' : ''
-    });
-}
+let mapInstance = null;
+let mainMarker  = null;
+let tempMarker  = null;
+let agencyCenter = null;  // [lon, lat] — geocoded from agencyAddress after license gate
 
 function ensureMap() {
     if (mapInstance) return;
-    const container = document.getElementById('addressMap');
-    mapInstance = L.map(container, {
-        zoomControl: true,
-        scrollWheelZoom: false,
+    const token = window.BRAND?.maps?.jawgToken ?? '';
+    mapInstance = new maplibregl.Map({
+        container: 'addressMap',
+        style: `https://api.jawg.io/styles/jawg-streets.json?access-token=${token}`,
+        zoom: 13,
+        center: agencyCenter ?? [2.3522, 48.8566],  // Agency location or Paris fallback
+        scrollZoom: false,
         attributionControl: true,
-        trackResize: false       // we use ResizeObserver instead
+        trackResize: false
     });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© <a href="https://openstreetmap.org" target="_blank">OpenStreetMap</a>',
-        maxZoom: 19
-    }).addTo(mapInstance);
-
-    // ResizeObserver reliably handles size changes (hidden→visible, responsive, etc.)
+    const container = document.getElementById('addressMap');
     const ro = new ResizeObserver(() => {
         if (container.offsetWidth > 0 && container.offsetHeight > 0) {
-            mapInstance.invalidateSize({ animate: false, pan: false });
+            mapInstance.resize();
         }
     });
     ro.observe(container);
 }
 
+function applyView(center, bounds) {
+    function doView() {
+        if (bounds) {
+            mapInstance.fitBounds(bounds, { padding: 60, maxZoom: 16 });
+        } else {
+            mapInstance.flyTo({ center, zoom: 15 });
+        }
+    }
+    if (mapInstance.loaded()) { doView(); }
+    else { mapInstance.once('load', doView); }
+}
+
 async function geocode(query) {
     if (!query || query.length < 5) return null;
+    const token = window.BRAND?.maps?.jawgToken ?? '';
     try {
-        const params = new URLSearchParams({ q: query, limit: 1, lang: 'en' });
-        const resp = await fetch(`https://photon.komoot.io/api/?${params}`);
+        const params = new URLSearchParams({ text: query, size: 1, lang: 'fr', 'access-token': token });
+        const resp = await fetch(`https://api.jawg.io/places/v1/search?${params}`);
         if (!resp.ok) return null;
         const data = await resp.json();
         const f = data.features?.[0];
@@ -1036,49 +1032,53 @@ async function refreshMap() {
     const data  = state.currentData;
     const query = buildMainQuery(data);
 
-    if (!query || !data.address) {
-        hideAddressMap();
-        return;
-    }
+    if (!query || !data.address) { hideAddressMap(); return; }
 
     const coords = await geocode(query);
     if (!coords) { hideAddressMap(); return; }
 
-    // 1. Make the container visible FIRST so the browser can compute its dimensions
     showAddressMap();
-
-    // 2. Wait for the browser to complete layout, THEN create/update the map
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-
-    // 3. Now create the map (container has real dimensions)
     ensureMap();
 
+    // Update overlay label with address text
+    const labelEl = document.getElementById('addressMapLabel');
+    if (labelEl) {
+        labelEl.textContent = [data.address, data.zipCode, data.city].filter(Boolean).join(', ');
+    }
+
     if (mainMarker) { mainMarker.remove(); mainMarker = null; }
-    mainMarker = L.marker([coords.lat, coords.lon], { icon: getLeafletIcon('main') })
-        .addTo(mapInstance)
-        .bindPopup(`<strong>${data.address || ''}</strong><br>${[data.zipCode, data.city, data.country].filter(Boolean).join(', ')}`);
+    mainMarker = new maplibregl.Marker({ color: '#3B82F6' })
+        .setLngLat([coords.lon, coords.lat])
+        .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(
+            `<strong>${data.address || ''}</strong><br>${[data.zipCode, data.city, data.country].filter(Boolean).join(', ')}`
+        ))
+        .addTo(mapInstance);
 
     if (tempMarker) { tempMarker.remove(); tempMarker = null; }
-
     const tempBadge = document.getElementById('addressMapTempBadge');
 
     if (data.hasTempAddress && data.tempAddress) {
-        const tq     = buildTempQuery(data);
-        const tcoords = await geocode(tq);
+        const tcoords = await geocode(buildTempQuery(data));
         if (tcoords) {
-            tempMarker = L.marker([tcoords.lat, tcoords.lon], { icon: getLeafletIcon('temp') })
-                .addTo(mapInstance)
-                .bindPopup(`<strong>${data.tempAddress}</strong><br>${[data.tempZipCode, data.tempCity].filter(Boolean).join(', ')}`);
+            tempMarker = new maplibregl.Marker({ color: '#8B5CF6' })
+                .setLngLat([tcoords.lon, tcoords.lat])
+                .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(
+                    `<strong>${data.tempAddress}</strong><br>${[data.tempZipCode, data.tempCity].filter(Boolean).join(', ')}`
+                ))
+                .addTo(mapInstance);
             if (tempBadge) tempBadge.style.display = 'inline-flex';
-            const group = L.featureGroup([mainMarker, tempMarker]);
-            mapInstance.fitBounds(group.getBounds().pad(0.3));
+            applyView(null, [
+                [Math.min(coords.lon, tcoords.lon), Math.min(coords.lat, tcoords.lat)],
+                [Math.max(coords.lon, tcoords.lon), Math.max(coords.lat, tcoords.lat)]
+            ]);
         } else {
             if (tempBadge) tempBadge.style.display = 'none';
-            mapInstance.setView([coords.lat, coords.lon], 15);
+            applyView([coords.lon, coords.lat]);
         }
     } else {
         if (tempBadge) tempBadge.style.display = 'none';
-        mapInstance.setView([coords.lat, coords.lon], 15);
+        applyView([coords.lon, coords.lat]);
     }
 }
 
@@ -1097,6 +1097,53 @@ function hideAddressMap() {
 function scheduleMapRefresh() {
     clearTimeout(state.mapDebounceTimer);
     state.mapDebounceTimer = setTimeout(refreshMap, 900);
+}
+
+// ── Map lightbox ──────────────────────────────────────────────────
+let mapLightboxInstance = null;
+
+function openMapLightbox() {
+    if (!dom.mapLightbox || !mapInstance) return;
+    const token  = window.BRAND?.maps?.jawgToken ?? '';
+    const center = mapInstance.getCenter();
+    const zoom   = mapInstance.getZoom();
+
+    // Sync label text
+    const src = document.getElementById('addressMapLabel');
+    const dst = document.getElementById('mapLightboxLabel');
+    if (src && dst) dst.textContent = src.textContent;
+
+    dom.mapLightbox.classList.add('is-open');
+    dom.mapLightbox.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+
+    mapLightboxInstance = new maplibregl.Map({
+        container: 'addressMapLarge',
+        style: `https://api.jawg.io/styles/jawg-streets.json?access-token=${token}`,
+        center: [center.lng, center.lat],
+        zoom,
+        scrollZoom: true
+    });
+
+    // Mirror markers into lightbox
+    if (mainMarker) {
+        new maplibregl.Marker({ color: '#3B82F6' })
+            .setLngLat(mainMarker.getLngLat())
+            .addTo(mapLightboxInstance);
+    }
+    if (tempMarker) {
+        new maplibregl.Marker({ color: '#8B5CF6' })
+            .setLngLat(tempMarker.getLngLat())
+            .addTo(mapLightboxInstance);
+    }
+}
+
+function closeMapLightbox() {
+    if (!dom.mapLightbox) return;
+    dom.mapLightbox.classList.remove('is-open');
+    dom.mapLightbox.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    if (mapLightboxInstance) { mapLightboxInstance.remove(); mapLightboxInstance = null; }
 }
 
 // ============================================================================
@@ -1186,9 +1233,20 @@ if (dom.qrLightboxFrame) {
     dom.qrLightboxFrame.addEventListener('click', closeQrLightbox);
 }
 
+if (dom.addressMapExpandBtn) {
+    dom.addressMapExpandBtn.addEventListener('click', e => { e.stopPropagation(); openMapLightbox(); });
+}
+if (dom.mapLightbox) {
+    dom.mapLightbox.querySelector('.map-lightbox-backdrop')?.addEventListener('click', closeMapLightbox);
+}
+if (dom.mapLightboxCloseBtn) {
+    dom.mapLightboxCloseBtn.addEventListener('click', e => { e.stopPropagation(); closeMapLightbox(); });
+}
+
 document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
         closeQrLightbox();
+        closeMapLightbox();
     }
 });
 
@@ -1261,6 +1319,35 @@ if (typeof window.runLicenseGate === 'function') {
                     slogan.title = agencyName;
                 }
             }
+
+            // ── Agency address → default map center ──────────────────────────
+            const agencyAddress = cached?.agencyAddress || null;
+            if (agencyAddress) {
+                const SESSION_KEY = 'okm_agency_center_' + agencyId;
+                const cachedCenter = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
+                if (cachedCenter) {
+                    agencyCenter = cachedCenter;
+                } else {
+                    geocode(agencyAddress).then(coords => {
+                        if (coords) {
+                            agencyCenter = [coords.lon, coords.lat];
+                            try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(agencyCenter)); } catch (_) {}
+                        }
+                    });
+                }
+            }
+
+            // ── Agency language → pre-select language selector ───────────────
+            const agencyLanguage = cached?.agencyLanguage || null;
+            if (agencyLanguage && dom.langSelect) {
+                const validLangs = ['en', 'fr', 'es', 'it', 'pt', 'de', 'nl'];
+                if (validLangs.includes(agencyLanguage)) {
+                    dom.langSelect.value = agencyLanguage;
+                    state.lang = agencyLanguage;
+                    if (dom.langDisplay) dom.langDisplay.textContent = languageNames[agencyLanguage] || agencyLanguage;
+                }
+            }
+            // ─────────────────────────────────────────────────────────────────
 
             initializePeer();
         })

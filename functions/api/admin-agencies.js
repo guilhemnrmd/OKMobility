@@ -265,6 +265,13 @@ export async function onRequest(context) {
                 return jsonResponse({ error: 'agencyName and licenseExpiresAt are required' }, 400, origin, rateLimit);
             }
 
+            const agencyAddress = typeof body.agencyAddress === 'string'
+                ? body.agencyAddress.slice(0, 200).trim() || null
+                : undefined;
+            const agencyLanguage = typeof body.agencyLanguage === 'string' && body.agencyLanguage.length <= 5
+                ? body.agencyLanguage.trim() || null
+                : undefined;
+
             // Load existing to preserve fields not being updated
             const raw = await env.OKM_LICENSES.get(`agency:${agencyId}`);
             const existing = raw ? JSON.parse(raw) : { firstActivation: true };
@@ -275,7 +282,9 @@ export async function onRequest(context) {
                 ...existing,
                 agencyName,
                 licenseExpiresAt,
-                licenseVersion: (existing.licenseVersion || 1) + 1
+                licenseVersion: (existing.licenseVersion || 1) + 1,
+                ...(agencyAddress !== undefined && { agencyAddress }),
+                ...(agencyLanguage !== undefined && { agencyLanguage }),
             };
 
             await env.OKM_LICENSES.put(`agency:${agencyId}`, JSON.stringify(updated));
