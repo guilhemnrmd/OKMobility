@@ -1195,13 +1195,14 @@ function buildMergedIceServers(dynamicServers) {
 }
 
 // Fetch ephemeral Cloudflare TURN credentials.
+// Always uses the canonical production URL — preview deployments don't have secrets.
 // Falls back to the hardcoded openrelay servers if the API is unavailable.
 async function fetchTurnCredentials() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), TURN_FETCH_TIMEOUT_MS);
 
     try {
-        const response = await fetch('/api/turn-credentials', {
+        const response = await fetch('https://okmobility.pages.dev/api/turn-credentials', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             signal: controller.signal
