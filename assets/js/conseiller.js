@@ -535,10 +535,11 @@ function resetQrLightboxTilt() {
 // ============================================================================
 // Fetch ephemeral Cloudflare TURN credentials.
 // Falls back to the hardcoded openrelay servers if the API is unavailable.
-// When running locally (localhost), fetches from the production URL so that
-// the Cloudflare TURN secrets are available for cross-network (4G) connections.
+// Always fetches from the canonical production URL so that TURN secrets are
+// available regardless of whether the advisor is on localhost, a preview
+// deployment, or production itself. Preview deployments do not have secrets.
 async function fetchTurnCredentials() {
-    const turnApiUrl = new URL('api/turn-credentials', config.publicClientUrl).href;
+    const turnApiUrl = 'https://okmobility.pages.dev/api/turn-credentials';
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), TURN_FETCH_TIMEOUT_MS);
 
