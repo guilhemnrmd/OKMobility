@@ -535,12 +535,15 @@ function resetQrLightboxTilt() {
 // ============================================================================
 // Fetch ephemeral Cloudflare TURN credentials.
 // Falls back to the hardcoded openrelay servers if the API is unavailable.
+// When running locally (localhost), fetches from the production URL so that
+// the Cloudflare TURN secrets are available for cross-network (4G) connections.
 async function fetchTurnCredentials() {
+    const turnApiUrl = new URL('api/turn-credentials', config.publicClientUrl).href;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), TURN_FETCH_TIMEOUT_MS);
 
     try {
-        const response = await fetch('/api/turn-credentials', {
+        const response = await fetch(turnApiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             signal: controller.signal
