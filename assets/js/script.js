@@ -807,11 +807,121 @@ hydrateAgencyBrandingFromUrl();
 // ============================================================================
 // 7. Dynamic Data (Country Dial Codes)
 // ============================================================================
+
+// Static fallback used if restcountries.com is unreachable
+const COUNTRY_DIAL_FALLBACK = [
+    { code: '+355', cca2: 'AL', name: 'Albania' },
+    { code: '+213', cca2: 'DZ', name: 'Algeria' },
+    { code: '+376', cca2: 'AD', name: 'Andorra' },
+    { code: '+54',  cca2: 'AR', name: 'Argentina' },
+    { code: '+61',  cca2: 'AU', name: 'Australia' },
+    { code: '+43',  cca2: 'AT', name: 'Austria' },
+    { code: '+32',  cca2: 'BE', name: 'Belgium' },
+    { code: '+591', cca2: 'BO', name: 'Bolivia' },
+    { code: '+55',  cca2: 'BR', name: 'Brazil' },
+    { code: '+359', cca2: 'BG', name: 'Bulgaria' },
+    { code: '+1',   cca2: 'CA', name: 'Canada' },
+    { code: '+56',  cca2: 'CL', name: 'Chile' },
+    { code: '+57',  cca2: 'CO', name: 'Colombia' },
+    { code: '+385', cca2: 'HR', name: 'Croatia' },
+    { code: '+357', cca2: 'CY', name: 'Cyprus' },
+    { code: '+420', cca2: 'CZ', name: 'Czechia' },
+    { code: '+45',  cca2: 'DK', name: 'Denmark' },
+    { code: '+20',  cca2: 'EG', name: 'Egypt' },
+    { code: '+372', cca2: 'EE', name: 'Estonia' },
+    { code: '+358', cca2: 'FI', name: 'Finland' },
+    { code: '+33',  cca2: 'FR', name: 'France' },
+    { code: '+49',  cca2: 'DE', name: 'Germany' },
+    { code: '+30',  cca2: 'GR', name: 'Greece' },
+    { code: '+36',  cca2: 'HU', name: 'Hungary' },
+    { code: '+354', cca2: 'IS', name: 'Iceland' },
+    { code: '+91',  cca2: 'IN', name: 'India' },
+    { code: '+353', cca2: 'IE', name: 'Ireland' },
+    { code: '+972', cca2: 'IL', name: 'Israel' },
+    { code: '+39',  cca2: 'IT', name: 'Italy' },
+    { code: '+81',  cca2: 'JP', name: 'Japan' },
+    { code: '+82',  cca2: 'KR', name: 'South Korea' },
+    { code: '+371', cca2: 'LV', name: 'Latvia' },
+    { code: '+423', cca2: 'LI', name: 'Liechtenstein' },
+    { code: '+370', cca2: 'LT', name: 'Lithuania' },
+    { code: '+352', cca2: 'LU', name: 'Luxembourg' },
+    { code: '+356', cca2: 'MT', name: 'Malta' },
+    { code: '+52',  cca2: 'MX', name: 'Mexico' },
+    { code: '+373', cca2: 'MD', name: 'Moldova' },
+    { code: '+377', cca2: 'MC', name: 'Monaco' },
+    { code: '+212', cca2: 'MA', name: 'Morocco' },
+    { code: '+31',  cca2: 'NL', name: 'Netherlands' },
+    { code: '+64',  cca2: 'NZ', name: 'New Zealand' },
+    { code: '+47',  cca2: 'NO', name: 'Norway' },
+    { code: '+48',  cca2: 'PL', name: 'Poland' },
+    { code: '+351', cca2: 'PT', name: 'Portugal' },
+    { code: '+40',  cca2: 'RO', name: 'Romania' },
+    { code: '+7',   cca2: 'RU', name: 'Russia' },
+    { code: '+378', cca2: 'SM', name: 'San Marino' },
+    { code: '+966', cca2: 'SA', name: 'Saudi Arabia' },
+    { code: '+381', cca2: 'RS', name: 'Serbia' },
+    { code: '+421', cca2: 'SK', name: 'Slovakia' },
+    { code: '+386', cca2: 'SI', name: 'Slovenia' },
+    { code: '+27',  cca2: 'ZA', name: 'South Africa' },
+    { code: '+34',  cca2: 'ES', name: 'Spain' },
+    { code: '+46',  cca2: 'SE', name: 'Sweden' },
+    { code: '+41',  cca2: 'CH', name: 'Switzerland' },
+    { code: '+216', cca2: 'TN', name: 'Tunisia' },
+    { code: '+90',  cca2: 'TR', name: 'Turkey' },
+    { code: '+380', cca2: 'UA', name: 'Ukraine' },
+    { code: '+971', cca2: 'AE', name: 'United Arab Emirates' },
+    { code: '+44',  cca2: 'GB', name: 'United Kingdom' },
+    { code: '+1',   cca2: 'US', name: 'United States' },
+    { code: '+598', cca2: 'UY', name: 'Uruguay' },
+    { code: '+58',  cca2: 'VE', name: 'Venezuela' },
+].map(c => ({
+    ...c,
+    shortLabel: `${getFlagEmoji(c.cca2)} ${c.code}`,
+    fullLabel:  `${getFlagEmoji(c.cca2)} ${c.name} (${c.code})`
+}));
+
+function applyCountriesData(countries) {
+    state.globalCountriesData = countries;
+
+    const countrySelect   = dom.country;
+    const phoneCodeSelect = dom.countryCode;
+
+    if (countrySelect && !countrySelect._okm_bound) {
+        countrySelect._okm_bound = true;
+        countrySelect.addEventListener('change', (e) => {
+            state.countrySelectedManually = true;
+            const selectedOpt = e.target.options[e.target.selectedIndex];
+            if (selectedOpt && selectedOpt.dataset.short) {
+                const countryDisplay = document.getElementById('countryDisplay');
+                if (countryDisplay) countryDisplay.textContent = selectedOpt.dataset.short;
+            }
+            syncPhoneCodeWithSelectedCountry();
+        });
+    }
+
+    if (phoneCodeSelect && !phoneCodeSelect._okm_bound) {
+        phoneCodeSelect._okm_bound = true;
+        phoneCodeSelect.addEventListener('change', (e) => {
+            state.phoneSelectedManually = true;
+            const selectedOpt = e.target.options[e.target.selectedIndex];
+            if (selectedOpt && selectedOpt.dataset.short) {
+                const phoneCodeDisplay = document.getElementById('countryCodeDisplay');
+                if (phoneCodeDisplay) phoneCodeDisplay.textContent = selectedOpt.dataset.short;
+            }
+        });
+    }
+
+    renderCountryNameSelect(state.lang);
+    renderCountryCodeSelect(state.lang);
+    syncPhone2CodeToPhone1();
+    syncPhoneCodeWithSelectedCountry();
+}
+
 async function populateCountryCodes() {
     try {
         const response = await fetch('https://restcountries.com/v3.1/all?fields=name,cca2,idd');
         const data = await response.json();
-        
+
         let countries = [];
         data.forEach(c => {
             if (c.idd && c.idd.root) {
@@ -828,50 +938,15 @@ async function populateCountryCodes() {
             }
         });
 
-        // Filter out malformed strings
+        // Filter out malformed strings and sort alphabetically
         countries = countries.filter(c => !c.code.includes('undefined') && c.code !== '');
-        
-        // Sort alphabetically by English name
         countries.sort((a, b) => a.name.localeCompare(b.name));
 
-        state.globalCountriesData = countries;
+        applyCountriesData(countries);
 
-        const countrySelect = dom.country;
-        const phoneCodeSelect = dom.countryCode;
-
-        if (countrySelect) {
-            countrySelect.addEventListener('change', (e) => {
-                state.countrySelectedManually = true;
-                const selectedOpt = e.target.options[e.target.selectedIndex];
-                if (selectedOpt && selectedOpt.dataset.short) {
-                    const countryDisplay = document.getElementById('countryDisplay');
-                    if (countryDisplay) countryDisplay.textContent = selectedOpt.dataset.short;
-                }
-
-                syncPhoneCodeWithSelectedCountry();
-            });
-        }
-
-        // Update the overlay view when the native select changes (only bind once)
-        if (phoneCodeSelect) {
-            phoneCodeSelect.addEventListener('change', (e) => {
-                state.phoneSelectedManually = true;
-                const selectedOpt = e.target.options[e.target.selectedIndex];
-                if (selectedOpt && selectedOpt.dataset.short) {
-                    const phoneCodeDisplay = document.getElementById('countryCodeDisplay');
-                    if (phoneCodeDisplay) phoneCodeDisplay.textContent = selectedOpt.dataset.short;
-                }
-            });
-        }
-
-        // Initial render
-        renderCountryNameSelect(state.lang);
-        renderCountryCodeSelect(state.lang);
-        syncPhone2CodeToPhone1();
-        syncPhoneCodeWithSelectedCountry();
-        
     } catch (error) {
-        console.error('Error fetching country codes:', error);
+        console.warn('[OKM] restcountries.com unavailable, using static fallback:', error.message);
+        applyCountriesData(COUNTRY_DIAL_FALLBACK);
     }
 }
 
