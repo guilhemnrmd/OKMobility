@@ -73,6 +73,8 @@
     const inId         = document.getElementById('newAgencyId');
     const inName       = document.getElementById('newAgencyName');
     const inExpiry     = document.getElementById('newAgencyExpiry');
+    const inAddress    = document.getElementById('newAgencyAddress');
+    const inLanguage   = document.getElementById('newAgencyLanguage');
 
     let editingId = null; // null = new agency
     let agenciesCache = [];
@@ -230,6 +232,24 @@
             `).join('')
             : '<div class="agency-log-item"><span>Aucun log de connexion disponible.</span></div>';
 
+        const countries30d = (a.telemetry?.countries30d && typeof a.telemetry.countries30d === 'object')
+            ? Object.entries(a.telemetry.countries30d).sort((x, y) => y[1] - x[1])
+            : [];
+        const maxCount = countries30d[0]?.[1] || 1;
+        const countriesHtml = countries30d.length > 0
+            ? countries30d.map(([cc, count]) => {
+                const pct = Math.round((count / maxCount) * 100);
+                const flag = cc.length === 2
+                    ? String.fromCodePoint(...[...cc.toUpperCase()].map(c => 0x1F1E0 + c.charCodeAt(0) - 65))
+                    : '🌐';
+                return `<div class="country-bar-row">
+                    <span class="country-bar-label">${flag} ${escHtml(cc)}</span>
+                    <span class="country-bar-track"><span class="country-bar-fill" style="width:${pct}%"></span></span>
+                    <span class="country-bar-count">${count}</span>
+                </div>`;
+            }).join('')
+            : '<div class="agency-log-item"><span>Aucune donnée pays disponible.</span></div>';
+
         card.innerHTML = `
             <div class="agency-card-header">
                 <div>
@@ -269,6 +289,9 @@
                 <button class="btn-sm btn-logs">
                     <i class='bx bx-list-ul'></i> Logs
                 </button>
+                <button class="btn-sm btn-countries">
+                    <i class='bx bx-bar-chart-alt-2'></i> Pays
+                </button>
                 ${isRevoked ? `<button class="btn-sm danger btn-delete" title="Supprimer définitivement cette licence révoquée">
                     <i class='bx bx-trash'></i> Supprimer
                 </button>` : ''}
@@ -276,6 +299,10 @@
             <div class="agency-logs" id="logs_${escHtml(a.id)}">
                 <div class="agency-logs-title">Connexions récentes</div>
                 <div class="agency-logs-list">${logsListHtml}</div>
+            </div>
+            <div class="agency-countries" id="countries_${escHtml(a.id)}">
+                <div class="agency-logs-title"><i class='bx bx-bar-chart-alt-2'></i> Pays (30j)</div>
+                <div class="countries-bar-list">${countriesHtml}</div>
             </div>
             <div class="edit-form" id="ef_${escHtml(a.id)}">
                 <!-- inline edit, opened by JS -->
@@ -359,6 +386,18 @@
                 logsBtn.innerHTML = isOpen
                     ? "<i class='bx bx-x'></i> Fermer logs"
                     : "<i class='bx bx-list-ul'></i> Logs";
+            });
+        }
+
+        const countriesBtn = card.querySelector('.btn-countries');
+        const countriesPanel = card.querySelector('.agency-countries');
+        if (countriesBtn && countriesPanel) {
+            countriesBtn.addEventListener('click', () => {
+                countriesPanel.classList.toggle('open');
+                const isOpen = countriesPanel.classList.contains('open');
+                countriesBtn.innerHTML = isOpen
+                    ? "<i class='bx bx-x'></i> Fermer pays"
+                    : "<i class='bx bx-bar-chart-alt-2'></i> Pays";
             });
         }
 
@@ -554,6 +593,8 @@
         const next = new Date();
         next.setMonth(next.getMonth() + 1);
         inExpiry.value = next.toISOString().slice(0, 10);
+        inAddress.value = '';
+        inLanguage.value = '';
         inId.disabled = false;
         addTitle.textContent = 'Nouvelle agence';
         addError.textContent = '';
@@ -567,8 +608,8 @@
         inId.value = a.id;
         inName.value = a.agencyName || '';
         inExpiry.value = a.licenseExpiresAt ? a.licenseExpiresAt.slice(0, 10) : '';
-        document.getElementById('newAgencyAddress').value = a.agencyAddress || '';
-        document.getElementById('newAgencyLanguage').value = a.agencyLanguage || '';
+        inAddress.value = a.agencyAddress || '';
+        inLanguage.value = a.agencyLanguage || '';
         inId.disabled = true;
         addTitle.textContent = 'Modifier l\'agence';
         addError.textContent = '';
@@ -604,8 +645,8 @@
             agencyId: id,
             agencyName: name,
             licenseExpiresAt: new Date(expiry + 'T23:59:59Z').toISOString(),
-            agencyAddress: document.getElementById('newAgencyAddress').value.trim() || null,
-            agencyLanguage: document.getElementById('newAgencyLanguage').value || null,
+            agencyAddress: inAddress.value.trim() || null,
+            agencyLanguage: inLanguage.value || null,
         };
 
         try {

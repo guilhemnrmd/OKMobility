@@ -291,6 +291,68 @@
     }
 }
 
+/* ── Countries breakdown panel ──────────────────────────────────── */
+.agency-countries {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 12px;
+    margin-top: 4px;
+    border-top: 1px dashed var(--color-border);
+}
+
+.agency-countries.open {
+    display: flex;
+}
+
+.countries-bar-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.country-bar-row {
+    display: grid;
+    grid-template-columns: 3rem 1fr 2.2rem;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+}
+
+.country-bar-label {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    letter-spacing: 0.02em;
+}
+
+.country-bar-track {
+    height: 6px;
+    background: rgba(0,0,0,0.08);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.country-bar-fill {
+    display: block;
+    height: 100%;
+    background: var(--color-primary, #2054EA);
+    border-radius: 99px;
+    min-width: 4px;
+    transition: width 0.3s ease;
+}
+
+.country-bar-count {
+    color: var(--color-text-secondary);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-color-scheme: dark) {
+    .country-bar-track {
+        background: rgba(255,255,255,0.1);
+    }
+}
+
 .btn-sm {
     padding: 6px 14px;
     font-size: 0.82rem;

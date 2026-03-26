@@ -970,7 +970,8 @@ function restartSession() {
 let mapInstance = null;
 let mainMarker  = null;
 let tempMarker  = null;
-let agencyCenter = null;  // [lon, lat] — geocoded from agencyAddress after license gate
+let agencyCenter = null;       // [lon, lat] — geocoded from agencyAddress after license gate
+let mapHasClientAddress = false; // true once the map has flown to a real client address
 
 function ensureMap() {
     if (mapInstance) return;
@@ -1040,6 +1041,7 @@ async function refreshMap() {
     showAddressMap();
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     ensureMap();
+    mapHasClientAddress = true;
 
     // Update overlay label with address text
     const labelEl = document.getElementById('addressMapLabel');
@@ -1092,6 +1094,7 @@ function hideAddressMap() {
     if (w) w.style.display = 'none';
     if (mainMarker) { mainMarker.remove(); mainMarker = null; }
     if (tempMarker) { tempMarker.remove(); tempMarker = null; }
+    mapHasClientAddress = false;
 }
 
 function scheduleMapRefresh() {
@@ -1332,6 +1335,10 @@ if (typeof window.runLicenseGate === 'function') {
                         if (coords) {
                             agencyCenter = [coords.lon, coords.lat];
                             try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(agencyCenter)); } catch (_) {}
+                            // If the map is open but no client address has been shown yet, re-center on agency
+                            if (mapInstance && !mapHasClientAddress) {
+                                mapInstance.jumpTo({ center: agencyCenter });
+                            }
                         }
                     });
                 }
