@@ -1627,6 +1627,10 @@ function initSearchableSelects() {
             if (wrap.classList.contains('is-open')) return;
             syncItems();
             renderList(allItems);
+            // Flip above if not enough space below
+            const rect = wrap.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            wrap.classList.toggle('cs-above', spaceBelow < 250 && rect.top > spaceBelow);
             wrap.classList.add('is-open');
             search.placeholder = face.textContent;
             search.focus();

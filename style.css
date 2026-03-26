@@ -1021,6 +1021,7 @@ input:focus + i, .input-with-icon:focus-within i {
     display: none;
     position: absolute;
     top: calc(100% + 4px);
+    bottom: auto;
     left: 0;
     right: 0;
     max-height: 230px;
@@ -1037,6 +1038,11 @@ input:focus + i, .input-with-icon:focus-within i {
 }
 
 .cs-wrap.is-open .cs-list { display: block; }
+
+.cs-wrap.cs-above .cs-list {
+    top: auto;
+    bottom: calc(100% + 4px);
+}
 
 .cs-list li {
     padding: 10px 12px;
