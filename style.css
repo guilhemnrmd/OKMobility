@@ -1037,6 +1037,7 @@ input:focus + i, .input-with-icon:focus-within i {
     overscroll-behavior: contain;
 }
 
+.cs-wrap.is-open { z-index: 50; }
 .cs-wrap.is-open .cs-list { display: block; }
 
 .cs-wrap.cs-above .cs-list {
