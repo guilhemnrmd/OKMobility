@@ -185,6 +185,9 @@ html.theme-partner-example {
     .custom-checkbox,
     .lang-selector,
     .overlay-select,
+    .cs-wrap,
+    .cs-face,
+    .cs-list li,
     .qr-code-frame,
     .qr-lightbox,
     .qr-lightbox-frame,
@@ -208,6 +211,7 @@ html.theme-partner-example {
     .custom-checkbox *,
     .lang-selector *,
     .overlay-select *,
+    .cs-wrap *,
     .qr-code-frame *,
     .qr-lightbox *,
     .qr-lightbox-frame * {
@@ -780,6 +784,21 @@ label {
     color: var(--color-text-secondary);
 }
 
+/* phone2 toggle-header: single column (no info button) */
+.phone2-toggle-header {
+    grid-template-columns: 1fr;
+}
+
+/* Override accent color — phone2 checkbox label stays white like other labels */
+.phone2-toggle-header .custom-checkbox {
+    color: var(--color-text-primary);
+}
+
+/* Fix dropdown clipping inside bordered expand boxes */
+.temp-address-content-inner:has(.cs-wrap.is-open) {
+    overflow: visible;
+}
+
 /* New: Phone Split Container */
 /* Second phone toggle */
 .phone2-toggle-row {
@@ -921,6 +940,186 @@ input:focus + i, .input-with-icon:focus-within i {
     right: 8px;
     color: var(--color-text-secondary);
     font-size: 1.2rem;
+    pointer-events: none;
+}
+
+/* Searchable country combobox */
+.cs-wrap {
+    position: relative;
+    height: 52px;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.09);
+    background: rgba(255, 255, 255, 0.93);
+    box-shadow:
+        0 2px 8px rgba(var(--color-accent-rgb), 0.04),
+        inset 0 0.75px 0 rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    padding: 0 36px 0 12px;
+    transition: all var(--transition-base);
+}
+
+.cs-wrap:focus-within {
+    border-color: var(--color-accent);
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.13), 0 4px 16px rgba(var(--color-accent-rgb), 0.09);
+}
+
+@media (prefers-color-scheme: dark) {
+    .cs-wrap {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.13);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    .cs-wrap:focus-within {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: var(--color-accent);
+    }
+    .cs-search {
+        color: var(--color-text-primary);
+    }
+    .cs-search::placeholder {
+        color: var(--color-text-secondary);
+        opacity: 0.6;
+    }
+}
+
+.cs-face {
+    font-size: 0.95rem;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    pointer-events: none;
+    user-select: none;
+}
+
+.cs-search {
+    display: none;
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 0.95rem;
+    color: var(--color-text-primary);
+    font-family: inherit;
+    padding: 0;
+    min-width: 0;
+    cursor: text !important;
+}
+
+.cs-search::placeholder {
+    color: var(--color-text-secondary);
+    opacity: 0.5;
+}
+
+.cs-wrap.is-open .cs-face { display: none; }
+.cs-wrap.is-open .cs-search { display: block; }
+
+.cs-arrow {
+    position: absolute;
+    right: 8px;
+    color: var(--color-text-secondary);
+    font-size: 1.2rem;
+    pointer-events: none;
+    transition: transform 0.2s ease;
+}
+
+.cs-wrap.is-open .cs-arrow {
+    transform: rotate(180deg);
+}
+
+.cs-list {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    bottom: auto;
+    left: 0;
+    right: 0;
+    max-height: 230px;
+    overflow-y: auto;
+    border-radius: var(--radius-md);
+    background: #fff;
+    border: 1px solid rgba(var(--color-accent-rgb), 0.18);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.13);
+    z-index: 200;
+    list-style: none;
+    margin: 0;
+    padding: 4px 0;
+    overscroll-behavior: contain;
+}
+
+.cs-wrap.is-open { z-index: 50; }
+.cs-wrap.is-open .cs-list { display: block; }
+
+/*
+ * Stacking context fix: when a dropdown is open, raise its nearest
+ * positioned ancestor so it paints above all following siblings
+ * (backdrop-filter on inputs creates stacking contexts that override
+ * z-index comparisons at child level).
+ */
+.input-wrapper:has(.cs-wrap.is-open),
+.form-group-row:has(.cs-wrap.is-open),
+.temp-address-wrapper:has(.cs-wrap.is-open) {
+    position: relative;
+    z-index: 10;
+}
+
+.cs-wrap.cs-above .cs-list {
+    top: auto;
+    bottom: calc(100% + 4px);
+}
+
+.cs-list li {
+    padding: 10px 12px;
+    font-size: 0.88rem;
+    color: var(--color-text-primary);
+    transition: background 0.1s;
+    outline: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cs-list li:hover,
+.cs-list li:focus {
+    background: rgba(var(--color-accent-rgb), 0.07);
+}
+
+.cs-list li[aria-selected="true"] {
+    color: var(--color-accent);
+    font-weight: 500;
+}
+
+.cs-list:empty::after {
+    content: '—';
+    display: block;
+    padding: 10px 12px;
+    font-size: 0.88rem;
+    color: var(--color-text-secondary);
+    text-align: center;
+}
+
+@media (prefers-color-scheme: dark) {
+    .cs-list {
+        background: #1e1f26;
+        border-color: rgba(255, 255, 255, 0.12);
+    }
+    .cs-list li:hover,
+    .cs-list li:focus {
+        background: rgba(255, 255, 255, 0.07);
+    }
+}
+
+.cs-hidden {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    opacity: 0;
     pointer-events: none;
 }
 
@@ -1071,7 +1270,8 @@ input::placeholder {
     display: block;
 }
 
-        gap: 12px;
+.info-btn {
+    background: none;
     border: none;
     color: var(--color-accent);
     font-size: 1.3rem;
@@ -1082,7 +1282,7 @@ input::placeholder {
     justify-content: center;
     transition: color var(--transition-base);
     flex-shrink: 0;
-    margin-top: 1px;
+    margin-left: 4px;
 }
 
 .info-btn:hover {

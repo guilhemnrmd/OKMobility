@@ -35,6 +35,7 @@ const i18n = {
       "tempAddress": "Adresse temporaire",
       "tempZipCode": "Code Postal",
       "tempCity": "Ville",
+      "country": "Pays",
       "zipCode": "Code Postal",
       "city": "Ville",
     "phoneCode": "Indicatif téléphonique",
@@ -73,6 +74,7 @@ const i18n = {
       "tempAddress": "Temporary Address",
       "tempZipCode": "Postal Code / Zip",
       "tempCity": "City",
+      "country": "Country",
       "zipCode": "Postal Code / Zip",
       "city": "City",
     "phoneCode": "Calling code",
@@ -111,6 +113,7 @@ const i18n = {
       "tempAddress": "Dirección temporal",
       "tempZipCode": "Código Postal / CP",
       "tempCity": "Ciudad",
+      "country": "País",
       "zipCode": "Código Postal / CP",
       "city": "Ciudad",
     "phoneCode": "Prefijo telefónico",
@@ -149,6 +152,7 @@ const i18n = {
       "tempAddress": "Indirizzo temporaneo",
       "tempZipCode": "Codice Postale / CAP",
       "tempCity": "Città",
+      "country": "Paese",
       "zipCode": "Codice Postale / CAP",
       "city": "Città",
     "phoneCode": "Prefisso telefonico",
@@ -187,6 +191,7 @@ const i18n = {
       "tempAddress": "Endereço temporário",
       "tempZipCode": "Código Postal",
       "tempCity": "Cidade",
+      "country": "País",
       "zipCode": "Código Postal",
       "city": "Cidade",
     "phoneCode": "Indicativo telefónico",
@@ -225,6 +230,7 @@ const i18n = {
       "tempAddress": "Temporäre Adresse",
       "tempZipCode": "Postleitzahl / PLZ",
       "tempCity": "Stadt",
+      "country": "Land",
       "zipCode": "Postleitzahl / PLZ",
       "city": "Stadt",
     "phoneCode": "Ländervorwahl",
@@ -263,6 +269,7 @@ const i18n = {
             "tempAddress": "Tijdelijk adres",
             "tempZipCode": "Postcode",
             "tempCity": "Plaats",
+            "country": "Land",
             "zipCode": "Postcode",
             "city": "Plaats",
             "phoneCode": "Landcode",
@@ -310,6 +317,7 @@ const state = {
     globalCountriesData: [],
     countrySelectedManually: false,
     phoneSelectedManually: false,
+    phone2SelectedManually: false,
     phone2Visible: false,
     // WebRTC / PeerJS
     peer: null,
@@ -356,6 +364,7 @@ const dom = {
     // Second phone (optional)
     phone2Section: document.getElementById('phone2Section'),
     btnTogglePhone2: document.getElementById('btnTogglePhone2'),
+    hasPhone2: document.getElementById('hasPhone2'),
     countryCode2: document.getElementById('countryCode2'),
     phone2: document.getElementById('phone2'),
     email: document.getElementById('email'),
@@ -571,6 +580,7 @@ function resetClientForm() {
     document.getElementById('tempAddressSuggestions')?.classList.remove('open');
 
     // Reset temp address section
+    dom.hasTempAddress.checked = false;
     dom.tempAddressSection.classList.remove('expanded');
     document.getElementById('tempAddressWrapper').classList.remove('active');
     dom.tempAddress.removeAttribute('required');
@@ -584,6 +594,7 @@ function resetClientForm() {
 
     // Reset country to language default
     state.countrySelectedManually = false;
+    state.phone2SelectedManually = false;
     if (state.globalCountriesData && state.globalCountriesData.length > 0) {
         renderCountryNameSelect(state.lang);
         renderCountryCodeSelect(state.lang);
@@ -625,22 +636,20 @@ dom.hasTempAddress.addEventListener('change', (e) => {
     if (e.target.checked) {
         dom.tempAddressSection.classList.add('expanded');
         wrapper.classList.add('active');
-        // Add required attributes dynamically
         dom.tempAddress.setAttribute('required', 'true');
         dom.tempZipCode.setAttribute('required', 'true');
         dom.tempCity.setAttribute('required', 'true');
     } else {
         dom.tempAddressSection.classList.remove('expanded');
         wrapper.classList.remove('active');
-        // Remove required attributes
         dom.tempAddress.removeAttribute('required');
         dom.tempZipCode.removeAttribute('required');
         dom.tempCity.removeAttribute('required');
     }
 });
 
-// Clic sur toute la ligne = coche la case (sauf si clic sur le bouton info ou sur le label lui-même qui gère nativement)
-document.querySelector('.toggle-header').addEventListener('click', (e) => {
+// Clic sur toute la ligne = coche la case (sauf si clic sur le bouton info ou sur le label lui-même)
+document.querySelector('#tempToggleHeader').addEventListener('click', (e) => {
     if (!dom.btnTempInfo.contains(e.target) && !e.target.closest('.custom-checkbox')) {
         dom.hasTempAddress.click();
     }
@@ -648,7 +657,7 @@ document.querySelector('.toggle-header').addEventListener('click', (e) => {
 
 // Tooltip Toggle on Info Button Click
 dom.btnTempInfo.addEventListener('click', (e) => {
-    e.stopPropagation(); // Prevent document click from immediately closing it
+    e.stopPropagation();
     const isHidden = dom.tempTooltip.style.display === 'none';
     dom.tempTooltip.style.display = isHidden ? 'block' : 'none';
 });
@@ -960,9 +969,7 @@ function syncPhone2CodeToPhone1() {
 }
 
 function syncPhoneCodeWithSelectedCountry() {
-    if (state.phoneSelectedManually || !dom.country || !dom.countryCode || !state.globalCountriesData?.length) {
-        return;
-    }
+    if (!dom.country || !state.globalCountriesData?.length) return;
 
     const selectedCountryCca2 = dom.country.value;
     if (!selectedCountryCca2) return;
@@ -970,14 +977,24 @@ function syncPhoneCodeWithSelectedCountry() {
     const selectedCountryData = state.globalCountriesData.find(c => c.cca2 === selectedCountryCca2);
     if (!selectedCountryData || !selectedCountryData.code) return;
 
-    const matchingOption = Array.from(dom.countryCode.options).find(opt => !opt.disabled && opt.value === selectedCountryData.code);
-    if (!matchingOption) return;
+    // Sync phone1
+    if (!state.phoneSelectedManually && dom.countryCode) {
+        const match1 = Array.from(dom.countryCode.options).find(opt => !opt.disabled && opt.value === selectedCountryData.code);
+        if (match1) {
+            dom.countryCode.value = selectedCountryData.code;
+            const display1 = document.getElementById('countryCodeDisplay');
+            if (display1) display1.textContent = match1.dataset.short || selectedCountryData.shortLabel || `${getFlagEmoji(selectedCountryData.cca2)} ${selectedCountryData.code}`;
+        }
+    }
 
-    dom.countryCode.value = selectedCountryData.code;
-
-    const phoneCodeDisplay = document.getElementById('countryCodeDisplay');
-    if (phoneCodeDisplay) {
-        phoneCodeDisplay.textContent = matchingOption.dataset.short || selectedCountryData.shortLabel || `${getFlagEmoji(selectedCountryData.cca2)} ${selectedCountryData.code}`;
+    // Sync phone2 (mirrors phone1 unless user manually changed it)
+    if (!state.phone2SelectedManually && dom.countryCode2) {
+        const match2 = Array.from(dom.countryCode2.options).find(opt => !opt.disabled && opt.value === selectedCountryData.code);
+        if (match2) {
+            dom.countryCode2.value = selectedCountryData.code;
+            const display2 = document.getElementById('countryCode2Display');
+            if (display2) display2.textContent = match2.dataset.short || selectedCountryData.shortLabel || `${getFlagEmoji(selectedCountryData.cca2)} ${selectedCountryData.code}`;
+        }
     }
 }
 
@@ -1472,9 +1489,9 @@ function buildAdvisorPayload() {
     const selectedPhoneOption = dom.countryCode ? dom.countryCode.options[dom.countryCode.selectedIndex] : null;
     const selectedCountryOption = dom.country ? dom.country.options[dom.country.selectedIndex] : null;
     const phoneCode = selectedPhoneOption ? selectedPhoneOption.value : '+33';
-    const countryName = selectedCountryOption
+    const countryName = (selectedCountryOption
         ? (selectedCountryOption.dataset.countryName || selectedCountryOption.textContent || '')
-        : '';
+        : '').replace(/[\u{1F1E0}-\u{1F1FF}]+\s*/gu, '').trim();
 
     const phoneValue = clampText(dom.phone?.value || '', 40);
     const formattedPhone = `${phoneCode} ${phoneValue}`.replace(/\s+/g, ' ').trim();
@@ -1559,6 +1576,7 @@ function attachRealTimeListeners() {
 
     if (dom.countryCode2) {
         dom.countryCode2.addEventListener('change', (e) => {
+            state.phone2SelectedManually = true;
             const display = document.getElementById('countryCode2Display');
             if (display) {
                 const opt = e.target.options[e.target.selectedIndex];
@@ -1583,21 +1601,27 @@ function attachRealTimeListeners() {
 // Second phone toggle
 function setPhone2Visible(visible) {
     state.phone2Visible = visible;
-    if (dom.phone2Section) dom.phone2Section.style.display = visible ? 'flex' : 'none';
+    if (dom.hasPhone2) dom.hasPhone2.checked = visible;
+    const wrapper = document.getElementById('phone2Wrapper');
+    if (dom.phone2Section) dom.phone2Section.classList.toggle('expanded', visible);
+    if (wrapper) wrapper.classList.toggle('active', visible);
     if (!visible && dom.phone2) dom.phone2.value = '';
     const t = i18n[state.lang] || i18n['es'];
     const lblToggle = document.getElementById('lblPhone2Toggle');
-    const btnToggle = dom.btnTogglePhone2;
     if (lblToggle) lblToggle.textContent = visible ? (t.phone2ToggleRemove || 'Remove 2nd phone') : (t.phone2Toggle || 'Add a 2nd phone number');
-    if (btnToggle) {
-        const icon = btnToggle.querySelector('i');
-        if (icon) icon.className = visible ? 'bx bx-minus-circle' : 'bx bx-plus-circle';
-    }
 }
 
 if (dom.btnTogglePhone2) {
-    dom.btnTogglePhone2.addEventListener('click', () => {
-        setPhone2Visible(!state.phone2Visible);
+    dom.btnTogglePhone2.addEventListener('click', (e) => {
+        if (!e.target.closest('.custom-checkbox')) {
+            dom.hasPhone2.click();
+        }
+    });
+}
+
+if (dom.hasPhone2) {
+    dom.hasPhone2.addEventListener('change', (e) => {
+        setPhone2Visible(e.target.checked);
         debouncedSendToAdvisor();
     });
 }
@@ -1636,6 +1660,127 @@ if (dom.advisorCodeInput) {
         if (e.target.value.trim().length >= 4 && !state.advisorConnected) {
             connectToAdvisor();
         }
+    });
+}
+
+// ============================================================================
+// Searchable country combobox — replaces native <select> overlay pattern
+// ============================================================================
+
+function initSearchableSelects() {
+    document.querySelectorAll('.cs-wrap').forEach(wrap => {
+        const face   = wrap.querySelector('.cs-face');
+        const search = wrap.querySelector('.cs-search');
+        const list   = wrap.querySelector('.cs-list');
+        const select = wrap.querySelector('select');
+        const arrow  = wrap.querySelector('.cs-arrow');
+        if (!face || !search || !list || !select) return;
+
+        let allItems = [];
+
+        function syncItems() {
+            allItems = Array.from(select.options).map(opt => ({
+                value: opt.value,
+                label: opt.textContent.trim(),
+                short: opt.dataset.short || opt.textContent.trim()
+            }));
+        }
+
+        function renderList(items) {
+            list.innerHTML = '';
+            const cur = select.value;
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.setAttribute('role', 'option');
+                li.setAttribute('tabindex', '-1');
+                li.textContent = item.label;
+                li.dataset.value = item.value;
+                if (item.value === cur) li.setAttribute('aria-selected', 'true');
+                li.addEventListener('mousedown', e => { e.preventDefault(); pick(item); });
+                list.appendChild(li);
+            });
+        }
+
+        function normalize(s) {
+            return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+        }
+
+        function filterList(q) {
+            if (!q.trim()) { renderList(allItems); return; }
+            const terms = normalize(q).split(/\s+/).filter(Boolean);
+            const matches = allItems.filter(item => {
+                const hay = normalize(item.label + ' ' + item.value);
+                return terms.every(t => hay.includes(t));
+            });
+            renderList(matches);
+        }
+
+        function pick(item) {
+            select.value = item.value;
+            face.textContent = item.short;
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+            close();
+        }
+
+        function open() {
+            if (wrap.classList.contains('is-open')) return;
+            syncItems();
+            renderList(allItems);
+            // Flip above if not enough space below
+            const rect = wrap.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            wrap.classList.toggle('cs-above', spaceBelow < 250 && rect.top > spaceBelow);
+            wrap.classList.add('is-open');
+            search.placeholder = face.textContent;
+            search.focus();
+            // Scroll to currently selected item
+            const sel = list.querySelector('[aria-selected="true"]');
+            if (sel) setTimeout(() => sel.scrollIntoView({ block: 'nearest' }), 0);
+        }
+
+        function close() {
+            if (!wrap.classList.contains('is-open')) return;
+            wrap.classList.remove('is-open');
+            search.value = '';
+            list.innerHTML = '';
+        }
+
+        face.addEventListener('click', open);
+        wrap.addEventListener('click', e => { if (e.target === wrap || e.target === arrow) open(); });
+
+        search.addEventListener('input', () => filterList(search.value));
+        search.addEventListener('blur', () => setTimeout(close, 180));
+        search.addEventListener('keydown', e => {
+            if (e.key === 'Escape') { close(); face.focus?.(); }
+            if (e.key === 'ArrowDown') { e.preventDefault(); list.firstElementChild?.focus(); }
+        });
+
+        list.addEventListener('keydown', e => {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                (document.activeElement.nextElementSibling || list.firstElementChild)?.focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prev = document.activeElement.previousElementSibling;
+                prev ? prev.focus() : search.focus();
+            } else if (e.key === 'Enter') {
+                const li = document.activeElement;
+                if (li.dataset?.value !== undefined) {
+                    const item = allItems.find(i => i.value === li.dataset.value);
+                    if (item) pick(item);
+                }
+            } else if (e.key === 'Escape') {
+                close();
+            }
+        });
+
+        // Sync face when select value is changed externally
+        select.addEventListener('change', () => {
+            if (!wrap.classList.contains('is-open')) {
+                const opt = select.options[select.selectedIndex];
+                if (opt) face.textContent = opt.dataset.short || opt.textContent.trim();
+            }
+        });
     });
 }
 
@@ -1766,11 +1911,12 @@ function initAddressAutocomplete() {
     }
 
     const tempInner = document.querySelector('.temp-address-content-inner');
-    bindField(mainInput, mainList, () => dom.country?.value || '');
+    bindField(mainInput, mainList, () => state.countrySelectedManually ? (dom.country?.value || '') : '');
     bindField(tempInput, tempList, null, tempInner);
 }
 
 // Initialize
 attachRealTimeListeners();
 initAddressAutocomplete();
+initSearchableSelects();
 checkUrlForAdvisorCode();
