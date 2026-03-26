@@ -1397,9 +1397,9 @@ function buildAdvisorPayload() {
     const selectedPhoneOption = dom.countryCode ? dom.countryCode.options[dom.countryCode.selectedIndex] : null;
     const selectedCountryOption = dom.country ? dom.country.options[dom.country.selectedIndex] : null;
     const phoneCode = selectedPhoneOption ? selectedPhoneOption.value : '+33';
-    const countryName = selectedCountryOption
+    const countryName = (selectedCountryOption
         ? (selectedCountryOption.dataset.countryName || selectedCountryOption.textContent || '')
-        : '';
+        : '').replace(/[\u{1F1E0}-\u{1F1FF}]+\s*/gu, '').trim();
 
     const phoneValue = clampText(dom.phone?.value || '', 40);
     const formattedPhone = `${phoneCode} ${phoneValue}`.replace(/\s+/g, ' ').trim();
@@ -1691,7 +1691,7 @@ function initAddressAutocomplete() {
     }
 
     const tempInner = document.querySelector('.temp-address-content-inner');
-    bindField(mainInput, mainList, () => dom.country?.value || '');
+    bindField(mainInput, mainList, () => state.countrySelectedManually ? (dom.country?.value || '') : '');
     bindField(tempInput, tempList, null, tempInner);
 }
 
