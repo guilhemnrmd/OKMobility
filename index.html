@@ -12,7 +12,7 @@
     <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css?v=43">
+    <link rel="stylesheet" href="style.css?v=47">
     
     <!-- Brand Config (white-label) -->
     <script src="/assets/js/brand-config.js"></script>
@@ -121,7 +121,7 @@
                 <div class="temp-address-wrapper" id="tempAddressWrapper">
                     <!-- Temporary Address Checkbox -->
                     <div class="temp-address-toggle">
-                        <div class="toggle-header">
+                        <div class="toggle-header" id="tempToggleHeader">
                             <label class="custom-checkbox">
                                 <input type="checkbox" id="hasTempAddress" name="hasTempAddress">
                                 <span class="checkmark"></span>
@@ -191,33 +191,40 @@
                     </div>
                 </div>
 
-                <!-- Second Phone Toggle -->
-                <div class="phone2-toggle-row">
-                    <button type="button" id="btnTogglePhone2" class="btn-add-field">
-                        <i class='bx bx-plus-circle'></i>
-                        <span id="lblPhone2Toggle">Añadir segundo teléfono</span>
-                    </button>
-                </div>
-
-                <!-- Second Phone Section (optional) -->
-                <div id="phone2Section" class="form-group-row" style="display: none;">
-                    <div class="input-wrapper zip-wrapper">
-                        <label for="countryCode2" id="lblPhoneCode2">Indicatif</label>
-                        <div class="phone-country-box cs-wrap" id="countryCode2Wrap">
-                            <span class="cs-face" id="countryCode2Display">🇫🇷 +33</span>
-                            <input class="cs-search" type="text" autocomplete="off" spellcheck="false" aria-label="Rechercher un indicatif">
-                            <i class='bx bx-chevron-down cs-arrow'></i>
-                            <ul class="cs-list" role="listbox"></ul>
-                            <select id="countryCode2" name="countryCode2" class="cs-hidden" tabindex="-1" aria-hidden="true">
-                                <option value="+33">🇫🇷 France (+33)</option>
-                            </select>
+                <!-- Second Phone (optional) -->
+                <div class="temp-address-wrapper" id="phone2Wrapper">
+                    <div class="temp-address-toggle">
+                        <div class="toggle-header phone2-toggle-header" id="btnTogglePhone2">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" id="hasPhone2" name="hasPhone2">
+                                <span class="checkmark"></span>
+                                <span id="lblPhone2Toggle">Añadir segundo teléfono</span>
+                            </label>
                         </div>
                     </div>
-                    <div class="input-wrapper city-wrapper">
-                        <label for="phone2" id="lblPhone2">2e téléphone (optionnel)</label>
-                        <div class="input-with-icon">
-                            <i class='bx bx-phone'></i>
-                            <input type="tel" id="phone2" name="phone2" pattern="^[0-9\s]+$" placeholder="6 12 34 56 78">
+                    <div class="temp-address-sliding-section" id="phone2Section">
+                        <div class="temp-address-content-inner">
+                            <div class="form-group-row">
+                                <div class="input-wrapper zip-wrapper">
+                                    <label for="countryCode2" id="lblPhoneCode2">Indicatif</label>
+                                    <div class="phone-country-box cs-wrap" id="countryCode2Wrap">
+                                        <span class="cs-face" id="countryCode2Display">🇫🇷 +33</span>
+                                        <input class="cs-search" type="text" autocomplete="off" spellcheck="false" aria-label="Rechercher un indicatif">
+                                        <i class='bx bx-chevron-down cs-arrow'></i>
+                                        <ul class="cs-list" role="listbox"></ul>
+                                        <select id="countryCode2" name="countryCode2" class="cs-hidden" tabindex="-1" aria-hidden="true">
+                                            <option value="+33">🇫🇷 France (+33)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="input-wrapper city-wrapper">
+                                    <label for="phone2" id="lblPhone2">2e téléphone (optionnel)</label>
+                                    <div class="input-with-icon">
+                                        <i class='bx bx-phone'></i>
+                                        <input type="tel" id="phone2" name="phone2" pattern="^[0-9\s]+$" placeholder="6 12 34 56 78">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -281,6 +288,6 @@
         
     </main>
 
-    <script src="/assets/js/script.js?v=29"></script>
+    <script src="/assets/js/script.js?v=32"></script>
 </body>
 </html>

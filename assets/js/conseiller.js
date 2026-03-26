@@ -972,6 +972,30 @@ let mainMarker  = null;
 let tempMarker  = null;
 let agencyCenter = null;  // [lon, lat] — geocoded from agencyAddress after license gate
 
+function preloadMapTiles(center) {
+    const token = window.BRAND?.maps?.jawgToken ?? '';
+    if (!token || mapInstance) return; // skip if map already created
+
+    const div = document.createElement('div');
+    div.style.cssText = 'position:fixed;left:-9999px;top:0;width:400px;height:280px;pointer-events:none;';
+    document.body.appendChild(div);
+
+    const preload = new maplibregl.Map({
+        container: div,
+        style: `https://api.jawg.io/styles/jawg-streets.json?access-token=${token}`,
+        zoom: 13,
+        center,
+        interactive: false,
+        attributionControl: false,
+        trackResize: false
+    });
+
+    preload.once('idle', () => {
+        preload.remove();
+        div.remove();
+    });
+}
+
 function ensureMap() {
     if (mapInstance) return;
     const token = window.BRAND?.maps?.jawgToken ?? '';
@@ -1327,14 +1351,18 @@ if (typeof window.runLicenseGate === 'function') {
                 const cachedCenter = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
                 if (cachedCenter) {
                     agencyCenter = cachedCenter;
+                    preloadMapTiles(agencyCenter);
                 } else {
                     geocode(agencyAddress).then(coords => {
                         if (coords) {
                             agencyCenter = [coords.lon, coords.lat];
                             try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(agencyCenter)); } catch (_) {}
+                            preloadMapTiles(agencyCenter);
                         }
                     });
                 }
+            } else {
+                preloadMapTiles([2.3522, 48.8566]); // Paris fallback
             }
 
             // ── Agency language → pre-select language selector ───────────────

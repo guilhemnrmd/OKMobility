@@ -784,6 +784,21 @@ label {
     color: var(--color-text-secondary);
 }
 
+/* phone2 toggle-header: single column (no info button) */
+.phone2-toggle-header {
+    grid-template-columns: 1fr;
+}
+
+/* Override accent color — phone2 checkbox label stays white like other labels */
+.phone2-toggle-header .custom-checkbox {
+    color: var(--color-text-primary);
+}
+
+/* Fix dropdown clipping inside bordered expand boxes */
+.temp-address-content-inner:has(.cs-wrap.is-open) {
+    overflow: visible;
+}
+
 /* New: Phone Split Container */
 /* Second phone toggle */
 .phone2-toggle-row {
@@ -1040,6 +1055,19 @@ input:focus + i, .input-with-icon:focus-within i {
 .cs-wrap.is-open { z-index: 50; }
 .cs-wrap.is-open .cs-list { display: block; }
 
+/*
+ * Stacking context fix: when a dropdown is open, raise its nearest
+ * positioned ancestor so it paints above all following siblings
+ * (backdrop-filter on inputs creates stacking contexts that override
+ * z-index comparisons at child level).
+ */
+.input-wrapper:has(.cs-wrap.is-open),
+.form-group-row:has(.cs-wrap.is-open),
+.temp-address-wrapper:has(.cs-wrap.is-open) {
+    position: relative;
+    z-index: 10;
+}
+
 .cs-wrap.cs-above .cs-list {
     top: auto;
     bottom: calc(100% + 4px);
@@ -1242,7 +1270,8 @@ input::placeholder {
     display: block;
 }
 
-        gap: 12px;
+.info-btn {
+    background: none;
     border: none;
     color: var(--color-accent);
     font-size: 1.3rem;
@@ -1253,7 +1282,7 @@ input::placeholder {
     justify-content: center;
     transition: color var(--transition-base);
     flex-shrink: 0;
-    margin-top: 1px;
+    margin-left: 4px;
 }
 
 .info-btn:hover {

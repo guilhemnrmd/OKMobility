@@ -317,6 +317,7 @@ const state = {
     globalCountriesData: [],
     countrySelectedManually: false,
     phoneSelectedManually: false,
+    phone2SelectedManually: false,
     phone2Visible: false,
     // WebRTC / PeerJS
     peer: null,
@@ -363,6 +364,7 @@ const dom = {
     // Second phone (optional)
     phone2Section: document.getElementById('phone2Section'),
     btnTogglePhone2: document.getElementById('btnTogglePhone2'),
+    hasPhone2: document.getElementById('hasPhone2'),
     countryCode2: document.getElementById('countryCode2'),
     phone2: document.getElementById('phone2'),
     email: document.getElementById('email'),
@@ -578,6 +580,7 @@ function resetClientForm() {
     document.getElementById('tempAddressSuggestions')?.classList.remove('open');
 
     // Reset temp address section
+    dom.hasTempAddress.checked = false;
     dom.tempAddressSection.classList.remove('expanded');
     document.getElementById('tempAddressWrapper').classList.remove('active');
     dom.tempAddress.removeAttribute('required');
@@ -591,6 +594,7 @@ function resetClientForm() {
 
     // Reset country to language default
     state.countrySelectedManually = false;
+    state.phone2SelectedManually = false;
     if (state.globalCountriesData && state.globalCountriesData.length > 0) {
         renderCountryNameSelect(state.lang);
         renderCountryCodeSelect(state.lang);
@@ -632,22 +636,20 @@ dom.hasTempAddress.addEventListener('change', (e) => {
     if (e.target.checked) {
         dom.tempAddressSection.classList.add('expanded');
         wrapper.classList.add('active');
-        // Add required attributes dynamically
         dom.tempAddress.setAttribute('required', 'true');
         dom.tempZipCode.setAttribute('required', 'true');
         dom.tempCity.setAttribute('required', 'true');
     } else {
         dom.tempAddressSection.classList.remove('expanded');
         wrapper.classList.remove('active');
-        // Remove required attributes
         dom.tempAddress.removeAttribute('required');
         dom.tempZipCode.removeAttribute('required');
         dom.tempCity.removeAttribute('required');
     }
 });
 
-// Clic sur toute la ligne = coche la case (sauf si clic sur le bouton info ou sur le label lui-même qui gère nativement)
-document.querySelector('.toggle-header').addEventListener('click', (e) => {
+// Clic sur toute la ligne = coche la case (sauf si clic sur le bouton info ou sur le label lui-même)
+document.querySelector('#tempToggleHeader').addEventListener('click', (e) => {
     if (!dom.btnTempInfo.contains(e.target) && !e.target.closest('.custom-checkbox')) {
         dom.hasTempAddress.click();
     }
@@ -655,7 +657,7 @@ document.querySelector('.toggle-header').addEventListener('click', (e) => {
 
 // Tooltip Toggle on Info Button Click
 dom.btnTempInfo.addEventListener('click', (e) => {
-    e.stopPropagation(); // Prevent document click from immediately closing it
+    e.stopPropagation();
     const isHidden = dom.tempTooltip.style.display === 'none';
     dom.tempTooltip.style.display = isHidden ? 'block' : 'none';
 });
@@ -892,9 +894,7 @@ function syncPhone2CodeToPhone1() {
 }
 
 function syncPhoneCodeWithSelectedCountry() {
-    if (state.phoneSelectedManually || !dom.country || !dom.countryCode || !state.globalCountriesData?.length) {
-        return;
-    }
+    if (!dom.country || !state.globalCountriesData?.length) return;
 
     const selectedCountryCca2 = dom.country.value;
     if (!selectedCountryCca2) return;
@@ -902,14 +902,24 @@ function syncPhoneCodeWithSelectedCountry() {
     const selectedCountryData = state.globalCountriesData.find(c => c.cca2 === selectedCountryCca2);
     if (!selectedCountryData || !selectedCountryData.code) return;
 
-    const matchingOption = Array.from(dom.countryCode.options).find(opt => !opt.disabled && opt.value === selectedCountryData.code);
-    if (!matchingOption) return;
+    // Sync phone1
+    if (!state.phoneSelectedManually && dom.countryCode) {
+        const match1 = Array.from(dom.countryCode.options).find(opt => !opt.disabled && opt.value === selectedCountryData.code);
+        if (match1) {
+            dom.countryCode.value = selectedCountryData.code;
+            const display1 = document.getElementById('countryCodeDisplay');
+            if (display1) display1.textContent = match1.dataset.short || selectedCountryData.shortLabel || `${getFlagEmoji(selectedCountryData.cca2)} ${selectedCountryData.code}`;
+        }
+    }
 
-    dom.countryCode.value = selectedCountryData.code;
-
-    const phoneCodeDisplay = document.getElementById('countryCodeDisplay');
-    if (phoneCodeDisplay) {
-        phoneCodeDisplay.textContent = matchingOption.dataset.short || selectedCountryData.shortLabel || `${getFlagEmoji(selectedCountryData.cca2)} ${selectedCountryData.code}`;
+    // Sync phone2 (mirrors phone1 unless user manually changed it)
+    if (!state.phone2SelectedManually && dom.countryCode2) {
+        const match2 = Array.from(dom.countryCode2.options).find(opt => !opt.disabled && opt.value === selectedCountryData.code);
+        if (match2) {
+            dom.countryCode2.value = selectedCountryData.code;
+            const display2 = document.getElementById('countryCode2Display');
+            if (display2) display2.textContent = match2.dataset.short || selectedCountryData.shortLabel || `${getFlagEmoji(selectedCountryData.cca2)} ${selectedCountryData.code}`;
+        }
     }
 }
 
@@ -1491,6 +1501,7 @@ function attachRealTimeListeners() {
 
     if (dom.countryCode2) {
         dom.countryCode2.addEventListener('change', (e) => {
+            state.phone2SelectedManually = true;
             const display = document.getElementById('countryCode2Display');
             if (display) {
                 const opt = e.target.options[e.target.selectedIndex];
@@ -1515,21 +1526,27 @@ function attachRealTimeListeners() {
 // Second phone toggle
 function setPhone2Visible(visible) {
     state.phone2Visible = visible;
-    if (dom.phone2Section) dom.phone2Section.style.display = visible ? 'flex' : 'none';
+    if (dom.hasPhone2) dom.hasPhone2.checked = visible;
+    const wrapper = document.getElementById('phone2Wrapper');
+    if (dom.phone2Section) dom.phone2Section.classList.toggle('expanded', visible);
+    if (wrapper) wrapper.classList.toggle('active', visible);
     if (!visible && dom.phone2) dom.phone2.value = '';
     const t = i18n[state.lang] || i18n['es'];
     const lblToggle = document.getElementById('lblPhone2Toggle');
-    const btnToggle = dom.btnTogglePhone2;
     if (lblToggle) lblToggle.textContent = visible ? (t.phone2ToggleRemove || 'Remove 2nd phone') : (t.phone2Toggle || 'Add a 2nd phone number');
-    if (btnToggle) {
-        const icon = btnToggle.querySelector('i');
-        if (icon) icon.className = visible ? 'bx bx-minus-circle' : 'bx bx-plus-circle';
-    }
 }
 
 if (dom.btnTogglePhone2) {
-    dom.btnTogglePhone2.addEventListener('click', () => {
-        setPhone2Visible(!state.phone2Visible);
+    dom.btnTogglePhone2.addEventListener('click', (e) => {
+        if (!e.target.closest('.custom-checkbox')) {
+            dom.hasPhone2.click();
+        }
+    });
+}
+
+if (dom.hasPhone2) {
+    dom.hasPhone2.addEventListener('change', (e) => {
+        setPhone2Visible(e.target.checked);
         debouncedSendToAdvisor();
     });
 }
