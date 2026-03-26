@@ -1565,6 +1565,123 @@ if (dom.advisorCodeInput) {
 }
 
 // ============================================================================
+// Searchable country combobox — replaces native <select> overlay pattern
+// ============================================================================
+
+function initSearchableSelects() {
+    document.querySelectorAll('.cs-wrap').forEach(wrap => {
+        const face   = wrap.querySelector('.cs-face');
+        const search = wrap.querySelector('.cs-search');
+        const list   = wrap.querySelector('.cs-list');
+        const select = wrap.querySelector('select');
+        const arrow  = wrap.querySelector('.cs-arrow');
+        if (!face || !search || !list || !select) return;
+
+        let allItems = [];
+
+        function syncItems() {
+            allItems = Array.from(select.options).map(opt => ({
+                value: opt.value,
+                label: opt.textContent.trim(),
+                short: opt.dataset.short || opt.textContent.trim()
+            }));
+        }
+
+        function renderList(items) {
+            list.innerHTML = '';
+            const cur = select.value;
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.setAttribute('role', 'option');
+                li.setAttribute('tabindex', '-1');
+                li.textContent = item.label;
+                li.dataset.value = item.value;
+                if (item.value === cur) li.setAttribute('aria-selected', 'true');
+                li.addEventListener('mousedown', e => { e.preventDefault(); pick(item); });
+                list.appendChild(li);
+            });
+        }
+
+        function normalize(s) {
+            return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+        }
+
+        function filterList(q) {
+            if (!q.trim()) { renderList(allItems); return; }
+            const terms = normalize(q).split(/\s+/).filter(Boolean);
+            const matches = allItems.filter(item => {
+                const hay = normalize(item.label + ' ' + item.value);
+                return terms.every(t => hay.includes(t));
+            });
+            renderList(matches);
+        }
+
+        function pick(item) {
+            select.value = item.value;
+            face.textContent = item.short;
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+            close();
+        }
+
+        function open() {
+            if (wrap.classList.contains('is-open')) return;
+            syncItems();
+            renderList(allItems);
+            wrap.classList.add('is-open');
+            search.placeholder = face.textContent;
+            search.focus();
+            // Scroll to currently selected item
+            const sel = list.querySelector('[aria-selected="true"]');
+            if (sel) setTimeout(() => sel.scrollIntoView({ block: 'nearest' }), 0);
+        }
+
+        function close() {
+            if (!wrap.classList.contains('is-open')) return;
+            wrap.classList.remove('is-open');
+            search.value = '';
+            list.innerHTML = '';
+        }
+
+        face.addEventListener('click', open);
+        wrap.addEventListener('click', e => { if (e.target === wrap || e.target === arrow) open(); });
+
+        search.addEventListener('input', () => filterList(search.value));
+        search.addEventListener('blur', () => setTimeout(close, 180));
+        search.addEventListener('keydown', e => {
+            if (e.key === 'Escape') { close(); face.focus?.(); }
+            if (e.key === 'ArrowDown') { e.preventDefault(); list.firstElementChild?.focus(); }
+        });
+
+        list.addEventListener('keydown', e => {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                (document.activeElement.nextElementSibling || list.firstElementChild)?.focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prev = document.activeElement.previousElementSibling;
+                prev ? prev.focus() : search.focus();
+            } else if (e.key === 'Enter') {
+                const li = document.activeElement;
+                if (li.dataset?.value !== undefined) {
+                    const item = allItems.find(i => i.value === li.dataset.value);
+                    if (item) pick(item);
+                }
+            } else if (e.key === 'Escape') {
+                close();
+            }
+        });
+
+        // Sync face when select value is changed externally
+        select.addEventListener('change', () => {
+            if (!wrap.classList.contains('is-open')) {
+                const opt = select.options[select.selectedIndex];
+                if (opt) face.textContent = opt.dataset.short || opt.textContent.trim();
+            }
+        });
+    });
+}
+
+// ============================================================================
 // Address Autocomplete — Photon API (OpenStreetMap, EU-hosted, no key needed)
 // ============================================================================
 
@@ -1698,4 +1815,5 @@ function initAddressAutocomplete() {
 // Initialize
 attachRealTimeListeners();
 initAddressAutocomplete();
+initSearchableSelects();
 checkUrlForAdvisorCode();
