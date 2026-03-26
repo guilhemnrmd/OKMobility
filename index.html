@@ -85,20 +85,6 @@
                     <ul class="address-suggestions" id="addressSuggestions" role="listbox"></ul>
                 </div>
 
-                <!-- Country -->
-                <div class="input-wrapper">
-                    <label for="country" id="lblCountry">Pays</label>
-                    <div class="cs-wrap" id="countryWrap">
-                        <span class="cs-face" id="countryDisplay">🇫🇷 France</span>
-                        <input class="cs-search" type="text" autocomplete="off" spellcheck="false" aria-label="Rechercher un pays">
-                        <i class='bx bx-chevron-down cs-arrow'></i>
-                        <ul class="cs-list" role="listbox"></ul>
-                        <select id="country" name="country" class="cs-hidden" tabindex="-1" aria-hidden="true">
-                            <option value="FR" selected>🇫🇷 France</option>
-                        </select>
-                    </div>
-                </div>
-
                 <!-- Postal Code & City -->
                 <div class="form-group-row">
                     <div class="input-wrapper zip-wrapper">
@@ -114,6 +100,20 @@
                             <i class='bx bx-buildings'></i>
                             <input type="text" id="city" name="city" placeholder="Paris" required>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Country -->
+                <div class="input-wrapper">
+                    <label for="country" id="lblCountry">Pays</label>
+                    <div class="cs-wrap" id="countryWrap">
+                        <span class="cs-face" id="countryDisplay">🇫🇷 France</span>
+                        <input class="cs-search" type="text" autocomplete="off" spellcheck="false" aria-label="Rechercher un pays">
+                        <i class='bx bx-chevron-down cs-arrow'></i>
+                        <ul class="cs-list" role="listbox"></ul>
+                        <select id="country" name="country" class="cs-hidden" tabindex="-1" aria-hidden="true">
+                            <option value="FR" selected>🇫🇷 France</option>
+                        </select>
                     </div>
                 </div>
 
