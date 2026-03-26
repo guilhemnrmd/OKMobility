@@ -73,6 +73,8 @@
     const inId         = document.getElementById('newAgencyId');
     const inName       = document.getElementById('newAgencyName');
     const inExpiry     = document.getElementById('newAgencyExpiry');
+    const inAddress    = document.getElementById('newAgencyAddress');
+    const inLanguage   = document.getElementById('newAgencyLanguage');
 
     let editingId = null; // null = new agency
     let agenciesCache = [];
@@ -591,6 +593,8 @@
         const next = new Date();
         next.setMonth(next.getMonth() + 1);
         inExpiry.value = next.toISOString().slice(0, 10);
+        inAddress.value = '';
+        inLanguage.value = '';
         inId.disabled = false;
         addTitle.textContent = 'Nouvelle agence';
         addError.textContent = '';
@@ -604,8 +608,8 @@
         inId.value = a.id;
         inName.value = a.agencyName || '';
         inExpiry.value = a.licenseExpiresAt ? a.licenseExpiresAt.slice(0, 10) : '';
-        document.getElementById('newAgencyAddress').value = a.agencyAddress || '';
-        document.getElementById('newAgencyLanguage').value = a.agencyLanguage || '';
+        inAddress.value = a.agencyAddress || '';
+        inLanguage.value = a.agencyLanguage || '';
         inId.disabled = true;
         addTitle.textContent = 'Modifier l\'agence';
         addError.textContent = '';
@@ -641,8 +645,8 @@
             agencyId: id,
             agencyName: name,
             licenseExpiresAt: new Date(expiry + 'T23:59:59Z').toISOString(),
-            agencyAddress: document.getElementById('newAgencyAddress').value.trim() || null,
-            agencyLanguage: document.getElementById('newAgencyLanguage').value || null,
+            agencyAddress: inAddress.value.trim() || null,
+            agencyLanguage: inLanguage.value || null,
         };
 
         try {
