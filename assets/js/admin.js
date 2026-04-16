@@ -1131,7 +1131,6 @@
             { icon: 'bx-map', label: 'Région', value: evt.region ? `${evt.region}${evt.regionCode ? ' (' + evt.regionCode + ')' : ''}` : '—' },
             { icon: 'bx-world', label: 'Pays', value: `${flag} ${evt.country || 'XX'}` },
             { icon: 'bx-timer', label: 'Fuseau horaire', value: evt.timezone || '—' },
-            { icon: 'bx-current-location', label: 'Coordonnées', value: (Number.isFinite(evt.lat) && Number.isFinite(evt.lon)) ? `${evt.lat.toFixed(2)}, ${evt.lon.toFixed(2)}` : '—' },
             { icon: 'bx-devices', label: 'Device (hash)', value: evt.device || '—' },
         ];
 
@@ -1174,8 +1173,6 @@
             }
         } else if (logDetailMapContainer) {
             logDetailMapContainer.style.display = 'none';
-            logDetailMapContainer.innerHTML = '<div class="log-detail-map-placeholder"><i class="bx bx-map-alt" style="margin-right:6px;"></i> Coordonnées non disponibles</div>';
-            logDetailMapContainer.style.display = 'block';
         }
     }
 

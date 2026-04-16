@@ -701,7 +701,7 @@
     z-index: 200;
     width: min(94vw, 480px);
     max-height: 90vh;
-    overflow-y: auto;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     gap: 0;
