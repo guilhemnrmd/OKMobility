@@ -1,0 +1,30 @@
+--- assets/js/admin.js
++++ assets/js/admin.js
+@@ -1141,18 +1141,20 @@
+             const mapToken = getMapToken();
+             if (mapToken && typeof maplibregl !== 'undefined') {
+-                logDetailMapInstance = new maplibregl.Map({
+-                    container: logDetailMapContainer,
+-                    style: `https://api.jawg.io/styles/jawg-streets.json?access-token=${mapToken}`,
+-                    center: [evt.lon, evt.lat],
+-                    zoom: 12,
+-                    scrollZoom: false,
+-                    attributionControl: false
++                // Wait for the modal layout to be calculated before initializing the map
++                requestAnimationFrame(() => {
++                    logDetailMapInstance = new maplibregl.Map({
++                        container: logDetailMapContainer,
++                        style: `https://api.jawg.io/styles/jawg-streets.json?access-token=${mapToken}`,
++                        center: [evt.lon, evt.lat],
++                        zoom: 12,
++                        scrollZoom: false,
++                        attributionControl: false
++                    });
++                    new maplibregl.Marker({ color: '#2054EA' })
++                        .setLngLat([evt.lon, evt.lat])
++                        .addTo(logDetailMapInstance);
+                 });
+-                new maplibregl.Marker({ color: '#2054EA' })
+-                    .setLngLat([evt.lon, evt.lat])
+-                    .addTo(logDetailMapInstance);
+             }

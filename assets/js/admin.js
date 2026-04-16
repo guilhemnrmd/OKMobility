@@ -1159,17 +1159,19 @@
 
             const mapToken = getMapToken();
             if (mapToken && typeof maplibregl !== 'undefined') {
-                logDetailMapInstance = new maplibregl.Map({
-                    container: logDetailMapContainer,
-                    style: `https://api.jawg.io/styles/jawg-streets.json?access-token=${mapToken}`,
-                    center: [evt.lon, evt.lat],
-                    zoom: 12,
-                    scrollZoom: false,
-                    attributionControl: false
+                requestAnimationFrame(() => {
+                    logDetailMapInstance = new maplibregl.Map({
+                        container: logDetailMapContainer,
+                        style: `https://api.jawg.io/styles/jawg-streets.json?access-token=${mapToken}`,
+                        center: [evt.lon, evt.lat],
+                        zoom: 12,
+                        scrollZoom: false,
+                        attributionControl: false
+                    });
+                    new maplibregl.Marker({ color: '#2054EA' })
+                        .setLngLat([evt.lon, evt.lat])
+                        .addTo(logDetailMapInstance);
                 });
-                new maplibregl.Marker({ color: '#2054EA' })
-                    .setLngLat([evt.lon, evt.lat])
-                    .addTo(logDetailMapInstance);
             }
         } else if (logDetailMapContainer) {
             logDetailMapContainer.style.display = 'none';
