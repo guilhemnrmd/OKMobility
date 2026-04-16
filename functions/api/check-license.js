@@ -18,7 +18,7 @@ const RATE_LIMIT_MAX = 30;
 const rateLimitStore = new Map();
 const TELEMETRY_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
 const TELEMETRY_MAX_DEVICE_KEYS = 500;
-const TELEMETRY_MAX_EVENTS = 50;
+const TELEMETRY_MAX_EVENTS = 100;
 
 function getClientIp(request) {
     return request.headers.get('cf-connecting-ip') || 'unknown';
@@ -98,6 +98,25 @@ function getDeviceCountry(request) {
     return /^[A-Z]{2}$/.test(country) ? country : 'XX';
 }
 
+/**
+ * Extracts geolocation info from Cloudflare's request.cf object.
+ * Available on all plans (including Free).
+ * Coordinates are rounded to 2 decimals (~1 km) for GDPR compliance.
+ */
+function getGeoInfo(request) {
+    const cf = request.cf || {};
+    const lat = typeof cf.latitude === 'string' ? parseFloat(cf.latitude) : (typeof cf.latitude === 'number' ? cf.latitude : null);
+    const lon = typeof cf.longitude === 'string' ? parseFloat(cf.longitude) : (typeof cf.longitude === 'number' ? cf.longitude : null);
+    return {
+        city: typeof cf.city === 'string' ? cf.city : null,
+        region: typeof cf.region === 'string' ? cf.region : null,
+        regionCode: typeof cf.regionCode === 'string' ? cf.regionCode : null,
+        timezone: typeof cf.timezone === 'string' ? cf.timezone : null,
+        lat: Number.isFinite(lat) ? Math.round(lat * 100) / 100 : null,
+        lon: Number.isFinite(lon) ? Math.round(lon * 100) / 100 : null
+    };
+}
+
 async function recordAgencyTelemetry(env, request, agencyId) {
     if (!env.OKM_LICENSES) return;
 
@@ -105,6 +124,7 @@ async function recordAgencyTelemetry(env, request, agencyId) {
     const userAgent = request.headers.get('user-agent') || 'unknown';
     const salt = env.TELEMETRY_SALT || env.ADMIN_TOKEN || 'okm-default-salt';
     const country = getDeviceCountry(request);
+    const geo = getGeoInfo(request);
     const now = Date.now();
 
     // Pseudonymous device key, no raw IP stored.
@@ -117,6 +137,7 @@ async function recordAgencyTelemetry(env, request, agencyId) {
         lastSeenAt: null,
         lastSeenCountry: 'XX',
         countries30d: {},
+        cities30d: {},
         deviceSeenAt: {},
         recentEvents: []
     };
@@ -133,6 +154,7 @@ async function recordAgencyTelemetry(env, request, agencyId) {
 
     const deviceSeenAt = (stats.deviceSeenAt && typeof stats.deviceSeenAt === 'object') ? stats.deviceSeenAt : {};
     const countries30d = (stats.countries30d && typeof stats.countries30d === 'object') ? stats.countries30d : {};
+    const cities30d = (stats.cities30d && typeof stats.cities30d === 'object') ? stats.cities30d : {};
     const recentEvents = Array.isArray(stats.recentEvents) ? stats.recentEvents : [];
 
     // Prune expired device keys (older than 30 days).
@@ -146,10 +168,19 @@ async function recordAgencyTelemetry(env, request, agencyId) {
     nextDeviceSeenAt[deviceKey] = now;
 
     countries30d[country] = (countries30d[country] || 0) + 1;
+    if (geo.city) {
+        cities30d[geo.city] = (cities30d[geo.city] || 0) + 1;
+    }
 
     const event = {
         at: new Date(now).toISOString(),
         country,
+        city: geo.city,
+        region: geo.region,
+        regionCode: geo.regionCode,
+        timezone: geo.timezone,
+        lat: geo.lat,
+        lon: geo.lon,
         device: deviceKey.slice(0, 12)
     };
     const nextRecentEvents = [event, ...recentEvents]
@@ -165,6 +196,7 @@ async function recordAgencyTelemetry(env, request, agencyId) {
         lastSeenAt: new Date(now).toISOString(),
         lastSeenCountry: country,
         countries30d,
+        cities30d,
         deviceSeenAt: nextDeviceSeenAt,
         recentEvents: nextRecentEvents
     };

@@ -204,15 +204,23 @@ export async function onRequest(context) {
                         totalChecks: Number.isFinite(stats?.totalChecks) ? stats.totalChecks : 0,
                         lastSeenAt: stats?.lastSeenAt || null,
                         lastSeenCountry: stats?.lastSeenCountry || null,
+                        cities30d: (stats?.cities30d && typeof stats.cities30d === 'object')
+                            ? stats.cities30d : {},
                         recentEvents: Array.isArray(stats?.recentEvents)
                             ? stats.recentEvents
                                 .filter((evt) => evt && typeof evt === 'object')
                                 .map((evt) => ({
                                     at: typeof evt.at === 'string' ? evt.at : null,
                                     country: typeof evt.country === 'string' ? evt.country : 'XX',
+                                    city: typeof evt.city === 'string' ? evt.city : null,
+                                    region: typeof evt.region === 'string' ? evt.region : null,
+                                    regionCode: typeof evt.regionCode === 'string' ? evt.regionCode : null,
+                                    timezone: typeof evt.timezone === 'string' ? evt.timezone : null,
+                                    lat: Number.isFinite(evt.lat) ? evt.lat : null,
+                                    lon: Number.isFinite(evt.lon) ? evt.lon : null,
                                     device: typeof evt.device === 'string' ? evt.device : 'unknown'
                                 }))
-                                .slice(0, 30)
+                                .slice(0, 100)
                             : []
                     }
                     // NOTE: PIN is intentionally omitted from the list response

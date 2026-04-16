@@ -2173,9 +2173,10 @@ input::placeholder {
     color: var(--color-accent);
 }
 
-/* MapLibre GL controls — blend with glass design */
+/* MapLibre GL controls — blend with glass design (shared via .okm-map) */
 .address-map-wrapper .maplibregl-ctrl-attrib,
-.map-lightbox-inner .maplibregl-ctrl-attrib {
+.map-lightbox-inner .maplibregl-ctrl-attrib,
+.okm-map .maplibregl-ctrl-attrib {
     font-size: 0.5rem !important;
     opacity: 0.45;
     background: rgba(255, 255, 255, 0.55) !important;
@@ -2184,7 +2185,8 @@ input::placeholder {
 }
 
 .address-map-wrapper .maplibregl-ctrl-group,
-.map-lightbox-inner .maplibregl-ctrl-group {
+.map-lightbox-inner .maplibregl-ctrl-group,
+.okm-map .maplibregl-ctrl-group {
     border: none !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
     border-radius: 8px !important;
@@ -2192,7 +2194,8 @@ input::placeholder {
 }
 
 .address-map-wrapper .maplibregl-ctrl-group button,
-.map-lightbox-inner .maplibregl-ctrl-group button {
+.map-lightbox-inner .maplibregl-ctrl-group button,
+.okm-map .maplibregl-ctrl-group button {
     background: rgba(255, 255, 255, 0.85) !important;
     backdrop-filter: blur(8px);
     border-bottom: 0.5px solid rgba(0, 0, 0, 0.08) !important;
@@ -2201,7 +2204,8 @@ input::placeholder {
 }
 
 .address-map-wrapper .maplibregl-ctrl-group button:hover,
-.map-lightbox-inner .maplibregl-ctrl-group button:hover {
+.map-lightbox-inner .maplibregl-ctrl-group button:hover,
+.okm-map .maplibregl-ctrl-group button:hover {
     background: rgba(255, 255, 255, 0.95) !important;
 }
 
