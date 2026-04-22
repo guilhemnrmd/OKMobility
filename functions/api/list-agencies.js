@@ -10,20 +10,81 @@
  * Used by the retailer license-gate to build the agency selection menu.
  */
 
+function getRootHost(hostname) {
+    const parts = String(hostname || '').split('.').filter(Boolean);
+    if (parts.length <= 2) return String(hostname || '');
+    return parts.slice(-3).join('.');
+}
+
+function getTrustedOrigin(request) {
+    const requestUrl = new URL(request.url);
+    const requestOrigin = requestUrl.origin;
+    const requestHost = requestUrl.hostname;
+    const requestRootHost = getRootHost(requestHost);
+
+    const origin = request.headers.get('origin');
+    if (origin) {
+        try {
+            const url = new URL(origin);
+            if (url.origin === requestOrigin) return origin;
+            if (getRootHost(url.hostname) === requestRootHost) return origin;
+        } catch { /* ignore */ }
+    }
+
+    const referer = request.headers.get('referer');
+    if (referer) {
+        try {
+            const refUrl = new URL(referer);
+            if (refUrl.origin === requestOrigin) return refUrl.origin;
+            if (getRootHost(refUrl.hostname) === requestRootHost) return refUrl.origin;
+        } catch { /* ignore */ }
+    }
+
+    return null;
+}
+
+function buildHeaders(trustedOrigin) {
+    const headers = {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store',
+        'X-Content-Type-Options': 'nosniff',
+        'Vary': 'Origin'
+    };
+
+    if (trustedOrigin) {
+        headers['Access-Control-Allow-Origin'] = trustedOrigin;
+        headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS';
+    }
+
+    return headers;
+}
+
 export async function onRequest(context) {
     const { env, request } = context;
+    const trustedOrigin = getTrustedOrigin(request);
+
+    if (request.method === 'OPTIONS') {
+        return new Response(null, { status: 204, headers: buildHeaders(trustedOrigin) });
+    }
 
     if (request.method !== 'GET') {
         return new Response(JSON.stringify({ error: 'Method Not Allowed' }), {
             status: 405,
-            headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
+            headers: buildHeaders(trustedOrigin)
+        });
+    }
+
+    if (!trustedOrigin) {
+        return new Response(JSON.stringify({ error: 'Forbidden' }), {
+            status: 403,
+            headers: buildHeaders(null)
         });
     }
 
     if (!env.OKM_LICENSES) {
         return new Response(JSON.stringify({ error: 'KV not configured' }), {
             status: 503,
-            headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
+            headers: buildHeaders(trustedOrigin)
         });
     }
 
@@ -78,10 +139,6 @@ export async function onRequest(context) {
 
     return new Response(JSON.stringify({ agencies }), {
         status: 200,
-        headers: {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'no-store',
-            'X-Content-Type-Options': 'nosniff'
-        }
+        headers: buildHeaders(trustedOrigin)
     });
 }

@@ -18,25 +18,16 @@ const RATE_LIMIT_MAX = 30;
 const rateLimitStore = new Map();
 const TELEMETRY_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
 const TELEMETRY_MAX_DEVICE_KEYS = 500;
-const TELEMETRY_MAX_EVENTS = 100;
-
-function shouldCollectTelemetry(request, url) {
-    const source = (url.searchParams.get('source') || '').trim().toLowerCase();
-    if (source !== 'retailer') return false;
-
-    const referer = request.headers.get('referer') || '';
-    if (!referer) return false;
-
-    try {
-        const refererUrl = new URL(referer);
-        return refererUrl.pathname.startsWith('/retailer/');
-    } catch {
-        return false;
-    }
-}
+const TELEMETRY_MAX_EVENTS = 50;
 
 function getClientIp(request) {
     return request.headers.get('cf-connecting-ip') || 'unknown';
+}
+
+function getRootHost(hostname) {
+    const parts = String(hostname || '').split('.').filter(Boolean);
+    if (parts.length <= 2) return String(hostname || '');
+    return parts.slice(-3).join('.');
 }
 
 /**
@@ -44,18 +35,17 @@ function getClientIp(request) {
  * This makes the code domain-agnostic — works with any custom domain or pages.dev URL.
  */
 function getTrustedOrigin(request) {
-    const requestHost = request.headers.get('host') || '';
-    const sameOrigin = 'https://' + requestHost;
+    const requestUrl = new URL(request.url);
+    const requestOrigin = requestUrl.origin;
+    const requestHost = requestUrl.hostname;
+    const requestRootHost = getRootHost(requestHost);
 
     const origin = request.headers.get('origin');
     if (origin) {
         try {
             const url = new URL(origin);
-            // Same-origin or same root domain (covers preview deployments like abc123.okmobility.pages.dev)
-            if (url.origin === sameOrigin) return origin;
-            // Allow subdomains of the same root (e.g. develop.okmobility.pages.dev)
-            const rootHost = requestHost.split('.').slice(-3).join('.');
-            if (url.hostname.endsWith(rootHost)) return origin;
+            if (url.origin === requestOrigin) return origin;
+            if (getRootHost(url.hostname) === requestRootHost) return origin;
         } catch { /* ignore */ }
     }
 
@@ -63,12 +53,14 @@ function getTrustedOrigin(request) {
     if (referer) {
         try {
             const refOrigin = new URL(referer).origin;
-            if (refOrigin === sameOrigin) return refOrigin;
+            const refHost = new URL(referer).hostname;
+            if (refOrigin === requestOrigin) return refOrigin;
+            if (getRootHost(refHost) === requestRootHost) return refOrigin;
         } catch { /* ignore */ }
     }
 
-    // Same-host request without origin header (e.g. fetch from QR-scanned page)
-    return sameOrigin;
+    // Reject requests with no verifiable browser origin/referer.
+    return null;
 }
 
 function isRateLimited(key) {
@@ -113,25 +105,6 @@ function getDeviceCountry(request) {
     return /^[A-Z]{2}$/.test(country) ? country : 'XX';
 }
 
-/**
- * Extracts geolocation info from Cloudflare's request.cf object.
- * Available on all plans (including Free).
- * Coordinates are rounded to 2 decimals (~1 km) for GDPR compliance.
- */
-function getGeoInfo(request) {
-    const cf = request.cf || {};
-    const lat = typeof cf.latitude === 'string' ? parseFloat(cf.latitude) : (typeof cf.latitude === 'number' ? cf.latitude : null);
-    const lon = typeof cf.longitude === 'string' ? parseFloat(cf.longitude) : (typeof cf.longitude === 'number' ? cf.longitude : null);
-    return {
-        city: typeof cf.city === 'string' ? cf.city : null,
-        region: typeof cf.region === 'string' ? cf.region : null,
-        regionCode: typeof cf.regionCode === 'string' ? cf.regionCode : null,
-        timezone: typeof cf.timezone === 'string' ? cf.timezone : null,
-        lat: Number.isFinite(lat) ? Math.round(lat * 100) / 100 : null,
-        lon: Number.isFinite(lon) ? Math.round(lon * 100) / 100 : null
-    };
-}
-
 async function recordAgencyTelemetry(env, request, agencyId) {
     if (!env.OKM_LICENSES) return;
 
@@ -139,7 +112,6 @@ async function recordAgencyTelemetry(env, request, agencyId) {
     const userAgent = request.headers.get('user-agent') || 'unknown';
     const salt = env.TELEMETRY_SALT || env.ADMIN_TOKEN || 'okm-default-salt';
     const country = getDeviceCountry(request);
-    const geo = getGeoInfo(request);
     const now = Date.now();
 
     // Pseudonymous device key, no raw IP stored.
@@ -152,7 +124,6 @@ async function recordAgencyTelemetry(env, request, agencyId) {
         lastSeenAt: null,
         lastSeenCountry: 'XX',
         countries30d: {},
-        cities30d: {},
         deviceSeenAt: {},
         recentEvents: []
     };
@@ -169,7 +140,6 @@ async function recordAgencyTelemetry(env, request, agencyId) {
 
     const deviceSeenAt = (stats.deviceSeenAt && typeof stats.deviceSeenAt === 'object') ? stats.deviceSeenAt : {};
     const countries30d = (stats.countries30d && typeof stats.countries30d === 'object') ? stats.countries30d : {};
-    const cities30d = (stats.cities30d && typeof stats.cities30d === 'object') ? stats.cities30d : {};
     const recentEvents = Array.isArray(stats.recentEvents) ? stats.recentEvents : [];
 
     // Prune expired device keys (older than 30 days).
@@ -183,19 +153,10 @@ async function recordAgencyTelemetry(env, request, agencyId) {
     nextDeviceSeenAt[deviceKey] = now;
 
     countries30d[country] = (countries30d[country] || 0) + 1;
-    if (geo.city) {
-        cities30d[geo.city] = (cities30d[geo.city] || 0) + 1;
-    }
 
     const event = {
         at: new Date(now).toISOString(),
         country,
-        city: geo.city,
-        region: geo.region,
-        regionCode: geo.regionCode,
-        timezone: geo.timezone,
-        lat: geo.lat,
-        lon: geo.lon,
         device: deviceKey.slice(0, 12)
     };
     const nextRecentEvents = [event, ...recentEvents]
@@ -211,7 +172,6 @@ async function recordAgencyTelemetry(env, request, agencyId) {
         lastSeenAt: new Date(now).toISOString(),
         lastSeenCountry: country,
         countries30d,
-        cities30d,
         deviceSeenAt: nextDeviceSeenAt,
         recentEvents: nextRecentEvents
     };
@@ -222,6 +182,7 @@ async function recordAgencyTelemetry(env, request, agencyId) {
 export async function onRequest(context) {
     const { env, request } = context;
     const trustedOrigin = getTrustedOrigin(request);
+    const telemetryEnabled = String(env.LICENSE_TELEMETRY_ENABLED || 'false').toLowerCase() === 'true';
 
     if (request.method === 'OPTIONS') {
         return new Response(null, { status: 204, headers: buildHeaders(trustedOrigin) });
@@ -284,8 +245,8 @@ export async function onRequest(context) {
         });
     }
 
-    // Best-effort telemetry for admin insights (retailer context only).
-    if (shouldCollectTelemetry(request, url)) {
+    // Privacy-by-default: telemetry is disabled unless explicitly enabled.
+    if (telemetryEnabled) {
         try {
             await recordAgencyTelemetry(env, request, agencyId);
         } catch {
@@ -298,9 +259,7 @@ export async function onRequest(context) {
         agencyName: license.agencyName,
         licenseExpiresAt: license.licenseExpiresAt || null,
         firstActivation: license.firstActivation === true,
-        licenseVersion: license.licenseVersion || 1,
-        agencyAddress: license.agencyAddress || null,
-        agencyLanguage: license.agencyLanguage || null,
+        licenseVersion: license.licenseVersion || 1
     }), { status: 200, headers: buildHeaders(trustedOrigin) });
 
 }

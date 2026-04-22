@@ -6,24 +6,37 @@
  * Cloudflare Pages Function — Accept CGU on first activation
  * POST /api/accept-terms { agencyId }
  *
- * Logs acceptance: terms:{agencyId} → { acceptedAt, ip }
+ * Logs acceptance: terms:{agencyId} → pseudonymous audit fields
  * Updates agency:{agencyId} → firstActivation: false
  */
+
+function getRootHost(hostname) {
+    const parts = String(hostname || '').split('.').filter(Boolean);
+    if (parts.length <= 2) return String(hostname || '');
+    return parts.slice(-3).join('.');
+}
+
+async function sha256Hex(input) {
+    const payload = new TextEncoder().encode(input);
+    const digest = await crypto.subtle.digest('SHA-256', payload);
+    return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
 
 /**
  * Domain-agnostic origin check — works with any custom domain or pages.dev URL.
  */
 function getTrustedOrigin(request) {
-    const requestHost = request.headers.get('host') || '';
-    const sameOrigin = 'https://' + requestHost;
+    const requestUrl = new URL(request.url);
+    const requestOrigin = requestUrl.origin;
+    const requestHost = requestUrl.hostname;
+    const requestRootHost = getRootHost(requestHost);
 
     const origin = request.headers.get('origin');
     if (origin) {
         try {
             const url = new URL(origin);
-            if (url.origin === sameOrigin) return origin;
-            const rootHost = requestHost.split('.').slice(-3).join('.');
-            if (url.hostname.endsWith(rootHost)) return origin;
+            if (url.origin === requestOrigin) return origin;
+            if (getRootHost(url.hostname) === requestRootHost) return origin;
         } catch { /* ignore */ }
     }
 
@@ -31,11 +44,13 @@ function getTrustedOrigin(request) {
     if (referer) {
         try {
             const refOrigin = new URL(referer).origin;
-            if (refOrigin === sameOrigin) return refOrigin;
+            const refHost = new URL(referer).hostname;
+            if (refOrigin === requestOrigin) return refOrigin;
+            if (getRootHost(refHost) === requestRootHost) return refOrigin;
         } catch { /* ignore */ }
     }
 
-    return sameOrigin;
+    return null;
 }
 
 function buildHeaders(trustedOrigin) {
@@ -109,12 +124,20 @@ export async function onRequest(context) {
 
     const license = JSON.parse(licenseRaw);
 
-    // Log the acceptance
+    // Log acceptance using pseudonymous audit fields (no raw IP stored).
     const ip = request.headers.get('cf-connecting-ip') || 'unknown';
+    const userAgent = request.headers.get('user-agent') || 'unknown';
+    const country = (request.headers.get('cf-ipcountry') || '').toUpperCase();
+    const salt = env.TELEMETRY_SALT || env.ADMIN_TOKEN || 'okm-default-salt';
+
+    const ipHash = await sha256Hex(`${salt}:terms:${agencyId}:${ip}`);
+    const uaHash = await sha256Hex(`${salt}:terms:${agencyId}:${userAgent}`);
+
     const termsEntry = {
         acceptedAt: new Date().toISOString(),
-        ip,
-        userAgent: request.headers.get('user-agent') || 'unknown'
+        ipHash,
+        uaHash: uaHash.slice(0, 16),
+        country: /^[A-Z]{2}$/.test(country) ? country : 'XX'
     };
     await env.OKM_LICENSES.put(`terms:${agencyId}`, JSON.stringify(termsEntry));
 
