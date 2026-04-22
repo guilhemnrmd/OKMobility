@@ -952,7 +952,16 @@ function resolveCountryCca2(rawCountry) {
     const needle = normalizeCountryLabel(trimmed);
     if (!needle) return null;
 
-    const locales = Array.from(new Set([state.lang, 'en'].filter(Boolean)));
+    const locales = Array.from(new Set([
+        state.lang,
+        'en',
+        'fr',
+        'es',
+        'it',
+        'pt',
+        'de',
+        'nl'
+    ].filter(Boolean)));
     const displayNamesByLocale = new Map();
 
     locales.forEach((locale) => {
@@ -974,7 +983,14 @@ function resolveCountryCca2(rawCountry) {
         if (c.shortLabel) candidates.push(c.shortLabel);
         if (c.fullLabel) candidates.push(c.fullLabel);
 
-        const match = candidates.some((candidate) => normalizeCountryLabel(candidate) === needle);
+        const match = candidates.some((candidate) => {
+            const normalizedCandidate = normalizeCountryLabel(candidate);
+            if (!normalizedCandidate) return false;
+            if (normalizedCandidate === needle) return true;
+            if (normalizedCandidate.length >= 4 && needle.includes(normalizedCandidate)) return true;
+            if (needle.length >= 4 && normalizedCandidate.includes(needle)) return true;
+            return false;
+        });
         if (match) return c.cca2;
     }
 
