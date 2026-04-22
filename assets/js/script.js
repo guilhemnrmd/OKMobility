@@ -315,6 +315,7 @@ const state = {
     debounceTimer: null,
     addressSelected: false,
     globalCountriesData: [],
+    pendingCountryCca2FromAddress: null,
     countrySelectedManually: false,
     phoneSelectedManually: false,
     phone2SelectedManually: false,
@@ -912,9 +913,42 @@ function applyCountriesData(countries) {
     }
 
     renderCountryNameSelect(state.lang);
+
+    if (state.pendingCountryCca2FromAddress) {
+        trySetCountryFromAddress(state.pendingCountryCca2FromAddress);
+    }
+
     renderCountryCodeSelect(state.lang);
     syncPhone2CodeToPhone1();
     syncPhoneCodeWithSelectedCountry();
+}
+
+function trySetCountryFromAddress(countryCca2) {
+    if (!dom.country || typeof countryCca2 !== 'string') return false;
+
+    const normalized = countryCca2.trim().toUpperCase();
+    if (!/^[A-Z]{2}$/.test(normalized)) return false;
+
+    const hasOption = Array.from(dom.country.options).some((opt) => opt.value === normalized);
+    if (!hasOption) {
+        state.pendingCountryCca2FromAddress = normalized;
+        return false;
+    }
+
+    state.pendingCountryCca2FromAddress = null;
+
+    if (dom.country.value !== normalized) {
+        dom.country.value = normalized;
+        dom.country.dispatchEvent(new Event('change', { bubbles: true }));
+    } else {
+        const selectedOpt = dom.country.options[dom.country.selectedIndex];
+        if (selectedOpt?.dataset?.short) {
+            const countryDisplay = document.getElementById('countryDisplay');
+            if (countryDisplay) countryDisplay.textContent = selectedOpt.dataset.short;
+        }
+    }
+
+    return true;
 }
 
 async function populateCountryCodes() {
@@ -1891,10 +1925,7 @@ function initAddressAutocomplete() {
                             if (zip  && dom.zipCode)  dom.zipCode.value  = zip;
                             if (city && dom.city)      dom.city.value     = city;
                             const cc = (props.countrycode || props.country_code || '').toUpperCase();
-                            if (cc && dom.country && dom.country.value !== cc) {
-                                dom.country.value = cc;
-                                dom.country.dispatchEvent(new Event('change', { bubbles: true }));
-                            }
+                            if (cc) trySetCountryFromAddress(cc);
                         } else {
                             if (zip  && dom.tempZipCode)  dom.tempZipCode.value  = zip;
                             if (city && dom.tempCity)      dom.tempCity.value     = city;
