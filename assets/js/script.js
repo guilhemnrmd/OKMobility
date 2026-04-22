@@ -426,7 +426,7 @@ async function hydrateAgencyBrandingFromUrl() {
     }
 
     try {
-        const res = await fetch(`/api/check-license?agency=${encodeURIComponent(agencyId)}`);
+        const res = await fetch(`/api/check-license?agency=${encodeURIComponent(agencyId)}&source=client`);
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const payload = await res.json();
 

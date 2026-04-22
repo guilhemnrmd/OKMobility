@@ -237,7 +237,7 @@ function loadCache(agencyId) {
 
 // ── Server calls ──────────────────────────────────────────────────────────────
 async function apiCheckLicense(agencyId) {
-    const res = await fetch(`/api/check-license?agency=${encodeURIComponent(agencyId)}`);
+    const res = await fetch(`/api/check-license?agency=${encodeURIComponent(agencyId)}&source=retailer`);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     return res.json();
 }

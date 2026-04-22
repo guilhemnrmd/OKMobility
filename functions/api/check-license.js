@@ -20,6 +20,21 @@ const TELEMETRY_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
 const TELEMETRY_MAX_DEVICE_KEYS = 500;
 const TELEMETRY_MAX_EVENTS = 100;
 
+function shouldCollectTelemetry(request, url) {
+    const source = (url.searchParams.get('source') || '').trim().toLowerCase();
+    if (source !== 'retailer') return false;
+
+    const referer = request.headers.get('referer') || '';
+    if (!referer) return false;
+
+    try {
+        const refererUrl = new URL(referer);
+        return refererUrl.pathname.startsWith('/retailer/');
+    } catch {
+        return false;
+    }
+}
+
 function getClientIp(request) {
     return request.headers.get('cf-connecting-ip') || 'unknown';
 }
@@ -269,11 +284,13 @@ export async function onRequest(context) {
         });
     }
 
-    // Best-effort telemetry for admin insights (do not block license flow on failure).
-    try {
-        await recordAgencyTelemetry(env, request, agencyId);
-    } catch {
-        // Ignore telemetry errors.
+    // Best-effort telemetry for admin insights (retailer context only).
+    if (shouldCollectTelemetry(request, url)) {
+        try {
+            await recordAgencyTelemetry(env, request, agencyId);
+        } catch {
+            // Ignore telemetry errors.
+        }
     }
 
     return new Response(JSON.stringify({
