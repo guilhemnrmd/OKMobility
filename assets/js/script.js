@@ -316,6 +316,7 @@ const state = {
     addressSelected: false,
     globalCountriesData: [],
     pendingCountryCca2FromAddress: null,
+    pendingCountryRawFromAddress: null,
     countrySelectedManually: false,
     phoneSelectedManually: false,
     phone2SelectedManually: false,
@@ -917,10 +918,78 @@ function applyCountriesData(countries) {
     if (state.pendingCountryCca2FromAddress) {
         trySetCountryFromAddress(state.pendingCountryCca2FromAddress);
     }
+    if (state.pendingCountryRawFromAddress) {
+        trySetCountryFromAddressRaw(state.pendingCountryRawFromAddress);
+    }
 
     renderCountryCodeSelect(state.lang);
     syncPhone2CodeToPhone1();
     syncPhoneCodeWithSelectedCountry();
+}
+
+function normalizeCountryLabel(value) {
+    if (typeof value !== 'string') return '';
+    return value
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z]/g, '');
+}
+
+function resolveCountryCca2(rawCountry) {
+    if (typeof rawCountry !== 'string') return null;
+    const trimmed = rawCountry.trim();
+    if (!trimmed) return null;
+
+    if (/^[A-Za-z]{2}$/.test(trimmed)) {
+        return trimmed.toUpperCase();
+    }
+
+    if (!Array.isArray(state.globalCountriesData) || state.globalCountriesData.length === 0) {
+        return null;
+    }
+
+    const needle = normalizeCountryLabel(trimmed);
+    if (!needle) return null;
+
+    const locales = Array.from(new Set([state.lang, 'en'].filter(Boolean)));
+    const displayNamesByLocale = new Map();
+
+    locales.forEach((locale) => {
+        try {
+            displayNamesByLocale.set(locale, new Intl.DisplayNames([locale], { type: 'region' }));
+        } catch {
+            // Ignore locale support issues.
+        }
+    });
+
+    for (const c of state.globalCountriesData) {
+        const candidates = [c.name, c.cca2];
+
+        displayNamesByLocale.forEach((displayNames) => {
+            const localized = displayNames.of(c.cca2);
+            if (localized) candidates.push(localized);
+        });
+
+        if (c.shortLabel) candidates.push(c.shortLabel);
+        if (c.fullLabel) candidates.push(c.fullLabel);
+
+        const match = candidates.some((candidate) => normalizeCountryLabel(candidate) === needle);
+        if (match) return c.cca2;
+    }
+
+    return null;
+}
+
+function trySetCountryFromAddressRaw(rawCountry) {
+    const cca2 = resolveCountryCca2(rawCountry);
+    if (!cca2) {
+        state.pendingCountryRawFromAddress = rawCountry;
+        return false;
+    }
+
+    state.pendingCountryRawFromAddress = null;
+    return trySetCountryFromAddress(cca2);
 }
 
 function trySetCountryFromAddress(countryCca2) {
@@ -1861,6 +1930,17 @@ function buildSuggestionItem(feature) {
     return { line1, line2, props: p };
 }
 
+function extractCountryFromSuggestionProps(props) {
+    if (!props || typeof props !== 'object') return '';
+    return (
+        props.countrycode ||
+        props.country_code ||
+        props.countryCode ||
+        props.country ||
+        ''
+    );
+}
+
 function renderAddressSuggestions(features, listEl, onSelect, closeList) {
     listEl.innerHTML = '';
     const items = features.map(buildSuggestionItem).filter(i => i.line1);
@@ -1924,8 +2004,8 @@ function initAddressAutocomplete() {
                         if (inputEl === mainInput) {
                             if (zip  && dom.zipCode)  dom.zipCode.value  = zip;
                             if (city && dom.city)      dom.city.value     = city;
-                            const cc = (props.countrycode || props.country_code || '').toUpperCase();
-                            if (cc) trySetCountryFromAddress(cc);
+                            const rawCountry = extractCountryFromSuggestionProps(props);
+                            if (rawCountry) trySetCountryFromAddressRaw(rawCountry);
                         } else {
                             if (zip  && dom.tempZipCode)  dom.tempZipCode.value  = zip;
                             if (city && dom.tempCity)      dom.tempCity.value     = city;
