@@ -210,8 +210,10 @@ const dom = {
     valCity: document.getElementById('valCity'),
     lblDataTempAddress: document.getElementById('lblDataTempAddress'),
     valTempAddress: document.getElementById('valTempAddress'),
-    lblDataTempZipCity: document.getElementById('lblDataTempZipCity'),
-    valTempZipCity: document.getElementById('valTempZipCity'),
+    lblDataTempZipCode: document.getElementById('lblDataTempZipCode'),
+    valTempZipCode: document.getElementById('valTempZipCode'),
+    lblDataTempCity: document.getElementById('lblDataTempCity'),
+    valTempCity: document.getElementById('valTempCity'),
     lblDataPhoneCode: document.getElementById('lblDataPhoneCode'),
     valPhoneCode: document.getElementById('valPhoneCode'),
     lblDataPhone: document.getElementById('lblDataPhone'),
@@ -227,7 +229,8 @@ const dom = {
     valEmail: document.getElementById('valEmail'),
     // Rows (for showing/hiding temp address)
     rowTempAddress: document.getElementById('rowTempAddress'),
-    rowTempZipCity: document.getElementById('rowTempZipCity'),
+    rowTempZipCode: document.getElementById('rowTempZipCode'),
+    rowTempCity: document.getElementById('rowTempCity'),
     rowPhone2: document.getElementById('rowPhone2'),
     rowPhone2Number: document.getElementById('rowPhone2Number')
 };
@@ -794,19 +797,23 @@ function handleIncomingData(data) {
     if (cleanData.hasTempAddress !== undefined) {
         const show = cleanData.hasTempAddress;
         dom.rowTempAddress.style.display = show ? 'flex' : 'none';
-        dom.rowTempZipCity.style.display = show ? 'flex' : 'none';
+        dom.rowTempZipCode.style.display = show ? 'flex' : 'none';
+        dom.rowTempCity.style.display    = show ? 'flex' : 'none';
     }
-    
+
     if (cleanData.tempAddress !== undefined) {
         dom.valTempAddress.textContent = cleanData.tempAddress || '-';
         highlightField('valTempAddress');
     }
-    
-    if (cleanData.tempZipCode !== undefined || cleanData.tempCity !== undefined) {
-        const zip = cleanData.tempZipCode || state.currentData.tempZipCode || '';
-        const city = cleanData.tempCity || state.currentData.tempCity || '';
-        dom.valTempZipCity.textContent = `${zip} ${city}`.trim() || '-';
-        highlightField('valTempZipCity');
+
+    if (cleanData.tempZipCode !== undefined) {
+        dom.valTempZipCode.textContent = cleanData.tempZipCode || '-';
+        highlightField('valTempZipCode');
+    }
+
+    if (cleanData.tempCity !== undefined) {
+        dom.valTempCity.textContent = cleanData.tempCity || '-';
+        highlightField('valTempCity');
     }
     
     if (cleanData.phoneCode !== undefined) {
@@ -910,8 +917,9 @@ function clearDisplayedData() {
     dom.valCountry.textContent = '-';
     dom.valZipCode.textContent = '-';
     dom.valCity.textContent = '-';
-    dom.valTempAddress.textContent = '-';
-    dom.valTempZipCity.textContent = '-';
+    dom.valTempAddress.textContent  = '-';
+    dom.valTempZipCode.textContent  = '-';
+    dom.valTempCity.textContent     = '-';
     dom.valPhoneCode.textContent = '-';
     dom.valPhone.textContent = '-';
     if (dom.phoneWarning) dom.phoneWarning.style.display = 'none';
@@ -920,7 +928,8 @@ function clearDisplayedData() {
     if (dom.phone2Warning) dom.phone2Warning.style.display = 'none';
     dom.valEmail.textContent = '-';
     dom.rowTempAddress.style.display = 'none';
-    dom.rowTempZipCity.style.display = 'none';
+    dom.rowTempZipCode.style.display = 'none';
+    dom.rowTempCity.style.display    = 'none';
     if (dom.rowPhone2) dom.rowPhone2.style.display = 'none';
     if (dom.rowPhone2Number) dom.rowPhone2Number.style.display = 'none';
     hideAddressMap();
@@ -1236,7 +1245,8 @@ function copyFieldValue(field) {
         zipCode: dom.valZipCode.textContent,
         city: dom.valCity.textContent,
         tempAddress: dom.valTempAddress.textContent,
-        tempZipCity: dom.valTempZipCity.textContent,
+        tempZipCode: dom.valTempZipCode.textContent,
+        tempCity:    dom.valTempCity.textContent,
         phoneCode: dom.valPhoneCode.textContent,
         phoneNumber: dom.valPhone.textContent,
         phone2Code: dom.valPhone2Code?.textContent || '',
@@ -1257,7 +1267,8 @@ function copyAllData() {
     
     if (data.hasTempAddress) {
         if (data.tempAddress) text += `Dirección temporal: ${data.tempAddress}\n`;
-        if (data.tempZipCode || data.tempCity) text += `CP / Ciudad (temp): ${data.tempZipCode || ''} ${data.tempCity || ''}\n`;
+        if (data.tempZipCode) text += `CP (temp): ${data.tempZipCode}\n`;
+        if (data.tempCity)    text += `Ciudad (temp): ${data.tempCity}\n`;
     }
     
     if (data.phoneCode) text += `Prefijo telefónico: ${data.phoneCode}\n`;

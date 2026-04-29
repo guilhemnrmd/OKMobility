@@ -2099,23 +2099,32 @@ input::placeholder {
     height: auto !important;
 }
 
-/* ─── Address Map (retailer) ─────────────────────────────────────────────── */
-/* ── Address Map ──────────────────────────────────────────────── */
-.address-map-wrapper {
-    position: relative;
-    overflow: hidden;
-    margin: 8px -16px -16px;
-    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+/* ─── Retailer live data: 2-column layout ────────────────────────────────── */
+.live-data-columns {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    width: 100%;
 }
 
-/* Temp address map — standalone glass panel */
-.temp-map-panel {
+.live-col-data {
+    width: 100%;
+}
+
+.live-col-maps {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    width: 100%;
+}
+
+/* Map column panels — glass boxes styled like the data table */
+.map-col-panel {
     overflow: hidden;
     padding: 0;
-    margin-top: var(--spacing-sm);
 }
 
-.temp-map-panel-header {
+.map-col-header {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -2128,12 +2137,43 @@ input::placeholder {
     border-bottom: 0.5px solid rgba(var(--color-accent-rgb), 0.1);
 }
 
-.temp-map-panel-header i {
+.map-col-header i {
     font-size: 0.9rem;
     color: var(--color-accent);
 }
 
-/* Address-map-wrapper inside the standalone temp panel: no bleed margins */
+/* Side-by-side on wide screens */
+@media (min-width: 820px) {
+    .conseiller-container {
+        max-width: 1020px;
+    }
+
+    .live-data-columns {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+
+    .live-col-data {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+
+    .live-col-maps {
+        flex: 1 1 0;
+        min-width: 0;
+        width: auto;
+    }
+}
+
+/* ─── Address Map (retailer) ─────────────────────────────────────────────── */
+.address-map-wrapper {
+    position: relative;
+    overflow: hidden;
+    margin: 8px -16px -16px;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+/* No bleed when map is inside a map-col-panel (not a data table) */
 .temp-standalone-map {
     margin: 0;
     border-radius: 0 0 var(--radius-lg) var(--radius-lg);
