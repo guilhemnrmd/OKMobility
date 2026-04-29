@@ -1162,7 +1162,7 @@ input::placeholder {
 .temp-address-wrapper {
     position: relative;
     border: 1px solid var(--color-border);
-    border-radius: 18px;
+    border-radius: var(--radius-md);
     margin-bottom: var(--spacing-md);
     background: transparent;
     transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -2092,6 +2092,12 @@ input::placeholder {
     overflow: hidden;
     margin: 8px -16px -16px;
     border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+/* Temp address map sits between rows — no bottom bleed */
+.temp-address-map-wrapper {
+    margin: 8px -16px 0;
+    border-radius: 0;
 }
 
 .address-map-container {

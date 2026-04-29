@@ -191,6 +191,18 @@
                         </button>
                     </div>
 
+                    <!-- Temp Address Map — separate map shown when temp address is active -->
+                    <div id="tempAddressMapWrapper" class="address-map-wrapper temp-address-map-wrapper" style="display:none;">
+                        <div id="tempAddressMap" class="address-map-container"></div>
+                        <div class="address-map-overlay">
+                            <i class='bx bx-map-pin'></i>
+                            <span id="tempAddressMapLabel" class="address-map-overlay-text"></span>
+                            <button class="address-map-expand-btn" id="tempAddressMapExpandBtn" aria-label="Agrandir la carte temporaire">
+                                <i class='bx bx-fullscreen'></i>
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="data-row" id="rowPhone">
                         <div class="data-info">
                             <span id="lblDataPhoneCode" class="data-label">Prefijo telefónico</span>
@@ -249,10 +261,7 @@
                         <div class="address-map-overlay">
                             <i class='bx bx-map-alt'></i>
                             <span id="addressMapLabel" class="address-map-overlay-text"></span>
-                            <span id="addressMapTempBadge" class="map-temp-badge" style="display:none;">
-                                <i class='bx bx-map-pin'></i> Dirección temporal
-                            </span>
-                            <button class="address-map-expand-btn" id="addressMapExpandBtn" aria-label="Agrandir la carte">
+<button class="address-map-expand-btn" id="addressMapExpandBtn" aria-label="Agrandir la carte">
                                 <i class='bx bx-fullscreen'></i>
                             </button>
                         </div>
