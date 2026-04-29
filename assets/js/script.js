@@ -454,9 +454,13 @@ function applyLanguage(langCode) {
     state.lang = langCode;
 
     // Sync lang display label
-    const langNames = { fr: 'Français', en: 'English', es: 'Español', it: 'Italiano', pt: 'Português', de: 'Deutsch', nl: 'Nederlands' };
+    const langNames    = { fr: 'Français', en: 'English', es: 'Español', it: 'Italiano', pt: 'Português', de: 'Deutsch', nl: 'Nederlands' };
+    const langToCountry = { en: 'gb', fr: 'fr', es: 'es', it: 'it', pt: 'pt', de: 'de', nl: 'nl' };
     const langDisplay = document.getElementById('langDisplay');
-    if (langDisplay) langDisplay.textContent = langNames[langCode] || langCode;
+    if (langDisplay) {
+        const cc = langToCountry[langCode] || langCode;
+        langDisplay.innerHTML = `${getFlagHtml(cc)} ${langNames[langCode] || langCode}`;
+    }
 
     // Apply Directionality & Lang Attribute
     dom.html.setAttribute('dir', t.dir);
@@ -604,18 +608,18 @@ function resetClientForm() {
     const countrySelect = dom.country;
     if (countrySelect) {
         const selectedOpt = countrySelect.options[countrySelect.selectedIndex];
-        if (selectedOpt && selectedOpt.dataset.short) {
+        if (selectedOpt) {
             const countryDisplay = document.getElementById('countryDisplay');
-            if (countryDisplay) countryDisplay.textContent = selectedOpt.dataset.short;
+            if (countryDisplay) countryDisplay.innerHTML = selectedOpt.dataset.shortHtml || selectedOpt.dataset.short || '';
         }
     }
 
     const phoneCodeSelect = dom.countryCode;
     if (phoneCodeSelect) {
         const selectedOpt = phoneCodeSelect.options[phoneCodeSelect.selectedIndex];
-        if (selectedOpt && selectedOpt.dataset.short) {
+        if (selectedOpt) {
             const phoneCodeDisplay = document.getElementById('countryCodeDisplay');
-            if (phoneCodeDisplay) phoneCodeDisplay.textContent = selectedOpt.dataset.short;
+            if (phoneCodeDisplay) phoneCodeDisplay.innerHTML = selectedOpt.dataset.shortHtml || selectedOpt.dataset.short || '';
         }
     }
 
@@ -876,8 +880,9 @@ const COUNTRY_DIAL_FALLBACK = [
     { code: '+58',  cca2: 'VE', name: 'Venezuela' },
 ].map(c => ({
     ...c,
-    shortLabel: `${getFlagEmoji(c.cca2)} ${c.code}`,
-    fullLabel:  `${getFlagEmoji(c.cca2)} ${c.name} (${c.code})`
+    shortLabel:    `${getFlagEmoji(c.cca2)} ${c.code}`,
+    fullLabel:     `${getFlagEmoji(c.cca2)} ${c.name} (${c.code})`,
+    shortLabelHtml: `${getFlagHtml(c.cca2)} ${c.code}`
 }));
 
 function applyCountriesData(countries) {
@@ -891,9 +896,9 @@ function applyCountriesData(countries) {
         countrySelect.addEventListener('change', (e) => {
             state.countrySelectedManually = true;
             const selectedOpt = e.target.options[e.target.selectedIndex];
-            if (selectedOpt && selectedOpt.dataset.short) {
+            if (selectedOpt) {
                 const countryDisplay = document.getElementById('countryDisplay');
-                if (countryDisplay) countryDisplay.textContent = selectedOpt.dataset.short;
+                if (countryDisplay) countryDisplay.innerHTML = selectedOpt.dataset.shortHtml || selectedOpt.dataset.short || '';
             }
             syncPhoneCodeWithSelectedCountry();
         });
@@ -904,9 +909,9 @@ function applyCountriesData(countries) {
         phoneCodeSelect.addEventListener('change', (e) => {
             state.phoneSelectedManually = true;
             const selectedOpt = e.target.options[e.target.selectedIndex];
-            if (selectedOpt && selectedOpt.dataset.short) {
+            if (selectedOpt) {
                 const phoneCodeDisplay = document.getElementById('countryCodeDisplay');
-                if (phoneCodeDisplay) phoneCodeDisplay.textContent = selectedOpt.dataset.short;
+                if (phoneCodeDisplay) phoneCodeDisplay.innerHTML = selectedOpt.dataset.shortHtml || selectedOpt.dataset.short || '';
             }
         });
     }
@@ -932,8 +937,9 @@ async function populateCountryCodes() {
                     code: code,
                     cca2: c.cca2,
                     name: c.name.common,
-                    shortLabel: `${flag} ${code}`,
-                    fullLabel: `${flag} ${c.name.common} (${code})`
+                    shortLabel:     `${flag} ${code}`,
+                    fullLabel:      `${flag} ${c.name.common} (${code})`,
+                    shortLabelHtml: `${getFlagHtml(c.cca2)} ${code}`
                 });
             }
         });
@@ -964,7 +970,7 @@ function syncPhone2CodeToPhone1() {
     const display2 = document.getElementById('countryCode2Display');
     if (display2) {
         const opt = dom.countryCode2.options[dom.countryCode2.selectedIndex];
-        if (opt?.dataset.short) display2.textContent = opt.dataset.short;
+        if (opt) display2.innerHTML = opt.dataset.shortHtml || opt.dataset.short || '';
     }
 }
 
@@ -983,7 +989,7 @@ function syncPhoneCodeWithSelectedCountry() {
         if (match1) {
             dom.countryCode.value = selectedCountryData.code;
             const display1 = document.getElementById('countryCodeDisplay');
-            if (display1) display1.textContent = match1.dataset.short || selectedCountryData.shortLabel || `${getFlagEmoji(selectedCountryData.cca2)} ${selectedCountryData.code}`;
+            if (display1) display1.innerHTML = match1.dataset.shortHtml || match1.dataset.short || selectedCountryData.shortLabelHtml || selectedCountryData.shortLabel;
         }
     }
 
@@ -993,7 +999,7 @@ function syncPhoneCodeWithSelectedCountry() {
         if (match2) {
             dom.countryCode2.value = selectedCountryData.code;
             const display2 = document.getElementById('countryCode2Display');
-            if (display2) display2.textContent = match2.dataset.short || selectedCountryData.shortLabel || `${getFlagEmoji(selectedCountryData.cca2)} ${selectedCountryData.code}`;
+            if (display2) display2.innerHTML = match2.dataset.shortHtml || match2.dataset.short || selectedCountryData.shortLabelHtml || selectedCountryData.shortLabel;
         }
     }
 }
@@ -1043,12 +1049,14 @@ function renderCountryCodeSelect(langCode) {
         const localizedName = displayNames ? displayNames.of(c.cca2) : c.name;
         option.value = c.code;
         option.textContent = `${getFlagEmoji(c.cca2)} ${localizedName || c.name} (${c.code})`;
-        option.dataset.short = c.shortLabel;
-        
+        option.dataset.short    = c.shortLabel;
+        option.dataset.shortHtml = c.shortLabelHtml || c.shortLabel;
+        option.dataset.labelHtml = `${getFlagHtml(c.cca2)} ${localizedName || c.name} (${c.code})`;
+
         if (c.code === currentSelection || (!currentSelection && index === 0)) {
             option.selected = true;
             const display = document.getElementById('countryCodeDisplay');
-            if (display) display.textContent = c.shortLabel;
+            if (display) display.innerHTML = c.shortLabelHtml || c.shortLabel;
             selectionRestored = true;
         }
         select.appendChild(option);
@@ -1068,12 +1076,14 @@ function renderCountryCodeSelect(langCode) {
         const localizedName = displayNames ? displayNames.of(c.cca2) : c.name;
         option.value = c.code;
         option.textContent = `${getFlagEmoji(c.cca2)} ${localizedName || c.name} (${c.code})`;
-        option.dataset.short = c.shortLabel;
-        
+        option.dataset.short    = c.shortLabel;
+        option.dataset.shortHtml = c.shortLabelHtml || c.shortLabel;
+        option.dataset.labelHtml = `${getFlagHtml(c.cca2)} ${localizedName || c.name} (${c.code})`;
+
         if (!selectionRestored && c.code === currentSelection) {
             option.selected = true;
             const display = document.getElementById('countryCodeDisplay');
-            if (display) display.textContent = c.shortLabel;
+            if (display) display.innerHTML = c.shortLabelHtml || c.shortLabel;
             selectionRestored = true;
         }
         select.appendChild(option);
@@ -1101,11 +1111,14 @@ function renderCountryNameSelect(langCode) {
         const option = document.createElement('option');
         const localizedName = displayNames ? displayNames.of(c.cca2) : c.name;
         const countryName = localizedName || c.name;
-        const shortLabel = `${getFlagEmoji(c.cca2)} ${countryName}`;
+        const shortLabel     = `${getFlagEmoji(c.cca2)} ${countryName}`;
+        const shortLabelHtml = `${getFlagHtml(c.cca2)} ${countryName}`;
 
         option.value = c.cca2;
         option.textContent = shortLabel;
-        option.dataset.short = shortLabel;
+        option.dataset.short     = shortLabel;
+        option.dataset.shortHtml = shortLabelHtml;
+        option.dataset.labelHtml = shortLabelHtml;
         option.dataset.countryName = countryName;
 
         const defaultCca2ByLang = { fr: 'FR', en: 'GB', es: 'ES', it: 'IT', pt: 'PT', de: 'DE', nl: 'NL' };
@@ -1113,7 +1126,7 @@ function renderCountryNameSelect(langCode) {
         if (c.cca2 === currentSelection || (!currentSelection && (c.cca2 === defaultCca2 || index === 0))) {
             option.selected = true;
             const display = document.getElementById('countryDisplay');
-            if (display) display.textContent = shortLabel;
+            if (display) display.innerHTML = shortLabelHtml;
         }
 
         select.appendChild(option);
@@ -1127,6 +1140,11 @@ function getFlagEmoji(countryCode) {
         .split('')
         .map(char => 127397 + char.charCodeAt(0));
     return String.fromCodePoint(...codePoints);
+}
+
+function getFlagHtml(countryCode) {
+    if (!countryCode) return '';
+    return `<span class="fi fi-${countryCode.toLowerCase()}" aria-hidden="true"></span>`;
 }
 
 // Call on startup
@@ -1580,7 +1598,7 @@ function attachRealTimeListeners() {
             const display = document.getElementById('countryCode2Display');
             if (display) {
                 const opt = e.target.options[e.target.selectedIndex];
-                if (opt?.dataset.short) display.textContent = opt.dataset.short;
+                if (opt) display.innerHTML = opt.dataset.shortHtml || opt.dataset.short || '';
             }
             debouncedSendToAdvisor();
         });
@@ -1680,9 +1698,11 @@ function initSearchableSelects() {
 
         function syncItems() {
             allItems = Array.from(select.options).map(opt => ({
-                value: opt.value,
-                label: opt.textContent.trim(),
-                short: opt.dataset.short || opt.textContent.trim()
+                value:     opt.value,
+                label:     opt.dataset.labelText || opt.textContent.trim(),
+                labelHtml: opt.dataset.labelHtml  || opt.textContent.trim(),
+                short:     opt.dataset.short      || opt.textContent.trim(),
+                shortHtml: opt.dataset.shortHtml  || opt.dataset.short || opt.textContent.trim()
             }));
         }
 
@@ -1693,7 +1713,7 @@ function initSearchableSelects() {
                 const li = document.createElement('li');
                 li.setAttribute('role', 'option');
                 li.setAttribute('tabindex', '-1');
-                li.textContent = item.label;
+                li.innerHTML = item.labelHtml;
                 li.dataset.value = item.value;
                 if (item.value === cur) li.setAttribute('aria-selected', 'true');
                 li.addEventListener('mousedown', e => { e.preventDefault(); pick(item); });
@@ -1717,7 +1737,7 @@ function initSearchableSelects() {
 
         function pick(item) {
             select.value = item.value;
-            face.textContent = item.short;
+            face.innerHTML = item.shortHtml;
             select.dispatchEvent(new Event('change', { bubbles: true }));
             close();
         }
@@ -1731,7 +1751,7 @@ function initSearchableSelects() {
             const spaceBelow = window.innerHeight - rect.bottom;
             wrap.classList.toggle('cs-above', spaceBelow < 250 && rect.top > spaceBelow);
             wrap.classList.add('is-open');
-            search.placeholder = face.textContent;
+            search.placeholder = face.textContent.trim();
             search.focus();
             // Scroll to currently selected item
             const sel = list.querySelector('[aria-selected="true"]');
@@ -1778,7 +1798,7 @@ function initSearchableSelects() {
         select.addEventListener('change', () => {
             if (!wrap.classList.contains('is-open')) {
                 const opt = select.options[select.selectedIndex];
-                if (opt) face.textContent = opt.dataset.short || opt.textContent.trim();
+                if (opt) face.innerHTML = opt.dataset.shortHtml || opt.dataset.short || opt.textContent.trim();
             }
         });
     });

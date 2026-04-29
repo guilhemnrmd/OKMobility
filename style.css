@@ -1082,6 +1082,20 @@ input:focus + i, .input-with-icon:focus-within i {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* flag-icons alignment in custom selects and lang selector */
+.cs-face .fi,
+.cs-list li .fi,
+#langDisplay .fi {
+    flex-shrink: 0;
+    border-radius: 2px;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
 }
 
 .cs-list li:hover,
@@ -2094,10 +2108,35 @@ input::placeholder {
     border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
 
-/* Temp address map sits between rows — no bottom bleed */
-.temp-address-map-wrapper {
-    margin: 8px -16px 0;
-    border-radius: 0;
+/* Temp address map — standalone glass panel */
+.temp-map-panel {
+    overflow: hidden;
+    padding: 0;
+    margin-top: var(--spacing-sm);
+}
+
+.temp-map-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    font-size: 0.71rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--color-text-secondary);
+    border-bottom: 0.5px solid rgba(var(--color-accent-rgb), 0.1);
+}
+
+.temp-map-panel-header i {
+    font-size: 0.9rem;
+    color: var(--color-accent);
+}
+
+/* Address-map-wrapper inside the standalone temp panel: no bleed margins */
+.temp-standalone-map {
+    margin: 0;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
 
 .address-map-container {

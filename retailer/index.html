@@ -9,6 +9,8 @@
     <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
     <link href="https://unpkg.com/maplibre-gl@5.7.0/dist/maplibre-gl.css" rel="stylesheet">
     <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
+    <!-- Flag icons — SVG sprites, cross-platform flag display -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
     <link rel="stylesheet" href="/style.css?v=42">
     <script src="/assets/js/brand-config.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -191,18 +193,6 @@
                         </button>
                     </div>
 
-                    <!-- Temp Address Map — separate map shown when temp address is active -->
-                    <div id="tempAddressMapWrapper" class="address-map-wrapper temp-address-map-wrapper" style="display:none;">
-                        <div id="tempAddressMap" class="address-map-container"></div>
-                        <div class="address-map-overlay">
-                            <i class='bx bx-map-pin'></i>
-                            <span id="tempAddressMapLabel" class="address-map-overlay-text"></span>
-                            <button class="address-map-expand-btn" id="tempAddressMapExpandBtn" aria-label="Agrandir la carte temporaire">
-                                <i class='bx bx-fullscreen'></i>
-                            </button>
-                        </div>
-                    </div>
-
                     <div class="data-row" id="rowPhone">
                         <div class="data-info">
                             <span id="lblDataPhoneCode" class="data-label">Prefijo telefónico</span>
@@ -262,6 +252,24 @@
                             <i class='bx bx-map-alt'></i>
                             <span id="addressMapLabel" class="address-map-overlay-text"></span>
 <button class="address-map-expand-btn" id="addressMapExpandBtn" aria-label="Agrandir la carte">
+                                <i class='bx bx-fullscreen'></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Temp Address Map — standalone panel, visible only when hasTempAddress -->
+                <div id="tempAddressMapWrapper" class="glass-panel temp-map-panel" style="display:none;">
+                    <div class="temp-map-panel-header">
+                        <i class='bx bx-map-pin'></i>
+                        <span id="lblTempAddressMapSection">Adresse temporaire</span>
+                    </div>
+                    <div class="address-map-wrapper temp-standalone-map">
+                        <div id="tempAddressMap" class="address-map-container"></div>
+                        <div class="address-map-overlay">
+                            <i class='bx bx-map-pin'></i>
+                            <span id="tempAddressMapLabel" class="address-map-overlay-text"></span>
+                            <button class="address-map-expand-btn" id="tempAddressMapExpandBtn" aria-label="Agrandir la carte temporaire">
                                 <i class='bx bx-fullscreen'></i>
                             </button>
                         </div>
