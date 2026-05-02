@@ -160,8 +160,12 @@ const state = {
     qrCodeInstance: null,
     currentData: {},
     mapDebounceTimer: null,
+    mapVerificationTimer: null,
     mainMapRefreshToken: 0,
-    tempMapRefreshToken: 0
+    tempMapRefreshToken: 0,
+    mainMapDisplayedQuery: '',
+    tempMapDisplayedQuery: '',
+    mapGeocodeCache: new Map()
 };
 
 // ============================================================================
@@ -729,6 +733,7 @@ function updateStatus(status, message) {
 // 7. View Management
 // ============================================================================
 function showSetupView() {
+    stopMapVerification();
     dom.setupView.style.display = 'flex';
     dom.liveDataView.style.display = 'none';
     dom.disconnectedView.style.display = 'none';
@@ -738,9 +743,11 @@ function showLiveDataView() {
     dom.setupView.style.display = 'none';
     dom.liveDataView.style.display = 'flex';
     dom.disconnectedView.style.display = 'none';
+    startMapVerification();
 }
 
 function showDisconnectedView() {
+    stopMapVerification();
     dom.setupView.style.display = 'none';
     dom.liveDataView.style.display = 'none';
     dom.disconnectedView.style.display = 'flex';
@@ -950,6 +957,52 @@ function disconnectCurrentClient() {
     }
 }
 
+const MAP_VERIFICATION_INTERVAL_MS = 3000;
+const MAP_GEOCODE_SUCCESS_TTL_MS = 30 * 60 * 1000;
+const MAP_GEOCODE_FAILURE_TTL_MS = 15 * 1000;
+
+function normalizeMapQuery(query) {
+    return typeof query === 'string' ? query.replace(/\s+/g, ' ').trim() : '';
+}
+
+function isMapWrapperVisible(wrapperId) {
+    const wrapper = document.getElementById(wrapperId);
+    return Boolean(wrapper && wrapper.style.display !== 'none');
+}
+
+function startMapVerification() {
+    if (state.mapVerificationTimer) return;
+    state.mapVerificationTimer = setInterval(verifyMapDisplay, MAP_VERIFICATION_INTERVAL_MS);
+}
+
+function stopMapVerification() {
+    if (!state.mapVerificationTimer) return;
+    clearInterval(state.mapVerificationTimer);
+    state.mapVerificationTimer = null;
+}
+
+function verifyMapDisplay() {
+    if (dom.liveDataView.style.display !== 'flex') return;
+
+    const data = state.currentData || {};
+    const desiredMainQuery = data.address ? normalizeMapQuery(buildMainQuery(data)) : '';
+    const desiredTempQuery = data.hasTempAddress && data.tempAddress ? normalizeMapQuery(buildTempQuery(data)) : '';
+
+    const mainVisible = isMapWrapperVisible('addressMapWrapper');
+    const tempVisible = isMapWrapperVisible('tempAddressMapWrapper');
+
+    const mainInSync = desiredMainQuery
+        ? mainVisible && state.mainMapDisplayedQuery === desiredMainQuery
+        : !mainVisible && !state.mainMapDisplayedQuery;
+    const tempInSync = desiredTempQuery
+        ? tempVisible && state.tempMapDisplayedQuery === desiredTempQuery
+        : !tempVisible && !state.tempMapDisplayedQuery;
+
+    if (!mainInSync || !tempInSync) {
+        scheduleMapRefresh();
+    }
+}
+
 function clearDisplayedData() {
     state.mainMapRefreshToken += 1;
     state.tempMapRefreshToken += 1;
@@ -972,6 +1025,8 @@ function clearDisplayedData() {
     if (dom.valPhone2) dom.valPhone2.textContent = '-';
     if (dom.phone2Warning) dom.phone2Warning.style.display = 'none';
     dom.valEmail.textContent = '-';
+    state.mainMapDisplayedQuery = '';
+    state.tempMapDisplayedQuery = '';
     setSellerExpandableRow(dom.rowTempAddress, false);
     setSellerExpandableRow(dom.rowTempZipCode, false);
     setSellerExpandableRow(dom.rowTempCity, false);
@@ -1087,20 +1142,49 @@ function applyView(center, bounds, refreshToken) {
 }
 
 async function geocode(query) {
-    const normalizedQuery = typeof query === 'string' ? query.replace(/\s+/g, ' ').trim() : '';
+    const normalizedQuery = normalizeMapQuery(query);
     if (!normalizedQuery || normalizedQuery.length < 5) return null;
+
+    const cachedEntry = state.mapGeocodeCache.get(normalizedQuery);
+    if (cachedEntry && cachedEntry.expiresAt > Date.now()) {
+        return cachedEntry.coords;
+    }
+    if (cachedEntry) {
+        state.mapGeocodeCache.delete(normalizedQuery);
+    }
+
+    const cacheFailure = () => {
+        state.mapGeocodeCache.set(normalizedQuery, {
+            coords: null,
+            expiresAt: Date.now() + MAP_GEOCODE_FAILURE_TTL_MS
+        });
+    };
 
     const token = window.BRAND?.maps?.jawgToken ?? '';
     try {
         const params = new URLSearchParams({ text: normalizedQuery, size: 1, lang: 'fr', 'access-token': token });
         const resp = await fetch(`https://api.jawg.io/places/v1/search?${params}`);
-        if (!resp.ok) return null;
+        if (!resp.ok) {
+            cacheFailure();
+            return null;
+        }
         const data = await resp.json();
         const f = data.features?.[0];
-        if (!f) return null;
+        if (!f) {
+            cacheFailure();
+            return null;
+        }
         const [lon, lat] = f.geometry.coordinates;
-        return { lat, lon };
-    } catch (_) { return null; }
+        const coords = { lat, lon };
+        state.mapGeocodeCache.set(normalizedQuery, {
+            coords,
+            expiresAt: Date.now() + MAP_GEOCODE_SUCCESS_TTL_MS
+        });
+        return coords;
+    } catch (_) {
+        cacheFailure();
+        return null;
+    }
 }
 
 function buildMainQuery(data) {
@@ -1113,8 +1197,8 @@ function buildTempQuery(data) {
 
 async function refreshMap() {
     const data  = state.currentData;
-    const mainQuery = buildMainQuery(data);
-    const tempQuery = buildTempQuery(data);
+    const mainQuery = normalizeMapQuery(buildMainQuery(data));
+    const tempQuery = normalizeMapQuery(buildTempQuery(data));
     const mainPromise = data.address ? geocode(mainQuery) : Promise.resolve(null);
     const tempPromise = data.hasTempAddress && data.tempAddress ? geocode(tempQuery) : Promise.resolve(null);
 
@@ -1143,7 +1227,10 @@ async function refreshMap() {
                 ))
                 .addTo(mapInstance);
 
+            state.mainMapDisplayedQuery = mainQuery;
             applyView([coords.lon, coords.lat], null, mainToken);
+        } else {
+            hideMainAddressMap();
         }
     } else {
         hideMainAddressMap();
@@ -1181,7 +1268,8 @@ async function refreshMap() {
                     tempMapInstance.flyTo({ center: [tcoords.lon, tcoords.lat], zoom: 15 });
                 });
             }
-        } else if (!data.tempAddress) {
+            state.tempMapDisplayedQuery = tempQuery;
+        } else {
             hideTempAddressMap();
         }
     } else {
@@ -1194,6 +1282,7 @@ function hideMainAddressMap() {
     if (w) w.style.display = 'none';
     if (mainMarker) { mainMarker.remove(); mainMarker = null; }
     mapHasClientAddress = false;
+    state.mainMapDisplayedQuery = '';
 }
 
 function showAddressMap() {
@@ -1245,6 +1334,7 @@ function hideTempAddressMap() {
     const w = document.getElementById('tempAddressMapWrapper');
     if (w) w.style.display = 'none';
     if (tempMapMarker) { tempMapMarker.remove(); tempMapMarker = null; }
+    state.tempMapDisplayedQuery = '';
 }
 
 function scheduleMapRefresh() {
