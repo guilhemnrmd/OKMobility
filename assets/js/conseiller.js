@@ -159,7 +159,9 @@ const state = {
     displayCode: null,
     qrCodeInstance: null,
     currentData: {},
-    mapDebounceTimer: null
+    mapDebounceTimer: null,
+    mainMapRefreshToken: 0,
+    tempMapRefreshToken: 0
 };
 
 // ============================================================================
@@ -913,6 +915,12 @@ function disconnectCurrentClient() {
 }
 
 function clearDisplayedData() {
+    state.mainMapRefreshToken += 1;
+    state.tempMapRefreshToken += 1;
+    if (state.mapDebounceTimer) {
+        clearTimeout(state.mapDebounceTimer);
+        state.mapDebounceTimer = null;
+    }
     state.currentData = {};
     dom.valAddress.textContent = '-';
     dom.valCountry.textContent = '-';
@@ -1029,8 +1037,9 @@ function ensureMap() {
     ro.observe(container);
 }
 
-function applyView(center, bounds) {
+function applyView(center, bounds, refreshToken) {
     function doView() {
+        if (refreshToken !== undefined && refreshToken !== state.mainMapRefreshToken) return;
         if (bounds) {
             mapInstance.fitBounds(bounds, { padding: 60, maxZoom: 16 });
         } else {
@@ -1042,10 +1051,12 @@ function applyView(center, bounds) {
 }
 
 async function geocode(query) {
-    if (!query || query.length < 5) return null;
+    const normalizedQuery = typeof query === 'string' ? query.replace(/\s+/g, ' ').trim() : '';
+    if (!normalizedQuery || normalizedQuery.length < 5) return null;
+
     const token = window.BRAND?.maps?.jawgToken ?? '';
     try {
-        const params = new URLSearchParams({ text: query, size: 1, lang: 'fr', 'access-token': token });
+        const params = new URLSearchParams({ text: normalizedQuery, size: 1, lang: 'fr', 'access-token': token });
         const resp = await fetch(`https://api.jawg.io/places/v1/search?${params}`);
         if (!resp.ok) return null;
         const data = await resp.json();
@@ -1066,39 +1077,51 @@ function buildTempQuery(data) {
 
 async function refreshMap() {
     const data  = state.currentData;
-    const query = buildMainQuery(data);
+    const mainQuery = buildMainQuery(data);
+    const tempQuery = buildTempQuery(data);
+    const mainPromise = data.address ? geocode(mainQuery) : Promise.resolve(null);
+    const tempPromise = data.hasTempAddress && data.tempAddress ? geocode(tempQuery) : Promise.resolve(null);
 
-    if (!query || !data.address) { hideAddressMap(); return; }
+    if (data.address) {
+        const mainToken = ++state.mainMapRefreshToken;
+        const coords = await mainPromise;
+        if (mainToken !== state.mainMapRefreshToken) return;
 
-    const coords = await geocode(query);
-    if (!coords) { hideAddressMap(); return; }
+        if (coords) {
+            showAddressMap();
+            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+            if (mainToken !== state.mainMapRefreshToken) return;
+            ensureMap();
+            mapHasClientAddress = true;
 
-    showAddressMap();
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    ensureMap();
-    mapHasClientAddress = true;
+            const labelEl = document.getElementById('addressMapLabel');
+            if (labelEl) {
+                labelEl.textContent = [data.address, data.zipCode, data.city].filter(Boolean).join(', ');
+            }
 
-    // Update overlay label with address text
-    const labelEl = document.getElementById('addressMapLabel');
-    if (labelEl) {
-        labelEl.textContent = [data.address, data.zipCode, data.city].filter(Boolean).join(', ');
+            if (mainMarker) { mainMarker.remove(); mainMarker = null; }
+            mainMarker = new maplibregl.Marker({ color: '#3B82F6' })
+                .setLngLat([coords.lon, coords.lat])
+                .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(
+                    `<strong>${data.address || ''}</strong><br>${[data.zipCode, data.city, data.country].filter(Boolean).join(', ')}`
+                ))
+                .addTo(mapInstance);
+
+            applyView([coords.lon, coords.lat], null, mainToken);
+        }
+    } else {
+        hideMainAddressMap();
     }
 
-    if (mainMarker) { mainMarker.remove(); mainMarker = null; }
-    mainMarker = new maplibregl.Marker({ color: '#3B82F6' })
-        .setLngLat([coords.lon, coords.lat])
-        .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(
-            `<strong>${data.address || ''}</strong><br>${[data.zipCode, data.city, data.country].filter(Boolean).join(', ')}`
-        ))
-        .addTo(mapInstance);
-
-    applyView([coords.lon, coords.lat]);
-
     if (data.hasTempAddress && data.tempAddress) {
-        const tcoords = await geocode(buildTempQuery(data));
+        const tempToken = ++state.tempMapRefreshToken;
+        const tcoords = await tempPromise;
+        if (tempToken !== state.tempMapRefreshToken) return;
+
         if (tcoords) {
             showTempAddressMap();
             await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+            if (tempToken !== state.tempMapRefreshToken) return;
             ensureTempMap();
 
             const tempLabelEl = document.getElementById('tempAddressMapLabel');
@@ -1117,14 +1140,24 @@ async function refreshMap() {
             if (tempMapInstance.loaded()) {
                 tempMapInstance.flyTo({ center: [tcoords.lon, tcoords.lat], zoom: 15 });
             } else {
-                tempMapInstance.once('load', () => tempMapInstance.flyTo({ center: [tcoords.lon, tcoords.lat], zoom: 15 }));
+                tempMapInstance.once('load', () => {
+                    if (tempToken !== state.tempMapRefreshToken) return;
+                    tempMapInstance.flyTo({ center: [tcoords.lon, tcoords.lat], zoom: 15 });
+                });
             }
-        } else {
+        } else if (!data.tempAddress) {
             hideTempAddressMap();
         }
     } else {
         hideTempAddressMap();
     }
+}
+
+function hideMainAddressMap() {
+    const w = document.getElementById('addressMapWrapper');
+    if (w) w.style.display = 'none';
+    if (mainMarker) { mainMarker.remove(); mainMarker = null; }
+    mapHasClientAddress = false;
 }
 
 function showAddressMap() {
@@ -1142,10 +1175,7 @@ function showAddressMap() {
 }
 
 function hideAddressMap() {
-    const w = document.getElementById('addressMapWrapper');
-    if (w) w.style.display = 'none';
-    if (mainMarker) { mainMarker.remove(); mainMarker = null; }
-    mapHasClientAddress = false;
+    hideMainAddressMap();
     hideTempAddressMap();
 }
 
