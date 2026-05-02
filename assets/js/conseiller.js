@@ -159,7 +159,14 @@ const state = {
     displayCode: null,
     qrCodeInstance: null,
     currentData: {},
-    mapDebounceTimer: null
+    mapDebounceTimer: null,
+    mapVerificationTimer: null,
+    mainMapRefreshToken: 0,
+    tempMapRefreshToken: 0,
+    mainMapPendingRefresh: false,
+    mainMapDisplayedQuery: '',
+    tempMapDisplayedQuery: '',
+    mapGeocodeCache: new Map()
 };
 
 // ============================================================================
@@ -184,6 +191,7 @@ const dom = {
     qrLightboxFrame: document.getElementById('qrLightboxFrame'),
     qrCodeLarge: document.getElementById('qrCodeLarge'),
     addressMapExpandBtn: document.getElementById('addressMapExpandBtn'),
+    tempAddressMapExpandBtn: document.getElementById('tempAddressMapExpandBtn'),
     mapLightbox:         document.getElementById('mapLightbox'),
     mapLightboxCloseBtn: document.getElementById('mapLightboxCloseBtn'),
     qrHint: document.getElementById('qrHint'),
@@ -726,6 +734,7 @@ function updateStatus(status, message) {
 // 7. View Management
 // ============================================================================
 function showSetupView() {
+    stopMapVerification();
     dom.setupView.style.display = 'flex';
     dom.liveDataView.style.display = 'none';
     dom.disconnectedView.style.display = 'none';
@@ -735,9 +744,11 @@ function showLiveDataView() {
     dom.setupView.style.display = 'none';
     dom.liveDataView.style.display = 'flex';
     dom.disconnectedView.style.display = 'none';
+    startMapVerification();
 }
 
 function showDisconnectedView() {
+    stopMapVerification();
     dom.setupView.style.display = 'none';
     dom.liveDataView.style.display = 'none';
     dom.disconnectedView.style.display = 'flex';
@@ -796,16 +807,16 @@ function handleIncomingData(data) {
     // Handle temporary address visibility
     if (cleanData.hasTempAddress !== undefined) {
         const show = cleanData.hasTempAddress;
-        dom.rowTempAddress.style.display = show ? 'flex' : 'none';
-        dom.rowTempZipCode.style.display = show ? 'flex' : 'none';
-        dom.rowTempCity.style.display    = show ? 'flex' : 'none';
+        setSellerExpandableRow(dom.rowTempAddress, show);
+        setSellerExpandableRow(dom.rowTempZipCode, show);
+        setSellerExpandableRow(dom.rowTempCity, show);
     }
-
+    
     if (cleanData.tempAddress !== undefined) {
         dom.valTempAddress.textContent = cleanData.tempAddress || '-';
         highlightField('valTempAddress');
     }
-
+    
     if (cleanData.tempZipCode !== undefined) {
         dom.valTempZipCode.textContent = cleanData.tempZipCode || '-';
         highlightField('valTempZipCode');
@@ -836,8 +847,8 @@ function handleIncomingData(data) {
 
     if (cleanData.phone2Code !== undefined || cleanData.phone2Number !== undefined) {
         const hasPhone2 = (cleanData.phone2Code || state.currentData.phone2Code || '') || (cleanData.phone2Number || state.currentData.phone2Number || '');
-        if (dom.rowPhone2) dom.rowPhone2.style.display = hasPhone2 ? 'flex' : 'none';
-        if (dom.rowPhone2Number) dom.rowPhone2Number.style.display = hasPhone2 ? 'flex' : 'none';
+        setSellerExpandableRow(dom.rowPhone2, Boolean(hasPhone2));
+        setSellerExpandableRow(dom.rowPhone2Number, Boolean(hasPhone2));
         if (cleanData.phone2Code !== undefined) {
             dom.valPhone2Code.textContent = cleanData.phone2Code || '-';
             highlightField('valPhone2Code');
@@ -865,6 +876,42 @@ function highlightField(fieldId) {
         void el.offsetWidth;
         el.classList.add('highlight');
     }
+}
+
+const SELLER_OPTION_ROW_TOGGLE_MS = 360;
+
+function setSellerExpandableRow(row, visible) {
+    if (!row) return;
+
+    if (row._sellerRowTimer) {
+        clearTimeout(row._sellerRowTimer);
+        row._sellerRowTimer = null;
+    }
+
+    const nextToken = (row._sellerRowToken || 0) + 1;
+    row._sellerRowToken = nextToken;
+
+    if (visible) {
+        if (row.style.display !== 'flex') {
+            row.style.display = 'flex';
+        }
+        if (!row.classList.contains('is-visible')) {
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                if (row._sellerRowToken === nextToken && row.style.display === 'flex') {
+                    row.classList.add('is-visible');
+                }
+            }));
+        }
+        return;
+    }
+
+    row.classList.remove('is-visible');
+    row._sellerRowTimer = setTimeout(() => {
+        if (row._sellerRowToken === nextToken && !row.classList.contains('is-visible')) {
+            row.style.display = 'none';
+        }
+        row._sellerRowTimer = null;
+    }, SELLER_OPTION_ROW_TOGGLE_MS);
 }
 
 // ============================================================================
@@ -911,15 +958,104 @@ function disconnectCurrentClient() {
     }
 }
 
+const MAP_VERIFICATION_INTERVAL_MS = 3000;
+const MAP_GEOCODE_SUCCESS_TTL_MS = 30 * 60 * 1000;
+const MAP_GEOCODE_FAILURE_TTL_MS = 15 * 1000;
+const MAP_CENTER_EPSILON = 0.0005;
+
+function normalizeMapQuery(query) {
+    return typeof query === 'string' ? query.replace(/\s+/g, ' ').trim() : '';
+}
+
+function isMapWrapperVisible(wrapperId) {
+    const wrapper = document.getElementById(wrapperId);
+    return Boolean(wrapper && wrapper.style.display !== 'none');
+}
+
+function getCachedMapCoords(query) {
+    const normalizedQuery = normalizeMapQuery(query);
+    if (!normalizedQuery) return null;
+
+    const cachedEntry = state.mapGeocodeCache.get(normalizedQuery);
+    if (!cachedEntry) return null;
+    if (cachedEntry.expiresAt <= Date.now()) {
+        state.mapGeocodeCache.delete(normalizedQuery);
+        return null;
+    }
+
+    return cachedEntry.coords;
+}
+
+function isMapAtCoords(map, coords) {
+    if (!map || !coords || typeof map.getCenter !== 'function') return false;
+    const center = map.getCenter();
+    if (!center) return false;
+
+    return Math.abs(center.lng - coords.lon) <= MAP_CENTER_EPSILON && Math.abs(center.lat - coords.lat) <= MAP_CENTER_EPSILON;
+}
+
+function isMainMapMoving() {
+    return Boolean(mapInstance && typeof mapInstance.isMoving === 'function' && mapInstance.isMoving());
+}
+
+function stopMainMapAnimation() {
+    if (!isMainMapMoving() || typeof mapInstance.stop !== 'function') return;
+    try {
+        mapInstance.stop();
+    } catch (_) {}
+}
+
+function startMapVerification() {
+    if (state.mapVerificationTimer) return;
+    state.mapVerificationTimer = setInterval(verifyMapDisplay, MAP_VERIFICATION_INTERVAL_MS);
+}
+
+function stopMapVerification() {
+    if (!state.mapVerificationTimer) return;
+    clearInterval(state.mapVerificationTimer);
+    state.mapVerificationTimer = null;
+}
+
+function verifyMapDisplay() {
+    if (dom.liveDataView.style.display !== 'flex') return;
+
+    const data = state.currentData || {};
+    const desiredMainQuery = data.address ? normalizeMapQuery(buildMainQuery(data)) : '';
+    const desiredTempQuery = data.hasTempAddress && data.tempAddress ? normalizeMapQuery(buildTempQuery(data)) : '';
+
+    const mainVisible = isMapWrapperVisible('addressMapWrapper');
+    const tempVisible = isMapWrapperVisible('tempAddressMapWrapper');
+    const mainCoords = desiredMainQuery ? getCachedMapCoords(desiredMainQuery) : null;
+    const tempCoords = desiredTempQuery ? getCachedMapCoords(desiredTempQuery) : null;
+
+    const mainInSync = desiredMainQuery
+        ? mainVisible && isMapAtCoords(mapInstance, mainCoords)
+        : !mainVisible && !state.mainMapDisplayedQuery;
+    const tempInSync = desiredTempQuery
+        ? tempVisible && isMapAtCoords(tempMapInstance, tempCoords)
+        : !tempVisible && !state.tempMapDisplayedQuery;
+
+    if (!mainInSync || !tempInSync) {
+        scheduleMapRefresh();
+    }
+}
+
 function clearDisplayedData() {
+    state.mainMapRefreshToken += 1;
+    state.tempMapRefreshToken += 1;
+    state.mainMapPendingRefresh = false;
+    if (state.mapDebounceTimer) {
+        clearTimeout(state.mapDebounceTimer);
+        state.mapDebounceTimer = null;
+    }
     state.currentData = {};
     dom.valAddress.textContent = '-';
     dom.valCountry.textContent = '-';
     dom.valZipCode.textContent = '-';
     dom.valCity.textContent = '-';
-    dom.valTempAddress.textContent  = '-';
-    dom.valTempZipCode.textContent  = '-';
-    dom.valTempCity.textContent     = '-';
+    dom.valTempAddress.textContent = '-';
+    dom.valTempZipCode.textContent = '-';
+    dom.valTempCity.textContent = '-';
     dom.valPhoneCode.textContent = '-';
     dom.valPhone.textContent = '-';
     if (dom.phoneWarning) dom.phoneWarning.style.display = 'none';
@@ -927,11 +1063,13 @@ function clearDisplayedData() {
     if (dom.valPhone2) dom.valPhone2.textContent = '-';
     if (dom.phone2Warning) dom.phone2Warning.style.display = 'none';
     dom.valEmail.textContent = '-';
-    dom.rowTempAddress.style.display = 'none';
-    dom.rowTempZipCode.style.display = 'none';
-    dom.rowTempCity.style.display    = 'none';
-    if (dom.rowPhone2) dom.rowPhone2.style.display = 'none';
-    if (dom.rowPhone2Number) dom.rowPhone2Number.style.display = 'none';
+    state.mainMapDisplayedQuery = '';
+    state.tempMapDisplayedQuery = '';
+    setSellerExpandableRow(dom.rowTempAddress, false);
+    setSellerExpandableRow(dom.rowTempZipCode, false);
+    setSellerExpandableRow(dom.rowTempCity, false);
+    setSellerExpandableRow(dom.rowPhone2, false);
+    setSellerExpandableRow(dom.rowPhone2Number, false);
     hideAddressMap();
 }
 
@@ -978,11 +1116,10 @@ function restartSession() {
 // ============================================================================
 let mapInstance = null;
 let mainMarker  = null;
-let agencyCenter = null;       // [lon, lat] — geocoded from agencyAddress after license gate
-let mapHasClientAddress = false; // true once the map has flown to a real client address
-
 let tempMapInstance = null;
 let tempMapMarker   = null;
+let agencyCenter = null;       // [lon, lat] — geocoded from agencyAddress after license gate
+let mapHasClientAddress = false; // true once the map has flown to a real client address
 
 function preloadMapTiles(center) {
     const token = window.BRAND?.maps?.jawgToken ?? '';
@@ -1027,6 +1164,194 @@ function ensureMap() {
         }
     });
     ro.observe(container);
+
+    mapInstance.on('movestart', () => {
+        state.mainMapPendingRefresh = false;
+    });
+
+    mapInstance.on('moveend', () => {
+        if (state.mainMapPendingRefresh) {
+            state.mainMapPendingRefresh = false;
+            scheduleMapRefresh();
+        }
+    });
+}
+
+function applyView(center, bounds, refreshToken) {
+    function doView() {
+        if (refreshToken !== undefined && refreshToken !== state.mainMapRefreshToken) return;
+        if (bounds) {
+            mapInstance.fitBounds(bounds, { padding: 60, maxZoom: 16 });
+        } else {
+            mapInstance.flyTo({ center, zoom: 15 });
+        }
+    }
+    if (mapInstance.loaded()) { doView(); }
+    else { mapInstance.once('load', doView); }
+}
+
+async function geocode(query) {
+    const normalizedQuery = normalizeMapQuery(query);
+    if (!normalizedQuery || normalizedQuery.length < 5) return null;
+
+    const cachedEntry = state.mapGeocodeCache.get(normalizedQuery);
+    if (cachedEntry && cachedEntry.expiresAt > Date.now()) {
+        return cachedEntry.coords;
+    }
+    if (cachedEntry) {
+        state.mapGeocodeCache.delete(normalizedQuery);
+    }
+
+    const cacheFailure = () => {
+        state.mapGeocodeCache.set(normalizedQuery, {
+            coords: null,
+            expiresAt: Date.now() + MAP_GEOCODE_FAILURE_TTL_MS
+        });
+    };
+
+    const token = window.BRAND?.maps?.jawgToken ?? '';
+    try {
+        const params = new URLSearchParams({ text: normalizedQuery, size: 1, lang: 'fr', 'access-token': token });
+        const resp = await fetch(`https://api.jawg.io/places/v1/search?${params}`);
+        if (!resp.ok) {
+            cacheFailure();
+            return null;
+        }
+        const data = await resp.json();
+        const f = data.features?.[0];
+        if (!f) {
+            cacheFailure();
+            return null;
+        }
+        const [lon, lat] = f.geometry.coordinates;
+        const coords = { lat, lon };
+        state.mapGeocodeCache.set(normalizedQuery, {
+            coords,
+            expiresAt: Date.now() + MAP_GEOCODE_SUCCESS_TTL_MS
+        });
+        return coords;
+    } catch (_) {
+        cacheFailure();
+        return null;
+    }
+}
+
+function buildMainQuery(data) {
+    return [data.address, data.zipCode, data.city, data.country].filter(Boolean).join(', ');
+}
+
+function buildTempQuery(data) {
+    return [data.tempAddress, data.tempZipCode, data.tempCity].filter(Boolean).join(', ');
+}
+
+async function refreshMap() {
+    const data  = state.currentData;
+    const mainQuery = normalizeMapQuery(buildMainQuery(data));
+    const tempQuery = normalizeMapQuery(buildTempQuery(data));
+    const mainPromise = data.address ? geocode(mainQuery) : Promise.resolve(null);
+    const tempPromise = data.hasTempAddress && data.tempAddress ? geocode(tempQuery) : Promise.resolve(null);
+
+    if (data.address) {
+        const mainToken = ++state.mainMapRefreshToken;
+        const coords = await mainPromise;
+        if (mainToken !== state.mainMapRefreshToken) return;
+
+        if (coords) {
+            showAddressMap();
+            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+            if (mainToken !== state.mainMapRefreshToken) return;
+            ensureMap();
+            mapHasClientAddress = true;
+
+            const labelEl = document.getElementById('addressMapLabel');
+            if (labelEl) {
+                labelEl.textContent = [data.address, data.zipCode, data.city].filter(Boolean).join(', ');
+            }
+
+            if (mainMarker) { mainMarker.remove(); mainMarker = null; }
+            mainMarker = new maplibregl.Marker({ color: '#3B82F6' })
+                .setLngLat([coords.lon, coords.lat])
+                .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(
+                    `<strong>${data.address || ''}</strong><br>${[data.zipCode, data.city, data.country].filter(Boolean).join(', ')}`
+                ))
+                .addTo(mapInstance);
+
+            state.mainMapDisplayedQuery = mainQuery;
+            applyView([coords.lon, coords.lat], null, mainToken);
+        } else {
+            hideMainAddressMap();
+        }
+    } else {
+        hideMainAddressMap();
+    }
+
+    if (data.hasTempAddress && data.tempAddress) {
+        const tempToken = ++state.tempMapRefreshToken;
+        const tcoords = await tempPromise;
+        if (tempToken !== state.tempMapRefreshToken) return;
+
+        if (tcoords) {
+            showTempAddressMap();
+            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+            if (tempToken !== state.tempMapRefreshToken) return;
+            ensureTempMap();
+
+            const tempLabelEl = document.getElementById('tempAddressMapLabel');
+            if (tempLabelEl) {
+                tempLabelEl.textContent = [data.tempAddress, data.tempZipCode, data.tempCity].filter(Boolean).join(', ');
+            }
+
+            if (tempMapMarker) { tempMapMarker.remove(); tempMapMarker = null; }
+            tempMapMarker = new maplibregl.Marker({ color: '#8B5CF6' })
+                .setLngLat([tcoords.lon, tcoords.lat])
+                .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(
+                    `<strong>${data.tempAddress}</strong><br>${[data.tempZipCode, data.tempCity].filter(Boolean).join(', ')}`
+                ))
+                .addTo(tempMapInstance);
+
+            if (tempMapInstance.loaded()) {
+                tempMapInstance.flyTo({ center: [tcoords.lon, tcoords.lat], zoom: 15 });
+            } else {
+                tempMapInstance.once('load', () => {
+                    if (tempToken !== state.tempMapRefreshToken) return;
+                    tempMapInstance.flyTo({ center: [tcoords.lon, tcoords.lat], zoom: 15 });
+                });
+            }
+            state.tempMapDisplayedQuery = tempQuery;
+        } else {
+            hideTempAddressMap();
+        }
+    } else {
+        hideTempAddressMap();
+    }
+}
+
+function hideMainAddressMap() {
+    const w = document.getElementById('addressMapWrapper');
+    if (w) w.style.display = 'none';
+    if (mainMarker) { mainMarker.remove(); mainMarker = null; }
+    mapHasClientAddress = false;
+    state.mainMapDisplayedQuery = '';
+    state.mainMapPendingRefresh = false;
+}
+
+function showAddressMap() {
+    const w = document.getElementById('addressMapWrapper');
+    if (w) {
+        w.style.display = 'block';
+        // If the map instance already exists, ensure it is resized now that the
+        // container is visible. Use two animation frames to wait for layout.
+        if (mapInstance) {
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                try { mapInstance.resize(); } catch (_) {}
+            }));
+        }
+    }
+}
+
+function hideAddressMap() {
+    hideMainAddressMap();
+    hideTempAddressMap();
 }
 
 function ensureTempMap() {
@@ -1050,117 +1375,6 @@ function ensureTempMap() {
     ro.observe(container);
 }
 
-function applyView(center, bounds) {
-    function doView() {
-        if (bounds) {
-            mapInstance.fitBounds(bounds, { padding: 60, maxZoom: 16 });
-        } else {
-            mapInstance.flyTo({ center, zoom: 15 });
-        }
-    }
-    if (mapInstance.loaded()) { doView(); }
-    else { mapInstance.once('load', doView); }
-}
-
-async function geocode(query) {
-    if (!query || query.length < 5) return null;
-    const token = window.BRAND?.maps?.jawgToken ?? '';
-    try {
-        const params = new URLSearchParams({ text: query, size: 1, lang: 'fr', 'access-token': token });
-        const resp = await fetch(`https://api.jawg.io/places/v1/search?${params}`);
-        if (!resp.ok) return null;
-        const data = await resp.json();
-        const f = data.features?.[0];
-        if (!f) return null;
-        const [lon, lat] = f.geometry.coordinates;
-        return { lat, lon };
-    } catch (_) { return null; }
-}
-
-function buildMainQuery(data) {
-    return [data.address, data.zipCode, data.city, data.country].filter(Boolean).join(', ');
-}
-
-function buildTempQuery(data) {
-    return [data.tempAddress, data.tempZipCode, data.tempCity].filter(Boolean).join(', ');
-}
-
-async function refreshMap() {
-    const data  = state.currentData;
-    const query = buildMainQuery(data);
-
-    if (!query || !data.address) { hideAddressMap(); return; }
-
-    const coords = await geocode(query);
-    if (!coords) { hideAddressMap(); return; }
-
-    showAddressMap();
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    ensureMap();
-    mapHasClientAddress = true;
-
-    const labelEl = document.getElementById('addressMapLabel');
-    if (labelEl) {
-        labelEl.textContent = [data.address, data.zipCode, data.city].filter(Boolean).join(', ');
-    }
-
-    if (mainMarker) { mainMarker.remove(); mainMarker = null; }
-    mainMarker = new maplibregl.Marker({ color: '#3B82F6' })
-        .setLngLat([coords.lon, coords.lat])
-        .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(
-            `<strong>${data.address || ''}</strong><br>${[data.zipCode, data.city, data.country].filter(Boolean).join(', ')}`
-        ))
-        .addTo(mapInstance);
-
-    applyView([coords.lon, coords.lat]);
-
-    // Temp address — separate map
-    if (data.hasTempAddress && data.tempAddress) {
-        const tcoords = await geocode(buildTempQuery(data));
-        if (tcoords) {
-            showTempAddressMap();
-            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-            ensureTempMap();
-
-            const tempLabelEl = document.getElementById('tempAddressMapLabel');
-            if (tempLabelEl) {
-                tempLabelEl.textContent = [data.tempAddress, data.tempZipCode, data.tempCity].filter(Boolean).join(', ');
-            }
-
-            if (tempMapMarker) { tempMapMarker.remove(); tempMapMarker = null; }
-            tempMapMarker = new maplibregl.Marker({ color: '#8B5CF6' })
-                .setLngLat([tcoords.lon, tcoords.lat])
-                .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(
-                    `<strong>${data.tempAddress}</strong><br>${[data.tempZipCode, data.tempCity].filter(Boolean).join(', ')}`
-                ))
-                .addTo(tempMapInstance);
-
-            if (tempMapInstance.loaded()) {
-                tempMapInstance.flyTo({ center: [tcoords.lon, tcoords.lat], zoom: 15 });
-            } else {
-                tempMapInstance.once('load', () => tempMapInstance.flyTo({ center: [tcoords.lon, tcoords.lat], zoom: 15 }));
-            }
-        } else {
-            hideTempAddressMap();
-        }
-    } else {
-        hideTempAddressMap();
-    }
-}
-
-function showAddressMap() {
-    const w = document.getElementById('addressMapWrapper');
-    if (w) w.style.display = 'block';
-}
-
-function hideAddressMap() {
-    const w = document.getElementById('addressMapWrapper');
-    if (w) w.style.display = 'none';
-    if (mainMarker) { mainMarker.remove(); mainMarker = null; }
-    mapHasClientAddress = false;
-    hideTempAddressMap();
-}
-
 function showTempAddressMap() {
     const w = document.getElementById('tempAddressMapWrapper');
     if (w) w.style.display = 'block';
@@ -1170,11 +1384,20 @@ function hideTempAddressMap() {
     const w = document.getElementById('tempAddressMapWrapper');
     if (w) w.style.display = 'none';
     if (tempMapMarker) { tempMapMarker.remove(); tempMapMarker = null; }
+    state.tempMapDisplayedQuery = '';
 }
 
 function scheduleMapRefresh() {
     clearTimeout(state.mapDebounceTimer);
-    state.mapDebounceTimer = setTimeout(refreshMap, 900);
+    if (isMainMapMoving()) {
+        state.mainMapPendingRefresh = true;
+        return;
+    }
+    state.mainMapPendingRefresh = false;
+    state.mapDebounceTimer = setTimeout(() => {
+        state.mapDebounceTimer = null;
+        refreshMap();
+    }, 900);
 }
 
 // ── Map lightbox ──────────────────────────────────────────────────
@@ -1246,7 +1469,7 @@ function copyFieldValue(field) {
         city: dom.valCity.textContent,
         tempAddress: dom.valTempAddress.textContent,
         tempZipCode: dom.valTempZipCode.textContent,
-        tempCity:    dom.valTempCity.textContent,
+        tempCity: dom.valTempCity.textContent,
         phoneCode: dom.valPhoneCode.textContent,
         phoneNumber: dom.valPhone.textContent,
         phone2Code: dom.valPhone2Code?.textContent || '',
@@ -1267,8 +1490,7 @@ function copyAllData() {
     
     if (data.hasTempAddress) {
         if (data.tempAddress) text += `Dirección temporal: ${data.tempAddress}\n`;
-        if (data.tempZipCode) text += `CP (temp): ${data.tempZipCode}\n`;
-        if (data.tempCity)    text += `Ciudad (temp): ${data.tempCity}\n`;
+        if (data.tempZipCode || data.tempCity) text += `CP / Ciudad (temp): ${data.tempZipCode || ''} ${data.tempCity || ''}\n`;
     }
     
     if (data.phoneCode) text += `Prefijo telefónico: ${data.phoneCode}\n`;
@@ -1308,18 +1530,10 @@ if (dom.qrLightboxFrame) {
 }
 
 if (dom.addressMapExpandBtn) {
-    dom.addressMapExpandBtn.addEventListener('click', e => {
-        e.stopPropagation();
-        openMapLightbox(mapInstance, '#3B82F6', 'addressMapLabel');
-    });
+    dom.addressMapExpandBtn.addEventListener('click', e => { e.stopPropagation(); openMapLightbox(mapInstance, '#3B82F6', 'addressMapLabel'); });
 }
-
-const tempAddressMapExpandBtn = document.getElementById('tempAddressMapExpandBtn');
-if (tempAddressMapExpandBtn) {
-    tempAddressMapExpandBtn.addEventListener('click', e => {
-        e.stopPropagation();
-        openMapLightbox(tempMapInstance, '#8B5CF6', 'tempAddressMapLabel');
-    });
+if (dom.tempAddressMapExpandBtn) {
+    dom.tempAddressMapExpandBtn.addEventListener('click', e => { e.stopPropagation(); openMapLightbox(tempMapInstance, '#8B5CF6', 'tempAddressMapLabel'); });
 }
 if (dom.mapLightbox) {
     dom.mapLightbox.querySelector('.map-lightbox-backdrop')?.addEventListener('click', closeMapLightbox);
