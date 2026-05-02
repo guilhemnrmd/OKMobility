@@ -210,10 +210,8 @@ const dom = {
     valCity: document.getElementById('valCity'),
     lblDataTempAddress: document.getElementById('lblDataTempAddress'),
     valTempAddress: document.getElementById('valTempAddress'),
-    lblDataTempZipCode: document.getElementById('lblDataTempZipCode'),
-    valTempZipCode: document.getElementById('valTempZipCode'),
-    lblDataTempCity: document.getElementById('lblDataTempCity'),
-    valTempCity: document.getElementById('valTempCity'),
+    lblDataTempZipCity: document.getElementById('lblDataTempZipCity'),
+    valTempZipCity: document.getElementById('valTempZipCity'),
     lblDataPhoneCode: document.getElementById('lblDataPhoneCode'),
     valPhoneCode: document.getElementById('valPhoneCode'),
     lblDataPhone: document.getElementById('lblDataPhone'),
@@ -229,8 +227,7 @@ const dom = {
     valEmail: document.getElementById('valEmail'),
     // Rows (for showing/hiding temp address)
     rowTempAddress: document.getElementById('rowTempAddress'),
-    rowTempZipCode: document.getElementById('rowTempZipCode'),
-    rowTempCity: document.getElementById('rowTempCity'),
+    rowTempZipCity: document.getElementById('rowTempZipCity'),
     rowPhone2: document.getElementById('rowPhone2'),
     rowPhone2Number: document.getElementById('rowPhone2Number')
 };
@@ -797,23 +794,19 @@ function handleIncomingData(data) {
     if (cleanData.hasTempAddress !== undefined) {
         const show = cleanData.hasTempAddress;
         dom.rowTempAddress.style.display = show ? 'flex' : 'none';
-        dom.rowTempZipCode.style.display = show ? 'flex' : 'none';
-        dom.rowTempCity.style.display    = show ? 'flex' : 'none';
+        dom.rowTempZipCity.style.display = show ? 'flex' : 'none';
     }
-
+    
     if (cleanData.tempAddress !== undefined) {
         dom.valTempAddress.textContent = cleanData.tempAddress || '-';
         highlightField('valTempAddress');
     }
-
-    if (cleanData.tempZipCode !== undefined) {
-        dom.valTempZipCode.textContent = cleanData.tempZipCode || '-';
-        highlightField('valTempZipCode');
-    }
-
-    if (cleanData.tempCity !== undefined) {
-        dom.valTempCity.textContent = cleanData.tempCity || '-';
-        highlightField('valTempCity');
+    
+    if (cleanData.tempZipCode !== undefined || cleanData.tempCity !== undefined) {
+        const zip = cleanData.tempZipCode || state.currentData.tempZipCode || '';
+        const city = cleanData.tempCity || state.currentData.tempCity || '';
+        dom.valTempZipCity.textContent = `${zip} ${city}`.trim() || '-';
+        highlightField('valTempZipCity');
     }
     
     if (cleanData.phoneCode !== undefined) {
@@ -917,9 +910,8 @@ function clearDisplayedData() {
     dom.valCountry.textContent = '-';
     dom.valZipCode.textContent = '-';
     dom.valCity.textContent = '-';
-    dom.valTempAddress.textContent  = '-';
-    dom.valTempZipCode.textContent  = '-';
-    dom.valTempCity.textContent     = '-';
+    dom.valTempAddress.textContent = '-';
+    dom.valTempZipCity.textContent = '-';
     dom.valPhoneCode.textContent = '-';
     dom.valPhone.textContent = '-';
     if (dom.phoneWarning) dom.phoneWarning.style.display = 'none';
@@ -928,8 +920,7 @@ function clearDisplayedData() {
     if (dom.phone2Warning) dom.phone2Warning.style.display = 'none';
     dom.valEmail.textContent = '-';
     dom.rowTempAddress.style.display = 'none';
-    dom.rowTempZipCode.style.display = 'none';
-    dom.rowTempCity.style.display    = 'none';
+    dom.rowTempZipCity.style.display = 'none';
     if (dom.rowPhone2) dom.rowPhone2.style.display = 'none';
     if (dom.rowPhone2Number) dom.rowPhone2Number.style.display = 'none';
     hideAddressMap();
@@ -978,11 +969,9 @@ function restartSession() {
 // ============================================================================
 let mapInstance = null;
 let mainMarker  = null;
+let tempMarker  = null;
 let agencyCenter = null;       // [lon, lat] — geocoded from agencyAddress after license gate
 let mapHasClientAddress = false; // true once the map has flown to a real client address
-
-let tempMapInstance = null;
-let tempMapMarker   = null;
 
 function preloadMapTiles(center) {
     const token = window.BRAND?.maps?.jawgToken ?? '';
@@ -1024,27 +1013,6 @@ function ensureMap() {
     const ro = new ResizeObserver(() => {
         if (container.offsetWidth > 0 && container.offsetHeight > 0) {
             mapInstance.resize();
-        }
-    });
-    ro.observe(container);
-}
-
-function ensureTempMap() {
-    if (tempMapInstance) return;
-    const token = window.BRAND?.maps?.jawgToken ?? '';
-    tempMapInstance = new maplibregl.Map({
-        container: 'tempAddressMap',
-        style: `https://api.jawg.io/styles/jawg-streets.json?access-token=${token}`,
-        zoom: 15,
-        center: agencyCenter ?? [2.3522, 48.8566],
-        scrollZoom: false,
-        attributionControl: true,
-        trackResize: false
-    });
-    const container = document.getElementById('tempAddressMap');
-    const ro = new ResizeObserver(() => {
-        if (container.offsetWidth > 0 && container.offsetHeight > 0) {
-            tempMapInstance.resize();
         }
     });
     ro.observe(container);
@@ -1099,6 +1067,7 @@ async function refreshMap() {
     ensureMap();
     mapHasClientAddress = true;
 
+    // Update overlay label with address text
     const labelEl = document.getElementById('addressMapLabel');
     if (labelEl) {
         labelEl.textContent = [data.address, data.zipCode, data.city].filter(Boolean).join(', ');
@@ -1112,64 +1081,53 @@ async function refreshMap() {
         ))
         .addTo(mapInstance);
 
-    applyView([coords.lon, coords.lat]);
+    if (tempMarker) { tempMarker.remove(); tempMarker = null; }
+    const tempBadge = document.getElementById('addressMapTempBadge');
 
-    // Temp address — separate map
     if (data.hasTempAddress && data.tempAddress) {
         const tcoords = await geocode(buildTempQuery(data));
         if (tcoords) {
-            showTempAddressMap();
-            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-            ensureTempMap();
-
-            const tempLabelEl = document.getElementById('tempAddressMapLabel');
-            if (tempLabelEl) {
-                tempLabelEl.textContent = [data.tempAddress, data.tempZipCode, data.tempCity].filter(Boolean).join(', ');
-            }
-
-            if (tempMapMarker) { tempMapMarker.remove(); tempMapMarker = null; }
-            tempMapMarker = new maplibregl.Marker({ color: '#8B5CF6' })
+            tempMarker = new maplibregl.Marker({ color: '#8B5CF6' })
                 .setLngLat([tcoords.lon, tcoords.lat])
                 .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(
                     `<strong>${data.tempAddress}</strong><br>${[data.tempZipCode, data.tempCity].filter(Boolean).join(', ')}`
                 ))
-                .addTo(tempMapInstance);
-
-            if (tempMapInstance.loaded()) {
-                tempMapInstance.flyTo({ center: [tcoords.lon, tcoords.lat], zoom: 15 });
-            } else {
-                tempMapInstance.once('load', () => tempMapInstance.flyTo({ center: [tcoords.lon, tcoords.lat], zoom: 15 }));
-            }
+                .addTo(mapInstance);
+            if (tempBadge) tempBadge.style.display = 'inline-flex';
+            applyView(null, [
+                [Math.min(coords.lon, tcoords.lon), Math.min(coords.lat, tcoords.lat)],
+                [Math.max(coords.lon, tcoords.lon), Math.max(coords.lat, tcoords.lat)]
+            ]);
         } else {
-            hideTempAddressMap();
+            if (tempBadge) tempBadge.style.display = 'none';
+            applyView([coords.lon, coords.lat]);
         }
     } else {
-        hideTempAddressMap();
+        if (tempBadge) tempBadge.style.display = 'none';
+        applyView([coords.lon, coords.lat]);
     }
 }
 
 function showAddressMap() {
     const w = document.getElementById('addressMapWrapper');
-    if (w) w.style.display = 'block';
+    if (w) {
+        w.style.display = 'block';
+        // If the map instance already exists, ensure it is resized now that the
+        // container is visible. Use two animation frames to wait for layout.
+        if (mapInstance) {
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                try { mapInstance.resize(); } catch (_) {}
+            }));
+        }
+    }
 }
 
 function hideAddressMap() {
     const w = document.getElementById('addressMapWrapper');
     if (w) w.style.display = 'none';
     if (mainMarker) { mainMarker.remove(); mainMarker = null; }
+    if (tempMarker) { tempMarker.remove(); tempMarker = null; }
     mapHasClientAddress = false;
-    hideTempAddressMap();
-}
-
-function showTempAddressMap() {
-    const w = document.getElementById('tempAddressMapWrapper');
-    if (w) w.style.display = 'block';
-}
-
-function hideTempAddressMap() {
-    const w = document.getElementById('tempAddressMapWrapper');
-    if (w) w.style.display = 'none';
-    if (tempMapMarker) { tempMapMarker.remove(); tempMapMarker = null; }
 }
 
 function scheduleMapRefresh() {
@@ -1180,13 +1138,14 @@ function scheduleMapRefresh() {
 // ── Map lightbox ──────────────────────────────────────────────────
 let mapLightboxInstance = null;
 
-function openMapLightbox(sourceMap, markerColor, labelElId) {
-    if (!dom.mapLightbox || !sourceMap) return;
+function openMapLightbox() {
+    if (!dom.mapLightbox || !mapInstance) return;
     const token  = window.BRAND?.maps?.jawgToken ?? '';
-    const center = sourceMap.getCenter();
-    const zoom   = sourceMap.getZoom();
+    const center = mapInstance.getCenter();
+    const zoom   = mapInstance.getZoom();
 
-    const src = document.getElementById(labelElId ?? 'addressMapLabel');
+    // Sync label text
+    const src = document.getElementById('addressMapLabel');
     const dst = document.getElementById('mapLightboxLabel');
     if (src && dst) dst.textContent = src.textContent;
 
@@ -1202,10 +1161,15 @@ function openMapLightbox(sourceMap, markerColor, labelElId) {
         scrollZoom: true
     });
 
-    const marker = markerColor === '#8B5CF6' ? tempMapMarker : mainMarker;
-    if (marker) {
-        new maplibregl.Marker({ color: markerColor ?? '#3B82F6' })
-            .setLngLat(marker.getLngLat())
+    // Mirror markers into lightbox
+    if (mainMarker) {
+        new maplibregl.Marker({ color: '#3B82F6' })
+            .setLngLat(mainMarker.getLngLat())
+            .addTo(mapLightboxInstance);
+    }
+    if (tempMarker) {
+        new maplibregl.Marker({ color: '#8B5CF6' })
+            .setLngLat(tempMarker.getLngLat())
             .addTo(mapLightboxInstance);
     }
 }
@@ -1245,8 +1209,7 @@ function copyFieldValue(field) {
         zipCode: dom.valZipCode.textContent,
         city: dom.valCity.textContent,
         tempAddress: dom.valTempAddress.textContent,
-        tempZipCode: dom.valTempZipCode.textContent,
-        tempCity:    dom.valTempCity.textContent,
+        tempZipCity: dom.valTempZipCity.textContent,
         phoneCode: dom.valPhoneCode.textContent,
         phoneNumber: dom.valPhone.textContent,
         phone2Code: dom.valPhone2Code?.textContent || '',
@@ -1267,8 +1230,7 @@ function copyAllData() {
     
     if (data.hasTempAddress) {
         if (data.tempAddress) text += `Dirección temporal: ${data.tempAddress}\n`;
-        if (data.tempZipCode) text += `CP (temp): ${data.tempZipCode}\n`;
-        if (data.tempCity)    text += `Ciudad (temp): ${data.tempCity}\n`;
+        if (data.tempZipCode || data.tempCity) text += `CP / Ciudad (temp): ${data.tempZipCode || ''} ${data.tempCity || ''}\n`;
     }
     
     if (data.phoneCode) text += `Prefijo telefónico: ${data.phoneCode}\n`;
@@ -1308,18 +1270,7 @@ if (dom.qrLightboxFrame) {
 }
 
 if (dom.addressMapExpandBtn) {
-    dom.addressMapExpandBtn.addEventListener('click', e => {
-        e.stopPropagation();
-        openMapLightbox(mapInstance, '#3B82F6', 'addressMapLabel');
-    });
-}
-
-const tempAddressMapExpandBtn = document.getElementById('tempAddressMapExpandBtn');
-if (tempAddressMapExpandBtn) {
-    tempAddressMapExpandBtn.addEventListener('click', e => {
-        e.stopPropagation();
-        openMapLightbox(tempMapInstance, '#8B5CF6', 'tempAddressMapLabel');
-    });
+    dom.addressMapExpandBtn.addEventListener('click', e => { e.stopPropagation(); openMapLightbox(); });
 }
 if (dom.mapLightbox) {
     dom.mapLightbox.querySelector('.map-lightbox-backdrop')?.addEventListener('click', closeMapLightbox);
