@@ -163,6 +163,7 @@ const state = {
     mapVerificationTimer: null,
     mainMapRefreshToken: 0,
     tempMapRefreshToken: 0,
+    mainMapPendingRefresh: false,
     mainMapDisplayedQuery: '',
     tempMapDisplayedQuery: '',
     mapGeocodeCache: new Map()
@@ -960,6 +961,7 @@ function disconnectCurrentClient() {
 const MAP_VERIFICATION_INTERVAL_MS = 3000;
 const MAP_GEOCODE_SUCCESS_TTL_MS = 30 * 60 * 1000;
 const MAP_GEOCODE_FAILURE_TTL_MS = 15 * 1000;
+const MAP_CENTER_EPSILON = 0.0005;
 
 function normalizeMapQuery(query) {
     return typeof query === 'string' ? query.replace(/\s+/g, ' ').trim() : '';
@@ -968,6 +970,28 @@ function normalizeMapQuery(query) {
 function isMapWrapperVisible(wrapperId) {
     const wrapper = document.getElementById(wrapperId);
     return Boolean(wrapper && wrapper.style.display !== 'none');
+}
+
+function getCachedMapCoords(query) {
+    const normalizedQuery = normalizeMapQuery(query);
+    if (!normalizedQuery) return null;
+
+    const cachedEntry = state.mapGeocodeCache.get(normalizedQuery);
+    if (!cachedEntry) return null;
+    if (cachedEntry.expiresAt <= Date.now()) {
+        state.mapGeocodeCache.delete(normalizedQuery);
+        return null;
+    }
+
+    return cachedEntry.coords;
+}
+
+function isMapAtCoords(map, coords) {
+    if (!map || !coords || typeof map.getCenter !== 'function') return false;
+    const center = map.getCenter();
+    if (!center) return false;
+
+    return Math.abs(center.lng - coords.lon) <= MAP_CENTER_EPSILON && Math.abs(center.lat - coords.lat) <= MAP_CENTER_EPSILON;
 }
 
 function isMainMapMoving() {
@@ -1001,12 +1025,14 @@ function verifyMapDisplay() {
 
     const mainVisible = isMapWrapperVisible('addressMapWrapper');
     const tempVisible = isMapWrapperVisible('tempAddressMapWrapper');
+    const mainCoords = desiredMainQuery ? getCachedMapCoords(desiredMainQuery) : null;
+    const tempCoords = desiredTempQuery ? getCachedMapCoords(desiredTempQuery) : null;
 
     const mainInSync = desiredMainQuery
-        ? mainVisible && state.mainMapDisplayedQuery === desiredMainQuery
+        ? mainVisible && isMapAtCoords(mapInstance, mainCoords)
         : !mainVisible && !state.mainMapDisplayedQuery;
     const tempInSync = desiredTempQuery
-        ? tempVisible && state.tempMapDisplayedQuery === desiredTempQuery
+        ? tempVisible && isMapAtCoords(tempMapInstance, tempCoords)
         : !tempVisible && !state.tempMapDisplayedQuery;
 
     if (!mainInSync || !tempInSync) {
@@ -1017,6 +1043,7 @@ function verifyMapDisplay() {
 function clearDisplayedData() {
     state.mainMapRefreshToken += 1;
     state.tempMapRefreshToken += 1;
+    state.mainMapPendingRefresh = false;
     if (state.mapDebounceTimer) {
         clearTimeout(state.mapDebounceTimer);
         state.mapDebounceTimer = null;
@@ -1137,6 +1164,17 @@ function ensureMap() {
         }
     });
     ro.observe(container);
+
+    mapInstance.on('movestart', () => {
+        state.mainMapPendingRefresh = false;
+    });
+
+    mapInstance.on('moveend', () => {
+        if (state.mainMapPendingRefresh) {
+            state.mainMapPendingRefresh = false;
+            scheduleMapRefresh();
+        }
+    });
 }
 
 function applyView(center, bounds, refreshToken) {
@@ -1207,7 +1245,6 @@ function buildTempQuery(data) {
 }
 
 async function refreshMap() {
-    stopMainMapAnimation();
     const data  = state.currentData;
     const mainQuery = normalizeMapQuery(buildMainQuery(data));
     const tempQuery = normalizeMapQuery(buildTempQuery(data));
@@ -1290,12 +1327,12 @@ async function refreshMap() {
 }
 
 function hideMainAddressMap() {
-    stopMainMapAnimation();
     const w = document.getElementById('addressMapWrapper');
     if (w) w.style.display = 'none';
     if (mainMarker) { mainMarker.remove(); mainMarker = null; }
     mapHasClientAddress = false;
     state.mainMapDisplayedQuery = '';
+    state.mainMapPendingRefresh = false;
 }
 
 function showAddressMap() {
@@ -1352,9 +1389,13 @@ function hideTempAddressMap() {
 
 function scheduleMapRefresh() {
     clearTimeout(state.mapDebounceTimer);
+    if (isMainMapMoving()) {
+        state.mainMapPendingRefresh = true;
+        return;
+    }
+    state.mainMapPendingRefresh = false;
     state.mapDebounceTimer = setTimeout(() => {
         state.mapDebounceTimer = null;
-        stopMainMapAnimation();
         refreshMap();
     }, 900);
 }
