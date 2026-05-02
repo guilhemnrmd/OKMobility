@@ -2409,8 +2409,55 @@ input::placeholder {
     margin: 4px 0;
 }
 
+.data-row.temp-address-row,
+#rowPhone2,
+#rowPhone2Number {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-8px);
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    border-bottom-color: transparent;
+    pointer-events: none;
+    transition:
+        max-height 0.38s cubic-bezier(0.25, 1, 0.5, 1),
+        opacity 0.2s ease,
+        transform 0.38s cubic-bezier(0.25, 1, 0.5, 1),
+        padding 0.38s cubic-bezier(0.25, 1, 0.5, 1),
+        margin 0.38s cubic-bezier(0.25, 1, 0.5, 1),
+        border-color 0.38s ease;
+}
+
+.data-row.temp-address-row.is-visible,
+#rowPhone2.is-visible,
+#rowPhone2Number.is-visible {
+    max-height: 220px;
+    opacity: 1;
+    transform: translateY(0);
+    padding-top: 12px;
+    padding-bottom: 12px;
+    border-bottom-color: var(--color-border);
+    pointer-events: auto;
+}
+
+.data-row.temp-address-row.is-visible {
+    margin: 4px 0;
+}
+
+#rowPhone2.is-visible,
+#rowPhone2Number.is-visible {
+    margin: 0;
+}
+
 @media (prefers-color-scheme: dark) {
     .data-row.temp-address-row {
+        background: rgba(var(--color-accent-rgb), 0.08);
+    }
+
+    .data-row.temp-address-row.is-visible {
         background: rgba(var(--color-accent-rgb), 0.08);
     }
 }

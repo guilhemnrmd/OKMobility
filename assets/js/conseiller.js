@@ -799,9 +799,9 @@ function handleIncomingData(data) {
     // Handle temporary address visibility
     if (cleanData.hasTempAddress !== undefined) {
         const show = cleanData.hasTempAddress;
-        dom.rowTempAddress.style.display = show ? 'flex' : 'none';
-        dom.rowTempZipCode.style.display = show ? 'flex' : 'none';
-        dom.rowTempCity.style.display = show ? 'flex' : 'none';
+        setSellerExpandableRow(dom.rowTempAddress, show);
+        setSellerExpandableRow(dom.rowTempZipCode, show);
+        setSellerExpandableRow(dom.rowTempCity, show);
     }
     
     if (cleanData.tempAddress !== undefined) {
@@ -839,8 +839,8 @@ function handleIncomingData(data) {
 
     if (cleanData.phone2Code !== undefined || cleanData.phone2Number !== undefined) {
         const hasPhone2 = (cleanData.phone2Code || state.currentData.phone2Code || '') || (cleanData.phone2Number || state.currentData.phone2Number || '');
-        if (dom.rowPhone2) dom.rowPhone2.style.display = hasPhone2 ? 'flex' : 'none';
-        if (dom.rowPhone2Number) dom.rowPhone2Number.style.display = hasPhone2 ? 'flex' : 'none';
+        setSellerExpandableRow(dom.rowPhone2, Boolean(hasPhone2));
+        setSellerExpandableRow(dom.rowPhone2Number, Boolean(hasPhone2));
         if (cleanData.phone2Code !== undefined) {
             dom.valPhone2Code.textContent = cleanData.phone2Code || '-';
             highlightField('valPhone2Code');
@@ -868,6 +868,42 @@ function highlightField(fieldId) {
         void el.offsetWidth;
         el.classList.add('highlight');
     }
+}
+
+const SELLER_OPTION_ROW_TOGGLE_MS = 360;
+
+function setSellerExpandableRow(row, visible) {
+    if (!row) return;
+
+    if (row._sellerRowTimer) {
+        clearTimeout(row._sellerRowTimer);
+        row._sellerRowTimer = null;
+    }
+
+    const nextToken = (row._sellerRowToken || 0) + 1;
+    row._sellerRowToken = nextToken;
+
+    if (visible) {
+        if (row.style.display !== 'flex') {
+            row.style.display = 'flex';
+        }
+        if (!row.classList.contains('is-visible')) {
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                if (row._sellerRowToken === nextToken && row.style.display === 'flex') {
+                    row.classList.add('is-visible');
+                }
+            }));
+        }
+        return;
+    }
+
+    row.classList.remove('is-visible');
+    row._sellerRowTimer = setTimeout(() => {
+        if (row._sellerRowToken === nextToken && !row.classList.contains('is-visible')) {
+            row.style.display = 'none';
+        }
+        row._sellerRowTimer = null;
+    }, SELLER_OPTION_ROW_TOGGLE_MS);
 }
 
 // ============================================================================
@@ -936,11 +972,11 @@ function clearDisplayedData() {
     if (dom.valPhone2) dom.valPhone2.textContent = '-';
     if (dom.phone2Warning) dom.phone2Warning.style.display = 'none';
     dom.valEmail.textContent = '-';
-    dom.rowTempAddress.style.display = 'none';
-    dom.rowTempZipCode.style.display = 'none';
-    dom.rowTempCity.style.display = 'none';
-    if (dom.rowPhone2) dom.rowPhone2.style.display = 'none';
-    if (dom.rowPhone2Number) dom.rowPhone2Number.style.display = 'none';
+    setSellerExpandableRow(dom.rowTempAddress, false);
+    setSellerExpandableRow(dom.rowTempZipCode, false);
+    setSellerExpandableRow(dom.rowTempCity, false);
+    setSellerExpandableRow(dom.rowPhone2, false);
+    setSellerExpandableRow(dom.rowPhone2Number, false);
     hideAddressMap();
 }
 
