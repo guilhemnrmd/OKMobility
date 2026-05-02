@@ -970,6 +970,17 @@ function isMapWrapperVisible(wrapperId) {
     return Boolean(wrapper && wrapper.style.display !== 'none');
 }
 
+function isMainMapMoving() {
+    return Boolean(mapInstance && typeof mapInstance.isMoving === 'function' && mapInstance.isMoving());
+}
+
+function stopMainMapAnimation() {
+    if (!isMainMapMoving() || typeof mapInstance.stop !== 'function') return;
+    try {
+        mapInstance.stop();
+    } catch (_) {}
+}
+
 function startMapVerification() {
     if (state.mapVerificationTimer) return;
     state.mapVerificationTimer = setInterval(verifyMapDisplay, MAP_VERIFICATION_INTERVAL_MS);
@@ -1196,6 +1207,7 @@ function buildTempQuery(data) {
 }
 
 async function refreshMap() {
+    stopMainMapAnimation();
     const data  = state.currentData;
     const mainQuery = normalizeMapQuery(buildMainQuery(data));
     const tempQuery = normalizeMapQuery(buildTempQuery(data));
@@ -1278,6 +1290,7 @@ async function refreshMap() {
 }
 
 function hideMainAddressMap() {
+    stopMainMapAnimation();
     const w = document.getElementById('addressMapWrapper');
     if (w) w.style.display = 'none';
     if (mainMarker) { mainMarker.remove(); mainMarker = null; }
@@ -1339,7 +1352,11 @@ function hideTempAddressMap() {
 
 function scheduleMapRefresh() {
     clearTimeout(state.mapDebounceTimer);
-    state.mapDebounceTimer = setTimeout(refreshMap, 900);
+    state.mapDebounceTimer = setTimeout(() => {
+        state.mapDebounceTimer = null;
+        stopMainMapAnimation();
+        refreshMap();
+    }, 900);
 }
 
 // ── Map lightbox ──────────────────────────────────────────────────
