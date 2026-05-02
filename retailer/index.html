@@ -9,6 +9,8 @@
     <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
     <link href="https://unpkg.com/maplibre-gl@5.7.0/dist/maplibre-gl.css" rel="stylesheet">
     <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
+    <!-- Flag icons — SVG sprites, cross-platform flag display -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
     <link rel="stylesheet" href="/style.css?v=42">
     <script src="/assets/js/brand-config.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
@@ -130,132 +132,174 @@
                     <h1 id="titleLiveData" class="gradient-text">Datos del cliente</h1>
                 </div>
 
-                <div class="live-data-table glass-panel">
-                    <div class="data-row" id="rowAddress">
-                        <div class="data-info">
-                            <span id="lblDataAddress" class="data-label">Dirección</span>
-                            <span class="data-value" id="valAddress">-</span>
+                <div class="live-data-columns">
+
+                    <!-- ── Left column: data rows ──────────────────────── -->
+                    <div class="live-col-data">
+                        <div class="live-data-table glass-panel">
+                            <div class="data-row" id="rowAddress">
+                                <div class="data-info">
+                                    <span id="lblDataAddress" class="data-label">Dirección</span>
+                                    <span class="data-value" id="valAddress">-</span>
+                                </div>
+                                <button class="btn-copy" data-field="address" title="Copiar">
+                                    <i class='bx bx-copy'></i>
+                                </button>
+                            </div>
+
+                            <div class="data-row" id="rowCountry">
+                                <div class="data-info">
+                                    <span id="lblDataCountry" class="data-label">País</span>
+                                    <span class="data-value" id="valCountry">-</span>
+                                </div>
+                                <button class="btn-copy" data-field="country" title="Copiar">
+                                    <i class='bx bx-copy'></i>
+                                </button>
+                            </div>
+
+                            <div class="data-row" id="rowZipCode">
+                                <div class="data-info">
+                                    <span id="lblDataZipCode" class="data-label">CP</span>
+                                    <span class="data-value" id="valZipCode">-</span>
+                                </div>
+                                <button class="btn-copy" data-field="zipCode" title="Copiar">
+                                    <i class='bx bx-copy'></i>
+                                </button>
+                            </div>
+
+                            <div class="data-row" id="rowCity">
+                                <div class="data-info">
+                                    <span id="lblDataCity" class="data-label">Ciudad</span>
+                                    <span class="data-value" id="valCity">-</span>
+                                </div>
+                                <button class="btn-copy" data-field="city" title="Copiar">
+                                    <i class='bx bx-copy'></i>
+                                </button>
+                            </div>
+
+                            <div class="data-row temp-address-row" id="rowTempAddress" style="display: none;">
+                                <div class="data-info">
+                                    <span id="lblDataTempAddress" class="data-label"><i class='bx bx-map-pin'></i> Dirección temporal</span>
+                                    <span class="data-value" id="valTempAddress">-</span>
+                                </div>
+                                <button class="btn-copy" data-field="tempAddress" title="Copiar">
+                                    <i class='bx bx-copy'></i>
+                                </button>
+                            </div>
+
+                            <div class="data-row temp-address-row" id="rowTempZipCode" style="display: none;">
+                                <div class="data-info">
+                                    <span id="lblDataTempZipCode" class="data-label">CP (temp)</span>
+                                    <span class="data-value" id="valTempZipCode">-</span>
+                                </div>
+                                <button class="btn-copy" data-field="tempZipCode" title="Copiar">
+                                    <i class='bx bx-copy'></i>
+                                </button>
+                            </div>
+
+                            <div class="data-row temp-address-row" id="rowTempCity" style="display: none;">
+                                <div class="data-info">
+                                    <span id="lblDataTempCity" class="data-label">Ciudad (temp)</span>
+                                    <span class="data-value" id="valTempCity">-</span>
+                                </div>
+                                <button class="btn-copy" data-field="tempCity" title="Copiar">
+                                    <i class='bx bx-copy'></i>
+                                </button>
+                            </div>
+
+                            <div class="data-row" id="rowPhone">
+                                <div class="data-info">
+                                    <span id="lblDataPhoneCode" class="data-label">Prefijo telefónico</span>
+                                    <span class="data-value" id="valPhoneCode">-</span>
+                                </div>
+                                <button class="btn-copy" data-field="phoneCode" title="Copiar">
+                                    <i class='bx bx-copy'></i>
+                                </button>
+                            </div>
+
+                            <div class="data-row" id="rowPhoneNumber">
+                                <div class="data-info">
+                                    <span id="lblDataPhone" class="data-label">Teléfono</span>
+                                    <span class="data-value" id="valPhone">-</span>
+                                    <span id="phoneWarning" class="phone-warning" style="display:none;" title="Formato de número inválido"><i class='bx bx-error-circle'></i></span>
+                                </div>
+                                <button class="btn-copy" data-field="phoneNumber" title="Copiar">
+                                    <i class='bx bx-copy'></i>
+                                </button>
+                            </div>
+
+                            <div class="data-row" id="rowPhone2" style="display: none;">
+                                <div class="data-info">
+                                    <span id="lblDataPhone2Code" class="data-label">Prefijo 2º tel.</span>
+                                    <span class="data-value" id="valPhone2Code">-</span>
+                                </div>
+                                <button class="btn-copy" data-field="phone2Code" title="Copiar">
+                                    <i class='bx bx-copy'></i>
+                                </button>
+                            </div>
+
+                            <div class="data-row" id="rowPhone2Number" style="display: none;">
+                                <div class="data-info">
+                                    <span id="lblDataPhone2" class="data-label">2º Teléfono</span>
+                                    <span class="data-value" id="valPhone2">-</span>
+                                    <span id="phone2Warning" class="phone-warning" style="display:none;" title="Formato de número inválido"><i class='bx bx-error-circle'></i></span>
+                                </div>
+                                <button class="btn-copy" data-field="phone2Number" title="Copiar">
+                                    <i class='bx bx-copy'></i>
+                                </button>
+                            </div>
+
+                            <div class="data-row" id="rowEmail">
+                                <div class="data-info">
+                                    <span id="lblDataEmail" class="data-label">E-mail</span>
+                                    <span class="data-value" id="valEmail">-</span>
+                                </div>
+                                <button class="btn-copy" data-field="email" title="Copiar">
+                                    <i class='bx bx-copy'></i>
+                                </button>
+                            </div>
                         </div>
-                        <button class="btn-copy" data-field="address" title="Copiar">
-                            <i class='bx bx-copy'></i>
-                        </button>
                     </div>
 
-                    <div class="data-row" id="rowCountry">
-                        <div class="data-info">
-                            <span id="lblDataCountry" class="data-label">País</span>
-                            <span class="data-value" id="valCountry">-</span>
-                        </div>
-                        <button class="btn-copy" data-field="country" title="Copiar">
-                            <i class='bx bx-copy'></i>
-                        </button>
-                    </div>
+                    <!-- ── Right column: maps ──────────────────────────── -->
+                    <div class="live-col-maps">
 
-                    <div class="data-row" id="rowZipCode">
-                        <div class="data-info">
-                            <span id="lblDataZipCode" class="data-label">CP</span>
-                            <span class="data-value" id="valZipCode">-</span>
+                        <!-- Main address map -->
+                        <div id="addressMapWrapper" class="glass-panel map-col-panel" style="display:none;">
+                            <div class="map-col-header">
+                                <i class='bx bx-map-alt'></i>
+                                <span id="lblAddressMapSection">Carte</span>
+                            </div>
+                            <div class="address-map-wrapper temp-standalone-map">
+                                <div id="addressMap" class="address-map-container"></div>
+                                <div class="address-map-overlay">
+                                    <i class='bx bx-map-alt'></i>
+                                    <span id="addressMapLabel" class="address-map-overlay-text"></span>
+                                    <button class="address-map-expand-btn" id="addressMapExpandBtn" aria-label="Agrandir la carte">
+                                        <i class='bx bx-fullscreen'></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <button class="btn-copy" data-field="zipCode" title="Copiar">
-                            <i class='bx bx-copy'></i>
-                        </button>
-                    </div>
 
-                    <div class="data-row" id="rowCity">
-                        <div class="data-info">
-                            <span id="lblDataCity" class="data-label">Ciudad</span>
-                            <span class="data-value" id="valCity">-</span>
+                        <!-- Temp address map -->
+                        <div id="tempAddressMapWrapper" class="glass-panel map-col-panel" style="display:none;">
+                            <div class="map-col-header">
+                                <i class='bx bx-map-pin'></i>
+                                <span id="lblTempAddressMapSection">Adresse temporaire</span>
+                            </div>
+                            <div class="address-map-wrapper temp-standalone-map">
+                                <div id="tempAddressMap" class="address-map-container"></div>
+                                <div class="address-map-overlay">
+                                    <i class='bx bx-map-pin'></i>
+                                    <span id="tempAddressMapLabel" class="address-map-overlay-text"></span>
+                                    <button class="address-map-expand-btn" id="tempAddressMapExpandBtn" aria-label="Agrandir la carte temporaire">
+                                        <i class='bx bx-fullscreen'></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <button class="btn-copy" data-field="city" title="Copiar">
-                            <i class='bx bx-copy'></i>
-                        </button>
-                    </div>
 
-                    <div class="data-row temp-address-row" id="rowTempAddress" style="display: none;">
-                        <div class="data-info">
-                            <span id="lblDataTempAddress" class="data-label"><i class='bx bx-map-pin'></i> Dirección temporal</span>
-                            <span class="data-value" id="valTempAddress">-</span>
-                        </div>
-                        <button class="btn-copy" data-field="tempAddress" title="Copiar">
-                            <i class='bx bx-copy'></i>
-                        </button>
-                    </div>
-
-                    <div class="data-row temp-address-row" id="rowTempZipCity" style="display: none;">
-                        <div class="data-info">
-                            <span id="lblDataTempZipCity" class="data-label">CP / Ciudad (temp)</span>
-                            <span class="data-value" id="valTempZipCity">-</span>
-                        </div>
-                        <button class="btn-copy" data-field="tempZipCity" title="Copiar">
-                            <i class='bx bx-copy'></i>
-                        </button>
-                    </div>
-
-                    <div class="data-row" id="rowPhone">
-                        <div class="data-info">
-                            <span id="lblDataPhoneCode" class="data-label">Prefijo telefónico</span>
-                            <span class="data-value" id="valPhoneCode">-</span>
-                        </div>
-                        <button class="btn-copy" data-field="phoneCode" title="Copiar">
-                            <i class='bx bx-copy'></i>
-                        </button>
-                    </div>
-
-                    <div class="data-row" id="rowPhoneNumber">
-                        <div class="data-info">
-                            <span id="lblDataPhone" class="data-label">Teléfono</span>
-                            <span class="data-value" id="valPhone">-</span>
-                            <span id="phoneWarning" class="phone-warning" style="display:none;" title="Formato de número inválido"><i class='bx bx-error-circle'></i></span>
-                        </div>
-                        <button class="btn-copy" data-field="phoneNumber" title="Copiar">
-                            <i class='bx bx-copy'></i>
-                        </button>
-                    </div>
-
-                    <div class="data-row" id="rowPhone2" style="display: none;">
-                        <div class="data-info">
-                            <span id="lblDataPhone2Code" class="data-label">Prefijo 2º tel.</span>
-                            <span class="data-value" id="valPhone2Code">-</span>
-                        </div>
-                        <button class="btn-copy" data-field="phone2Code" title="Copiar">
-                            <i class='bx bx-copy'></i>
-                        </button>
-                    </div>
-
-                    <div class="data-row" id="rowPhone2Number" style="display: none;">
-                        <div class="data-info">
-                            <span id="lblDataPhone2" class="data-label">2º Teléfono</span>
-                            <span class="data-value" id="valPhone2">-</span>
-                            <span id="phone2Warning" class="phone-warning" style="display:none;" title="Formato de número inválido"><i class='bx bx-error-circle'></i></span>
-                        </div>
-                        <button class="btn-copy" data-field="phone2Number" title="Copiar">
-                            <i class='bx bx-copy'></i>
-                        </button>
-                    </div>
-
-                    <div class="data-row" id="rowEmail">
-                        <div class="data-info">
-                            <span id="lblDataEmail" class="data-label">E-mail</span>
-                            <span class="data-value" id="valEmail">-</span>
-                        </div>
-                        <button class="btn-copy" data-field="email" title="Copiar">
-                            <i class='bx bx-copy'></i>
-                        </button>
-                    </div>
-
-                    <!-- Address Map — embedded in data table -->
-                    <div id="addressMapWrapper" class="address-map-wrapper" style="display:none;">
-                        <div id="addressMap" class="address-map-container"></div>
-                        <div class="address-map-overlay">
-                            <i class='bx bx-map-alt'></i>
-                            <span id="addressMapLabel" class="address-map-overlay-text"></span>
-                            <span id="addressMapTempBadge" class="map-temp-badge" style="display:none;">
-                                <i class='bx bx-map-pin'></i> Dirección temporal
-                            </span>
-                            <button class="address-map-expand-btn" id="addressMapExpandBtn" aria-label="Agrandir la carte">
-                                <i class='bx bx-fullscreen'></i>
-                            </button>
-                        </div>
                     </div>
                 </div>
 

@@ -1082,6 +1082,20 @@ input:focus + i, .input-with-icon:focus-within i {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* flag-icons alignment in custom selects and lang selector */
+.cs-face .fi,
+.cs-list li .fi,
+#langDisplay .fi {
+    flex-shrink: 0;
+    border-radius: 2px;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
 }
 
 .cs-list li:hover,
@@ -1162,7 +1176,7 @@ input::placeholder {
 .temp-address-wrapper {
     position: relative;
     border: 1px solid var(--color-border);
-    border-radius: 18px;
+    border-radius: var(--radius-md);
     margin-bottom: var(--spacing-md);
     background: transparent;
     transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -2085,12 +2099,83 @@ input::placeholder {
     height: auto !important;
 }
 
+/* ─── Retailer live data: 2-column layout ────────────────────────────────── */
+.live-data-columns {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    width: 100%;
+}
+
+.live-col-data {
+    width: 100%;
+}
+
+.live-col-maps {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    width: 100%;
+}
+
+/* Map column panels — glass boxes styled like the data table */
+.map-col-panel {
+    overflow: hidden;
+    padding: 0;
+}
+
+.map-col-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    font-size: 0.71rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--color-text-secondary);
+    border-bottom: 0.5px solid rgba(var(--color-accent-rgb), 0.1);
+}
+
+.map-col-header i {
+    font-size: 0.9rem;
+    color: var(--color-accent);
+}
+
+/* Side-by-side on wide screens */
+@media (min-width: 820px) {
+    .conseiller-container {
+        max-width: 1020px;
+    }
+
+    .live-data-columns {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+
+    .live-col-data {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+
+    .live-col-maps {
+        flex: 1 1 0;
+        min-width: 0;
+        width: auto;
+    }
+}
+
 /* ─── Address Map (retailer) ─────────────────────────────────────────────── */
-/* ── Address Map ──────────────────────────────────────────────── */
 .address-map-wrapper {
     position: relative;
     overflow: hidden;
     margin: 8px -16px -16px;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+/* No bleed when map is inside a map-col-panel (not a data table) */
+.temp-standalone-map {
+    margin: 0;
     border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
 
