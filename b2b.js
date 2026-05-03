@@ -16,7 +16,7 @@
         // 2. Internationalization (i18n)
         const i18n = {
             fr: {
-                heroTitle: "La mobilité repensée.",
+                heroTitle: "Votre marque. Notre technologie.",
                 heroSubtitle: "Une plateforme SaaS en marque blanche, conçue pour l'excellence opérationnelle. Fluidifiez l'expérience de location, suivez vos flottes et offrez un design avant-gardiste à vos clients.",
                 btnDemo: "Demander une démo",
                 aiDisclaimer: "Généré automatiquement à partir de votre profil d'entreprise.",
@@ -47,7 +47,7 @@
                 footerRights: "Tous droits réservés."
             },
             en: {
-                heroTitle: "Mobility reimagined.",
+                heroTitle: "Your brand. Our technology.",
                 heroSubtitle: "A white-label SaaS platform designed for operational excellence. Streamline rentals, track fleets, and offer cutting-edge design to your customers.",
                 btnDemo: "Request a demo",
                 aiDisclaimer: "Automatically generated from your company profile.",
@@ -78,7 +78,7 @@
                 footerRights: "All rights reserved."
             },
             es: {
-                heroTitle: "Movilidad reinventada.",
+                heroTitle: "Tu marca. Nuestra tecnología.",
                 heroSubtitle: "Una plataforma SaaS de marca blanca diseñada para la excelencia. Optimiza alquileres, rastrea flotas y ofrece un diseño de vanguardia a tus clientes.",
                 btnDemo: "Solicitar demo",
                 aiDisclaimer: "Generado automáticamente desde su perfil de empresa.",
@@ -109,7 +109,7 @@
                 footerRights: "Todos los derechos reservados."
             },
             it: {
-                heroTitle: "La mobilità reinventata.",
+                heroTitle: "Il tuo marchio. La nostra tecnologia.",
                 heroSubtitle: "Una piattaforma SaaS white-label progettata per l'eccellenza. Ottimizza i noleggi, traccia le flotte e offri un design all'avanguardia.",
                 btnDemo: "Richiedi demo",
                 aiDisclaimer: "Generato automaticamente dal profilo aziendale.",
@@ -140,7 +140,7 @@
                 footerRights: "Tutti i diritti riservati."
             },
             pt: {
-                heroTitle: "Mobilidade reinventada.",
+                heroTitle: "Sua marca. Nossa tecnologia.",
                 heroSubtitle: "Plataforma SaaS marca branca projetada para a excelência. Simplifique aluguéis, acompanhe frotas e ofereça design de ponta.",
                 btnDemo: "Pedir uma demo",
                 aiDisclaimer: "Gerado automaticamente a partir do perfil da empresa.",
@@ -171,7 +171,7 @@
                 footerRights: "Todos os direitos reservados."
             },
             de: {
-                heroTitle: "Mobilität neu gedacht.",
+                heroTitle: "Ihre Marke. Unsere Technologie.",
                 heroSubtitle: "Eine White-Label SaaS-Plattform für operative Exzellenz. Optimieren Sie Vermietungen, Flotten und bieten Sie modernstes Design.",
                 btnDemo: "Demo anfordern",
                 aiDisclaimer: "Automatisch aus dem Firmenprofil generiert.",
@@ -202,7 +202,7 @@
                 footerRights: "Alle Rechte vorbehalten."
             },
             nl: {
-                heroTitle: "Mobiliteit opnieuw uitgevonden.",
+                heroTitle: "Uw merk. Onze technologie.",
                 heroSubtitle: "Een white-label SaaS-platform ontworpen voor uitmuntendheid. Stroomlijn verhuur en bied uw klanten een geavanceerd ontwerp.",
                 btnDemo: "Demo aanvragen",
                 aiDisclaimer: "Automatisch gegenereerd op basis van bedrijfsprofiel.",
