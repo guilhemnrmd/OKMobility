@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Espace Client — OK Mobility</title>
+
+    <!-- Shared design system -->
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/assets/boxicons/css/boxicons.min.css">
+    <!-- Client-portal specific styles -->
+    <link rel="stylesheet" href="/client/client.css">
+
+    <!-- Brand config: controls logo, name, theme color, legal text.
+         Vendors override this file (or window.BRAND) to white-label. -->
+    <script src="/assets/js/brand-config.js"></script>
+</head>
+<body>
+
+<!-- Ambient background (colors driven by CSS vars / theme) -->
+<div class="ambient-background" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     SALES PAGE
+═══════════════════════════════════════════════════════════════════ -->
+<div id="salesPage" class="sales-page">
+
+    <!-- ── Navigation ──────────────────────────────────────────────── -->
+    <nav class="portal-nav" role="navigation">
+        <div class="nav-inner">
+            <a href="#" class="nav-brand" aria-label="Accueil">
+                <picture>
+                    <source media="(max-width: 640px)" srcset="/assets/logos/okm-logo-mobile-white.svg">
+                    <img class="logo-img-brand" src="/assets/logos/okm-logo-white.svg" alt="Logo" height="32">
+                </picture>
+            </a>
+            <div class="nav-actions">
+                <button id="navLoginBtn" class="btn-login-nav" aria-haspopup="dialog">
+                    <i class="bx bx-user" aria-hidden="true"></i>
+                    <span>Mon espace</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ── Hero ─────────────────────────────────────────────────────── -->
+    <section class="hero-section" id="hero" aria-labelledby="heroTitle">
+        <div class="hero-inner">
+            <div class="hero-badge" id="heroBadge" hidden></div>
+            <h1 class="hero-title" id="heroTitle"><!-- PORTAL_CONFIG --></h1>
+            <p class="hero-subtitle" id="heroSubtitle"><!-- PORTAL_CONFIG --></p>
+            <div class="hero-actions">
+                <button id="heroCta" class="btn-primary hero-cta"><!-- PORTAL_CONFIG --></button>
+                <button id="heroLoginCta" class="btn-ghost hero-login-cta">
+                    <i class="bx bx-log-in" aria-hidden="true"></i>
+                    <span>Déjà client ? Se connecter</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Features ─────────────────────────────────────────────────── -->
+    <section class="content-section features-section" id="features" aria-labelledby="featuresTitle">
+        <div class="section-inner">
+            <div class="section-header">
+                <h2 class="section-title" id="featuresTitle"><!-- PORTAL_CONFIG --></h2>
+                <p class="section-subtitle" id="featuresSubtitle"><!-- PORTAL_CONFIG --></p>
+            </div>
+            <div class="features-grid" id="featuresGrid" role="list">
+                <!-- Filled by client.js from PORTAL_CONFIG.features -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ── How it works ─────────────────────────────────────────────── -->
+    <section class="content-section steps-section" id="howItWorks" aria-labelledby="stepsTitle">
+        <div class="section-inner">
+            <div class="section-header">
+                <h2 class="section-title" id="stepsTitle"><!-- PORTAL_CONFIG --></h2>
+            </div>
+            <div class="steps-grid" id="stepsGrid" role="list">
+                <!-- Filled by client.js from PORTAL_CONFIG.steps -->
+            </div>
+        </div>
+    </section>
+
+    <!-- ── CTA band ──────────────────────────────────────────────────── -->
+    <section class="cta-band" id="ctaBand" aria-labelledby="ctaBandTitle">
+        <div class="section-inner">
+            <div class="cta-band-inner glass-card">
+                <div class="cta-band-text">
+                    <h2 id="ctaBandTitle"><!-- PORTAL_CONFIG --></h2>
+                    <p id="ctaBandSubtitle"><!-- PORTAL_CONFIG --></p>
+                </div>
+                <button id="ctaBandBtn" class="btn-primary btn-cta-band">
+                    <span id="ctaBandBtnLabel"><!-- PORTAL_CONFIG --></span>
+                    <i class="bx bx-right-arrow-alt" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── Footer ───────────────────────────────────────────────────── -->
+    <footer class="portal-footer" role="contentinfo">
+        <div class="footer-inner">
+            <picture>
+                <source media="(max-width: 640px)" srcset="/assets/logos/okm-logo-mobile-white.svg">
+                <img class="logo-img-brand footer-logo" src="/assets/logos/okm-logo-white.svg" alt="Logo" height="22">
+            </picture>
+            <p class="footer-legal" id="footerLegal"><!-- BRAND.copyright --></p>
+            <nav class="footer-links" aria-label="Liens légaux">
+                <a href="#" id="footerPrivacy">Confidentialité</a>
+                <span aria-hidden="true">·</span>
+                <a href="#" id="footerTerms">Conditions d'utilisation</a>
+            </nav>
+        </div>
+    </footer>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     LOGIN MODAL
+═══════════════════════════════════════════════════════════════════ -->
+<div id="loginOverlay" class="login-overlay" aria-hidden="true" role="presentation">
+    <div class="login-modal glass-card" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
+        <button class="modal-close-btn" id="loginCloseBtn" aria-label="Fermer">
+            <i class="bx bx-x" aria-hidden="true"></i>
+        </button>
+
+        <div class="login-modal-header">
+            <picture>
+                <img class="logo-img-brand login-logo" src="/assets/logos/okm-logo-white.svg" alt="Logo" height="28">
+            </picture>
+            <h2 id="loginModalTitle"><!-- PORTAL_CONFIG --></h2>
+            <p id="loginModalSubtitle"><!-- PORTAL_CONFIG --></p>
+        </div>
+
+        <form id="loginForm" class="login-form" novalidate>
+            <div class="field-group">
+                <label for="loginEmail">Adresse e-mail</label>
+                <div class="field-input-wrap">
+                    <i class="bx bx-envelope field-icon" aria-hidden="true"></i>
+                    <input
+                        type="email"
+                        id="loginEmail"
+                        name="email"
+                        autocomplete="email"
+                        placeholder="votre@email.com"
+                        required
+                        aria-required="true"
+                    >
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label for="loginPassword">Mot de passe</label>
+                <div class="field-input-wrap">
+                    <i class="bx bx-lock-alt field-icon" aria-hidden="true"></i>
+                    <input
+                        type="password"
+                        id="loginPassword"
+                        name="password"
+                        autocomplete="current-password"
+                        placeholder="••••••••"
+                        required
+                        aria-required="true"
+                    >
+                    <button type="button" class="toggle-pw-btn" id="togglePwBtn" aria-label="Afficher le mot de passe">
+                        <i class="bx bx-show" id="togglePwIcon" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="loginError" class="form-error" role="alert" aria-live="polite" hidden></div>
+
+            <button type="submit" class="btn-primary login-submit" id="loginSubmit">
+                <span class="btn-label">Se connecter</span>
+                <i class="bx bx-loader-alt bx-spin btn-spinner" aria-hidden="true" hidden></i>
+            </button>
+
+            <div class="login-footer-links">
+                <a href="#" id="forgotPasswordLink">Mot de passe oublié ?</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     CLIENT DASHBOARD  (hidden until authenticated)
+═══════════════════════════════════════════════════════════════════ -->
+<div id="dashboardPage" class="dashboard-page" hidden aria-label="Espace client">
+
+    <!-- Dashboard nav -->
+    <nav class="portal-nav dashboard-nav" role="navigation">
+        <div class="nav-inner">
+            <a href="#" class="nav-brand" aria-label="Tableau de bord">
+                <picture>
+                    <img class="logo-img-brand" src="/assets/logos/okm-logo-white.svg" alt="Logo" height="28">
+                </picture>
+            </a>
+            <div class="nav-actions">
+                <span class="user-greeting" id="userGreeting" aria-live="polite"></span>
+                <button id="logoutBtn" class="btn-ghost btn-logout">
+                    <i class="bx bx-log-out" aria-hidden="true"></i>
+                    <span>Déconnexion</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard content -->
+    <main class="dashboard-main" id="dashMain">
+        <div class="dashboard-inner">
+
+            <!-- Welcome row -->
+            <div class="dash-welcome">
+                <div class="dash-welcome-text">
+                    <h1 class="dash-title" id="dashWelcomeTitle"></h1>
+                    <p class="dash-subtitle" id="dashWelcomeSubtitle"></p>
+                </div>
+                <span class="dash-last-login" id="dashLastLogin"></span>
+            </div>
+
+            <!-- Summary stats -->
+            <div class="dash-stats" id="dashStats" role="list">
+                <!-- Filled by JS -->
+            </div>
+
+            <!-- Account card -->
+            <section class="dash-section" aria-labelledby="accountSectionTitle">
+                <div class="dash-section-header">
+                    <h2 class="dash-section-title" id="accountSectionTitle">Mon compte</h2>
+                    <button class="btn-ghost btn-sm" id="editAccountBtn">
+                        <i class="bx bx-edit-alt" aria-hidden="true"></i>
+                        <span>Modifier</span>
+                    </button>
+                </div>
+                <div class="account-card glass-card" id="accountCard">
+                    <!-- Filled by JS -->
+                </div>
+            </section>
+
+            <!-- DAs section -->
+            <section class="dash-section" aria-labelledby="dasSectionTitle">
+                <div class="dash-section-header">
+                    <h2 class="dash-section-title" id="dasSectionTitle">Mes dossiers</h2>
+                    <button class="btn-secondary btn-sm" id="newDaBtn" hidden>
+                        <i class="bx bx-plus" aria-hidden="true"></i>
+                        <span>Nouveau dossier</span>
+                    </button>
+                </div>
+
+                <!-- Filter tabs -->
+                <div class="da-tabs" id="daTabs" role="tablist" aria-label="Filtrer les dossiers">
+                    <button class="da-tab active" data-filter="all" role="tab" aria-selected="true">Tous</button>
+                    <button class="da-tab" data-filter="pending"  role="tab" aria-selected="false">En cours</button>
+                    <button class="da-tab" data-filter="approved" role="tab" aria-selected="false">Validés</button>
+                    <button class="da-tab" data-filter="refused"  role="tab" aria-selected="false">Refusés</button>
+                </div>
+
+                <!-- DA list -->
+                <div class="da-list" id="daList" role="list">
+                    <!-- Filled by JS -->
+                </div>
+
+                <!-- Empty state -->
+                <div class="da-empty" id="daEmpty" hidden>
+                    <i class="bx bx-folder-open" aria-hidden="true"></i>
+                    <p>Aucun dossier pour l'instant.</p>
+                </div>
+            </section>
+
+        </div>
+    </main>
+</div>
+
+
+<script src="/client/client.js"></script>
+</body>
+</html>
