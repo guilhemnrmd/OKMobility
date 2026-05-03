@@ -16,8 +16,8 @@
         // 2. Internationalization (i18n)
         const i18n = {
             fr: {
-                heroTitle: "Digitalisez l'accueil en agence.",
-                heroSubtitle: "La plateforme en marque blanche pour les loueurs de mobilité. Vos clients scannent un QR code, remplissent leurs informations sur leur smartphone, et vous les recevez instantanément. Zéro serveur, 100% sécurisé via WebRTC.",
+                heroTitle: "La fin des saisies au comptoir.",
+                heroSubtitle: "La solution universelle pour les hôtels, agences et accueils physiques. Vos clients scannent un QR code, saisissent leurs informations sur leur smartphone, et vous les recevez instantanément. Zéro serveur, 100% sécurisé via WebRTC.",
                 btnDemo: "Demander une démo",
                 aiDisclaimer: "Généré automatiquement à partir de votre profil d'entreprise.",
                 videoWatch: "Voir le fonctionnement",
@@ -56,8 +56,8 @@
                 footerRights: "Tous droits réservés."
             },
             en: {
-                heroTitle: "Digitize your agency onboarding.",
-                heroSubtitle: "The white-label platform for mobility renters. Your clients scan a QR code, fill in their info on their smartphone, and you receive it instantly. Zero server, 100% secure via WebRTC.",
+                heroTitle: "The end of manual data entry.",
+                heroSubtitle: "The universal solution for hotels, agencies, and physical receptions. Clients scan a QR code, enter their info on their smartphone, and you receive it instantly. Zero server, 100% secure via WebRTC.",
                 btnDemo: "Request a demo",
                 aiDisclaimer: "Automatically generated from your company profile.",
                 videoWatch: "See how it works",
@@ -96,8 +96,8 @@
                 footerRights: "All rights reserved."
             },
             es: {
-                heroTitle: "Digitalice la recepción en su agencia.",
-                heroSubtitle: "La plataforma de marca blanca para alquileres de movilidad. Sus clientes escanean, rellenan su información en su smartphone, y usted la recibe al instante. 100% seguro.",
+                heroTitle: "El fin de la entrada manual.",
+                heroSubtitle: "La solución universal para hoteles, agencias y recepciones. Sus clientes escanean un QR, introducen sus datos en su smartphone y usted los recibe al instante. 100% seguro.",
                 btnDemo: "Solicitar demo",
                 aiDisclaimer: "Generado automáticamente desde su perfil de empresa.",
                 videoWatch: "Ver cómo funciona",
@@ -136,8 +136,8 @@
                 footerRights: "Todos los derechos reservados."
             },
             it: {
-                heroTitle: "Digitalizza l'accoglienza in agenzia.",
-                heroSubtitle: "La piattaforma white-label per il noleggio. I clienti scansionano, inseriscono le informazioni sul loro smartphone e le ricevi all'istante. 100% sicuro tramite WebRTC.",
+                heroTitle: "La fine dell'inserimento manuale.",
+                heroSubtitle: "La soluzione universale per hotel, agenzie e reception fisiche. I clienti scansionano un QR, inseriscono i dati sul loro smartphone e tu li ricevi all'istante. 100% sicuro.",
                 btnDemo: "Richiedi demo",
                 aiDisclaimer: "Generato automaticamente dal profilo aziendale.",
                 videoWatch: "Guarda come funziona",
@@ -176,8 +176,8 @@
                 footerRights: "Tutti i diritti riservati."
             },
             pt: {
-                heroTitle: "Digitalize o atendimento na agência.",
-                heroSubtitle: "A plataforma marca branca para aluguel de mobilidade. Seus clientes escaneiam, preenchem suas informações no smartphone e você as recebe instantaneamente.",
+                heroTitle: "O fim da digitação manual.",
+                heroSubtitle: "A solução universal para hotéis, agências e recepções. Os clientes escaneiam um QR, inserem seus dados no smartphone e você recebe instantaneamente. 100% seguro.",
                 btnDemo: "Pedir uma demo",
                 aiDisclaimer: "Gerado automaticamente a partir do perfil da empresa.",
                 videoWatch: "Veja como funciona",
@@ -216,8 +216,8 @@
                 footerRights: "Todos os direitos reservados."
             },
             de: {
-                heroTitle: "Digitalisieren Sie Ihren Empfang.",
-                heroSubtitle: "Die White-Label-Plattform für Mobilitätsvermieter. Kunden scannen, füllen ihre Infos auf dem Smartphone aus und Sie erhalten sie sofort. 100% sicher.",
+                heroTitle: "Das Ende der manuellen Dateneingabe.",
+                heroSubtitle: "Die universelle Lösung für Hotels, Agenturen und physische Empfänge. Kunden scannen einen QR-Code, geben ihre Daten am Smartphone ein und Sie erhalten diese sofort.",
                 btnDemo: "Demo anfordern",
                 aiDisclaimer: "Automatisch aus dem Firmenprofil generiert.",
                 videoWatch: "So funktioniert es",
@@ -256,8 +256,8 @@
                 footerRights: "Alle Rechte vorbehalten."
             },
             nl: {
-                heroTitle: "Digitaliseer uw receptie.",
-                heroSubtitle: "Het white-label platform voor mobiliteitsverhuur. Uw klanten scannen, vullen hun info in op hun smartphone en u ontvangt deze direct. 100% veilig via WebRTC.",
+                heroTitle: "Het einde van handmatige invoer.",
+                heroSubtitle: "De universele oplossing voor hotels, bureaus en fysieke recepties. Klanten scannen een QR-code, vullen hun info in op hun smartphone en u ontvangt deze direct.",
                 btnDemo: "Demo aanvragen",
                 aiDisclaimer: "Automatisch gegenereerd op basis van bedrijfsprofiel.",
                 videoWatch: "Bekijk hoe het werkt",
