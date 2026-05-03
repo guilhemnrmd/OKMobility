@@ -53,6 +53,8 @@
                 plan3Feat2: "Intégration API",
                 plan3Feat3: "Développement spécifique",
                 btnQuote: "Nous contacter",
+                btnSecurityNote: "Lire la note technique",
+                navSecurity: "Sécurité & Confidentialité",
                 footerRights: "Tous droits réservés."
             },
             en: {
@@ -93,6 +95,8 @@
                 plan3Feat2: "API Integration",
                 plan3Feat3: "Custom development",
                 btnQuote: "Contact us",
+                btnSecurityNote: "Read technical note",
+                navSecurity: "Security & Privacy",
                 footerRights: "All rights reserved."
             },
             es: {
@@ -133,6 +137,8 @@
                 plan3Feat2: "Integración API",
                 plan3Feat3: "Desarrollo a medida",
                 btnQuote: "Contáctenos",
+                btnSecurityNote: "Leer nota técnica",
+                navSecurity: "Seguridad y Privacidad",
                 footerRights: "Todos los derechos reservados."
             },
             it: {
@@ -173,6 +179,8 @@
                 plan3Feat2: "Integrazione API",
                 plan3Feat3: "Sviluppo su misura",
                 btnQuote: "Contattaci",
+                btnSecurityNote: "Leggi la nota tecnica",
+                navSecurity: "Sicurezza e Privacy",
                 footerRights: "Tutti i diritti riservati."
             },
             pt: {
@@ -213,6 +221,8 @@
                 plan3Feat2: "Integração API",
                 plan3Feat3: "Desenvolvimento sob medida",
                 btnQuote: "Contacte-nos",
+                btnSecurityNote: "Ler nota técnica",
+                navSecurity: "Segurança e Privacidade",
                 footerRights: "Todos os direitos reservados."
             },
             de: {
@@ -253,6 +263,8 @@
                 plan3Feat2: "API-Integration",
                 plan3Feat3: "Maßgeschneiderte Entwicklung",
                 btnQuote: "Kontaktieren Sie uns",
+                btnSecurityNote: "Technische Notiz lesen",
+                navSecurity: "Sicherheit & Datenschutz",
                 footerRights: "Alle Rechte vorbehalten."
             },
             nl: {
@@ -293,6 +305,8 @@
                 plan3Feat2: "API integratie",
                 plan3Feat3: "Maatwerk ontwikkeling",
                 btnQuote: "Neem contact op",
+                btnSecurityNote: "Lees technische notitie",
+                navSecurity: "Veiligheid & Privacy",
                 footerRights: "Alle rechten voorbehouden."
             }
         };
