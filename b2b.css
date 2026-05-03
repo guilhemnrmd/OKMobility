@@ -425,8 +425,9 @@ p {
     align-items: flex-start;
 }
 .pricing-card h3 { font-size: 1.5rem; font-weight: 400; color: var(--text-secondary); }
-.pricing-card .price { font-size: 3.5rem; font-weight: 700; margin: 1rem 0 2rem; line-height: 1; }
+.pricing-card .price { font-size: 3.5rem; font-weight: 700; margin: 1rem 0 0; line-height: 1; }
 .pricing-card .price span { font-size: 1rem; font-weight: 400; color: var(--text-secondary); margin-left: 0.25rem; }
+.pricing-card .yearly-price { font-size: 0.875rem; color: rgba(255,255,255,0.4); margin-bottom: 2rem; margin-top: 0.25rem; }
 .pricing-card ul { list-style: none; margin-bottom: 2.5rem; width: 100%; }
 .pricing-card ul li { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; font-size: 1rem; }
 .pricing-card ul li i { color: #fff; background: rgba(255,255,255,0.1); border-radius: 50%; padding: 2px; }
