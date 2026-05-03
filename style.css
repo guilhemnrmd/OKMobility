@@ -2162,7 +2162,74 @@ input::placeholder {
         flex: 1 1 0;
         min-width: 0;
         width: auto;
+        /* on wide screens: use max-width for horizontal push animation */
+        max-height: none;
+        max-width: 0;
+        transition:
+            max-width 0.5s cubic-bezier(0.25, 1, 0.5, 1),
+            opacity 0.4s ease;
     }
+
+    .live-col-maps.has-map {
+        max-width: 50%;
+    }
+}
+
+/* ─── Retailer live data view entrance animation ─────────────────────────── */
+@keyframes liveDataSlideUp {
+    from { opacity: 0; transform: translateY(32px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.live-data-entrance {
+    animation: liveDataSlideUp 0.45s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+/* ─── Collapsible data rows (temp address, phone2) ───────────────────────── */
+.collapsible-row {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+    transition:
+        max-height 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+        opacity 0.3s ease;
+}
+
+.collapsible-row.row-expanded {
+    max-height: 80px; /* generous enough for one data row */
+    opacity: 1;
+    pointer-events: auto;
+    overflow: visible;
+}
+
+/* ─── Maps column slide-in animation ─────────────────────────────────────── */
+.live-col-maps {
+    /* hidden by default until a map is ready — vertical collapse on mobile */
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition:
+        max-height 0.5s cubic-bezier(0.25, 1, 0.5, 1),
+        opacity 0.4s ease;
+}
+
+.live-col-maps.has-map {
+    max-height: 1200px;
+    opacity: 1;
+    overflow: visible;
+}
+
+/* Map panels hidden until .map-visible is added */
+#addressMapWrapper,
+#tempAddressMapWrapper {
+    display: none;
+}
+
+#addressMapWrapper.map-visible,
+#tempAddressMapWrapper.map-visible {
+    display: block;
+    animation: liveDataSlideUp 0.4s cubic-bezier(0.25, 1, 0.5, 1) both;
 }
 
 /* ─── Address Map (retailer) ─────────────────────────────────────────────── */
