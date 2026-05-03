@@ -1,296 +1,95 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="fr" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
-    <meta name="referrer" content="same-origin">
-    <title>OK Mobility</title>
+    
+    <!-- SEO Optimization -->
+    <title>Plateforme de Mobilité en Marque Blanche</title>
+    <meta name="description" content="Découvrez notre plateforme SaaS de mobilité B2B. Interface en marque blanche, gestion dynamique et design Liquid Glass premium pour optimiser vos locations.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://votredomaine.com/">
+    
+    <!-- Icons -->
     <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
-    
-    <!-- Boxicons (self-hosted) -->
     <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
-
-    <!-- Flag icons — SVG sprites, cross-platform flag display -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css?v=47">
     
-    <!-- Brand Config (white-label) -->
-    <script src="/assets/js/brand-config.js"></script>
-
-    <!-- PeerJS -->
-    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <!-- B2B Custom Styles (Black & White, Liquid Glass, Magnetic) -->
+    <link rel="stylesheet" href="/b2b.css">
+    
+    <!-- B2B Logic (Redirect & Animations) -->
+    <script src="/b2b.js" defer></script>
 </head>
 <body>
-    
-    <!-- Dynamic Ambient Background -->
-    <div class="ambient-background">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
-    </div>
 
-    <!-- Main Liquid Glass Container -->
-    <main class="glass-container">
-        
-        <!-- Header & Language Selector -->
-        <header class="glass-header">
-            <div class="header-brand">
-                <div class="logo">
-                    <picture class="logo-picture">
-                        <source media="(max-width: 640px)" srcset="/assets/logos/okm-logo-mobile-white.svg">
-                        <img src="/assets/logos/okm-logo-white.svg" alt="OK Mobility Logo" class="logo-img logo-img-brand">
-                    </picture>
-                </div>
-                <span class="brand-slogan" id="agencyBrandText">The Global Mobility Platform</span>
-            </div>
+    <!-- Header / Navbar -->
+    <header class="b2b-nav">
+        <div class="nav-brand">
+            MobilityOS
+        </div>
+        <div class="nav-controls">
+            <!-- Language Icon -->
+            <button class="btn-icon magnetic" aria-label="Sélectionner la langue" title="Langue">
+                <i class='bx bx-globe'></i>
+            </button>
+            <!-- Login Icon -->
+            <a href="/retailer/" class="btn-icon magnetic" aria-label="Se connecter" title="Se connecter">
+                <i class='bx bx-user'></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="magnetic">La mobilité repensée.</h1>
+            <p>Une plateforme SaaS en marque blanche, conçue pour l'excellence opérationnelle. Fluidifiez l'expérience de location, suivez vos flottes et offrez un design avant-gardiste à vos clients.</p>
             
-            <div class="header-controls">
-                <div class="lang-selector">
-                    <i class='bx bx-globe'></i>
-                    <span id="langDisplay">English</span>
-                    <select id="languageSelect" aria-label="Select language">
-                        <option value="en" selected>English</option>
-                        <option value="fr">Français</option>
-                        <option value="es">Español</option>
-                        <option value="it">Italiano</option>
-                        <option value="pt">Português</option>
-                        <option value="de">Deutsch</option>
-                        <option value="nl">Nederlands</option>
-                    </select>
-                </div>
-                <button type="button" id="btnOpenAdvisorModal" class="btn-icon" aria-label="Connecter un conseiller" title="Connecter un conseiller">
-                    <i class='bx bx-link'></i>
-                </button>
-                <button id="btnReset" class="btn-reset" aria-label="Reset">
-                    <i class='bx bx-rotate-left'></i>
-                </button>
-            </div>
-        </header>
-
-        <section class="form-content">
+            <a href="/retailer/" class="btn-primary magnetic">
+                Demander une démo <i class='bx bx-right-arrow-alt'></i>
+            </a>
             
-            <div class="title-wrapper">
-                <h1 id="pageTitle" class="gradient-text">Vos informations</h1>
-            </div>
-
-            <form id="clientForm" class="modern-form" novalidate>
-                
-                <!-- Address Section (Free Text) -->
-                <div class="input-wrapper address-wrapper">
-                    <label for="address" id="lblAddress">Adresse de résidence</label>
-                    <div class="input-with-icon">
-                        <i class='bx bx-map'></i>
-                        <input type="text" id="address" name="address" placeholder="15 Rue de Rivoli" autocomplete="off" required>
-                    </div>
-                    <ul class="address-suggestions" id="addressSuggestions" role="listbox"></ul>
-                </div>
-
-                <!-- Postal Code & City -->
-                <div class="form-group-row">
-                    <div class="input-wrapper zip-wrapper">
-                        <label for="zipCode" id="lblZipCode">Code Postal</label>
-                        <div class="input-with-icon">
-                            <i class='bx bx-hash'></i>
-                            <input type="text" id="zipCode" name="zipCode" placeholder="75001" required>
-                        </div>
-                    </div>
-                    <div class="input-wrapper city-wrapper">
-                        <label for="city" id="lblCity">Ville</label>
-                        <div class="input-with-icon">
-                            <i class='bx bx-buildings'></i>
-                            <input type="text" id="city" name="city" placeholder="Paris" required>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Country -->
-                <div class="input-wrapper">
-                    <label for="country" id="lblCountry">Pays</label>
-                    <div class="cs-wrap" id="countryWrap">
-                        <span class="cs-face" id="countryDisplay">🇫🇷 France</span>
-                        <input class="cs-search" type="text" autocomplete="off" spellcheck="false" aria-label="Rechercher un pays">
-                        <i class='bx bx-chevron-down cs-arrow'></i>
-                        <ul class="cs-list" role="listbox"></ul>
-                        <select id="country" name="country" class="cs-hidden" tabindex="-1" aria-hidden="true">
-                            <option value="FR" selected>🇫🇷 France</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Expanding Temporary Address Wrapper -->
-                <div class="temp-address-wrapper" id="tempAddressWrapper">
-                    <!-- Temporary Address Checkbox -->
-                    <div class="temp-address-toggle">
-                        <div class="toggle-header" id="tempToggleHeader">
-                            <label class="custom-checkbox">
-                                <input type="checkbox" id="hasTempAddress" name="hasTempAddress">
-                                <span class="checkmark"></span>
-                                <span id="lblTempAddressCheck">J'ai une adresse temporaire locale</span>
-                            </label>
-                            <button type="button" class="info-btn" id="btnTempInfo" title="Utilisé si vous séjournez temporairement dans une autre adresse pendant votre location." aria-label="Information">
-                                <i class='bx bx-info-circle'></i>
-                            </button>
-                        </div>
-                        <!-- Tooltip content hidden by default -->
-                        <div class="info-tooltip glass-panel" id="tempTooltip" style="display: none;">
-                            <p id="txtTempTooltip">Renseignez cette adresse si vous séjournez temporairement à un autre endroit (ex: Hôtel, Airbnb) pendant la durée de votre location.</p>
-                        </div>
-                    </div>
-
-                    <!-- Temporary Address Fields (Hidden by CSS by default) -->
-                    <div class="temp-address-sliding-section" id="tempAddressSection">
-                        <div class="temp-address-content-inner">
-                            <div class="input-wrapper address-wrapper">
-                                <label for="tempAddress" id="lblTempAddress">Adresse temporaire</label>
-                                <div class="input-with-icon">
-                                    <i class='bx bx-map-pin'></i>
-                                    <input type="text" id="tempAddress" name="tempAddress" placeholder="Hotel Plaza" autocomplete="off">
-                                </div>
-                                <ul class="address-suggestions" id="tempAddressSuggestions" role="listbox"></ul>
-                            </div>
-                            <div class="form-group-row">
-                                <div class="input-wrapper zip-wrapper">
-                                    <label for="tempZipCode" id="lblTempZipCode">Code Postal</label>
-                                    <div class="input-with-icon">
-                                        <i class='bx bx-hash'></i>
-                                        <input type="text" id="tempZipCode" name="tempZipCodePlaceholder" placeholder="">
-                                    </div>
-                                </div>
-                                <div class="input-wrapper city-wrapper">
-                                    <label for="tempCity" id="lblTempCity">Ville</label>
-                                    <div class="input-with-icon">
-                                        <i class='bx bx-buildings'></i>
-                                        <input type="text" id="tempCity" name="tempCityPlaceholder" placeholder="">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Phone Section with separate dial code and number -->
-                <div class="form-group-row">
-                    <div class="input-wrapper zip-wrapper">
-                        <label for="countryCode" id="lblPhoneCode">Indicatif</label>
-                        <div class="phone-country-box cs-wrap" id="countryCodeWrap">
-                            <span class="cs-face" id="countryCodeDisplay">🇫🇷 +33</span>
-                            <input class="cs-search" type="text" autocomplete="off" spellcheck="false" aria-label="Rechercher un indicatif">
-                            <i class='bx bx-chevron-down cs-arrow'></i>
-                            <ul class="cs-list" role="listbox"></ul>
-                            <select id="countryCode" name="countryCode" class="cs-hidden" tabindex="-1" aria-hidden="true">
-                                <option value="+33" selected>🇫🇷 France (+33)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="input-wrapper city-wrapper">
-                        <label for="phone" id="lblPhone">Numéro de téléphone</label>
-                        <div class="input-with-icon">
-                            <i class='bx bx-phone'></i>
-                            <input type="tel" id="phone" name="phone" pattern="^[0-9\s]+$" placeholder="6 12 34 56 78" required>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Second Phone (optional) -->
-                <div class="temp-address-wrapper" id="phone2Wrapper">
-                    <div class="temp-address-toggle">
-                        <div class="toggle-header phone2-toggle-header" id="btnTogglePhone2">
-                            <label class="custom-checkbox">
-                                <input type="checkbox" id="hasPhone2" name="hasPhone2">
-                                <span class="checkmark"></span>
-                                <span id="lblPhone2Toggle">Añadir segundo teléfono</span>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="temp-address-sliding-section" id="phone2Section">
-                        <div class="temp-address-content-inner">
-                            <div class="form-group-row">
-                                <div class="input-wrapper zip-wrapper">
-                                    <label for="countryCode2" id="lblPhoneCode2">Indicatif</label>
-                                    <div class="phone-country-box cs-wrap" id="countryCode2Wrap">
-                                        <span class="cs-face" id="countryCode2Display">🇫🇷 +33</span>
-                                        <input class="cs-search" type="text" autocomplete="off" spellcheck="false" aria-label="Rechercher un indicatif">
-                                        <i class='bx bx-chevron-down cs-arrow'></i>
-                                        <ul class="cs-list" role="listbox"></ul>
-                                        <select id="countryCode2" name="countryCode2" class="cs-hidden" tabindex="-1" aria-hidden="true">
-                                            <option value="+33">🇫🇷 France (+33)</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="input-wrapper city-wrapper">
-                                    <label for="phone2" id="lblPhone2">2e téléphone (optionnel)</label>
-                                    <div class="input-with-icon">
-                                        <i class='bx bx-phone'></i>
-                                        <input type="tel" id="phone2" name="phone2" pattern="^[0-9\s]+$" placeholder="6 12 34 56 78">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Email Section -->
-                <div class="input-wrapper">
-                    <label for="email" id="lblEmail">E-mail</label>
-                    <div class="input-with-icon">
-                        <i class='bx bx-envelope'></i>
-                        <!-- inputmode="email" triggers email keyboard on mobile -->
-                        <input type="email" id="email" name="email" inputmode="email" placeholder="jean.dupont@email.com" required>
-                    </div>
-                </div>
-
-                <!-- Actions -->
-                <div class="form-actions">
-                    <button type="submit" id="btnGenerate" class="btn-primary glass-btn">
-                        <span id="txtBtnGenerate">Générer mon résumé</span>
-                    </button>
-                    <p class="legal-text">
-                        OK MOBILITY GROUP, S.L.U. es el Responsable del tratamiento de los datos personales del Interesado y le informa de que estos datos se tratarán de conformidad con lo dispuesto en el Reglamento (UE) 2016/679, de 27 de abril (GDPR), y la Ley Orgánica 3/2018, de 5 de diciembre (LOPDG).
-                    </p>
-                </div> <!-- Closes form-actions -->
-            </form>
-
-            <!-- Success / Summary View (Hidden by default) -->
-            <div id="summaryView" class="summary-view" style="display: none;">
-                <div class="summary-card glass-panel">
-                    <div class="summary-content" id="summaryContentBody">
-                        <!-- Filled via JS -->
-                    </div>
-                    <div class="summary-actions">
-                        <button id="btnEdit" class="btn-secondary">
-                            <i class='bx bx-edit-alt'></i>
-                            <span id="txtBtnEdit">Modifier</span>
-                        </button>
-                    </div>
-                </div>
-            <p class="legal-text">
-                OK MOBILITY GROUP, S.L.U. es el Responsable del tratamiento de los datos personales del Interesado y le informa de que estos datos se tratarán de conformidad con lo dispuesto en el Reglamento (UE) 2016/679, de 27 de abril (GDPR), y la Ley Orgánica 3/2018, de 5 de diciembre (LOPDG).
-            </p>
-            </div>
-
-        </section>
-
-        <!-- Advisor Connection Modal -->
-        <div class="modal-overlay" id="advisorModalOverlay" style="display: none;"></div>
-        <div class="advisor-modal glass-panel" id="advisorModal" role="dialog" aria-modal="true" aria-labelledby="advisorModalTitle" style="display: none;">
-            <div class="modal-header">
-                <h2 id="advisorModalTitle">Connecter un conseiller</h2>
-            </div>
-            <p id="advisorModalDesc" class="modal-desc">Saisissez le code fourni par le conseiller.</p>
-            <div class="input-with-icon">
-                <i class='bx bx-link'></i>
-                <input type="text" id="advisorCodeInput" placeholder="XXXXXX" maxlength="6" autocomplete="off" style="text-transform: uppercase;">
-            </div>
-            <div class="modal-actions">
-                <button id="advisorModalCancel" class="btn-secondary">Annuler</button>
+            <!-- Apple Intelligence transparent insertion -->
+            <div style="margin-top: 3rem;" class="ai-disclaimer reveal">
+                <i class='bx bx-sparkles'></i>
+                <span>Généré automatiquement à partir de votre profil d'entreprise.</span>
             </div>
         </div>
-        
-    </main>
+    </section>
 
-    <script src="/assets/js/script.js?v=32"></script>
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="glass-card reveal">
+            <div class="shine"></div>
+            <i class='bx bx-shape-triangle'></i>
+            <h3>Design Liquid Glass</h3>
+            <p>Une interface utilisateur à couper le souffle, s'adaptant dynamiquement à votre identité de marque en toute transparence.</p>
+        </div>
+        <div class="glass-card reveal" style="transition-delay: 0.1s;">
+            <div class="shine"></div>
+            <i class='bx bx-globe'></i>
+            <h3>Génération de QR Code</h3>
+            <p>Connectez instantanément vos clients depuis leur smartphone via la technologie WebRTC peer-to-peer. Rapide et sécurisé.</p>
+        </div>
+        <div class="glass-card reveal" style="transition-delay: 0.2s;">
+            <div class="shine"></div>
+            <i class='bx bx-shield-quarter'></i>
+            <h3>Confidentialité Totale</h3>
+            <p>Aucune donnée stockée sur nos serveurs lors des échanges client-vendeur. Conformité RGPD absolue by-design.</p>
+        </div>
+        <div class="glass-card reveal" style="transition-delay: 0.3s;">
+            <div class="shine"></div>
+            <i class='bx bx-git-branch'></i>
+            <h3>Marque Blanche</h3>
+            <p>Déployez notre technologie de pointe sous votre propre nom. Paramétrez les couleurs, textes et options selon vos besoins.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 MobilityOS. Tous droits réservés.</p>
+    </footer>
+
 </body>
 </html>

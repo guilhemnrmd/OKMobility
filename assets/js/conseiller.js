@@ -26,10 +26,10 @@
 // ============================================================================
 const config = {
     publicClientUrl: (() => {
-        if (typeof window === 'undefined') return 'https://okmobility.pages.dev/';
+        if (typeof window === 'undefined') return 'https://okmobility.pages.dev/client/';
         // Always use the current origin so the QR code points to the right environment
         // (prod → prod, Cloudflare preview → preview, localhost → localhost)
-        return window.location.origin + '/';
+        return window.location.origin + '/client/';
     })(),
     peerPrefix: 'OKM-',
     codeLength: 6,
