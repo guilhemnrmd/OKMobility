@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
     <!-- SEO Optimization -->
-    <title>Plateforme de Mobilité en Marque Blanche</title>
+    <title>MobilityOS - Plateforme B2B</title>
     <meta name="description" content="Découvrez notre plateforme SaaS de mobilité B2B. Interface en marque blanche, gestion dynamique et design Liquid Glass premium pour optimiser vos locations.">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://votredomaine.com/">
@@ -34,9 +34,13 @@
                 <i class='bx bx-globe'></i>
                 <span id="langDisplay">Français</span>
                 <select id="languageSelect" aria-label="Sélectionner la langue">
-                    <option value="fr" selected>Français</option>
                     <option value="en">English</option>
+                    <option value="fr" selected>Français</option>
                     <option value="es">Español</option>
+                    <option value="it">Italiano</option>
+                    <option value="pt">Português</option>
+                    <option value="de">Deutsch</option>
+                    <option value="nl">Nederlands</option>
                 </select>
             </div>
             <!-- Login Icon -->
@@ -53,16 +57,16 @@
         <section class="snap-section hero">
             <div class="hero-content">
                 <!-- Title with new blur-fade animation -->
-                <h1 class="magnetic blur-reveal">La mobilité repensée.</h1>
-                <p class="blur-reveal" style="animation-delay: 0.3s;">Une plateforme SaaS en marque blanche, conçue pour l'excellence opérationnelle. Fluidifiez l'expérience de location, suivez vos flottes et offrez un design avant-gardiste à vos clients.</p>
+                <h1 class="magnetic blur-reveal" data-i18n="heroTitle">La mobilité repensée.</h1>
+                <p class="blur-reveal" style="animation-delay: 0.3s;" data-i18n="heroSubtitle">Une plateforme SaaS en marque blanche, conçue pour l'excellence opérationnelle. Fluidifiez l'expérience de location, suivez vos flottes et offrez un design avant-gardiste à vos clients.</p>
                 
                 <a href="/retailer/" class="btn-primary magnetic blur-reveal" style="animation-delay: 0.5s;">
-                    Demander une démo <i class='bx bx-right-arrow-alt'></i>
+                    <span data-i18n="btnDemo">Demander une démo</span> <i class='bx bx-right-arrow-alt'></i>
                 </a>
                 
                 <div class="ai-disclaimer blur-reveal" style="animation-delay: 0.7s; margin-top: 3rem;">
                     <i class='bx bx-sparkles'></i>
-                    <span>Généré automatiquement à partir de votre profil d'entreprise.</span>
+                    <span data-i18n="aiDisclaimer">Généré automatiquement à partir de votre profil d'entreprise.</span>
                 </div>
             </div>
             <!-- Scroll indicator -->
@@ -76,10 +80,10 @@
             <div class="video-container glass-card reveal magnetic-card">
                 <div class="shine"></div>
                 <div class="video-placeholder">
-                    <button class="play-btn magnetic">
+                    <button class="play-btn magnetic" aria-label="Play">
                         <i class='bx bx-play'></i>
                     </button>
-                    <span>Voir le fonctionnement</span>
+                    <span data-i18n="videoWatch">Voir le fonctionnement</span>
                 </div>
             </div>
         </section>
@@ -90,20 +94,20 @@
                 <div class="glass-card reveal magnetic-card">
                     <div class="shine"></div>
                     <i class='bx bx-shape-triangle'></i>
-                    <h3>Design Liquid Glass</h3>
-                    <p>Une interface utilisateur s'adaptant dynamiquement à votre identité.</p>
+                    <h3 data-i18n="feat1Title">Design Liquid Glass</h3>
+                    <p data-i18n="feat1Desc">Une interface utilisateur s'adaptant dynamiquement à votre identité.</p>
                 </div>
                 <div class="glass-card reveal magnetic-card" style="transition-delay: 0.1s;">
                     <div class="shine"></div>
                     <i class='bx bx-qr-scan'></i>
-                    <h3>Scan Express</h3>
-                    <p>Connectez vos clients instantanément via QR Code. Rapide et sécurisé.</p>
+                    <h3 data-i18n="feat2Title">Scan Express</h3>
+                    <p data-i18n="feat2Desc">Connectez vos clients instantanément via QR Code. Rapide et sécurisé.</p>
                 </div>
                 <div class="glass-card reveal magnetic-card" style="transition-delay: 0.2s;">
                     <div class="shine"></div>
                     <i class='bx bx-git-branch'></i>
-                    <h3>Marque Blanche</h3>
-                    <p>Déployez notre technologie sous votre propre nom et vos propres couleurs.</p>
+                    <h3 data-i18n="feat3Title">Marque Blanche</h3>
+                    <p data-i18n="feat3Desc">Déployez notre technologie sous votre propre nom et vos propres couleurs.</p>
                 </div>
             </div>
         </section>
@@ -114,43 +118,43 @@
                 <div class="lock-icon-container magnetic">
                     <i class='bx bx-lock-alt'></i>
                 </div>
-                <h2>Sécurité Absolue.</h2>
-                <p>Vos données sont protégées par chiffrement de bout en bout. Nous utilisons la technologie WebRTC peer-to-peer : <strong>aucune donnée personnelle n'est stockée sur nos serveurs</strong>. Vos échanges clients-vendeurs restent strictement confidentiels et conformes au RGPD.</p>
+                <h2 data-i18n="privTitle">Sécurité Absolue.</h2>
+                <p data-i18n="privDesc">Vos données sont protégées par chiffrement de bout en bout. Nous utilisons la technologie WebRTC peer-to-peer : aucune donnée personnelle n'est stockée sur nos serveurs. Vos échanges clients-vendeurs restent strictement confidentiels et conformes au RGPD.</p>
             </div>
         </section>
 
         <!-- Section 5: Pricing -->
         <section class="snap-section pricing-section">
-            <h2 class="reveal">Tarification transparente.</h2>
+            <h2 class="reveal" data-i18n="priceTitle">Tarification transparente.</h2>
             <div class="pricing-cards">
                 <div class="glass-card reveal pricing-card magnetic-card">
                     <div class="shine"></div>
-                    <h3>Essentiel</h3>
-                    <div class="price">299€<span>/mois</span></div>
+                    <h3 data-i18n="plan1Name">Essentiel</h3>
+                    <div class="price">299€<span data-i18n="perMonth">/mois</span></div>
                     <ul>
-                        <li><i class='bx bx-check'></i> Marque Blanche standard</li>
-                        <li><i class='bx bx-check'></i> Jusqu'à 5 Agences</li>
-                        <li><i class='bx bx-check'></i> Support email</li>
+                        <li><i class='bx bx-check'></i> <span data-i18n="plan1Feat1">Marque Blanche standard</span></li>
+                        <li><i class='bx bx-check'></i> <span data-i18n="plan1Feat2">Jusqu'à 5 Agences</span></li>
+                        <li><i class='bx bx-check'></i> <span data-i18n="plan1Feat3">Support email</span></li>
                     </ul>
-                    <a href="#" class="btn-secondary">Choisir</a>
+                    <a href="#" class="btn-secondary" data-i18n="btnChoose">Choisir</a>
                 </div>
                 <div class="glass-card reveal pricing-card featured magnetic-card" style="transition-delay: 0.1s;">
                     <div class="shine"></div>
-                    <div class="badge">Le plus populaire</div>
-                    <h3>Entreprise</h3>
-                    <div class="price">Sur mesure</div>
+                    <div class="badge" data-i18n="badgePopular">Le plus populaire</div>
+                    <h3 data-i18n="plan2Name">Entreprise</h3>
+                    <div class="price" data-i18n="plan2Price">Sur mesure</div>
                     <ul>
-                        <li><i class='bx bx-check'></i> Customisation complète</li>
-                        <li><i class='bx bx-check'></i> Agences illimitées</li>
-                        <li><i class='bx bx-check'></i> Support prioritaire 24/7</li>
-                        <li><i class='bx bx-check'></i> Accès API complet</li>
+                        <li><i class='bx bx-check'></i> <span data-i18n="plan2Feat1">Customisation complète</span></li>
+                        <li><i class='bx bx-check'></i> <span data-i18n="plan2Feat2">Agences illimitées</span></li>
+                        <li><i class='bx bx-check'></i> <span data-i18n="plan2Feat3">Support prioritaire 24/7</span></li>
+                        <li><i class='bx bx-check'></i> <span data-i18n="plan2Feat4">Accès API complet</span></li>
                     </ul>
-                    <a href="#" class="btn-primary">Contacter les ventes</a>
+                    <a href="/retailer/" class="btn-primary" data-i18n="btnContact">Contacter les ventes</a>
                 </div>
             </div>
             
             <footer class="b2b-footer">
-                <p>&copy; 2026 MobilityOS. Tous droits réservés.</p>
+                <p>&copy; 2026 MobilityOS. <span data-i18n="footerRights">Tous droits réservés.</span></p>
             </footer>
         </section>
 
