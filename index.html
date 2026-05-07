@@ -55,10 +55,10 @@
         
         <!-- Section 1: Hero -->
         <section class="snap-section hero">
-            <div class="hero-content">
+            <div class="hero-content" style="text-align: left;">
                 <!-- Title with new blur-fade animation -->
                 <h1 class="magnetic blur-reveal" data-i18n="heroTitle">La fin des saisies au comptoir.</h1>
-                <p class="blur-reveal" style="animation-delay: 0.3s;" data-i18n="heroSubtitle">La solution universelle pour les hôtels, agences et accueils physiques. Vos clients scannent un QR code, saisissent leurs informations sur leur smartphone, et vous les recevez instantanément. Zéro serveur, 100% sécurisé via WebRTC.</p>
+                <p class="blur-reveal" style="animation-delay: 0.3s; text-align: left;" data-i18n="heroSubtitle">La solution universelle pour les hôtels, agences et accueils physiques. Vos clients scannent un QR code, saisissent leurs informations sur leur smartphone, et vous les recevez instantanément. Zéro serveur, 100% sécurisé via WebRTC.</p>
                 
                 <a href="/retailer/" class="btn-primary magnetic blur-reveal" style="animation-delay: 0.5s;">
                     <span data-i18n="btnDemo">Demander une démo</span> <i class='bx bx-right-arrow-alt'></i>
@@ -90,18 +90,18 @@
 
         <!-- Section 2.1: Problem / Solution -->
         <section class="snap-section problem-section">
-            <div class="content-wrapper reveal">
-                <h2 data-i18n="probTitle" style="font-size: 3rem; color: #fff; margin-bottom: 1rem;">L'ancien monde.</h2>
-                <p class="large-text" data-i18n="probDesc" style="color: var(--text-secondary); font-size: 1.5rem; line-height: 1.5; margin-bottom: 3rem;">Saisie manuelle. Fautes de frappe. Files d'attente interminables. La collecte de données au comptoir fait perdre de 3 à 5 minutes par client.</p>
+            <div class="content-wrapper reveal" style="text-align: left;">
+                <h2 data-i18n="probTitle" style="font-size: clamp(2rem, 5vw, 3rem); color: #fff; margin-bottom: 1rem;">L'ancien monde.</h2>
+                <p class="large-text" data-i18n="probDesc" style="color: var(--text-secondary); font-size: 1.3rem; line-height: 1.6; margin-bottom: 3rem;">Saisie manuelle. Fautes de frappe. Files d'attente interminables. La collecte de données au comptoir fait perdre de 3 à 5 minutes par client.</p>
                 
-                <h2 style="font-size: 3rem; color: #4CAF50; margin-bottom: 1rem;" data-i18n="solTitle">Le nouveau monde.</h2>
-                <p class="large-text" data-i18n="solDesc" style="color: #fff; font-size: 1.5rem; line-height: 1.5;">Le client scanne un QR code et saisit ses informations lui-même. Vous les recevez instantanément. Zéro friction.</p>
+                <h2 style="font-size: clamp(2rem, 5vw, 3rem); color: #4CAF50; margin-bottom: 1rem;" data-i18n="solTitle">Le nouveau monde.</h2>
+                <p class="large-text" data-i18n="solDesc" style="color: #fff; font-size: 1.3rem; line-height: 1.6;">Le client scanne un QR code et saisit ses informations lui-même. Vous les recevez instantanément. Zéro friction.</p>
             </div>
         </section>
 
         <!-- Section 2.2: The Experience -->
         <section class="snap-section experience-section" style="display: flex; flex-direction: column; justify-content: center;">
-            <h2 class="reveal" data-i18n="expTitle" style="text-align: center; margin-bottom: 4rem; font-size: 2.5rem;">Une expérience à 360°</h2>
+            <h2 class="reveal" data-i18n="expTitle" style="text-align: left; margin-bottom: 3rem; font-size: clamp(1.8rem, 4vw, 2.5rem); padding: 0 2rem;">Une expérience à 360°</h2>
             <div class="experience-grid">
                 <div class="experience-card glass-card reveal magnetic-card">
                     <div class="shine"></div>
@@ -152,9 +152,9 @@
 
         <!-- Section 3.1: Architecture Edge -->
         <section class="snap-section architecture-section">
-            <div class="content-wrapper reveal" style="max-width: 800px; margin: 0 auto; width: 100%;">
-                <h2 data-i18n="archTitle" style="font-size: 2.5rem; text-align: center; margin-bottom: 1rem;">Conçu pour l'Edge.</h2>
-                <p data-i18n="archDesc" style="color: var(--text-secondary); text-align: center; margin-bottom: 3rem;">Rendement de niveau entreprise dès le premier jour, sans serveurs à gérer.</p>
+            <div class="content-wrapper reveal" style="max-width: 800px; margin: 0 auto; width: 100%; text-align: left;">
+                <h2 data-i18n="archTitle" style="font-size: clamp(1.8rem, 4vw, 2.5rem); text-align: left; margin-bottom: 1rem;">Conçu pour l'Edge.</h2>
+                <p data-i18n="archDesc" style="color: var(--text-secondary); text-align: left; margin-bottom: 3rem;">Rendement de niveau entreprise dès le premier jour, sans serveurs à gérer.</p>
                 <div class="comparison-table glass-card" style="padding: 2rem;">
                     <table style="width: 100%; border-collapse: collapse; text-align: left;">
                         <thead>
@@ -232,7 +232,7 @@
                 <div class="glass-card reveal pricing-card magnetic-card" style="transition-delay: 0.2s;">
                     <div class="shine"></div>
                     <h3 data-i18n="plan3Name">Réseau & Franchise</h3>
-                    <div class="price" data-i18n="plan3Price">Sur devis</div>
+                    <div class="price"><span class="price-text" data-i18n="plan3Price">Sur devis</span></div>
                     <div class="yearly-price" data-i18n="plan3Year">Contactez-nous</div>
                     <ul>
                         <li><i class='bx bx-check'></i> <span data-i18n="plan3Feat1">Marque blanche intégrale</span></li>
@@ -242,9 +242,9 @@
                     <a href="mailto:guilhem.normand@icloud.com" class="btn-secondary" data-i18n="btnQuote">Nous contacter</a>
                 </div>
             </div>
-            <div class="apple-footnotes" style="max-width: 800px; margin: 4rem auto 2rem; padding: 0 2rem; font-size: 0.8rem; color: rgba(255,255,255,0.4); text-align: left; line-height: 1.5;">
-                <p style="margin-bottom: 0.5rem;"><sup style="margin-right: 4px;">1</sup> <span data-i18n="fn1">Disponibilité garantie contractuellement par l'infrastructure Cloudflare Edge, avec plus de 300 points de présence mondiaux.</span></p>
-                <p style="margin-bottom: 0.5rem;"><sup style="margin-right: 4px;">2</sup> <span data-i18n="fn2">Le protocole WebRTC chiffre nativement les transferts de données en DTLS/SRTP de bout en bout.</span></p>
+            <div class="apple-footnotes" style="max-width: 800px; margin: 3rem auto 1.5rem; padding: 0 2rem; font-size: 0.75rem; color: rgba(255,255,255,0.35); text-align: left; line-height: 1.6;">
+                <p style="margin-bottom: 0.4rem;"><sup style="font-size: 0.6em; vertical-align: super; margin-right: 2px;">1</sup> <span data-i18n="fn1">Disponibilité garantie contractuellement par l'infrastructure Cloudflare Edge, avec plus de 300 points de présence mondiaux.</span></p>
+                <p style="margin-bottom: 0.4rem;"><sup style="font-size: 0.6em; vertical-align: super; margin-right: 2px;">2</sup> <span data-i18n="fn2">Le protocole WebRTC chiffre nativement les transferts de données en DTLS/SRTP de bout en bout.</span></p>
             </div>
             
             <footer class="b2b-footer">
