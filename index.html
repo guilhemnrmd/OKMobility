@@ -88,6 +88,44 @@
             </div>
         </section>
 
+        <!-- Section 2.1: Problem / Solution -->
+        <section class="snap-section problem-section">
+            <div class="content-wrapper reveal">
+                <h2 data-i18n="probTitle" style="font-size: 3rem; color: #fff; margin-bottom: 1rem;">L'ancien monde.</h2>
+                <p class="large-text" data-i18n="probDesc" style="color: var(--text-secondary); font-size: 1.5rem; line-height: 1.5; margin-bottom: 3rem;">Saisie manuelle. Fautes de frappe. Files d'attente interminables. La collecte de données au comptoir fait perdre de 3 à 5 minutes par client.</p>
+                
+                <h2 style="font-size: 3rem; color: #4CAF50; margin-bottom: 1rem;" data-i18n="solTitle">Le nouveau monde.</h2>
+                <p class="large-text" data-i18n="solDesc" style="color: #fff; font-size: 1.5rem; line-height: 1.5;">Le client scanne un QR code et saisit ses informations lui-même. Vous les recevez instantanément. Zéro friction.</p>
+            </div>
+        </section>
+
+        <!-- Section 2.2: The Experience -->
+        <section class="snap-section experience-section" style="display: flex; flex-direction: column; justify-content: center;">
+            <h2 class="reveal" data-i18n="expTitle" style="text-align: center; margin-bottom: 4rem; font-size: 2.5rem;">Une expérience à 360°</h2>
+            <div class="experience-grid">
+                <div class="experience-card glass-card reveal magnetic-card">
+                    <div class="shine"></div>
+                    <i class='bx bx-laptop' style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+                    <h3 data-i18n="expAgentTitle" style="margin-bottom: 1.5rem; font-size: 1.5rem;">Côté Conseiller</h3>
+                    <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 1rem;">
+                        <li><i class='bx bx-check' style="color: #4CAF50;"></i> <span data-i18n="expAgent1">Génère un QR code unique en 1 clic</span></li>
+                        <li><i class='bx bx-check' style="color: #4CAF50;"></i> <span data-i18n="expAgent2">Reçoit les données en temps réel</span></li>
+                        <li><i class='bx bx-check' style="color: #4CAF50;"></i> <span data-i18n="expAgent3">Copie instantanée vers le CRM interne</span></li>
+                    </ul>
+                </div>
+                <div class="experience-card glass-card reveal magnetic-card" style="transition-delay: 0.1s;">
+                    <div class="shine"></div>
+                    <i class='bx bx-mobile' style="font-size: 3rem; color: #4CAF50; margin-bottom: 1rem;"></i>
+                    <h3 data-i18n="expClientTitle" style="margin-bottom: 1.5rem; font-size: 1.5rem;">Côté Client</h3>
+                    <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 1rem;">
+                        <li><i class='bx bx-check' style="color: #4CAF50;"></i> <span data-i18n="expClient1">Scanne sans installer d'application</span></li>
+                        <li><i class='bx bx-check' style="color: #4CAF50;"></i> <span data-i18n="expClient2">Saisie simplifiée (autocomplétion mondiale)</span></li>
+                        <li><i class='bx bx-check' style="color: #4CAF50;"></i> <span data-i18n="expClient3">Transmission P2P chiffrée de bout en bout</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
         <!-- Section 3: Features -->
         <section class="snap-section features-section">
             <div class="features">
@@ -108,6 +146,42 @@
                     <i class='bx bx-git-branch'></i>
                     <h3 data-i18n="feat3Title">Marque Blanche</h3>
                     <p data-i18n="feat3Desc">Déployez notre technologie sous votre propre nom et vos propres couleurs.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3.1: Architecture Edge -->
+        <section class="snap-section architecture-section">
+            <div class="content-wrapper reveal" style="max-width: 800px; margin: 0 auto; width: 100%;">
+                <h2 data-i18n="archTitle" style="font-size: 2.5rem; text-align: center; margin-bottom: 1rem;">Conçu pour l'Edge.</h2>
+                <p data-i18n="archDesc" style="color: var(--text-secondary); text-align: center; margin-bottom: 3rem;">Rendement de niveau entreprise dès le premier jour, sans serveurs à gérer.</p>
+                <div class="comparison-table glass-card" style="padding: 2rem;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead>
+                            <tr>
+                                <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);"></th>
+                                <th data-i18n="archTrad" style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-secondary);">Traditionnel</th>
+                                <th data-i18n="archNew" style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: #4CAF50; font-size: 1.2rem;">MobilityOS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td data-i18n="archLat" style="padding: 1.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">Latence de réseau</td>
+                                <td style="padding: 1.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-secondary);">100-300ms</td>
+                                <td style="padding: 1.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: #fff;">&lt; 20ms</td>
+                            </tr>
+                            <tr>
+                                <td data-i18n="archData" style="padding: 1.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">Stockage des données</td>
+                                <td data-i18n="archDataTrad" style="padding: 1.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-secondary);">Base de données centralisée</td>
+                                <td data-i18n="archDataNew" style="padding: 1.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: #fff;">Zéro (Transfert P2P)</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 1.5rem 1rem;">SLA Disponibilité</td>
+                                <td style="padding: 1.5rem 1rem; color: var(--text-secondary);">99.9%</td>
+                                <td style="padding: 1.5rem 1rem; color: #fff;">99.99%<sup style="color: var(--text-secondary); font-size: 0.7rem; margin-left: 2px;">1</sup></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </section>
@@ -168,10 +242,15 @@
                     <a href="#" class="btn-secondary" data-i18n="btnQuote">Nous contacter</a>
                 </div>
             </div>
+            <div class="apple-footnotes" style="max-width: 800px; margin: 4rem auto 2rem; padding: 0 2rem; font-size: 0.8rem; color: rgba(255,255,255,0.4); text-align: left; line-height: 1.5;">
+                <p style="margin-bottom: 0.5rem;"><sup style="margin-right: 4px;">1</sup> <span data-i18n="fn1">Disponibilité garantie contractuellement par l'infrastructure Cloudflare Edge, avec plus de 300 points de présence mondiaux.</span></p>
+                <p style="margin-bottom: 0.5rem;"><sup style="margin-right: 4px;">2</sup> <span data-i18n="fn2">Le protocole WebRTC chiffre nativement les transferts de données en DTLS/SRTP de bout en bout.</span></p>
+            </div>
             
             <footer class="b2b-footer">
-                <div style="margin-bottom: 1rem;">
+                <div style="margin-bottom: 1rem; display: flex; gap: 2rem; justify-content: center;">
                     <a href="/security/" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;" data-i18n="navSecurity">Sécurité & Confidentialité</a>
+                    <a href="/faq/" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;" data-i18n="navFaq">FAQ & Objections IT</a>
                 </div>
                 <p>&copy; 2026 MobilityOS. <span data-i18n="footerRights">Tous droits réservés.</span></p>
             </footer>

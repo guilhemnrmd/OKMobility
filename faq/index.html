@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="pageTitle">FAQ — Réponses aux objections IT</title>
+    <link rel="stylesheet" href="/b2b.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+        body {
+            overflow-y: auto;
+            scroll-snap-type: none;
+        }
+        .scroll-container {
+            scroll-snap-type: none;
+            overflow-y: visible;
+            height: auto;
+        }
+        .b2b-nav {
+            position: sticky;
+            top: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .document-wrapper {
+            max-width: 800px;
+            margin: 100px auto 60px;
+            padding: 2rem;
+        }
+        .doc-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        .doc-header h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            color: #fff;
+            font-weight: 700;
+        }
+        .doc-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        .faq-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: border-color 0.3s ease;
+        }
+        .faq-item:hover {
+            border-color: rgba(255,255,255,0.12);
+        }
+        .faq-question {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .faq-question i {
+            font-size: 1.5rem;
+            color: #4CAF50;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .faq-question h2 {
+            font-size: 1.3rem;
+            color: #fff;
+            font-weight: 600;
+            line-height: 1.4;
+            margin: 0;
+        }
+        .faq-answer {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            padding-left: 2.5rem;
+        }
+        .faq-answer p {
+            margin-bottom: 1rem;
+        }
+        .faq-answer strong {
+            color: #fff;
+            font-weight: 500;
+        }
+        .faq-answer ul {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0;
+        }
+        .faq-answer ul li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        .faq-answer ul li i {
+            color: #4CAF50;
+            flex-shrink: 0;
+            margin-top: 3px;
+        }
+        /* Argument cards */
+        .argument-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+        .argument-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+        }
+        .argument-card i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        .argument-card h3 {
+            color: #fff;
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+        }
+        .argument-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .cta-block {
+            text-align: center;
+            margin-top: 4rem;
+            padding: 3rem 2rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+        }
+        .cta-block h2 {
+            font-size: 2rem;
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+        .cta-block p {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        .cta-block a {
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <nav class="b2b-nav">
+        <div class="nav-content" style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 2rem; height: 100%;">
+            <div class="logo" style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; font-size: 1.1rem;">
+                <i class='bx bx-help-circle'></i> <span data-i18n="navTitle">FAQ</span>
+            </div>
+            <div class="nav-links" style="display: flex; align-items: center; gap: 2rem;">
+                <a href="/" data-i18n="navHome" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;">Retour à l'accueil</a>
+                <div class="lang-selector">
+                    <i class='bx bx-globe'></i>
+                    <span id="langDisplay">Français</span>
+                    <select id="languageSelect">
+                        <option value="fr" selected>Français</option>
+                        <option value="en">English</option>
+                        <option value="es">Español</option>
+                        <option value="it">Italiano</option>
+                        <option value="pt">Português</option>
+                        <option value="de">Deutsch</option>
+                        <option value="nl">Nederlands</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="scroll-container">
+        <div class="document-wrapper">
+
+            <header class="doc-header reveal">
+                <h1 data-i18n="faqTitle">Questions fréquentes</h1>
+                <p data-i18n="faqSubtitle">Les réponses techniques que votre direction IT, votre DPO ou votre service achats attendent.</p>
+            </header>
+
+            <!-- 3 Argument Cards -->
+            <div class="argument-cards">
+                <div class="argument-card reveal">
+                    <i class='bx bx-shield' style="color: #4CAF50;"></i>
+                    <h3 data-i18n="arg1Title">Zéro donnée stockée</h3>
+                    <p data-i18n="arg1Desc">Aucune base de données client. Les données personnelles transitent en P2P chiffré AES et ne touchent jamais un serveur. Rien à voler.</p>
+                </div>
+                <div class="argument-card reveal" style="transition-delay: 0.1s;">
+                    <i class='bx bx-bolt' style="color: #FFD700;"></i>
+                    <h3 data-i18n="arg2Title">Opérationnel en 5 min</h3>
+                    <p data-i18n="arg2Desc">Aucune installation côté client. Aucun serveur à configurer. Un QR code imprimé suffit. Le TCO le plus bas du marché.</p>
+                </div>
+                <div class="argument-card reveal" style="transition-delay: 0.2s;">
+                    <i class='bx bx-world' style="color: #2196F3;"></i>
+                    <h3 data-i18n="arg3Title">7 langues natives</h3>
+                    <p data-i18n="arg3Desc">Détection automatique de la langue du smartphone client. Autocomplétion d'adresse mondiale. Formatage national adapté.</p>
+                </div>
+            </div>
+
+            <!-- FAQ 1 -->
+            <div class="faq-item reveal">
+                <div class="faq-question">
+                    <i class='bx bx-question-mark'></i>
+                    <h2 data-i18n="q1">Comment savons-nous que les données ne sont pas stockées sur vos serveurs ?</h2>
+                </div>
+                <div class="faq-answer">
+                    <p data-i18n="a1p1">C'est vérifiable techniquement — pas seulement promis contractuellement. Le code source est auditable : la connexion PeerJS établit un canal WebRTC direct entre deux navigateurs.</p>
+                    <p data-i18n="a1p2">Les fonctions Cloudflare (check-license, turn-credentials, accept-terms) n'acceptent aucun paramètre de données personnelles. Le serveur TURN de Cloudflare Calls ne fait que relayer des paquets IP chiffrés — il est techniquement incapable d'en lire le contenu (chiffrement obligatoire DTLS/SRTP).</p>
+                    <p><strong data-i18n="a1p3">Preuve technique disponible sur demande : schéma d'architecture documenté et accès au code source pour audit.</strong></p>
+                </div>
+            </div>
+
+            <!-- FAQ 2 -->
+            <div class="faq-item reveal">
+                <div class="faq-question">
+                    <i class='bx bx-question-mark'></i>
+                    <h2 data-i18n="q2">Que se passe-t-il si Cloudflare tombe en panne ? Nos comptoirs s'arrêtent ?</h2>
+                </div>
+                <div class="faq-answer">
+                    <p data-i18n="a2p1">Cloudflare est l'infrastructure CDN avec la meilleure disponibilité historique : SLA contractuel de 99,99% — soit moins de 52 minutes d'inactivité par an.</p>
+                    <p data-i18n="a2p2">En cas de panne partielle, la connexion WebRTC peut basculer automatiquement sur les serveurs TURN. Même sans internet, la procédure classique reste applicable — la solution est un gain d'efficacité, pas un point de défaillance critique.</p>
+                    <p data-i18n="a2p3">Pour la vérification de licence, un cache local (localStorage, 30 jours) permet à chaque terminal de fonctionner même si l'API est momentanément inaccessible.</p>
+                </div>
+            </div>
+
+            <!-- FAQ 3 -->
+            <div class="faq-item reveal">
+                <div class="faq-question">
+                    <i class='bx bx-question-mark'></i>
+                    <h2 data-i18n="q3">C'est un développeur indépendant — que se passe-t-il s'il arrête de maintenir le produit ?</h2>
+                </div>
+                <div class="faq-answer">
+                    <p data-i18n="a3p1">Question légitime et appréciée. Trois niveaux de protection sont disponibles :</p>
+                    <ul>
+                        <li><i class='bx bx-check'></i> <span data-i18n="a3l1">Le code source complet est livré avec la licence. Tout développeur web peut reprendre le projet — pas de binaire opaque.</span></li>
+                        <li><i class='bx bx-check'></i> <span data-i18n="a3l2">L'architecture repose sur des standards ouverts (WebRTC W3C, Cloudflare Workers) — aucune technologie propriétaire non documentée.</span></li>
+                        <li><i class='bx bx-check'></i> <span data-i18n="a3l3">La pile technique (HTML/CSS/JS vanilla + serverless) est délibérément simple pour minimiser la dette technique et faciliter la reprise.</span></li>
+                    </ul>
+                    <p data-i18n="a3p2">Le contrat de licence inclut une clause d'escrow du code source sur demande. Pour les grands comptes, un contrat de maintenance pluriannuel est disponible.</p>
+                </div>
+            </div>
+
+            <!-- FAQ 4 — RGPD -->
+            <div class="faq-item reveal">
+                <div class="faq-question">
+                    <i class='bx bx-question-mark'></i>
+                    <h2 data-i18n="q4">Cette solution est-elle conforme au RGPD ?</h2>
+                </div>
+                <div class="faq-answer">
+                    <p data-i18n="a4p1">La conception « zéro stockage serveur » est le meilleur argument RGPD possible : on ne peut pas subir une fuite de données que l'on ne stocke pas.</p>
+                    <ul>
+                        <li><i class='bx bx-check'></i> <span data-i18n="a4l1">Principe de minimisation (Art. 5.1.c) : seules les données strictement nécessaires sont collectées.</span></li>
+                        <li><i class='bx bx-check'></i> <span data-i18n="a4l2">Droit de suppression (Art. 17) : données non stockées → rien à supprimer.</span></li>
+                        <li><i class='bx bx-check'></i> <span data-i18n="a4l3">Droit d'accès (Art. 15) : le client voit en temps réel toutes les données saisies via le résumé de validation.</span></li>
+                        <li><i class='bx bx-check'></i> <span data-i18n="a4l4">Droit de rectification (Art. 16) : bouton « Modifier » disponible avant la transmission.</span></li>
+                    </ul>
+                    <p data-i18n="a4p2">Les sous-traitants (Cloudflare, Photon/Komoot) sont conformes au cadre EU-US Data Privacy Framework. Un DPA est disponible.</p>
+                </div>
+            </div>
+
+            <!-- FAQ 5 — ROI -->
+            <div class="faq-item reveal">
+                <div class="faq-question">
+                    <i class='bx bx-question-mark'></i>
+                    <h2 data-i18n="q5">Quel est le retour sur investissement mesurable ?</h2>
+                </div>
+                <div class="faq-answer">
+                    <p data-i18n="a5p1">Chaque conseiller économise 3 à 5 minutes par dossier. Avec 40 clients/jour/agent, cela représente 2 à 3 heures récupérées quotidiennement.</p>
+                    <p data-i18n="a5p2">Un comptoir de 2 agents traitant 80 clients/jour récupère l'équivalent de 4 à 6 heures de temps productif — chaque jour. Le ROI est mesurable dès le premier jour d'utilisation.</p>
+                </div>
+            </div>
+
+            <!-- CTA Block -->
+            <div class="cta-block reveal">
+                <h2 data-i18n="ctaTitle">Convaincu ?</h2>
+                <p data-i18n="ctaDesc">Demandez un accès démo ou contactez-nous pour un devis personnalisé.</p>
+                <a href="mailto:support@guilhemnormand.com" class="btn-primary magnetic" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                    <span data-i18n="ctaBtn">Nous contacter</span> <i class='bx bx-right-arrow-alt'></i>
+                </a>
+            </div>
+
+        </div>
+
+        <footer class="b2b-footer" style="padding: 2rem 0; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; color: var(--text-secondary); font-size: 0.8rem; position: relative;">
+            <p>© 2026 MobilityOS. <span data-i18n="footerRights">Tous droits réservés.</span></p>
+            <p style="margin-top: 0.5rem; font-size: 0.75rem; color: rgba(255,255,255,0.3);" data-i18n="footerConfidential">Document confidentiel — support@guilhemnormand.com</p>
+        </footer>
+    </div>
+
+    <script src="faq.js"></script>
+</body>
+</html>

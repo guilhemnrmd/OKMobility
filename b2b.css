@@ -453,3 +453,78 @@ p {
     color: var(--text-secondary);
     font-size: 0.875rem;
 }
+
+/* ==========================================================================
+   Problem / Solution Section
+   ========================================================================== */
+.content-wrapper {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    text-align: center;
+}
+
+/* ==========================================================================
+   Experience Section (360° side-by-side)
+   ========================================================================== */
+.experience-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 0 2rem;
+}
+
+.experience-card {
+    padding: 3rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+}
+
+.experience-card ul li {
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+    .experience-grid {
+        grid-template-columns: 1fr;
+    }
+    .experience-card {
+        padding: 2rem 1.5rem;
+    }
+}
+
+/* ==========================================================================
+   Architecture Edge Comparison Table
+   ========================================================================== */
+.comparison-table {
+    overflow-x: auto;
+}
+
+.comparison-table table {
+    color: var(--text-secondary);
+}
+
+.comparison-table th {
+    font-weight: 500;
+}
+
+.comparison-table td {
+    font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+    .comparison-table {
+        padding: 1rem !important;
+    }
+    .comparison-table th,
+    .comparison-table td {
+        padding: 0.75rem 0.5rem !important;
+        font-size: 0.85rem;
+    }
+}
