@@ -56,8 +56,77 @@
                 <button id="btnNewSession" class="btn-reset" aria-label="Borrar datos" title="Borrar datos">
                     <i class='bx bx-rotate-left'></i>
                 </button>
+                <button id="btnOpenSettings" class="btn-reset" aria-label="Paramètres" title="Paramètres de personnalisation" style="display:none;">
+                    <i class='bx bx-cog'></i>
+                </button>
             </div>
         </header>
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <!-- SETTINGS PANEL                                               -->
+        <!-- ═══════════════════════════════════════════════════════════ -->
+        <div id="settingsOverlay" class="settings-overlay" style="display:none;" aria-hidden="true"></div>
+        <aside id="settingsPanel" class="settings-panel glass-panel" role="dialog" aria-modal="true" aria-label="Paramètres" style="display:none;">
+            <div class="settings-header">
+                <h2 class="settings-title"><i class='bx bx-cog'></i> <span id="settingsPanelTitle">Personnalisation</span></h2>
+                <button id="btnCloseSettings" class="btn-icon" aria-label="Fermer">
+                    <i class='bx bx-x'></i>
+                </button>
+            </div>
+
+            <!-- PIN gate -->
+            <div id="settingsPinGate" class="settings-section">
+                <p class="settings-hint" id="settingsPinHint">Entrez votre code PIN pour modifier les paramètres.</p>
+                <div class="field-group" style="margin-top:12px;">
+                    <label class="field-label">Code PIN</label>
+                    <div class="settings-pin-row">
+                        <input type="password" id="settingsPinInput" class="field-input-settings" maxlength="8" inputmode="numeric" autocomplete="off" placeholder="••••">
+                        <button id="settingsPinSubmit" class="btn-primary glass-btn" style="flex-shrink:0;">
+                            <i class='bx bx-check'></i>
+                        </button>
+                    </div>
+                    <div id="settingsPinError" class="settings-error" style="display:none;"></div>
+                </div>
+            </div>
+
+            <!-- Settings form (shown after PIN) -->
+            <div id="settingsForm" style="display:none;">
+                <div class="settings-section">
+                    <label class="field-label">Nom affiché <span class="field-hint">— visible dans l'en-tête</span></label>
+                    <input type="text" id="settingsDisplayName" class="field-input-settings" maxlength="80" placeholder="Ex : Agence Paris Centre">
+                </div>
+
+                <div class="settings-section">
+                    <label class="field-label">Message d'accueil <span class="field-hint">— affiché aux clients</span></label>
+                    <input type="text" id="settingsWelcomeMsg" class="field-input-settings" maxlength="160" placeholder="Ex : Bienvenue chez nous !">
+                    <div class="settings-charcount"><span id="settingsWelcomeMsgCount">0</span>/160</div>
+                </div>
+
+                <div class="settings-section">
+                    <label class="field-label">Langue par défaut</label>
+                    <select id="settingsDefaultLang" class="field-input-settings">
+                        <option value="">— Détection automatique —</option>
+                        <option value="fr">Français</option>
+                        <option value="en">English</option>
+                        <option value="es">Español</option>
+                        <option value="it">Italiano</option>
+                        <option value="pt">Português</option>
+                        <option value="de">Deutsch</option>
+                        <option value="nl">Nederlands</option>
+                    </select>
+                </div>
+
+                <div id="settingsSaveError" class="settings-error" style="display:none;"></div>
+                <div id="settingsSaveSuccess" class="settings-success" style="display:none;">
+                    <i class='bx bx-check-circle'></i> Paramètres enregistrés.
+                </div>
+
+                <button id="settingsSaveBtn" class="btn-primary glass-btn" style="width:100%; margin-top:8px;">
+                    <span class="btn-text">Enregistrer</span>
+                    <div class="btn-spinner" style="display:none;"></div>
+                </button>
+            </div>
+        </aside>
 
         <div id="sellerActionError" class="seller-action-error" role="alert" aria-live="polite"></div>
 
@@ -380,5 +449,276 @@
 
     <script src="/assets/js/license-gate.js?v=6"></script>
     <script src="/assets/js/conseiller.js?v=22"></script>
+
+<style>
+/* ── Settings Panel ──────────────────────────────────────────────── */
+.settings-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease;
+}
+.settings-panel {
+    position: fixed; top: 0; right: 0; bottom: 0; z-index: 201;
+    width: min(360px, 92vw);
+    display: flex; flex-direction: column; gap: 0;
+    padding: 0;
+    overflow-y: auto;
+    border-radius: var(--radius-xl) 0 0 var(--radius-xl);
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+.settings-panel.open { transform: translateX(0); }
+.settings-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--color-border);
+    position: sticky; top: 0;
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    z-index: 1;
+}
+.settings-title {
+    font-family: var(--font-family-display);
+    font-size: 17px; font-weight: 700;
+    color: var(--color-text-primary);
+    display: flex; align-items: center; gap: 8px;
+}
+.settings-title i { color: var(--color-accent); font-size: 20px; }
+.settings-section {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--color-border);
+}
+.settings-section:last-child { border-bottom: none; padding-bottom: 24px; }
+.field-label {
+    display: block;
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--color-text-secondary);
+    margin-bottom: 8px;
+}
+.field-hint { font-size: 10px; font-weight: 400; text-transform: none; letter-spacing: 0; opacity: 0.8; }
+.field-input-settings {
+    width: 100%;
+    background: rgba(var(--color-accent-rgb), 0.04);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 11px 13px;
+    font-size: 14px;
+    font-family: var(--font-family-sans);
+    color: var(--color-text-primary);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+}
+.field-input-settings::placeholder { color: var(--color-text-secondary); opacity: 0.5; }
+.field-input-settings:focus {
+    border-color: rgba(var(--color-accent-rgb), 0.5);
+    box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.1);
+}
+.settings-pin-row { display: flex; gap: 8px; }
+.settings-charcount {
+    font-size: 10px; color: var(--color-text-secondary);
+    text-align: right; margin-top: 4px;
+}
+.settings-hint {
+    font-size: 13px; color: var(--color-text-secondary); line-height: 1.5;
+}
+.settings-error {
+    background: rgba(255,107,107,0.1);
+    border: 1px solid rgba(255,107,107,0.25);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    font-size: 12px; color: var(--color-error);
+    margin-top: 10px; display: flex; align-items: center; gap: 6px;
+}
+.settings-success {
+    background: rgba(52,199,89,0.1);
+    border: 1px solid rgba(52,199,89,0.2);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    font-size: 12px; color: var(--color-success);
+    margin-top: 10px; display: flex; align-items: center; gap: 6px;
+}
+.btn-spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spinSettings 0.7s linear infinite;
+    margin: 0 auto;
+}
+@keyframes spinSettings { to { transform: rotate(360deg); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+</style>
+
+<script>
+/* ── Retailer Settings Panel ────────────────────────────────────── */
+(() => {
+    'use strict';
+
+    const btnOpen = document.getElementById('btnOpenSettings');
+    const overlay = document.getElementById('settingsOverlay');
+    const panel = document.getElementById('settingsPanel');
+    const btnClose = document.getElementById('btnCloseSettings');
+    const pinGate = document.getElementById('settingsPinGate');
+    const pinInput = document.getElementById('settingsPinInput');
+    const pinSubmit = document.getElementById('settingsPinSubmit');
+    const pinError = document.getElementById('settingsPinError');
+    const settingsForm = document.getElementById('settingsForm');
+    const displayNameInput = document.getElementById('settingsDisplayName');
+    const welcomeMsgInput = document.getElementById('settingsWelcomeMsg');
+    const welcomeMsgCount = document.getElementById('settingsWelcomeMsgCount');
+    const defaultLangSelect = document.getElementById('settingsDefaultLang');
+    const saveBtn = document.getElementById('settingsSaveBtn');
+    const saveError = document.getElementById('settingsSaveError');
+    const saveSuccess = document.getElementById('settingsSaveSuccess');
+
+    let agencyId = null;
+    let currentPin = null;
+    let isOpen = false;
+
+    // Expose a function for conseiller.js to call once agencyId is known
+    window.initRetailerSettings = function(id) {
+        agencyId = id;
+        if (btnOpen) btnOpen.style.display = '';
+    };
+
+    function openPanel() {
+        if (isOpen) return;
+        isOpen = true;
+        overlay.style.display = 'block';
+        panel.style.display = 'flex';
+        requestAnimationFrame(() => panel.classList.add('open'));
+        document.body.style.overflow = 'hidden';
+        // Reset to PIN gate
+        pinGate.style.display = 'block';
+        settingsForm.style.display = 'none';
+        pinInput.value = '';
+        pinError.style.display = 'none';
+        saveError.style.display = 'none';
+        saveSuccess.style.display = 'none';
+        currentPin = null;
+        // Load existing settings silently
+        if (agencyId) loadSettings();
+        setTimeout(() => pinInput.focus(), 350);
+    }
+
+    function closePanel() {
+        if (!isOpen) return;
+        isOpen = false;
+        panel.classList.remove('open');
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            panel.style.display = 'none';
+        }, 300);
+        document.body.style.overflow = '';
+    }
+
+    async function loadSettings() {
+        if (!agencyId) return;
+        try {
+            const res = await fetch(`/api/retailer-settings?agency=${encodeURIComponent(agencyId)}`);
+            const json = await res.json();
+            if (json.settings) {
+                displayNameInput.value = json.settings.displayName || '';
+                welcomeMsgInput.value = json.settings.welcomeMsg || '';
+                updateCharCount();
+                if (json.settings.defaultLang) defaultLangSelect.value = json.settings.defaultLang;
+            }
+        } catch { /* ignore */ }
+    }
+
+    function updateCharCount() {
+        welcomeMsgCount.textContent = welcomeMsgInput.value.length;
+    }
+
+    async function verifyPin() {
+        const pin = pinInput.value.trim();
+        if (!pin) { showPinError('Veuillez entrer votre PIN.'); return; }
+        // We verify the PIN by attempting a save with dummy empty settings
+        // To avoid changing data, we'll just proceed if API returns 200.
+        // For UX: assume valid and let the save action reveal errors.
+        currentPin = pin;
+        pinGate.style.display = 'none';
+        settingsForm.style.display = 'block';
+        await loadSettings();
+    }
+
+    function showPinError(msg) {
+        pinError.textContent = msg;
+        pinError.style.display = 'flex';
+    }
+
+    async function saveSettings() {
+        if (!agencyId || !currentPin) return;
+        saveError.style.display = 'none';
+        saveSuccess.style.display = 'none';
+        saveBtn.disabled = true;
+        saveBtn.querySelector('.btn-text').style.display = 'none';
+        saveBtn.querySelector('.btn-spinner').style.display = 'block';
+
+        try {
+            const res = await fetch('/api/retailer-settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    agency: agencyId,
+                    pin: currentPin,
+                    settings: {
+                        displayName: displayNameInput.value.trim(),
+                        welcomeMsg: welcomeMsgInput.value.trim(),
+                        defaultLang: defaultLangSelect.value,
+                    }
+                })
+            });
+            const json = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                if (res.status === 401) {
+                    // Wrong PIN — go back to gate
+                    settingsForm.style.display = 'none';
+                    pinGate.style.display = 'block';
+                    showPinError('PIN incorrect. Veuillez réessayer.');
+                } else {
+                    showSaveError(json.error || 'Erreur serveur.');
+                }
+            } else {
+                saveSuccess.style.display = 'flex';
+                // Update displayed agency name if changed
+                const name = displayNameInput.value.trim();
+                if (name) {
+                    const slogan = document.getElementById('retailerAgencyBrandText');
+                    if (slogan) slogan.textContent = name;
+                }
+                setTimeout(() => { saveSuccess.style.display = 'none'; }, 3000);
+            }
+        } catch (err) {
+            showSaveError('Erreur réseau. Vérifiez votre connexion.');
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.querySelector('.btn-text').style.display = '';
+            saveBtn.querySelector('.btn-spinner').style.display = 'none';
+        }
+    }
+
+    function showSaveError(msg) {
+        saveError.textContent = msg;
+        saveError.style.display = 'flex';
+    }
+
+    // Events
+    btnOpen && btnOpen.addEventListener('click', openPanel);
+    btnClose && btnClose.addEventListener('click', closePanel);
+    overlay && overlay.addEventListener('click', closePanel);
+    pinSubmit && pinSubmit.addEventListener('click', verifyPin);
+    pinInput && pinInput.addEventListener('keydown', e => { if (e.key === 'Enter') verifyPin(); });
+    saveBtn && saveBtn.addEventListener('click', saveSettings);
+    welcomeMsgInput && welcomeMsgInput.addEventListener('input', updateCharCount);
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && isOpen) closePanel(); });
+})();
+</script>
 </body>
 </html>

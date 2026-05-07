@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>MobilityOS — Activer votre compte</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
+    <link rel="stylesheet" href="/b2b.css?v=1">
+    <style>
+        body { min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+        .auth-card {
+            width: 100%; max-width: 420px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 24px;
+            padding: 40px 36px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .auth-icon {
+            width: 48px; height: 48px; border-radius: 14px;
+            background: rgba(32,84,234,0.12);
+            border: 1px solid rgba(32,84,234,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; color: #3d7fff;
+            margin-bottom: 20px;
+        }
+        .auth-title { font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+        .auth-sub { font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 28px; line-height: 1.5; }
+        .field { margin-bottom: 14px; }
+        .field label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.35); margin-bottom: 6px; }
+        .input {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 11px;
+            padding: 12px 14px;
+            font-size: 14px; font-family: inherit; color: #fff;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            -webkit-appearance: none;
+        }
+        .input::placeholder { color: rgba(255,255,255,0.2); }
+        .input:focus { border-color: rgba(32,84,234,0.6); box-shadow: 0 0 0 3px rgba(32,84,234,0.12); }
+        .input.err { border-color: rgba(255,107,107,0.5); box-shadow: 0 0 0 3px rgba(255,107,107,0.08); }
+        .field-err { font-size: 11px; color: #ff6b6b; margin-top: 4px; display: none; }
+        .field-err.show { display: block; }
+        .strength-bar { height: 3px; border-radius: 2px; background: rgba(255,255,255,0.08); margin-top: 6px; overflow: hidden; }
+        .strength-fill { height: 100%; border-radius: 2px; transition: width 0.3s, background 0.3s; width: 0; }
+        .strength-label { font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 4px; text-align: right; }
+        .form-error { display: none; align-items: center; gap: 8px; background: rgba(255,107,107,0.08); border: 1px solid rgba(255,107,107,0.2); border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #ff6b6b; margin-bottom: 16px; }
+        .form-error.show { display: flex; }
+        .btn-submit { width: 100%; padding: 14px 20px; border: none; border-radius: 13px; background: linear-gradient(135deg, #2054EA, #05C4E8); color: #fff; font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer; margin-top: 20px; transition: opacity 0.2s, transform 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-submit:hover { opacity: 0.88; transform: translateY(-1px); }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-submit .spinner { display: none; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
+        .btn-submit.loading .btn-label { display: none; }
+        .btn-submit.loading .spinner { display: block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        /* Token error/expired state */
+        .token-error { display: none; text-align: center; }
+        .token-error.show { display: block; }
+        .token-error-icon { font-size: 40px; margin-bottom: 16px; }
+        .token-error-title { font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+        .token-error-msg { font-size: 14px; color: rgba(255,255,255,0.45); margin-bottom: 24px; line-height: 1.6; }
+        .btn-link { display: inline-block; padding: 12px 24px; border-radius: 12px; background: rgba(32,84,234,0.15); border: 1px solid rgba(32,84,234,0.25); color: #3d7fff; text-decoration: none; font-size: 14px; font-weight: 600; transition: background 0.2s; }
+        .btn-link:hover { background: rgba(32,84,234,0.25); }
+        /* Success */
+        .success-state { display: none; text-align: center; }
+        .success-state.show { display: block; }
+    </style>
+</head>
+<body>
+<div class="iri-bg" aria-hidden="true"></div>
+<div class="noise-overlay" aria-hidden="true"></div>
+<div class="ambient-background">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+</div>
+
+<div class="auth-card" id="mainCard">
+
+    <!-- Token invalid / expired -->
+    <div class="token-error" id="tokenError">
+        <div class="token-error-icon">🔗</div>
+        <div class="token-error-title" id="tokenErrTitle">Lien invalide</div>
+        <p class="token-error-msg" id="tokenErrMsg">Ce lien d'activation est invalide ou a expiré. Les liens sont valables 24h.</p>
+        <a href="/signup/" class="btn-link">Créer un nouveau compte</a>
+    </div>
+
+    <!-- Loading state -->
+    <div id="loadingState" style="text-align:center; padding: 20px 0;">
+        <div style="width:32px;height:32px;border:2px solid rgba(255,255,255,0.1);border-top-color:rgba(32,84,234,0.8);border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 16px;"></div>
+        <p style="color:rgba(255,255,255,0.4);font-size:14px;">Vérification du lien…</p>
+    </div>
+
+    <!-- Form -->
+    <div id="formView" style="display:none;">
+        <div class="auth-icon"><i class='bx bx-lock-open-alt'></i></div>
+        <div class="auth-title">Créer votre mot de passe</div>
+        <p class="auth-sub" id="formSubtitle">Choisissez un mot de passe sécurisé pour accéder à votre espace.</p>
+
+        <div class="form-error" id="formErr" role="alert">
+            <i class='bx bx-error-circle'></i>
+            <span id="formErrMsg"></span>
+        </div>
+
+        <form id="pwForm" novalidate>
+            <div class="field">
+                <label>Nouveau mot de passe</label>
+                <input type="password" id="pw1" class="input" placeholder="Min. 8 caractères" autocomplete="new-password" required>
+                <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+                <div class="strength-label" id="strengthLabel"></div>
+                <div class="field-err" id="ePw1">Min. 8 caractères requis.</div>
+            </div>
+            <div class="field">
+                <label>Confirmer le mot de passe</label>
+                <input type="password" id="pw2" class="input" placeholder="Répéter le mot de passe" autocomplete="new-password" required>
+                <div class="field-err" id="ePw2">Les mots de passe ne correspondent pas.</div>
+            </div>
+            <button type="submit" class="btn-submit" id="submitBtn">
+                <span class="btn-label">Activer mon compte <i class='bx bx-right-arrow-alt'></i></span>
+                <div class="spinner"></div>
+            </button>
+        </form>
+    </div>
+
+    <!-- Success -->
+    <div class="success-state" id="successState">
+        <div style="font-size:42px; margin-bottom:18px;">✅</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:700;color:#fff;margin-bottom:10px;">Compte activé !</div>
+        <p style="font-size:14px;color:rgba(255,255,255,0.45);margin-bottom:24px;line-height:1.6;">Votre mot de passe a été créé. Vous pouvez maintenant vous connecter à votre espace.</p>
+        <a href="/login/" class="btn-link">Se connecter <i class='bx bx-right-arrow-alt'></i></a>
+    </div>
+
+</div>
+
+<script>
+(async () => {
+    const token = new URLSearchParams(location.search).get('token') || '';
+    const loading = document.getElementById('loadingState');
+    const tokenError = document.getElementById('tokenError');
+    const formView = document.getElementById('formView');
+    const formErr = document.getElementById('formErr');
+    const formErrMsg = document.getElementById('formErrMsg');
+
+    if (!token) {
+        loading.style.display = 'none';
+        tokenError.classList.add('show');
+        return;
+    }
+
+    // Verify token
+    try {
+        const res = await fetch(`/api/setup-account?token=${encodeURIComponent(token)}`);
+        const json = await res.json().catch(() => ({}));
+        loading.style.display = 'none';
+        if (!res.ok || !json.valid) {
+            document.getElementById('tokenErrTitle').textContent = json.reason === 'expired' ? 'Lien expiré' : 'Lien invalide';
+            document.getElementById('tokenErrMsg').textContent = json.reason === 'expired'
+                ? 'Ce lien d\'activation a expiré (validité 24h). Veuillez créer un nouveau compte.'
+                : 'Ce lien d\'activation est invalide ou a déjà été utilisé.';
+            tokenError.classList.add('show');
+            return;
+        }
+        if (json.email) {
+            document.getElementById('formSubtitle').textContent = `Compte : ${json.email}`;
+        }
+        formView.style.display = 'block';
+    } catch {
+        loading.style.display = 'none';
+        tokenError.classList.add('show');
+        return;
+    }
+
+    // Password strength
+    const pw1 = document.getElementById('pw1');
+    const strengthFill = document.getElementById('strengthFill');
+    const strengthLabel = document.getElementById('strengthLabel');
+    pw1.addEventListener('input', () => {
+        const v = pw1.value;
+        let score = 0;
+        if (v.length >= 8) score++;
+        if (v.length >= 12) score++;
+        if (/[A-Z]/.test(v) && /[a-z]/.test(v)) score++;
+        if (/[0-9]/.test(v)) score++;
+        if (/[^A-Za-z0-9]/.test(v)) score++;
+        const pct = Math.min(100, score * 20);
+        const colors = ['#ff6b6b','#ff6b6b','#ffbd2e','#34C759','#34C759'];
+        const labels = ['','Faible','Moyen','Fort','Très fort'];
+        strengthFill.style.width = pct + '%';
+        strengthFill.style.background = colors[score] || '#ff6b6b';
+        strengthLabel.textContent = labels[score] || '';
+    });
+
+    // Form submit
+    document.getElementById('pwForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        formErr.classList.remove('show');
+        const v1 = pw1.value;
+        const v2 = document.getElementById('pw2').value;
+        let ok = true;
+        if (v1.length < 8) { document.getElementById('ePw1').classList.add('show'); pw1.classList.add('err'); ok = false; } else { document.getElementById('ePw1').classList.remove('show'); pw1.classList.remove('err'); }
+        if (v1 !== v2) { document.getElementById('ePw2').classList.add('show'); document.getElementById('pw2').classList.add('err'); ok = false; } else { document.getElementById('ePw2').classList.remove('show'); document.getElementById('pw2').classList.remove('err'); }
+        if (!ok) return;
+
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.classList.add('loading'); submitBtn.disabled = true;
+        try {
+            const res = await fetch('/api/setup-account', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token, password: v1 })
+            });
+            const json = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(json.error || 'Erreur serveur.');
+            formView.style.display = 'none';
+            document.getElementById('successState').classList.add('show');
+        } catch (err) {
+            formErrMsg.textContent = err.message;
+            formErr.classList.add('show');
+            submitBtn.classList.remove('loading'); submitBtn.disabled = false;
+        }
+    });
+})();
+</script>
+</body>
+</html>

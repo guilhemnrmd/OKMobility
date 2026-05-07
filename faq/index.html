@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title data-i18n="pageTitle">FAQ — Réponses aux objections IT</title>
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
+    <link rel="stylesheet" href="/b2b.css">
+    <style>
+        body, html { overflow: auto; height: auto; }
+        .scroll-container { scroll-snap-type: none; overflow-y: visible; height: auto; }
+        .b2b-nav { position: sticky; top: 0; z-index: 100; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background: rgba(0,0,0,0.85); }
+        .document-wrapper { max-width: 800px; margin: 80px auto 40px; padding: 0 1.5rem; }
+        .doc-header { text-align: center; margin-bottom: 3rem; }
+        .doc-header h1 { font-size: clamp(2rem, 5vw, 3rem); margin-bottom: 0.5rem; color: #fff; font-weight: 700; }
+        .doc-header p { color: var(--text-secondary); font-size: 1.05rem; line-height: 1.6; }
+        .faq-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 2rem; margin-bottom: 1.5rem; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: border-color 0.3s ease; }
+        .faq-item:hover { border-color: rgba(255,255,255,0.12); }
+        .faq-question { display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 1.2rem; }
+        .faq-question i { font-size: 1.3rem; color: #4CAF50; flex-shrink: 0; margin-top: 2px; }
+        .faq-question h2 { font-size: 1.15rem; color: #fff; font-weight: 600; line-height: 1.4; margin: 0; }
+        .faq-answer { color: var(--text-secondary); line-height: 1.7; padding-left: 2rem; }
+        .faq-answer p { margin-bottom: 0.75rem; }
+        .faq-answer strong { color: #fff; font-weight: 500; }
+        .faq-answer ul { list-style: none; padding: 0; margin: 0.75rem 0; }
+        .faq-answer ul li { display: flex; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.5rem; }
+        .faq-answer ul li i { color: #4CAF50; flex-shrink: 0; margin-top: 3px; }
+        .argument-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin: 2.5rem 0; }
+        .argument-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 1.75rem; text-align: center; }
+        .argument-card i { font-size: 2rem; margin-bottom: 0.75rem; display: block; }
+        .argument-card h3 { color: #fff; font-size: 1rem; margin-bottom: 0.5rem; }
+        .argument-card p { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; }
+        .cta-block { text-align: center; margin-top: 3rem; padding: 2.5rem 1.5rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; }
+        .cta-block h2 { font-size: 1.8rem; color: #fff; margin-bottom: 0.75rem; }
+        .cta-block p { color: var(--text-secondary); margin-bottom: 1.5rem; }
+        .cta-block a { text-decoration: none; }
+        @media (max-width: 600px) {
+            .document-wrapper { padding: 0 1rem; margin-top: 70px; }
+            .faq-item { padding: 1.25rem; }
+            .faq-answer { padding-left: 0; }
+            .argument-cards { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Unified Header (same as landing page) -->
+    <header class="b2b-nav">
+        <div class="nav-brand">
+            <a href="/" style="color: #fff; text-decoration: none;">MobilityOS</a>
+        </div>
+        <div class="nav-controls">
+            <div class="lang-selector magnetic">
+                <i class='bx bx-globe'></i>
+                <span id="langDisplay">Français</span>
+                <select id="languageSelect" aria-label="Sélectionner la langue">
+                    <option value="en">English</option>
+                    <option value="fr" selected>Français</option>
+                    <option value="es">Español</option>
+                    <option value="it">Italiano</option>
+                    <option value="pt">Português</option>
+                    <option value="de">Deutsch</option>
+                    <option value="nl">Nederlands</option>
+                </select>
+            </div>
+            <a href="/retailer/" class="btn-icon magnetic" aria-label="Se connecter" title="Se connecter">
+                <i class='bx bx-user'></i>
+            </a>
+        </div>
+    </header>
+
+    <div class="scroll-container">
+        <div class="document-wrapper">
+
+            <header class="doc-header reveal">
+                <h1 data-i18n="faqTitle">Questions fréquentes</h1>
+                <p data-i18n="faqSubtitle">Les réponses techniques que votre direction IT, votre DPO ou votre service achats attendent.</p>
+            </header>
+
+            <div class="argument-cards">
+                <div class="argument-card reveal">
+                    <i class='bx bx-shield' style="color: #4CAF50;"></i>
+                    <h3 data-i18n="arg1Title">Zéro donnée stockée</h3>
+                    <p data-i18n="arg1Desc">Aucune base de données client. Les données transitent en P2P chiffré AES. Rien à voler.</p>
+                </div>
+                <div class="argument-card reveal" style="transition-delay: 0.1s;">
+                    <i class='bx bx-bolt' style="color: #FFD700;"></i>
+                    <h3 data-i18n="arg2Title">Opérationnel en 5 min</h3>
+                    <p data-i18n="arg2Desc">Aucune installation côté client. Aucun serveur. Un QR code suffit. Le TCO le plus bas du marché.</p>
+                </div>
+                <div class="argument-card reveal" style="transition-delay: 0.2s;">
+                    <i class='bx bx-world' style="color: #2196F3;"></i>
+                    <h3 data-i18n="arg3Title">7 langues natives</h3>
+                    <p data-i18n="arg3Desc">Détection automatique de la langue. Autocomplétion d'adresse mondiale. Formatage national adapté.</p>
+                </div>
+            </div>
+
+            <div class="faq-item reveal"><div class="faq-question"><i class='bx bx-question-mark'></i><h2 data-i18n="q1">Comment savons-nous que les données ne sont pas stockées sur vos serveurs ?</h2></div><div class="faq-answer"><p data-i18n="a1p1">C'est vérifiable techniquement — pas seulement promis contractuellement. Le code source est auditable : la connexion PeerJS établit un canal WebRTC direct entre deux navigateurs.</p><p data-i18n="a1p2">Les fonctions Cloudflare n'acceptent aucun paramètre de données personnelles. Le serveur TURN ne fait que relayer des paquets chiffrés — il est techniquement incapable d'en lire le contenu.</p><p><strong data-i18n="a1p3">Preuve technique disponible sur demande : schéma d'architecture et accès au code source pour audit.</strong></p></div></div>
+
+            <div class="faq-item reveal"><div class="faq-question"><i class='bx bx-question-mark'></i><h2 data-i18n="q2">Que se passe-t-il si Cloudflare tombe en panne ?</h2></div><div class="faq-answer"><p data-i18n="a2p1">SLA contractuel de 99,99% — moins de 52 minutes d'inactivité par an.</p><p data-i18n="a2p2">En cas de panne partielle, la connexion WebRTC bascule sur les serveurs TURN. La procédure classique reste applicable.</p><p data-i18n="a2p3">Un cache local (localStorage, 30 jours) permet à chaque terminal de fonctionner même si l'API est momentanément inaccessible.</p></div></div>
+
+            <div class="faq-item reveal"><div class="faq-question"><i class='bx bx-question-mark'></i><h2 data-i18n="q3">Développeur indépendant — que se passe-t-il s'il arrête ?</h2></div><div class="faq-answer"><p data-i18n="a3p1">Trois niveaux de protection :</p><ul><li><i class='bx bx-check'></i><span data-i18n="a3l1">Code source complet livré avec la licence.</span></li><li><i class='bx bx-check'></i><span data-i18n="a3l2">Standards ouverts (WebRTC W3C, Cloudflare Workers).</span></li><li><i class='bx bx-check'></i><span data-i18n="a3l3">Pile technique simple (HTML/CSS/JS vanilla + serverless).</span></li></ul><p data-i18n="a3p2">Clause d'escrow du code source sur demande. Contrat de maintenance pluriannuel disponible.</p></div></div>
+
+            <div class="faq-item reveal"><div class="faq-question"><i class='bx bx-question-mark'></i><h2 data-i18n="q4">Cette solution est-elle conforme au RGPD ?</h2></div><div class="faq-answer"><p data-i18n="a4p1">Zéro stockage serveur = meilleur argument RGPD possible.</p><ul><li><i class='bx bx-check'></i><span data-i18n="a4l1">Minimisation (Art. 5.1.c).</span></li><li><i class='bx bx-check'></i><span data-i18n="a4l2">Suppression (Art. 17) : rien à supprimer.</span></li><li><i class='bx bx-check'></i><span data-i18n="a4l3">Accès (Art. 15) : résumé en temps réel.</span></li><li><i class='bx bx-check'></i><span data-i18n="a4l4">Rectification (Art. 16) : bouton Modifier avant envoi.</span></li></ul><p data-i18n="a4p2">Sous-traitants conformes EU-US Data Privacy Framework.</p></div></div>
+
+            <div class="faq-item reveal"><div class="faq-question"><i class='bx bx-question-mark'></i><h2 data-i18n="q5">Quel est le retour sur investissement ?</h2></div><div class="faq-answer"><p data-i18n="a5p1">3 à 5 minutes économisées par dossier. Avec 40 clients/jour : 2 à 3 heures récupérées.</p><p data-i18n="a5p2">Un comptoir de 2 agents traitant 80 clients/jour récupère 4 à 6 heures de temps productif — chaque jour.</p></div></div>
+
+            <div class="cta-block reveal">
+                <h2 data-i18n="ctaTitle">Convaincu ?</h2>
+                <p data-i18n="ctaDesc">Demandez un accès démo ou contactez-nous.</p>
+                <a href="mailto:guilhem.normand@icloud.com" class="btn-primary magnetic" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                    <span data-i18n="ctaBtn">Nous contacter</span> <i class='bx bx-right-arrow-alt'></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Unified Footer (same as landing page) -->
+        <footer class="b2b-footer" style="border-top: 1px solid rgba(255,255,255,0.05);">
+            <div style="margin-bottom: 0.75rem; display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;">
+                <a href="/security/" style="color: var(--text-secondary); text-decoration: none; font-size: 0.85rem;" data-i18n="navSecurity">Sécurité &amp; Confidentialité</a>
+                <a href="/faq/" style="color: var(--text-secondary); text-decoration: none; font-size: 0.85rem;" data-i18n="navFaq">FAQ &amp; Objections IT</a>
+            </div>
+            <p style="font-size: 0.8rem;">&copy; 2026 MobilityOS. <span data-i18n="footerRights">Tous droits réservés.</span></p>
+        </footer>
+    </div>
+
+    <script src="faq.js"></script>
+</body>
+</html>
