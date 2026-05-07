@@ -528,3 +528,39 @@ p {
         font-size: 0.85rem;
     }
 }
+
+/* ==========================================================================
+   Global Mobile Responsive
+   ========================================================================== */
+@media (max-width: 600px) {
+    .b2b-nav {
+        padding: 0 1rem;
+    }
+    .nav-controls {
+        gap: 0.5rem;
+    }
+    .lang-selector span {
+        display: none; /* Hide label, keep globe icon */
+    }
+    .hero-content {
+        padding: 0 1rem;
+    }
+    .hero-content h1 {
+        font-size: 2rem !important;
+    }
+    .hero-content p {
+        font-size: 0.95rem !important;
+    }
+    .pricing-card.featured {
+        transform: scale(1);
+    }
+    .apple-footnotes {
+        padding: 0 1rem !important;
+    }
+    .b2b-footer {
+        padding: 1rem 1rem 1.5rem;
+    }
+    .b2b-footer div {
+        gap: 1rem !important;
+    }
+}

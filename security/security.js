@@ -76,6 +76,7 @@
                 
                 docFooter: "Guilhem Normand — 2026 — Documento confidencial",
                 footerRights: "© 2026. Todos los derechos reservados."
+                navSecurity: "Seguridad y Privacidad", navFaq: "FAQ y Objeciones IT",
             },
             fr: {
                 navHome: "Retour à l'accueil",
@@ -151,6 +152,7 @@
                 
                 docFooter: "Guilhem Normand — 2026 — Document confidentiel",
                 footerRights: "© 2026. Tous droits réservés."
+                navSecurity: "Sécurité & Confidentialité", navFaq: "FAQ & Objections IT",
             },
             en: {
                 navHome: "Back to Home",
@@ -226,6 +228,7 @@
                 
                 docFooter: "Guilhem Normand — 2026 — Confidential Document",
                 footerRights: "© 2026. All rights reserved."
+                navSecurity: "Security & Privacy", navFaq: "FAQ & IT Objections",
             },
             it: {
                 navHome: "Torna alla Home",
@@ -293,6 +296,7 @@
                 h7L5: "Avviso legale",
                 docFooter: "Guilhem Normand — 2026 — Documento Riservato",
                 footerRights: "© 2026. Tutti i diritti riservati."
+                navSecurity: "Sicurezza e Privacy", navFaq: "FAQ e Obiezioni IT",
             },
             pt: {
                 navHome: "Voltar",
@@ -360,6 +364,7 @@
                 h7L5: "Aviso legal",
                 docFooter: "Guilhem Normand — 2026 — Confidencial",
                 footerRights: "© 2026."
+                navSecurity: "Segurança e Privacidade", navFaq: "FAQ & Objeções de TI",
             },
             de: {
                 navHome: "Zurück",
@@ -427,6 +432,7 @@
                 h7L5: "Impressum",
                 docFooter: "Guilhem Normand — 2026 — Vertraulich",
                 footerRights: "© 2026."
+                navSecurity: "Sicherheit & Datenschutz", navFaq: "FAQ & IT-Einwände",
             },
             nl: {
                 navHome: "Terug",
@@ -494,6 +500,7 @@
                 h7L5: "Wettelijke kennisgeving",
                 docFooter: "Guilhem Normand — 2026 — Vertrouwelijk",
                 footerRights: "© 2026."
+                navSecurity: "Veiligheid & Privacy", navFaq: "FAQ & IT Bezwaren",
             }
         };
 
