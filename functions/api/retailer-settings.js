@@ -35,13 +35,41 @@ function getTrustedOrigin(request) {
     const origin = request.headers.get('origin');
     if (origin) {
         try {
-            const url = new URL(origin);
-            if (url.origin === sameOrigin) return origin;
-            const rootHost = requestHost.split('.').slice(-3).join('.');
-            if (url.hostname.endsWith(rootHost)) return origin;
+            const u = new URL(origin);
+            if (u.origin === sameOrigin) return origin;
+            // Match same eTLD+1 only (last two labels) to prevent subdomain spoofing
+            const eTLD1 = requestHost.split('.').slice(-2).join('.');
+            if (u.hostname === eTLD1 || u.hostname.endsWith('.' + eTLD1)) return origin;
         } catch { /* ignore */ }
     }
     return sameOrigin;
+}
+
+function hexEncode(buf) {
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function hashPin(pin, agencyId, secret) {
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+        'raw', enc.encode(secret + ':' + agencyId),
+        { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+    );
+    const sig = await crypto.subtle.sign('HMAC', key, enc.encode(pin));
+    return hexEncode(sig);
+}
+
+async function timingSafeEqual(a, b) {
+    const enc = new TextEncoder();
+    const ka = await crypto.subtle.importKey('raw', enc.encode(a), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+    const kb = await crypto.subtle.importKey('raw', enc.encode(b), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+    const msg = enc.encode('compare');
+    const [sa, sb] = await Promise.all([crypto.subtle.sign('HMAC', ka, msg), crypto.subtle.sign('HMAC', kb, msg)]);
+    const va = new Uint8Array(sa), vb = new Uint8Array(sb);
+    if (va.length !== vb.length) return false;
+    let diff = 0;
+    for (let i = 0; i < va.length; i++) diff |= va[i] ^ vb[i];
+    return diff === 0;
 }
 
 function buildHeaders(origin) {
@@ -182,7 +210,20 @@ export async function onRequest(context) {
                 status: 403, headers: buildHeaders(trustedOrigin)
             });
         }
-        if (pin !== String(license.settingsPin)) {
+
+        // settingsPin may be stored as plain text (legacy) or as a HMAC-SHA256 hex hash.
+        // If it looks like a 64-char hex hash, compare using HMAC; otherwise compare plain (legacy).
+        const secret = env.SETTINGS_PIN_SECRET || env.ADMIN_TOKEN || 'okm-settings-default';
+        const storedPin = String(license.settingsPin);
+        let pinValid = false;
+        if (/^[0-9a-f]{64}$/.test(storedPin)) {
+            const candidateHash = await hashPin(pin, agencyId, secret);
+            pinValid = await timingSafeEqual(candidateHash, storedPin);
+        } else {
+            // Legacy plain-text comparison (constant-time)
+            pinValid = await timingSafeEqual(pin, storedPin);
+        }
+        if (!pinValid) {
             return new Response(JSON.stringify({ error: 'Invalid PIN' }), {
                 status: 401, headers: buildHeaders(trustedOrigin)
             });

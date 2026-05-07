@@ -6,18 +6,20 @@
  * Cloudflare Pages Function — Trial signup endpoint
  * POST /api/signup
  *
- * Stores the signup request in KV (OKM_LICENSES namespace) under key signup:{ts}:{email}
- * and sends a notification email via MailChannels (free Cloudflare integration).
+ * Creates a pending account in KV, generates a one-time activation token,
+ * sends a magic-link email via MailChannels, and notifies the admin.
  *
  * Required env bindings:
- *   OKM_LICENSES  — KV namespace (reused for signups)
- *   NOTIFY_EMAIL  — email address to receive signup notifications (env secret)
+ *   OKM_LICENSES  — KV namespace
+ *   NOTIFY_EMAIL  — admin notification address (env secret)
  *   BRAND_NAME    — optional, defaults to "MobilityOS"
  */
 
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX = 5;
 const rateLimitStore = new Map();
+
+const ACTIVATION_TTL_SECONDS = 24 * 3600;
 
 function getClientIp(request) {
     return request.headers.get('cf-connecting-ip') || 'unknown';
@@ -29,10 +31,11 @@ function getTrustedOrigin(request) {
     const origin = request.headers.get('origin');
     if (origin) {
         try {
-            const url = new URL(origin);
-            if (url.origin === sameOrigin) return origin;
-            const rootHost = requestHost.split('.').slice(-3).join('.');
-            if (url.hostname.endsWith(rootHost)) return origin;
+            const u = new URL(origin);
+            if (u.origin === sameOrigin) return origin;
+            // Match same eTLD+1 only (last two labels) to prevent subdomain spoofing
+            const eTLD1 = requestHost.split('.').slice(-2).join('.');
+            if (u.hostname === eTLD1 || u.hostname.endsWith('.' + eTLD1)) return origin;
         } catch { /* ignore */ }
     }
     return sameOrigin;
@@ -72,39 +75,102 @@ function isValidEmail(email) {
     return typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 }
 
-async function sendNotificationEmail(env, data) {
-    const notifyTo = env.NOTIFY_EMAIL;
-    if (!notifyTo) return;
+/** HTML-encode all user-supplied values before inserting into email HTML. */
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;');
+}
 
+function hexEncode(buf) {
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function generateToken(bytes = 32) {
+    const arr = new Uint8Array(bytes);
+    crypto.getRandomValues(arr);
+    return hexEncode(arr.buffer);
+}
+
+function getRequestHost(request) {
+    const host = request.headers.get('host') || '';
+    // Prefer x-forwarded-host only when explicitly trusted by the platform
+    return host;
+}
+
+async function sendActivationEmail(env, request, data, token) {
     const brandName = env.BRAND_NAME || 'MobilityOS';
-    const subject = `[${brandName}] Nouvelle demande d'essai — ${data.companyName}`;
+    const host = getRequestHost(request);
+    const proto = request.url.startsWith('https://') ? 'https' : 'http';
+    const activationUrl = `${proto}://${host}/setup-account/?token=${token}`;
+
+    const fromEmail = env.NOTIFY_EMAIL
+        ? `noreply@${env.NOTIFY_EMAIL.split('@').slice(1).join('@')}`
+        : `noreply@${host}`;
+
     const html = `
-<h2 style="color:#2054EA">Nouvelle demande d'essai 30j</h2>
-<table style="border-collapse:collapse;font-family:sans-serif;font-size:14px;">
-  <tr><td style="padding:6px 16px 6px 0;color:#888;font-weight:600">Société</td><td>${data.companyName}</td></tr>
-  <tr><td style="padding:6px 16px 6px 0;color:#888;font-weight:600">Contact</td><td>${data.firstName} ${data.lastName}</td></tr>
-  <tr><td style="padding:6px 16px 6px 0;color:#888;font-weight:600">E-mail</td><td><a href="mailto:${data.email}">${data.email}</a></td></tr>
-  <tr><td style="padding:6px 16px 6px 0;color:#888;font-weight:600">Téléphone</td><td>${data.phone || '—'}</td></tr>
-  <tr><td style="padding:6px 16px 6px 0;color:#888;font-weight:600">Postes</td><td>${data.desks || '—'}</td></tr>
-  <tr><td style="padding:6px 16px 6px 0;color:#888;font-weight:600">Langue</td><td>${data.lang || '—'}</td></tr>
-  <tr><td style="padding:6px 16px 6px 0;color:#888;font-weight:600">Date</td><td>${data.ts}</td></tr>
-</table>
-`.trim();
+<div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#17181D;">
+  <h2 style="color:#2054EA;margin-bottom:8px;">${escapeHtml(brandName)}</h2>
+  <p style="margin-bottom:24px;color:#5B6070;">Bonjour ${escapeHtml(data.firstName)},</p>
+  <p>Votre demande d'essai a bien été reçue. Cliquez sur le bouton ci-dessous pour créer votre mot de passe et activer votre compte.</p>
+  <div style="margin:28px 0;">
+    <a href="${escapeHtml(activationUrl)}"
+       style="display:inline-block;padding:14px 28px;background:linear-gradient(135deg,#2054EA,#05C4E8);color:#fff;text-decoration:none;border-radius:12px;font-weight:600;font-size:15px;">
+      Activer mon compte →
+    </a>
+  </div>
+  <p style="font-size:13px;color:#888;">Ce lien est valable 24 heures et ne peut être utilisé qu'une seule fois.</p>
+  <hr style="border:none;border-top:1px solid #eee;margin:24px 0;">
+  <p style="font-size:12px;color:#aaa;">Si vous ne pouvez pas cliquer sur le bouton, copiez ce lien dans votre navigateur :<br>${escapeHtml(activationUrl)}</p>
+</div>`.trim();
 
     try {
         await fetch('https://api.mailchannels.net/tx/v1/send', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                personalizations: [{ to: [{ email: notifyTo }] }],
-                from: { email: `noreply@${new URL('https://' + notifyTo.split('@')[1]).hostname}`, name: brandName },
-                subject,
+                personalizations: [{ to: [{ email: data.email, name: `${data.firstName} ${data.lastName}` }] }],
+                from: { email: fromEmail, name: brandName },
+                subject: `Activez votre compte ${brandName} — lien valable 24h`,
                 content: [{ type: 'text/html', value: html }]
             })
         });
-    } catch {
-        // Email failure is non-blocking — signup is still stored in KV.
-    }
+    } catch { /* Non-blocking */ }
+}
+
+async function sendAdminNotification(env, data) {
+    const notifyTo = env.NOTIFY_EMAIL;
+    if (!notifyTo) return;
+    const brandName = env.BRAND_NAME || 'MobilityOS';
+
+    const html = `
+<h2 style="color:#2054EA">Nouvelle demande d'essai 30j — ${escapeHtml(brandName)}</h2>
+<table style="border-collapse:collapse;font-family:sans-serif;font-size:14px;">
+  <tr><td style="padding:6px 16px 6px 0;color:#888;font-weight:600">Société</td><td>${escapeHtml(data.companyName)}</td></tr>
+  <tr><td style="padding:6px 16px 6px 0;color:#888;font-weight:600">Contact</td><td>${escapeHtml(data.firstName)} ${escapeHtml(data.lastName)}</td></tr>
+  <tr><td style="padding:6px 16px 6px 0;color:#888;font-weight:600">E-mail</td><td><a href="mailto:${escapeHtml(data.email)}">${escapeHtml(data.email)}</a></td></tr>
+  <tr><td style="padding:6px 16px 6px 0;color:#888;font-weight:600">Téléphone</td><td>${escapeHtml(data.phone || '—')}</td></tr>
+  <tr><td style="padding:6px 16px 6px 0;color:#888;font-weight:600">Postes</td><td>${escapeHtml(data.desks || '—')}</td></tr>
+  <tr><td style="padding:6px 16px 6px 0;color:#888;font-weight:600">Langue</td><td>${escapeHtml(data.lang || '—')}</td></tr>
+  <tr><td style="padding:6px 16px 6px 0;color:#888;font-weight:600">Date</td><td>${escapeHtml(data.ts)}</td></tr>
+</table>`.trim();
+
+    try {
+        const fromEmail = `noreply@${notifyTo.split('@').slice(1).join('@')}`;
+        await fetch('https://api.mailchannels.net/tx/v1/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                personalizations: [{ to: [{ email: notifyTo }] }],
+                from: { email: fromEmail, name: brandName },
+                subject: `[${brandName}] Nouvelle demande d'essai — ${escapeHtml(data.companyName)}`,
+                content: [{ type: 'text/html', value: html }]
+            })
+        });
+    } catch { /* Non-blocking */ }
 }
 
 export async function onRequest(context) {
@@ -121,6 +187,12 @@ export async function onRequest(context) {
         });
     }
 
+    if (!env.OKM_LICENSES) {
+        return new Response(JSON.stringify({ error: 'Service unavailable' }), {
+            status: 503, headers: buildHeaders(trustedOrigin)
+        });
+    }
+
     const ip = getClientIp(request);
     if (isRateLimited(ip)) {
         return new Response(JSON.stringify({ error: 'Too Many Requests' }), {
@@ -129,21 +201,20 @@ export async function onRequest(context) {
     }
 
     let body;
-    try {
-        body = await request.json();
-    } catch {
+    try { body = await request.json(); }
+    catch {
         return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
             status: 400, headers: buildHeaders(trustedOrigin)
         });
     }
 
     const companyName = sanitizeString(body.companyName, 100);
-    const firstName = sanitizeString(body.firstName, 60);
-    const lastName = sanitizeString(body.lastName, 60);
-    const email = sanitizeString(body.email, 120);
-    const phone = sanitizeString(body.phone, 30);
-    const desks = sanitizeString(String(body.desks || ''), 6);
-    const lang = sanitizeString(body.lang, 10);
+    const firstName   = sanitizeString(body.firstName, 60);
+    const lastName    = sanitizeString(body.lastName, 60);
+    const email       = sanitizeString(body.email, 120).toLowerCase();
+    const phone       = sanitizeString(body.phone, 30);
+    const desks       = sanitizeString(String(body.desks || ''), 6);
+    const lang        = sanitizeString(body.lang, 10);
 
     if (!companyName || !firstName || !lastName) {
         return new Response(JSON.stringify({ error: 'Missing required fields' }), {
@@ -157,17 +228,29 @@ export async function onRequest(context) {
     }
 
     const ts = new Date().toISOString();
-    const data = { companyName, firstName, lastName, email, phone, desks, lang, ts, ip: ip.slice(0, 8) + '…' };
+    const accountKey = `signup:${ts}:${email}`;
+    const data = {
+        companyName, firstName, lastName, email, phone, desks, lang,
+        ts, status: 'pending',
+        ip: ip.slice(0, 8) + '…'
+    };
 
-    if (env.OKM_LICENSES) {
-        const key = `signup:${ts}:${email}`;
-        await env.OKM_LICENSES.put(key, JSON.stringify(data), {
-            expirationTtl: 365 * 24 * 3600  // keep for 1 year
-        });
-    }
+    await env.OKM_LICENSES.put(accountKey, JSON.stringify(data), {
+        expirationTtl: 365 * 24 * 3600
+    });
 
-    // Fire-and-forget notification email
-    context.waitUntil(sendNotificationEmail(env, data));
+    // Generate activation token (one-time, 24h TTL)
+    const token = generateToken(32);
+    await env.OKM_LICENSES.put(`activation:${token}`, JSON.stringify({
+        email,
+        expiresAt: new Date(Date.now() + ACTIVATION_TTL_SECONDS * 1000).toISOString()
+    }), { expirationTtl: ACTIVATION_TTL_SECONDS });
+
+    // Send emails (non-blocking)
+    context.waitUntil(Promise.all([
+        sendActivationEmail(env, request, data, token),
+        sendAdminNotification(env, data)
+    ]));
 
     return new Response(JSON.stringify({ ok: true }), {
         status: 200, headers: buildHeaders(trustedOrigin)
