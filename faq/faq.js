@@ -152,7 +152,15 @@ if (sel && disp) {
         update(e.target.value);
     });
 }
-update('fr');
+// Auto-detect language from browser
+const supportedLangs = ['fr','en','es','it','pt','de','nl'];
+const browserLang = (navigator.language || 'en').slice(0, 2).toLowerCase();
+const detectedLang = supportedLangs.includes(browserLang) ? browserLang : 'en';
+if (sel) {
+    sel.value = detectedLang;
+    if (disp) disp.textContent = sel.options[sel.selectedIndex].text;
+}
+update(detectedLang);
 // Reveal on scroll
 const obs = new IntersectionObserver(entries => {
     entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('active'); });

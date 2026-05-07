@@ -519,8 +519,15 @@
             });
         }
 
-        // Initialize with Spanish or matching logic if needed
-        updateLanguage('es');
+        // Auto-detect language from browser
+        const supportedLangs = ['fr','en','es','it','pt','de','nl'];
+        const browserLang = (navigator.language || 'en').slice(0, 2).toLowerCase();
+        const detectedLang = supportedLangs.includes(browserLang) ? browserLang : 'en';
+        if (langSelect) {
+            langSelect.value = detectedLang;
+            if (langDisplay) langDisplay.textContent = langSelect.options[langSelect.selectedIndex].text;
+        }
+        updateLanguage(detectedLang);
 
         // Animations and scroll reveal (similar to main page)
         const revealElements = document.querySelectorAll('.reveal');

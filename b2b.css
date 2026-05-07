@@ -447,8 +447,8 @@ p {
 }
 
 .b2b-footer {
-    position: absolute;
-    bottom: 2rem;
+    position: relative;
+    padding: 1.5rem 0 2rem;
     text-align: center;
     color: var(--text-secondary);
     font-size: 0.875rem;
