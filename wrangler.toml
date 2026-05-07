@@ -6,3 +6,13 @@ pages_build_output_dir = "."
 binding = "OKM_LICENSES"
 id = "8edd81d0d2e248bda2a399197c4d179e"
 preview_id = "b971db86aee54e92a44a79925ca1bd89"
+
+[vars]
+BRAND_NAME = "MobilityOS"
+# NOTIFY_EMAIL = "ton@email.com"   ← décommenter et renseigner
+# FROM_EMAIL = "noreply@tondomaine.com"  ← à ajouter quand domaine disponible
+
+# Secrets (ne jamais mettre ici, utiliser wrangler secret put) :
+#   wrangler secret put RESEND_API_KEY
+#   wrangler secret put ADMIN_TOKEN
+#   wrangler secret put SETTINGS_PIN_SECRET
