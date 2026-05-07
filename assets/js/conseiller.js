@@ -1431,6 +1431,11 @@ if (typeof window.runLicenseGate === 'function') {
                 }
             }
 
+            // ── Retailer settings panel (customization) ──────────────────────
+            if (typeof window.initRetailerSettings === 'function') {
+                window.initRetailerSettings(agencyId);
+            }
+
             // ── Agency address → default map center ──────────────────────────
             const agencyAddress = cached?.agencyAddress || null;
             if (agencyAddress) {

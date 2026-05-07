@@ -1,191 +1,353 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" dir="ltr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MobilityOS — Demo Flow</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
-<link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+<title>MobilityOS — Démo</title>
+<link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+<link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=42">
+<script src="/assets/js/brand-config.js"></script>
 <style>
-:root {
-    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-display: 'Outfit', 'Inter', sans-serif;
-    --color-accent: #2054EA;
-    --color-gradient-end: #05C4E8;
-    --color-text: #17181D;
-    --color-text-sec: #5B6070;
-    --glass-bg: rgba(245, 249, 255, 0.74);
-    --glass-border: rgba(255, 255, 255, 0.5);
-    --radius-xl: 28px;
-    --radius-lg: 22px;
-    --radius-md: 13px;
-}
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
 body {
-    font-family: var(--font-sans);
-    background: #fff;
-    color: var(--color-text);
-    height: 100vh;
+    font-family: var(--font-family-sans);
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
-    position: relative;
 }
 
-/* Ambient blobs — same as real app */
-.ambient-background { position: fixed; inset: -8vh -8vw; z-index: -1; overflow: hidden; pointer-events: none; }
-.blob { position: absolute; filter: blur(80px); opacity: 0.55; border-radius: 50%; animation: float 20s infinite ease-in-out; }
-.blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #2054EA; }
-.blob-2 { bottom: -10%; right: -10%; width: 60vw; height: 60vw; background: #05DBF3; animation-delay: -5s; }
-.blob-3 { top: 40%; left: 40%; width: 40vw; height: 40vw; background: #4F46E5; animation-delay: -10s; }
-@keyframes float {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(30px, -50px) scale(1.1); }
-    66% { transform: translate(-20px, 20px) scale(0.9); }
+.demo-stage {
+    display: flex;
+    align-items: center;
+    gap: clamp(24px, 5vw, 60px);
+    z-index: 10;
+    padding: 24px;
+    max-width: 100vw;
 }
-
-.demo-stage { display: flex; align-items: center; gap: 60px; z-index: 10; }
 
 /* ─── Phone (Client) ─── */
 .phone {
-    width: 300px; height: 600px;
-    background: #f5f5f7;
+    width: clamp(220px, 28vw, 300px);
+    height: clamp(440px, 56vw, 600px);
+    background: var(--glass-bg);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
     border-radius: 42px;
-    border: 4px solid #d1d1d6;
+    border: 1px solid var(--glass-border);
     padding: 55px 0 25px;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 24px 64px rgba(31,38,135,0.13), 0 8px 24px rgba(31,38,135,0.07);
+    box-shadow: var(--glass-shadow);
+    flex-shrink: 0;
 }
-.phone::before { content: ''; position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 90px; height: 22px; background: #17181D; border-radius: 14px; z-index: 10; }
-.phone-screen { height: 100%; background: #fff; overflow: hidden; display: flex; flex-direction: column; }
+.phone::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90px;
+    height: 22px;
+    background: var(--color-text-primary);
+    border-radius: 14px;
+    z-index: 10;
+    opacity: 0.7;
+}
+.phone-screen { height: 100%; overflow: hidden; display: flex; flex-direction: column; }
 
-/* Phone header — glass style */
 .phone-header {
     background: var(--glass-bg);
-    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(0,0,0,0.08);
-    padding: 12px 16px;
-    display: flex; align-items: center; justify-content: space-between;
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border-bottom: 1px solid var(--color-border);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
 }
-.phone-header .brand { display: flex; align-items: center; gap: 6px; }
-.phone-header .brand .logo-circle {
-    width: 24px; height: 24px; border-radius: 6px;
-    background: linear-gradient(135deg, #2054EA, #05C4E8);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700; color: #fff;
+.phone-header .brand { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+.phone-header .brand-logo { width: 20px; height: 20px; flex-shrink: 0; }
+.phone-header .brand-name {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
-.phone-header .brand span { font-size: 11px; font-weight: 600; color: var(--color-text-sec); text-transform: uppercase; letter-spacing: 0.04em; }
-.phone-header .lang-pill { background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.08); border-radius: 20px; padding: 4px 10px; font-size: 10px; color: var(--color-text-sec); display: flex; align-items: center; gap: 4px; }
+.lang-pill {
+    background: rgba(var(--color-accent-rgb), 0.08);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.15);
+    border-radius: 20px;
+    padding: 3px 8px;
+    font-size: 10px;
+    color: var(--color-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
+}
 
 .phone-title {
-    padding: 16px 20px 8px;
-    font-family: var(--font-display);
-    font-size: 20px; font-weight: 700;
+    padding: 14px 16px 6px;
+    font-family: var(--font-family-display);
+    font-size: clamp(16px, 2.5vw, 20px);
+    font-weight: 700;
     background: linear-gradient(125deg, var(--color-accent), var(--color-gradient-end));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
-.phone-form { padding: 4px 16px; display: flex; flex-direction: column; gap: 12px; overflow: hidden; flex: 1; }
 
-/* Form field */
+.phone-form { padding: 4px 12px; display: flex; flex-direction: column; gap: 10px; overflow: hidden; flex: 1; }
+
 .phone-field { opacity: 0; transform: translateY(8px); }
 .phone-field.visible { opacity: 1; transform: translateY(0); transition: all 0.4s cubic-bezier(0.16,1,0.3,1); }
 .phone-field label {
-    display: block; font-size: 9.5px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.07em;
-    color: var(--color-text-sec); margin-bottom: 4px; margin-left: 4px;
+    display: block;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--color-text-secondary);
+    margin-bottom: 4px;
+    margin-left: 4px;
 }
-.phone-field .input-box {
-    display: flex; align-items: center; gap: 8px;
-    background: rgba(255,255,255,0.93);
-    border: 1px solid rgba(32,84,234,0.09);
+.input-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--glass-bg);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    padding: 11px 12px;
-    box-shadow: 0 2px 8px rgba(32,84,234,0.04), inset 0 0.75px 0 rgba(255,255,255,0.88);
-    min-height: 42px; font-size: 13px; color: var(--color-text);
+    padding: 10px 12px;
+    box-shadow: inset 0 0.75px 0 rgba(255,255,255,0.06);
+    min-height: 40px;
+    font-size: 12px;
+    color: var(--color-text-primary);
 }
-.phone-field .input-box i { color: var(--color-text-sec); font-size: 15px; flex-shrink: 0; }
-.phone-field .input-box.typing { border-color: rgba(32,84,234,0.35); box-shadow: 0 0 0 3px rgba(32,84,234,0.08), 0 2px 8px rgba(32,84,234,0.04); }
-.cursor { display: inline-block; width: 2px; height: 15px; background: var(--color-accent); animation: blink 0.8s step-end infinite; }
+.input-box i { color: var(--color-text-secondary); font-size: 14px; flex-shrink: 0; }
+.input-box.typing {
+    border-color: rgba(var(--color-accent-rgb), 0.4);
+    box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.1);
+}
+.cursor {
+    display: inline-block;
+    width: 2px;
+    height: 13px;
+    background: var(--color-accent);
+    animation: blink 0.8s step-end infinite;
+    vertical-align: middle;
+}
 @keyframes blink { 50% { opacity: 0; } }
 
 /* ─── Flow connector ─── */
-.flow-connector { display: flex; flex-direction: column; align-items: center; gap: 10px; opacity: 0; }
+.flow-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    flex-shrink: 0;
+}
 .flow-connector.active { opacity: 1; transition: opacity 0.6s ease; }
-.flow-lock { font-size: 20px; }
-.flow-dots { display: flex; gap: 6px; }
-.flow-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--color-accent); opacity: 0.3; }
+.flow-lock { font-size: 18px; }
+.flow-dots { display: flex; gap: 5px; }
+.flow-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    opacity: 0.3;
+}
 .flow-dot.pulse { animation: dotP 1.2s ease-in-out infinite; }
 .flow-dot:nth-child(2) { animation-delay: 0.2s; }
 .flow-dot:nth-child(3) { animation-delay: 0.4s; }
 @keyframes dotP { 0%,100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.3); } }
-.flow-label { font-size: 10px; color: var(--color-text-sec); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
+.flow-label {
+    font-size: 9px;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 600;
+}
 
 /* ─── Laptop (Retailer) ─── */
 .laptop {
-    width: 480px;
+    width: clamp(300px, 40vw, 480px);
     background: var(--glass-bg);
-    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    border: 0.5px solid rgba(255,255,255,0.28);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-xl);
     overflow: hidden;
-    box-shadow: 0 24px 64px rgba(31,38,135,0.13), 0 8px 24px rgba(31,38,135,0.07),
-                inset 0 1px 0 rgba(255,255,255,0.82);
+    box-shadow: var(--glass-shadow);
+    flex-shrink: 0;
 }
 .laptop-bar {
-    height: 36px; background: rgba(255,255,255,0.5);
-    border-bottom: 1px solid rgba(0,0,0,0.06);
-    display: flex; align-items: center; padding: 0 14px; gap: 7px;
+    height: 34px;
+    background: rgba(var(--color-accent-rgb), 0.04);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    gap: 7px;
 }
-.laptop-bar .dot { width: 11px; height: 11px; border-radius: 50%; }
+.laptop-bar .dot { width: 10px; height: 10px; border-radius: 50%; }
 .laptop-bar .dot:nth-child(1) { background: #ff5f57; }
 .laptop-bar .dot:nth-child(2) { background: #ffbd2e; }
 .laptop-bar .dot:nth-child(3) { background: #28c840; }
-.laptop-bar .url { margin-left: 16px; font-size: 11px; color: var(--color-text-sec); background: rgba(0,0,0,0.04); padding: 4px 14px; border-radius: 6px; }
+.laptop-bar .url {
+    margin-left: 14px;
+    font-size: 10px;
+    color: var(--color-text-secondary);
+    background: rgba(var(--color-accent-rgb), 0.06);
+    padding: 3px 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
 
-.laptop-screen { padding: 24px; min-height: 420px; }
-.laptop-screen .brand-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-.laptop-screen .brand-row .logo-circle { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, #2054EA, #05C4E8); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; }
-.laptop-screen .brand-row span { font-size: 11px; font-weight: 600; color: var(--color-text-sec); text-transform: uppercase; letter-spacing: 0.04em; }
+.laptop-screen { padding: 20px; min-height: 380px; }
+
+.laptop-screen .brand-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+.laptop-screen .brand-row img {
+    height: 18px;
+    width: auto;
+    opacity: 0.8;
+}
+.laptop-screen .brand-row .agency-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
 
 .laptop-title {
-    font-family: var(--font-display); font-size: 22px; font-weight: 700;
+    font-family: var(--font-family-display);
+    font-size: clamp(16px, 2vw, 22px);
+    font-weight: 700;
     background: linear-gradient(125deg, var(--color-accent), var(--color-gradient-end));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    margin-bottom: 16px;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 14px;
 }
+
 .status-pill {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: rgba(52,199,89,0.1); border: 1px solid rgba(52,199,89,0.2);
-    border-radius: 20px; padding: 5px 12px; font-size: 11px; font-weight: 600;
-    color: #34C759; margin-bottom: 16px; opacity: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(52,199,89,0.1);
+    border: 1px solid rgba(52,199,89,0.2);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--color-success);
+    margin-bottom: 14px;
+    opacity: 0;
 }
 .status-pill.visible { opacity: 1; transition: opacity 0.5s ease; }
-.status-dot-live { width: 6px; height: 6px; border-radius: 50%; background: #34C759; animation: sPulse 1.5s ease infinite; }
+.status-dot-live {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-success);
+    animation: sPulse 1.5s ease infinite;
+}
 @keyframes sPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-/* Data rows — matches real app .data-row */
 .data-row {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 10px 14px;
-    background: rgba(255,255,255,0.7);
-    border: 0.5px solid rgba(255,255,255,0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 12px;
+    background: rgba(var(--color-accent-rgb), 0.04);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    margin-bottom: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.03), inset 0 0.5px 0 rgba(255,255,255,0.8);
-    opacity: 0; transform: translateX(10px);
+    margin-bottom: 7px;
+    opacity: 0;
+    transform: translateX(10px);
 }
-.data-row.visible { opacity: 1; transform: translateX(0); transition: all 0.5s cubic-bezier(0.16,1,0.3,1); }
-.data-row .label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-sec); }
-.data-row .value { font-size: 14px; font-weight: 500; color: var(--color-text); text-align: right; }
-.data-row .value.flash { animation: flashVal 0.4s ease; }
-@keyframes flashVal { from { color: var(--color-accent); transform: translateY(-3px); opacity: 0.7; } to { color: var(--color-text); transform: translateY(0); opacity: 1; } }
-.data-row .copy-btn { width: 30px; height: 30px; border-radius: 50%; background: rgba(0,0,0,0.04); border: none; display: flex; align-items: center; justify-content: center; color: var(--color-text-sec); font-size: 14px; flex-shrink: 0; }
+.data-row.visible {
+    opacity: 1;
+    transform: translateX(0);
+    transition: all 0.5s cubic-bezier(0.16,1,0.3,1);
+}
+.data-row .d-label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+}
+.data-row .d-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    text-align: right;
+    margin: 0 8px;
+    flex: 1;
+}
+.data-row .d-value.flash { animation: flashVal 0.4s ease; }
+@keyframes flashVal {
+    from { color: var(--color-accent); transform: translateY(-3px); opacity: 0.7; }
+    to { color: var(--color-text-primary); transform: translateY(0); opacity: 1; }
+}
+.data-row .copy-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(var(--color-accent-rgb), 0.08);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    flex-shrink: 0;
+}
 
-/* Watermark */
-.watermark { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); font-size: 12px; color: rgba(0,0,0,0.2); font-weight: 500; letter-spacing: 0.5px; z-index: 10; }
+.watermark {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    opacity: 0.5;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    z-index: 10;
+    white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+    .flow-connector { display: none; }
+    .laptop { display: none; }
+    .phone { width: min(280px, 85vw); height: auto; min-height: 440px; }
+    .watermark { font-size: 10px; }
+}
 </style>
 </head>
 <body>
@@ -201,10 +363,13 @@ body {
     <div class="phone">
         <div class="phone-screen">
             <div class="phone-header">
-                <div class="brand"><div class="logo-circle">M</div><span>OK Mobility</span></div>
+                <div class="brand">
+                    <img src="/assets/logos/okm-logo-mobile-white.svg" class="brand-logo" alt="Logo" id="demoBrandLogo">
+                    <span class="brand-name" id="demoBrandName">MobilityOS</span>
+                </div>
                 <div class="lang-pill"><i class='bx bx-globe'></i> FR</div>
             </div>
-            <div class="phone-title">Vos informations</div>
+            <div class="phone-title" id="demoPhoneTitle">Vos informations</div>
             <div class="phone-form">
                 <div class="phone-field" id="f1">
                     <label>Adresse de résidence</label>
@@ -241,22 +406,61 @@ body {
     <div class="laptop">
         <div class="laptop-bar">
             <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-            <span class="url">okmobility.pages.dev/retailer</span>
+            <span class="url" id="demoLaptopUrl">platform/retailer</span>
         </div>
         <div class="laptop-screen">
-            <div class="brand-row"><div class="logo-circle">M</div><span>OK Mobility · Palma Centro</span></div>
-            <div class="laptop-title">Données du client</div>
-            <div class="status-pill" id="statusPill"><div class="status-dot-live"></div>Connecté — Session active</div>
+            <div class="brand-row">
+                <img src="/assets/logos/okm-logo-mobile-white.svg" alt="Logo" id="demoLaptopLogo" style="height:18px;">
+                <span class="agency-name" id="demoAgencyName">Agence Demo</span>
+            </div>
+            <div class="laptop-title" id="demoLaptopTitle">Données du client</div>
+            <div class="status-pill" id="statusPill">
+                <div class="status-dot-live"></div>
+                <span id="demoStatusLabel">Connecté — Session active</span>
+            </div>
 
-            <div class="data-row" id="ar1"><span class="label">Adresse</span><span class="value" id="av1">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
-            <div class="data-row" id="ar2"><span class="label">Code Postal</span><span class="value" id="av2">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
-            <div class="data-row" id="ar3"><span class="label">Téléphone</span><span class="value" id="av3">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
-            <div class="data-row" id="ar4"><span class="label">E-mail</span><span class="value" id="av4">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
+            <div class="data-row" id="ar1">
+                <span class="d-label">Adresse</span>
+                <span class="d-value" id="av1">—</span>
+                <div class="copy-btn"><i class='bx bx-copy'></i></div>
+            </div>
+            <div class="data-row" id="ar2">
+                <span class="d-label">Code Postal</span>
+                <span class="d-value" id="av2">—</span>
+                <div class="copy-btn"><i class='bx bx-copy'></i></div>
+            </div>
+            <div class="data-row" id="ar3">
+                <span class="d-label">Téléphone</span>
+                <span class="d-value" id="av3">—</span>
+                <div class="copy-btn"><i class='bx bx-copy'></i></div>
+            </div>
+            <div class="data-row" id="ar4">
+                <span class="d-label">E-mail</span>
+                <span class="d-value" id="av4">—</span>
+                <div class="copy-btn"><i class='bx bx-copy'></i></div>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="watermark">MobilityOS — Digital Check-In</div>
+<div class="watermark" id="demoWatermark">MobilityOS — Digital Check-In</div>
+
+<script>
+// Apply brand from brand-config.js when available
+document.addEventListener('DOMContentLoaded', () => {
+    const B = window.BRAND;
+    if (!B) return;
+    const brandName = B.name || 'MobilityOS';
+    document.getElementById('demoBrandName').textContent = brandName;
+    document.getElementById('demoAgencyName').textContent = brandName + ' · Démo';
+    document.getElementById('demoWatermark').textContent = brandName + ' — Digital Check-In';
+    document.getElementById('demoLaptopUrl').textContent = window.location.hostname + '/retailer';
+    if (B.logos?.mobile) {
+        document.getElementById('demoBrandLogo').src = B.logos.mobile;
+        document.getElementById('demoLaptopLogo').src = B.logos.mobile;
+    }
+});
+</script>
 
 <script>
 const data = [

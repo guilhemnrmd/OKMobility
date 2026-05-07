@@ -18,7 +18,7 @@
             fr: {
                 heroTitle: "La fin des saisies au comptoir.",
                 heroSubtitle: "La solution universelle pour les hôtels, agences et accueils physiques. Vos clients scannent un QR code, saisissent leurs informations sur leur smartphone, et vous les recevez instantanément. Zéro serveur, 100% sécurisé via WebRTC.",
-                btnDemo: "Demander une démo",
+                btnDemo: "Essai gratuit 30 jours",
                 aiDisclaimer: "Généré automatiquement à partir de votre profil d'entreprise.",
                 videoWatch: "Voir le fonctionnement",
                 feat1Title: "Interface Adaptative",
@@ -84,7 +84,7 @@
             en: {
                 heroTitle: "The end of manual data entry.",
                 heroSubtitle: "The universal solution for hotels, agencies, and physical receptions. Clients scan a QR code, enter their info on their smartphone, and you receive it instantly. Zero server, 100% secure via WebRTC.",
-                btnDemo: "Request a demo",
+                btnDemo: "Free 30-day trial",
                 aiDisclaimer: "Automatically generated from your company profile.",
                 videoWatch: "See how it works",
                 feat1Title: "Adaptive Interface",
