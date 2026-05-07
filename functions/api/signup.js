@@ -101,15 +101,34 @@ function getRequestHost(request) {
     return host;
 }
 
+/**
+ * Send an email via Resend API.
+ * Requires RESEND_API_KEY env secret.
+ * Without a verified domain, uses Resend's shared sender onboarding@resend.dev.
+ */
+async function sendViaResend(env, { to, toName, subject, html }) {
+    const apiKey = env.RESEND_API_KEY;
+    if (!apiKey) return;
+
+    const brandName = env.BRAND_NAME || 'MobilityOS';
+    // Use verified domain sender if available, else Resend's free shared sender
+    const from = env.FROM_EMAIL || `${brandName} <onboarding@resend.dev>`;
+
+    await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({ from, to: toName ? `${toName} <${to}>` : to, subject, html })
+    });
+}
+
 async function sendActivationEmail(env, request, data, token) {
     const brandName = env.BRAND_NAME || 'MobilityOS';
-    const host = getRequestHost(request);
     const proto = request.url.startsWith('https://') ? 'https' : 'http';
+    const host = request.headers.get('host') || '';
     const activationUrl = `${proto}://${host}/setup-account/?token=${token}`;
-
-    const fromEmail = env.NOTIFY_EMAIL
-        ? `noreply@${env.NOTIFY_EMAIL.split('@').slice(1).join('@')}`
-        : `noreply@${host}`;
 
     const html = `
 <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#17181D;">
@@ -128,15 +147,11 @@ async function sendActivationEmail(env, request, data, token) {
 </div>`.trim();
 
     try {
-        await fetch('https://api.mailchannels.net/tx/v1/send', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                personalizations: [{ to: [{ email: data.email, name: `${data.firstName} ${data.lastName}` }] }],
-                from: { email: fromEmail, name: brandName },
-                subject: `Activez votre compte ${brandName} — lien valable 24h`,
-                content: [{ type: 'text/html', value: html }]
-            })
+        await sendViaResend(env, {
+            to: data.email,
+            toName: `${data.firstName} ${data.lastName}`,
+            subject: `Activez votre compte ${brandName} — lien valable 24h`,
+            html
         });
     } catch { /* Non-blocking */ }
 }
@@ -159,16 +174,10 @@ async function sendAdminNotification(env, data) {
 </table>`.trim();
 
     try {
-        const fromEmail = `noreply@${notifyTo.split('@').slice(1).join('@')}`;
-        await fetch('https://api.mailchannels.net/tx/v1/send', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                personalizations: [{ to: [{ email: notifyTo }] }],
-                from: { email: fromEmail, name: brandName },
-                subject: `[${brandName}] Nouvelle demande d'essai — ${escapeHtml(data.companyName)}`,
-                content: [{ type: 'text/html', value: html }]
-            })
+        await sendViaResend(env, {
+            to: notifyTo,
+            subject: `[${brandName}] Nouvelle demande d'essai — ${data.companyName}`,
+            html
         });
     } catch { /* Non-blocking */ }
 }
