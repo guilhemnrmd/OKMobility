@@ -455,69 +455,148 @@ function renderDynamicFields(fields) {
         detachedChildren.push(container.removeChild(container.firstChild));
     }
 
-    // Track which system wrappers we've already re-attached (avoid duplicates for shared wrappers)
+    // Track which system wrappers we've already re-attached
     const reattached = new Set();
 
-    fields.forEach(field => {
-        if (field.system) {
-            // Re-attach the existing system wrapper
-            const wrapperIds = SYSTEM_FIELD_WRAPPERS[field.id] || [];
-            wrapperIds.forEach(wrapperId => {
-                if (wrapperId && existingWrappers[wrapperId] && !reattached.has(wrapperId)) {
-                    container.appendChild(existingWrappers[wrapperId]);
-                    reattached.add(wrapperId);
+    function renderFields(fieldsArray, parentElement) {
+        fieldsArray.forEach(field => {
+            if (field.system) {
+                const wrapperIds = SYSTEM_FIELD_WRAPPERS[field.id] || [];
+                wrapperIds.forEach(wrapperId => {
+                    if (wrapperId && existingWrappers[wrapperId] && !reattached.has(wrapperId)) {
+                        parentElement.appendChild(existingWrappers[wrapperId]);
+                        reattached.add(wrapperId);
+                    }
+                });
+
+                // Backward compatibility: append hardcoded tempAddress and phone2 if needed
+                if (field.id === 'address_block' && tempAddressWrapper && !reattached.has('tempAddressWrapper')) {
+                    parentElement.appendChild(tempAddressWrapper);
+                    reattached.add('tempAddressWrapper');
                 }
-            });
+                if (field.id === 'phone' && phone2Wrapper && !reattached.has('phone2Wrapper')) {
+                    parentElement.appendChild(phone2Wrapper);
+                    reattached.add('phone2Wrapper');
+                }
+            } else if (field.type === 'toggle_group') {
+                // Create a toggle group
+                const groupWrap = document.createElement('div');
+                groupWrap.className = 'temp-address-wrapper active'; // Base class
+                groupWrap.style.animation = 'slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                groupWrap.style.marginBottom = 'var(--spacing-md)';
+                
+                const toggleDiv = document.createElement('div');
+                toggleDiv.className = 'temp-address-toggle';
+                
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'toggle-header';
+                
+                const labelWrap = document.createElement('label');
+                labelWrap.className = 'custom-checkbox';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `chk_${field.id}`;
+                
+                const checkmark = document.createElement('span');
+                checkmark.className = 'checkmark';
+                
+                const textSpan = document.createElement('span');
+                textSpan.textContent = field.label || 'Groupe';
+                
+                labelWrap.appendChild(checkbox);
+                labelWrap.appendChild(checkmark);
+                labelWrap.appendChild(textSpan);
+                headerDiv.appendChild(labelWrap);
+                toggleDiv.appendChild(headerDiv);
+                
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'temp-address-sliding-section';
+                sectionDiv.id = `section_${field.id}`;
+                
+                const innerDiv = document.createElement('div');
+                innerDiv.className = 'temp-address-content-inner';
+                
+                sectionDiv.appendChild(innerDiv);
+                groupWrap.appendChild(toggleDiv);
+                groupWrap.appendChild(sectionDiv);
+                parentElement.appendChild(groupWrap);
+                
+                // Toggle Logic
+                checkbox.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        sectionDiv.classList.add('expanded');
+                        groupWrap.classList.add('active');
+                        // Set required on children if needed
+                        innerDiv.querySelectorAll('input').forEach(i => {
+                            if (i.dataset.req === 'true') i.required = true;
+                        });
+                    } else {
+                        sectionDiv.classList.remove('expanded');
+                        // groupWrap.classList.remove('active'); // keep it active or it loses style depending on b2b.css
+                        // Remove required
+                        innerDiv.querySelectorAll('input').forEach(i => {
+                            i.removeAttribute('required');
+                        });
+                    }
+                });
+                
+                // Render children inside the inner container
+                if (field.children && field.children.length > 0) {
+                    renderFields(field.children, innerDiv);
+                }
+                
+            } else {
+                // Custom field
+                const wrapper = document.createElement('div');
+                wrapper.className = 'input-wrapper';
+                wrapper.id = `wrap_${field.id}`;
+                wrapper.style.cssText = 'animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);';
 
-            // After 'address_block', re-attach temp address wrapper if it was present
-            if (field.id === 'address_block' && tempAddressWrapper) {
-                container.appendChild(tempAddressWrapper);
+                const iconMap = {
+                    text: 'bx-text',
+                    email: 'bx-envelope',
+                    tel: 'bx-phone',
+                    number: 'bx-calculator',
+                    date: 'bx-calendar',
+                    url: 'bx-link'
+                };
+                const iconClass = field.icon || iconMap[field.type] || 'bx-edit-alt';
+
+                const label = document.createElement('label');
+                label.setAttribute('for', field.id);
+                label.textContent = field.label || 'Champ personnalisé';
+
+                const inputWrap = document.createElement('div');
+                inputWrap.className = 'input-with-icon';
+
+                const icon = document.createElement('i');
+                icon.className = `bx ${iconClass}`;
+
+                const input = document.createElement('input');
+                input.type = field.type === 'tel' ? 'tel' : (field.type || 'text');
+                input.id = field.id;
+                input.name = field.id;
+                input.placeholder = field.placeholder || '';
+                
+                // Store required status via dataset because if inside a toggle, it only becomes required when toggle is active
+                if (field.required) {
+                    input.dataset.req = 'true';
+                    // If it's not inside an inactive toggle group, make it required now
+                    // For simplicity, we make it required. The toggle logic removes it if unchecked.
+                    input.required = true;
+                }
+
+                inputWrap.appendChild(icon);
+                inputWrap.appendChild(input);
+                wrapper.appendChild(label);
+                wrapper.appendChild(inputWrap);
+                parentElement.appendChild(wrapper);
             }
-            // After 'phone', re-attach phone2 wrapper if it was present
-            if (field.id === 'phone' && phone2Wrapper) {
-                container.appendChild(phone2Wrapper);
-            }
-        } else {
-            // Custom field — create a new input wrapper
-            const wrapper = document.createElement('div');
-            wrapper.className = 'input-wrapper';
-            wrapper.id = `wrap_${field.id}`;
-            wrapper.style.cssText = 'animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);';
+        });
+    }
 
-            const iconMap = {
-                text: 'bx-text',
-                email: 'bx-envelope',
-                tel: 'bx-phone',
-                number: 'bx-calculator',
-                date: 'bx-calendar',
-                url: 'bx-link'
-            };
-            const iconClass = field.icon || iconMap[field.type] || 'bx-edit-alt';
-
-            const label = document.createElement('label');
-            label.setAttribute('for', field.id);
-            label.textContent = field.label || 'Champ personnalisé';
-
-            const inputWrap = document.createElement('div');
-            inputWrap.className = 'input-with-icon';
-
-            const icon = document.createElement('i');
-            icon.className = `bx ${iconClass}`;
-
-            const input = document.createElement('input');
-            input.type = field.type === 'tel' ? 'tel' : (field.type || 'text');
-            input.id = field.id;
-            input.name = field.id;
-            input.placeholder = field.placeholder || '';
-            if (field.required) input.required = true;
-
-            inputWrap.appendChild(icon);
-            inputWrap.appendChild(input);
-            wrapper.appendChild(label);
-            wrapper.appendChild(inputWrap);
-            container.appendChild(wrapper);
-        }
-    });
+    renderFields(fields, container);
 
     // Re-attach any system wrappers that weren't in the fields list (safety net)
     for (const [wrapperId, el] of Object.entries(existingWrappers)) {
