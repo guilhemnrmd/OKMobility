@@ -6,3 +6,8 @@ pages_build_output_dir = "."
 binding = "OKM_LICENSES"
 id = "8edd81d0d2e248bda2a399197c4d179e"
 preview_id = "b971db86aee54e92a44a79925ca1bd89"
+
+[[kv_namespaces]]
+binding = "OKM_ACCOUNTS"
+id = "REPLACE_WITH_REAL_KV_ID"
+preview_id = "REPLACE_WITH_REAL_PREVIEW_KV_ID"

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Créez votre mot de passe — OKMobility Platform</title>
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css?v=47">
+    <style>
+        .platform-wordmark {
+            display: flex; align-items: center; gap: 10px; text-decoration: none;
+        }
+        .platform-wordmark i { font-size: 1.4rem; color: var(--color-accent); }
+        .platform-wordmark span {
+            font-family: var(--font-family-display);
+            font-weight: 700; font-size: 1.05rem; color: var(--color-text-primary);
+        }
+        .alert-banner {
+            padding: 12px 16px; border-radius: var(--radius-md);
+            font-size: 0.875rem; font-weight: 500; margin-bottom: var(--spacing-sm); display: none;
+        }
+        .alert-error { background: rgba(255,107,107,0.12); color: var(--color-error); border: 1px solid rgba(255,107,107,0.25); }
+        .alert-success { background: rgba(52,199,89,0.1); color: var(--color-success); border: 1px solid rgba(52,199,89,0.25); }
+        .input-password-wrapper {
+            position: relative;
+        }
+        .btn-toggle-password {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+            transition: color var(--transition-base);
+        }
+        .btn-toggle-password:hover { color: var(--color-accent); }
+        .password-strength {
+            margin-top: 8px;
+        }
+        .strength-bar {
+            height: 4px;
+            border-radius: 2px;
+            background: var(--color-border);
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+        .strength-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s ease, background 0.3s ease;
+            width: 0%;
+        }
+        .strength-label {
+            font-size: 0.78rem;
+            color: var(--color-text-secondary);
+        }
+        .requirements-list {
+            list-style: none;
+            padding: 0;
+            margin: var(--spacing-xs) 0 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .requirements-list li {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            transition: color var(--transition-base);
+        }
+        .requirements-list li i { font-size: 0.9rem; }
+        .req-ok { color: var(--color-success) !important; }
+        .btn-full { width: 100%; justify-content: center; }
+        .btn-spinner { animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .form-subtitle { font-size: 0.9rem; color: var(--color-text-secondary); margin-top: 6px; }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-background">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <main class="glass-container" style="max-width:460px;">
+
+        <header class="glass-header">
+            <div class="header-brand">
+                <a href="/" class="platform-wordmark">
+                    <i class='bx bx-grid-alt'></i>
+                    <span>OKMobility Platform</span>
+                </a>
+            </div>
+        </header>
+
+        <section class="form-content">
+
+            <div class="title-wrapper">
+                <h1 class="gradient-text">Choisissez un mot de passe</h1>
+                <p class="form-subtitle">Dernière étape pour activer votre compte d'essai.</p>
+            </div>
+
+            <div id="alertBanner" class="alert-banner"></div>
+
+            <form id="setPasswordForm" class="modern-form" novalidate>
+
+                <div class="input-group">
+                    <label class="input-label" for="inputPassword">Mot de passe</label>
+                    <div class="input-wrapper input-password-wrapper">
+                        <i class='bx bx-lock-alt input-icon'></i>
+                        <input type="password" id="inputPassword" class="modern-input"
+                               placeholder="Minimum 8 caractères" autocomplete="new-password" required
+                               style="padding-right: 48px;">
+                        <button type="button" class="btn-toggle-password" id="btnTogglePwd" aria-label="Afficher le mot de passe">
+                            <i class='bx bx-show' id="eyeIcon"></i>
+                        </button>
+                    </div>
+                    <div class="password-strength" id="strengthWrapper" style="display:none">
+                        <div class="strength-bar">
+                            <div class="strength-fill" id="strengthFill"></div>
+                        </div>
+                        <span class="strength-label" id="strengthLabel"></span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label class="input-label" for="inputConfirm">Confirmer le mot de passe</label>
+                    <div class="input-wrapper">
+                        <i class='bx bx-lock input-icon'></i>
+                        <input type="password" id="inputConfirm" class="modern-input"
+                               placeholder="Répétez votre mot de passe" autocomplete="new-password" required>
+                    </div>
+                </div>
+
+                <ul class="requirements-list" id="requirementsList">
+                    <li id="req-length"><i class='bx bx-circle'></i> Au moins 8 caractères</li>
+                    <li id="req-upper"><i class='bx bx-circle'></i> Une lettre majuscule</li>
+                    <li id="req-number"><i class='bx bx-circle'></i> Un chiffre</li>
+                    <li id="req-match"><i class='bx bx-circle'></i> Les mots de passe correspondent</li>
+                </ul>
+
+                <button type="submit" id="btnSubmit" class="btn-primary btn-full" style="margin-top:var(--spacing-sm);">
+                    <span id="btnText">Créer mon compte</span>
+                    <i class='bx bx-loader-alt btn-spinner' id="btnSpinner" style="display:none"></i>
+                </button>
+
+            </form>
+
+        </section>
+    </main>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('token');
+
+        if (!token) {
+            window.location.href = '/signup/?error=invalid_token';
+        }
+
+        const pwdInput = document.getElementById('inputPassword');
+        const confirmInput = document.getElementById('inputConfirm');
+        const btnToggle = document.getElementById('btnTogglePwd');
+        const eyeIcon = document.getElementById('eyeIcon');
+        const strengthWrapper = document.getElementById('strengthWrapper');
+        const strengthFill = document.getElementById('strengthFill');
+        const strengthLabel = document.getElementById('strengthLabel');
+        const btnSubmit = document.getElementById('btnSubmit');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const alertBanner = document.getElementById('alertBanner');
+
+        btnToggle.addEventListener('click', () => {
+            const isHidden = pwdInput.type === 'password';
+            pwdInput.type = isHidden ? 'text' : 'password';
+            eyeIcon.className = isHidden ? 'bx bx-hide' : 'bx bx-show';
+        });
+
+        pwdInput.addEventListener('input', () => {
+            const val = pwdInput.value;
+            strengthWrapper.style.display = val ? 'block' : 'none';
+            updateRequirements(val, confirmInput.value);
+            updateStrength(val);
+        });
+
+        confirmInput.addEventListener('input', () => {
+            updateRequirements(pwdInput.value, confirmInput.value);
+        });
+
+        function updateRequirements(pwd, confirm) {
+            setReq('req-length', pwd.length >= 8);
+            setReq('req-upper', /[A-Z]/.test(pwd));
+            setReq('req-number', /[0-9]/.test(pwd));
+            setReq('req-match', pwd.length > 0 && pwd === confirm);
+        }
+
+        function setReq(id, ok) {
+            const li = document.getElementById(id);
+            li.className = ok ? 'req-ok' : '';
+            li.querySelector('i').className = ok ? 'bx bx-check-circle' : 'bx bx-circle';
+        }
+
+        function updateStrength(pwd) {
+            let score = 0;
+            if (pwd.length >= 8) score++;
+            if (pwd.length >= 12) score++;
+            if (/[A-Z]/.test(pwd)) score++;
+            if (/[0-9]/.test(pwd)) score++;
+            if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+            const levels = [
+                { pct: 20, color: '#ff4d4d', label: 'Très faible' },
+                { pct: 40, color: '#ff9500', label: 'Faible' },
+                { pct: 60, color: '#ffcc00', label: 'Moyen' },
+                { pct: 80, color: '#34c759', label: 'Fort' },
+                { pct: 100, color: '#007aff', label: 'Très fort' },
+            ];
+            const level = levels[Math.min(score, 4)];
+            strengthFill.style.width = level.pct + '%';
+            strengthFill.style.background = level.color;
+            strengthLabel.textContent = level.label;
+        }
+
+        document.getElementById('setPasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const password = pwdInput.value;
+            const confirm = confirmInput.value;
+
+            if (password.length < 8) {
+                showAlert('Le mot de passe doit contenir au moins 8 caractères.', 'error');
+                return;
+            }
+            if (password !== confirm) {
+                showAlert('Les mots de passe ne correspondent pas.', 'error');
+                return;
+            }
+
+            setLoading(true);
+            hideAlert();
+
+            try {
+                const res = await fetch('/api/set-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, password }),
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    window.location.href = '/dashboard/';
+                } else {
+                    showAlert(data.error || 'Une erreur est survenue.', 'error');
+                }
+            } catch {
+                showAlert('Erreur de connexion. Veuillez réessayer.', 'error');
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        function setLoading(on) {
+            btnSubmit.disabled = on;
+            btnText.textContent = on ? 'Création en cours…' : 'Créer mon compte';
+            btnSpinner.style.display = on ? 'inline-block' : 'none';
+        }
+
+        function showAlert(msg, type) {
+            alertBanner.textContent = msg;
+            alertBanner.className = `alert-banner alert-${type}`;
+            alertBanner.style.display = 'block';
+        }
+
+        function hideAlert() { alertBanner.style.display = 'none'; }
+    </script>
+</body>
+</html>
