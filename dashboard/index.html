@@ -296,6 +296,9 @@
                         <button type="button" class="btn-secondary-sm" id="btnAddPhoneField">
                             <i class='bx bx-phone'></i> Téléphone
                         </button>
+                        <button type="button" class="btn-secondary-sm" id="btnAddAddressBlock">
+                            <i class='bx bx-map-pin'></i> Bloc Adresse
+                        </button>
                         <button type="button" class="btn-secondary-sm" id="btnAddToggleGroup">
                             <i class='bx bx-list-plus'></i> Groupe déroulant (Tiroir)
                         </button>
@@ -610,6 +613,10 @@
         });
         document.getElementById('btnAddPhoneField').addEventListener('click', () => {
             formFields.push({ id: 'custom_' + Date.now(), label: 'Téléphone supplémentaire', type: 'tel', icon: 'bx-phone', required: false, system: false });
+            renderFieldsList();
+        });
+        document.getElementById('btnAddAddressBlock').addEventListener('click', () => {
+            formFields.push({ id: 'address_block_' + Date.now(), label: 'Bloc Adresse complet', type: 'address_block', icon: 'bx-map', required: false, system: false, children: [] });
             renderFieldsList();
         });
         document.getElementById('btnAddToggleGroup').addEventListener('click', () => {

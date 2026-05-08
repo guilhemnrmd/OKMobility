@@ -483,6 +483,7 @@ function renderDynamicFields(fields) {
                 const groupWrap = document.createElement('div');
                 groupWrap.className = 'temp-address-wrapper active'; // Base class
                 groupWrap.style.animation = 'slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                groupWrap.style.marginTop = 'var(--spacing-lg)';
                 groupWrap.style.marginBottom = 'var(--spacing-md)';
                 
                 const toggleDiv = document.createElement('div');
