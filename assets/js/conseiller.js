@@ -867,6 +867,41 @@ function handleIncomingData(data) {
         dom.valEmail.textContent = cleanData.email || '-';
         highlightField('valEmail');
     }
+
+    // Handle custom fields (keys starting with 'custom_')
+    const customContainer = document.getElementById('customFieldsContainer');
+    if (customContainer) {
+        Object.keys(cleanData).forEach(key => {
+            if (!key.startsWith('custom_')) return;
+            const value = cleanData[key] || '-';
+            let row = document.getElementById('row_' + key);
+            if (!row) {
+                row = document.createElement('div');
+                row.className = 'data-row';
+                row.id = 'row_' + key;
+                row.innerHTML = `
+                    <div class="data-info">
+                        <span class="data-label">${key.replace('custom_', '').replace(/_/g, ' ')}</span>
+                        <span class="data-value" id="val_${key}">-</span>
+                    </div>
+                    <button class="btn-copy" data-field="${key}" title="Copiar">
+                        <i class='bx bx-copy'></i>
+                    </button>
+                `;
+                customContainer.appendChild(row);
+                // Add copy handler
+                row.querySelector('.btn-copy').addEventListener('click', (e) => {
+                    const val = row.querySelector('.data-value').textContent;
+                    copyToClipboard(val, e.currentTarget);
+                });
+            }
+            const valEl = document.getElementById('val_' + key);
+            if (valEl) {
+                valEl.textContent = value;
+                highlightField('val_' + key);
+            }
+        });
+    }
 }
 
 function highlightField(fieldId) {
@@ -944,6 +979,9 @@ function clearDisplayedData() {
     dom.rowTempCity.classList.remove('row-expanded');
     if (dom.rowPhone2) dom.rowPhone2.classList.remove('row-expanded');
     if (dom.rowPhone2Number) dom.rowPhone2Number.classList.remove('row-expanded');
+    // Clear custom fields
+    const customContainer = document.getElementById('customFieldsContainer');
+    if (customContainer) customContainer.innerHTML = '';
     hideAddressMap();
     hideTempAddressMap();
 }

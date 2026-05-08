@@ -82,7 +82,8 @@
 
             <form id="clientForm" class="modern-form" onsubmit="event.preventDefault(); alert('Ceci est une prévisualisation. Le formulaire ne sera pas envoyé.');">
                 
-                <div class="input-wrapper address-wrapper">
+                <div id="dynamicFormFields">
+                <div class="input-wrapper address-wrapper" id="wrap_address">
                     <label for="address" id="lblAddress">Adresse de résidence</label>
                     <div class="input-with-icon">
                         <i class='bx bx-map'></i>
@@ -90,15 +91,15 @@
                     </div>
                 </div>
 
-                <div class="form-group-row">
-                    <div class="input-wrapper zip-wrapper">
+                <div class="form-group-row" id="wrap_zipCode_city">
+                    <div class="input-wrapper zip-wrapper" id="wrap_zipCode">
                         <label for="zipCode" id="lblZipCode">Code Postal</label>
                         <div class="input-with-icon">
                             <i class='bx bx-hash'></i>
                             <input type="text" id="zipCode" placeholder="75001" readonly>
                         </div>
                     </div>
-                    <div class="input-wrapper city-wrapper">
+                    <div class="input-wrapper city-wrapper" id="wrap_city">
                         <label for="city" id="lblCity">Ville</label>
                         <div class="input-with-icon">
                             <i class='bx bx-buildings'></i>
@@ -107,7 +108,7 @@
                     </div>
                 </div>
 
-                <div class="input-wrapper">
+                <div class="input-wrapper" id="wrap_country">
                     <label for="country" id="lblCountry">Pays</label>
                     <div class="input-with-icon">
                         <i class='bx bx-globe'></i>
@@ -140,15 +141,15 @@
                 </div>
 
                 <!-- Phone Section -->
-                <div class="form-group-row">
-                    <div class="input-wrapper zip-wrapper">
+                <div class="form-group-row" id="wrap_phone_group">
+                    <div class="input-wrapper zip-wrapper" id="wrap_phoneCode">
                         <label id="lblPhoneCode">Indicatif</label>
                         <div class="input-with-icon">
                             <i class='bx bx-plus'></i>
                             <input type="text" value="33" readonly>
                         </div>
                     </div>
-                    <div class="input-wrapper city-wrapper">
+                    <div class="input-wrapper city-wrapper" id="wrap_phone">
                         <label id="lblPhone">Numéro de téléphone</label>
                         <div class="input-with-icon">
                             <i class='bx bx-phone'></i>
@@ -190,13 +191,15 @@
                     </div>
                 </div>
 
-                <div class="input-wrapper">
+                <div class="input-wrapper" id="wrap_email">
                     <label id="lblEmail">E-mail</label>
                     <div class="input-with-icon">
                         <i class='bx bx-envelope'></i>
                         <input type="email" placeholder="jean.dupont@email.com" readonly>
                     </div>
                 </div>
+                
+                </div> <!-- End dynamicFormFields -->
 
                 <div class="form-actions">
                     <button type="submit" class="btn-primary glass-btn">
@@ -212,6 +215,63 @@
     </main>
 
     <script>
+        const SYSTEM_FIELD_WRAPPERS = {
+            address:  'wrap_address',
+            zipCode:  'wrap_zipCode_city',
+            city:     'wrap_zipCode_city',
+            country:  'wrap_country',
+            phone:    'wrap_phone_group',
+            email:    'wrap_email'
+        };
+
+        function renderDynamicFieldsPreview(fields) {
+            const container = document.getElementById('dynamicFormFields');
+            if (!container) return;
+
+            const existingWrappers = {};
+            for (const [, wrapperId] of Object.entries(SYSTEM_FIELD_WRAPPERS)) {
+                const el = document.getElementById(wrapperId);
+                if (el && !existingWrappers[wrapperId]) existingWrappers[wrapperId] = el;
+            }
+            const tempAddressWrapper = document.getElementById('tempAddressWrapper');
+            const phone2Wrapper = document.getElementById('phone2Wrapper');
+
+            while (container.firstChild) container.removeChild(container.firstChild);
+
+            const reattached = new Set();
+            fields.forEach(field => {
+                if (field.system) {
+                    const wrapperId = SYSTEM_FIELD_WRAPPERS[field.id];
+                    if (wrapperId && existingWrappers[wrapperId] && !reattached.has(wrapperId)) {
+                        container.appendChild(existingWrappers[wrapperId]);
+                        reattached.add(wrapperId);
+                    }
+                    if (field.id === 'country' && tempAddressWrapper) container.appendChild(tempAddressWrapper);
+                    if (field.id === 'phone' && phone2Wrapper) container.appendChild(phone2Wrapper);
+                } else {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'input-wrapper';
+                    wrapper.id = `wrap_${field.id}`;
+                    const iconMap = { text: 'bx-text', email: 'bx-envelope', tel: 'bx-phone' };
+                    const iconClass = field.icon || iconMap[field.type] || 'bx-edit-alt';
+                    wrapper.innerHTML = `
+                        <label>${field.label || 'Champ personnalisé'}${field.required ? ' *' : ''}</label>
+                        <div class="input-with-icon">
+                            <i class='bx ${iconClass}'></i>
+                            <input type="${field.type || 'text'}" placeholder="${field.placeholder || ''}" readonly>
+                        </div>
+                    `;
+                    container.appendChild(wrapper);
+                }
+            });
+
+            for (const [wrapperId, el] of Object.entries(existingWrappers)) {
+                if (!reattached.has(wrapperId)) { container.appendChild(el); reattached.add(wrapperId); }
+            }
+            if (tempAddressWrapper && !container.contains(tempAddressWrapper)) container.appendChild(tempAddressWrapper);
+            if (phone2Wrapper && !container.contains(phone2Wrapper)) container.appendChild(phone2Wrapper);
+        }
+
         async function applySettings() {
             try {
                 const res = await fetch('/api/auth/session');
@@ -261,6 +321,11 @@
                     if (settings.showSecondPhone !== false) {
                         document.getElementById('phone2Wrapper').style.display = 'block';
                     }
+
+                    // Champs dynamiques
+                    if (Array.isArray(settings.fields) && settings.fields.length > 0) {
+                        renderDynamicFieldsPreview(settings.fields);
+                    }
                 } else {
                     // Fallback defaults
                     document.getElementById('tempAddressWrapper').style.display = 'block';
@@ -273,7 +338,6 @@
             }
         }
 
-        // Wait a small moment to ensure styles load, then apply
         document.addEventListener('DOMContentLoaded', applySettings);
     </script>
 </body>

@@ -77,9 +77,9 @@
             </div>
 
             <form id="clientForm" class="modern-form" novalidate>
-                
+                <div id="dynamicFormFields">
                 <!-- Address Section (Free Text) -->
-                <div class="input-wrapper address-wrapper">
+                <div class="input-wrapper address-wrapper" id="wrap_address">
                     <label for="address" id="lblAddress">Adresse de résidence</label>
                     <div class="input-with-icon">
                         <i class='bx bx-map'></i>
@@ -89,15 +89,15 @@
                 </div>
 
                 <!-- Postal Code & City -->
-                <div class="form-group-row">
-                    <div class="input-wrapper zip-wrapper">
+                <div class="form-group-row" id="wrap_zipCode_city">
+                    <div class="input-wrapper zip-wrapper" id="wrap_zipCode">
                         <label for="zipCode" id="lblZipCode">Code Postal</label>
                         <div class="input-with-icon">
                             <i class='bx bx-hash'></i>
                             <input type="text" id="zipCode" name="zipCode" placeholder="75001" required>
                         </div>
                     </div>
-                    <div class="input-wrapper city-wrapper">
+                    <div class="input-wrapper city-wrapper" id="wrap_city">
                         <label for="city" id="lblCity">Ville</label>
                         <div class="input-with-icon">
                             <i class='bx bx-buildings'></i>
@@ -107,7 +107,7 @@
                 </div>
 
                 <!-- Country -->
-                <div class="input-wrapper">
+                <div class="input-wrapper" id="wrap_country">
                     <label for="country" id="lblCountry">Pays</label>
                     <div class="cs-wrap" id="countryWrap">
                         <span class="cs-face" id="countryDisplay">🇫🇷 France</span>
@@ -172,8 +172,8 @@
                 </div>
 
                 <!-- Phone Section with separate dial code and number -->
-                <div class="form-group-row">
-                    <div class="input-wrapper zip-wrapper">
+                <div class="form-group-row" id="wrap_phone_group">
+                    <div class="input-wrapper zip-wrapper" id="wrap_phoneCode">
                         <label for="countryCode" id="lblPhoneCode">Indicatif</label>
                         <div class="phone-country-box cs-wrap" id="countryCodeWrap">
                             <span class="cs-face" id="countryCodeDisplay">🇫🇷 +33</span>
@@ -185,7 +185,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="input-wrapper city-wrapper">
+                    <div class="input-wrapper city-wrapper" id="wrap_phone">
                         <label for="phone" id="lblPhone">Numéro de téléphone</label>
                         <div class="input-with-icon">
                             <i class='bx bx-phone'></i>
@@ -233,7 +233,7 @@
                 </div>
 
                 <!-- Email Section -->
-                <div class="input-wrapper">
+                <div class="input-wrapper" id="wrap_email">
                     <label for="email" id="lblEmail">E-mail</label>
                     <div class="input-with-icon">
                         <i class='bx bx-envelope'></i>
@@ -241,6 +241,8 @@
                         <input type="email" id="email" name="email" inputmode="email" placeholder="jean.dupont@email.com" required>
                     </div>
                 </div>
+                
+                </div> <!-- End dynamicFormFields -->
 
                 <!-- Actions -->
                 <div class="form-actions">

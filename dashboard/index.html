@@ -175,6 +175,33 @@
                                 </span>
                             </label>
                         </div>
+                    </form>
+                </div>
+
+                <div class="dash-card">
+                    <h3 class="card-title">Champs du formulaire (Form Builder)</h3>
+                    <p style="font-size: 0.85rem; color: var(--color-text-secondary); margin-bottom: 1rem;">
+                        Ajoutez, supprimez et réorganisez les champs que vos clients doivent remplir.
+                    </p>
+                    <div id="fieldsList" class="fields-list">
+                        <!-- Fields will be dynamically injected here -->
+                    </div>
+                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <button type="button" class="btn-secondary-sm" id="btnAddTextField">
+                            <i class='bx bx-text'></i> Texte court
+                        </button>
+                        <button type="button" class="btn-secondary-sm" id="btnAddEmailField">
+                            <i class='bx bx-envelope'></i> E-mail
+                        </button>
+                        <button type="button" class="btn-secondary-sm" id="btnAddPhoneField">
+                            <i class='bx bx-phone'></i> Téléphone
+                        </button>
+                    </div>
+                </div>
+
+                <div class="dash-card">
+                    <h3 class="card-title">Apparence & Thème</h3>
+                    <form id="appearanceForm" novalidate>
 
                         <div class="field" style="margin-top: 1.5rem; margin-bottom: 0.5rem;">
                             <label class="field-label">Thème par défaut</label>
@@ -204,10 +231,10 @@
                             </div>
                         </div>
 
-                        <div id="customAlert" class="inline-alert"></div>
+                        <div id="appearanceAlert" class="inline-alert"></div>
                         <div class="form-actions">
-                            <button type="submit" class="btn-primary-sm" id="btnSaveCustom">
-                                <span id="btnSaveCustomText">Enregistrer l'apparence</span>
+                            <button type="button" class="btn-primary-sm" id="btnSaveCustom">
+                                <span id="btnSaveCustomText">Enregistrer tous les paramètres</span>
                                 <i class='bx bx-loader-alt btn-spinner' id="btnSaveCustomSpinner" style="display:none"></i>
                             </button>
                         </div>
@@ -274,6 +301,17 @@
 
     <script>
         let currentUser = null;
+        let formFields = [];
+
+        // Champs par défaut si l'agence n'en a pas
+        const DEFAULT_FIELDS = [
+            { id: "address", label: "Adresse de résidence", type: "address", icon: "bx-map", required: true, system: true },
+            { id: "zipCode", label: "Code Postal", type: "text", icon: "bx-hash", required: true, system: true },
+            { id: "city", label: "Ville", type: "text", icon: "bx-buildings", required: true, system: true },
+            { id: "country", label: "Pays", type: "country", icon: "bx-globe", required: true, system: true },
+            { id: "phone", label: "Téléphone", type: "tel", icon: "bx-phone", required: true, system: true },
+            { id: "email", label: "E-mail", type: "email", icon: "bx-envelope", required: true, system: true }
+        ];
 
         async function init() {
             try {
@@ -330,7 +368,85 @@
             if (s.blob1) document.getElementById('formBlob1').value = s.blob1;
             if (s.blob2) document.getElementById('formBlob2').value = s.blob2;
             if (s.blob3) document.getElementById('formBlob3').value = s.blob3;
+
+            // Load fields
+            formFields = Array.isArray(s.fields) && s.fields.length > 0 ? [...s.fields] : [...DEFAULT_FIELDS];
+            renderFieldsList();
         }
+
+        function renderFieldsList() {
+            const container = document.getElementById('fieldsList');
+            container.innerHTML = '';
+            
+            formFields.forEach((field, index) => {
+                const isSystem = field.system;
+                const fieldEl = document.createElement('div');
+                fieldEl.className = 'field-item';
+                fieldEl.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 10px; background: rgba(0,0,0,0.03); border: 1px solid var(--color-border); border-radius: 8px; margin-bottom: 8px;';
+                
+                let iconHtml = `<i class='bx ${field.icon}' style="font-size: 1.2rem; color: var(--color-text-secondary);"></i>`;
+                
+                fieldEl.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
+                        ${iconHtml}
+                        <div style="display: flex; flex-direction: column;">
+                            <input type="text" class="field-input-inline" value="${escHtml(field.label)}" data-index="${index}" style="border: none; background: transparent; font-weight: 600; font-size: 0.9rem; outline: none; border-bottom: 1px dashed transparent; transition: 0.2s;" onfocus="this.style.borderBottomColor='var(--color-accent)'" onblur="this.style.borderBottomColor='transparent'">
+                            <span style="font-size: 0.7rem; color: var(--color-text-secondary); text-transform: uppercase;">${field.type} ${isSystem ? ' (Système)' : ''}</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <label style="display: flex; align-items: center; gap: 4px; font-size: 0.8rem; margin-right: 10px; cursor: pointer;">
+                            <input type="checkbox" class="field-req-check" data-index="${index}" ${field.required ? 'checked' : ''}> Requis
+                        </label>
+                        <button type="button" class="btn-icon" onclick="moveField(${index}, -1)" ${index === 0 ? 'disabled' : ''}><i class='bx bx-up-arrow-alt'></i></button>
+                        <button type="button" class="btn-icon" onclick="moveField(${index}, 1)" ${index === formFields.length - 1 ? 'disabled' : ''}><i class='bx bx-down-arrow-alt'></i></button>
+                        <button type="button" class="btn-icon danger" onclick="removeField(${index})" ${isSystem ? 'disabled title="Champ système requis"' : ''}><i class='bx bx-trash'></i></button>
+                    </div>
+                `;
+                container.appendChild(fieldEl);
+            });
+
+            // Add event listeners for inputs
+            container.querySelectorAll('.field-input-inline').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    const idx = e.target.dataset.index;
+                    formFields[idx].label = e.target.value;
+                });
+            });
+            container.querySelectorAll('.field-req-check').forEach(chk => {
+                chk.addEventListener('change', (e) => {
+                    const idx = e.target.dataset.index;
+                    formFields[idx].required = e.target.checked;
+                });
+            });
+        }
+
+        window.moveField = function(index, dir) {
+            if (index + dir < 0 || index + dir >= formFields.length) return;
+            const temp = formFields[index];
+            formFields[index] = formFields[index + dir];
+            formFields[index + dir] = temp;
+            renderFieldsList();
+        };
+
+        window.removeField = function(index) {
+            if (formFields[index].system) return;
+            formFields.splice(index, 1);
+            renderFieldsList();
+        };
+
+        document.getElementById('btnAddTextField').addEventListener('click', () => {
+            formFields.push({ id: 'custom_' + Date.now(), label: 'Nouveau champ', type: 'text', icon: 'bx-text', required: false, system: false });
+            renderFieldsList();
+        });
+        document.getElementById('btnAddEmailField').addEventListener('click', () => {
+            formFields.push({ id: 'custom_' + Date.now(), label: 'E-mail supplémentaire', type: 'email', icon: 'bx-envelope', required: false, system: false });
+            renderFieldsList();
+        });
+        document.getElementById('btnAddPhoneField').addEventListener('click', () => {
+            formFields.push({ id: 'custom_' + Date.now(), label: 'Téléphone supplémentaire', type: 'tel', icon: 'bx-phone', required: false, system: false });
+            renderFieldsList();
+        });
 
         function renderAgencies() {
             const agencies = currentUser.agencies || [];
@@ -460,8 +576,7 @@
         });
 
         // ── Customization form ────────────────────────────────
-        document.getElementById('customizationForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        document.getElementById('btnSaveCustom').addEventListener('click', async () => {
             const btn = document.getElementById('btnSaveCustom');
             const txt = document.getElementById('btnSaveCustomText');
             const spin = document.getElementById('btnSaveCustomSpinner');
@@ -477,6 +592,7 @@
                 blob1: document.getElementById('formBlob1').value,
                 blob2: document.getElementById('formBlob2').value,
                 blob3: document.getElementById('formBlob3').value,
+                fields: formFields
             };
 
             try {
@@ -488,14 +604,14 @@
                 const data = await res.json();
                 if (res.ok) {
                     currentUser.formSettings = { ...currentUser.formSettings, ...formSettings };
-                    showInline('customAlert', 'Paramètres enregistrés.', 'success');
+                    showInline('appearanceAlert', 'Paramètres enregistrés.', 'success');
                 } else {
-                    showInline('customAlert', data.error || 'Erreur.', 'error');
+                    showInline('appearanceAlert', data.error || 'Erreur.', 'error');
                 }
             } catch {
-                showInline('customAlert', 'Erreur de connexion.', 'error');
+                showInline('appearanceAlert', 'Erreur de connexion.', 'error');
             } finally {
-                btn.disabled = false; txt.textContent = 'Enregistrer'; spin.style.display = 'none';
+                btn.disabled = false; txt.textContent = 'Enregistrer tous les paramètres'; spin.style.display = 'none';
             }
         });
 

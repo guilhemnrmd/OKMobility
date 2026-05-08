@@ -407,6 +407,128 @@ function setAgencyBranding(agencyName) {
     dom.agencyBrandText.textContent = agencyName || DEFAULT_BRAND_SLOGAN;
 }
 
+// ============================================================================
+// 2b. Dynamic Fields Renderer
+// ============================================================================
+
+/**
+ * Maps a system field id to its existing wrapper element ID in the DOM.
+ * System fields are pre-built in the HTML, custom fields are injected.
+ */
+const SYSTEM_FIELD_WRAPPERS = {
+    address:  'wrap_address',
+    zipCode:  'wrap_zipCode_city',
+    city:     'wrap_zipCode_city',   // shared wrapper with zipCode
+    country:  'wrap_country',
+    phone:    'wrap_phone_group',
+    email:    'wrap_email'
+};
+
+/**
+ * Renders the form fields based on the `fields` array from formSettings.
+ * - System fields: reorders existing DOM elements.
+ * - Custom fields: creates new input elements and appends them.
+ */
+function renderDynamicFields(fields) {
+    const container = document.getElementById('dynamicFormFields');
+    if (!container) return;
+
+    // Collect all existing system wrappers
+    const existingWrappers = {};
+    for (const [fieldId, wrapperId] of Object.entries(SYSTEM_FIELD_WRAPPERS)) {
+        const el = document.getElementById(wrapperId);
+        if (el && !existingWrappers[wrapperId]) {
+            existingWrappers[wrapperId] = el;
+        }
+    }
+
+    // Also capture temp address and phone2 wrappers
+    const tempAddressWrapper = document.getElementById('tempAddressWrapper');
+    const phone2Wrapper = document.getElementById('phone2Wrapper');
+
+    // Detach all children from the container temporarily
+    const detachedChildren = [];
+    while (container.firstChild) {
+        detachedChildren.push(container.removeChild(container.firstChild));
+    }
+
+    // Track which system wrappers we've already re-attached (avoid duplicates for shared wrappers)
+    const reattached = new Set();
+
+    fields.forEach(field => {
+        if (field.system) {
+            // Re-attach the existing system wrapper
+            const wrapperId = SYSTEM_FIELD_WRAPPERS[field.id];
+            if (wrapperId && existingWrappers[wrapperId] && !reattached.has(wrapperId)) {
+                container.appendChild(existingWrappers[wrapperId]);
+                reattached.add(wrapperId);
+            }
+
+            // After 'country', re-attach temp address wrapper if it was present
+            if (field.id === 'country' && tempAddressWrapper) {
+                container.appendChild(tempAddressWrapper);
+            }
+            // After 'phone', re-attach phone2 wrapper if it was present
+            if (field.id === 'phone' && phone2Wrapper) {
+                container.appendChild(phone2Wrapper);
+            }
+        } else {
+            // Custom field — create a new input wrapper
+            const wrapper = document.createElement('div');
+            wrapper.className = 'input-wrapper';
+            wrapper.id = `wrap_${field.id}`;
+            wrapper.style.cssText = 'animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);';
+
+            const iconMap = {
+                text: 'bx-text',
+                email: 'bx-envelope',
+                tel: 'bx-phone',
+                number: 'bx-calculator',
+                date: 'bx-calendar',
+                url: 'bx-link'
+            };
+            const iconClass = field.icon || iconMap[field.type] || 'bx-edit-alt';
+
+            const label = document.createElement('label');
+            label.setAttribute('for', field.id);
+            label.textContent = field.label || 'Champ personnalisé';
+
+            const inputWrap = document.createElement('div');
+            inputWrap.className = 'input-with-icon';
+
+            const icon = document.createElement('i');
+            icon.className = `bx ${iconClass}`;
+
+            const input = document.createElement('input');
+            input.type = field.type === 'tel' ? 'tel' : (field.type || 'text');
+            input.id = field.id;
+            input.name = field.id;
+            input.placeholder = field.placeholder || '';
+            if (field.required) input.required = true;
+
+            inputWrap.appendChild(icon);
+            inputWrap.appendChild(input);
+            wrapper.appendChild(label);
+            wrapper.appendChild(inputWrap);
+            container.appendChild(wrapper);
+        }
+    });
+
+    // Re-attach any system wrappers that weren't in the fields list (safety net)
+    for (const [wrapperId, el] of Object.entries(existingWrappers)) {
+        if (!reattached.has(wrapperId)) {
+            container.appendChild(el);
+            reattached.add(wrapperId);
+        }
+    }
+    if (tempAddressWrapper && !container.contains(tempAddressWrapper)) {
+        container.appendChild(tempAddressWrapper);
+    }
+    if (phone2Wrapper && !container.contains(phone2Wrapper)) {
+        container.appendChild(phone2Wrapper);
+    }
+}
+
 async function hydrateAgencyBrandingFromUrl() {
     const params = new URLSearchParams(window.location.search);
     const agencyId = sanitizeAgencyId(params.get('agency'));
@@ -475,6 +597,11 @@ async function hydrateAgencyBrandingFromUrl() {
                 if (s.language && dom.langSelect) {
                     dom.langSelect.value = s.language;
                     applyLanguage(s.language);
+                }
+
+                // Champs dynamiques personnalisés
+                if (Array.isArray(s.fields) && s.fields.length > 0) {
+                    renderDynamicFields(s.fields);
                 }
             }
             return;
@@ -810,6 +937,24 @@ dom.form.addEventListener('submit', (e) => {
             <span class="summary-value">${formData.get('email')}</span>
         </div>
     `;
+
+    // Custom fields (non-system) — collect from dynamicFormFields
+    const container = document.getElementById('dynamicFormFields');
+    if (container) {
+        const customInputs = container.querySelectorAll('input[id^="custom_"]');
+        customInputs.forEach(input => {
+            if (input.value.trim()) {
+                const label = container.querySelector(`label[for="${input.id}"]`);
+                const labelText = label ? label.textContent : input.id;
+                summaryHTML += `
+                    <div class="summary-row">
+                        <span class="summary-label">${labelText}</span>
+                        <span class="summary-value">${input.value}</span>
+                    </div>
+                `;
+            }
+        });
+    }
 
     dom.summaryContentBody.innerHTML = summaryHTML;
 
@@ -1558,7 +1703,7 @@ function buildAdvisorPayload() {
     const phoneValue = clampText(dom.phone?.value || '', 40);
     const formattedPhone = `${phoneCode} ${phoneValue}`.replace(/\s+/g, ' ').trim();
     
-    return {
+    const basePayload = {
         language: state.lang,
         address: clampText(dom.address?.value || '', 140),
         country: clampText(countryName, 80),
@@ -1575,6 +1720,17 @@ function buildAdvisorPayload() {
         phone2Number: state.phone2Visible ? clampText(dom.phone2?.value || '', 40) : '',
         email: clampText(dom.email?.value || '', 120)
     };
+
+    // Collect custom fields
+    const container = document.getElementById('dynamicFormFields');
+    if (container) {
+        const customInputs = container.querySelectorAll('input[id^="custom_"]');
+        customInputs.forEach(input => {
+            basePayload[input.id] = clampText(input.value || '', 200);
+        });
+    }
+
+    return basePayload;
 }
 
 function getPayloadPatch(previousPayload, nextPayload) {
@@ -1656,6 +1812,16 @@ function attachRealTimeListeners() {
     if (dom.hasTempAddress) {
         dom.hasTempAddress.addEventListener('change', () => {
             setTimeout(sendFormDataToAdvisor, 100);
+        });
+    }
+
+    // Listen for custom fields input via event delegation
+    const dynamicContainer = document.getElementById('dynamicFormFields');
+    if (dynamicContainer) {
+        dynamicContainer.addEventListener('input', (e) => {
+            if (e.target.id && e.target.id.startsWith('custom_')) {
+                debouncedSendToAdvisor();
+            }
         });
     }
 }
