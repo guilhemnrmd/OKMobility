@@ -14,6 +14,11 @@ export async function onRequestPost(context) {
     }
 
     const emailLower = email.toLowerCase().trim();
+    
+    if (!env.OKM_ACCOUNTS) {
+        return jsonError('Erreur de configuration serveur (OKM_ACCOUNTS manquant)', 500);
+    }
+
     const accountRaw = await env.OKM_ACCOUNTS.get(`account:${emailLower}`);
     if (!accountRaw) {
         return jsonError('Email ou mot de passe incorrect', 401);

@@ -26,6 +26,10 @@ export async function onRequestPost(context) {
         return jsonError('Adresse email invalide', 400);
     }
 
+    if (!env.OKM_ACCOUNTS) {
+        return jsonError('Erreur de configuration serveur (OKM_ACCOUNTS manquant)', 500);
+    }
+
     const existing = await env.OKM_ACCOUNTS.get(`account:${emailLower}`);
     if (existing) {
         return jsonError('Un compte existe déjà avec cette adresse email', 409);

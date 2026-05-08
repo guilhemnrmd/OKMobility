@@ -105,7 +105,8 @@
                 } else {
                     showAlert(data.error || 'Identifiants incorrects.', 'error');
                 }
-            } catch {
+            } catch (err) {
+                console.error(err);
                 showAlert('Erreur de connexion. Veuillez réessayer.', 'error');
             } finally {
                 setLoading(false);

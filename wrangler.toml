@@ -10,7 +10,7 @@ preview_id = "b971db86aee54e92a44a79925ca1bd89"
 # OKM_ACCOUNTS KV namespace must be created in the Cloudflare dashboard
 # and added as a binding under Settings > Functions > KV namespace bindings.
 # For local dev with wrangler pages dev, uncomment and fill in real IDs:
-# [[kv_namespaces]]
-# binding = "OKM_ACCOUNTS"
-# id = "YOUR_KV_NAMESPACE_ID"
-# preview_id = "YOUR_PREVIEW_KV_NAMESPACE_ID"
+[[kv_namespaces]]
+binding = "OKM_ACCOUNTS"
+id = "dummy_acct_id"
+preview_id = "dummy_acct_id"
