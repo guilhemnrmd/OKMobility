@@ -275,25 +275,6 @@
                             </div>
                         </div>
 
-                        <div class="toggle-row">
-                            <label class="toggle-label" for="formShowTempAddress">
-                                <span>Afficher le champ adresse temporaire</span>
-                                <span class="toggle-switch">
-                                    <input type="checkbox" id="formShowTempAddress">
-                                    <span class="toggle-track"></span>
-                                </span>
-                            </label>
-                        </div>
-
-                        <div class="toggle-row">
-                            <label class="toggle-label" for="formShowSecondPhone">
-                                <span>Afficher le 2ᵉ numéro de téléphone</span>
-                                <span class="toggle-switch">
-                                    <input type="checkbox" id="formShowSecondPhone">
-                                    <span class="toggle-track"></span>
-                                </span>
-                            </label>
-                        </div>
                     </form>
                 </div>
 
@@ -314,6 +295,9 @@
                         </button>
                         <button type="button" class="btn-secondary-sm" id="btnAddPhoneField">
                             <i class='bx bx-phone'></i> Téléphone
+                        </button>
+                        <button type="button" class="btn-secondary-sm" id="btnAddToggleGroup">
+                            <i class='bx bx-list-plus'></i> Groupe déroulant (Tiroir)
                         </button>
                     </div>
                 </div>
@@ -476,8 +460,6 @@
         function renderCustomizationTab() {
             const s = currentUser.formSettings || {};
             if (s.language) document.getElementById('formLanguage').value = s.language;
-            document.getElementById('formShowTempAddress').checked = s.showTempAddress !== false;
-            document.getElementById('formShowSecondPhone').checked = s.showSecondPhone !== false;
             
             if (s.theme) document.getElementById('formTheme').value = s.theme;
             if (s.logoUrl) document.getElementById('formLogo').value = s.logoUrl;
@@ -494,59 +476,100 @@
             const container = document.getElementById('fieldsList');
             container.innerHTML = '';
             
-            formFields.forEach((field, index) => {
+            function renderField(field, index, parentArray, parentIndex = null) {
                 const isSystem = field.system;
+                const isGroup = field.type === 'toggle_group';
+                
                 const fieldEl = document.createElement('div');
                 fieldEl.className = 'field-item';
+                if (parentIndex !== null) {
+                    fieldEl.style.marginLeft = '40px';
+                    fieldEl.style.borderLeft = '3px solid var(--color-accent)';
+                    fieldEl.style.borderRadius = '0 var(--radius-md) var(--radius-md) 0';
+                }
                 
                 fieldEl.innerHTML = `
                     <div class="field-icon-wrap">
                         <i class='bx ${field.icon}'></i>
                     </div>
                     <div class="field-info">
-                        <input type="text" class="field-input-inline" value="${escHtml(field.label)}" data-index="${index}">
+                        <input type="text" class="field-input-inline" value="${escHtml(field.label)}" 
+                            data-idx="${index}" ${parentIndex !== null ? `data-parent="${parentIndex}"` : ''}>
                         <span class="field-subtitle">
-                            ${isSystem ? 'Champ standard (Requis)' : 'Champ personnalisé'}
+                            ${isGroup ? 'Groupe déroulant (Conteneur)' : (isSystem ? 'Champ standard (Requis)' : 'Champ personnalisé')}
                         </span>
                     </div>
                     <div class="field-actions">
+                        ${!isGroup ? `
                         <label class="field-req-label">
-                            <input type="checkbox" class="field-req-check" data-index="${index}" ${field.required ? 'checked' : ''}> Requis
+                            <input type="checkbox" class="field-req-check" data-idx="${index}" ${parentIndex !== null ? `data-parent="${parentIndex}"` : ''} ${field.required ? 'checked' : ''}> Requis
                         </label>
-                        <button type="button" class="btn-icon" onclick="moveField(${index}, -1)" ${index === 0 ? 'disabled' : ''} title="Monter"><i class='bx bx-up-arrow-alt'></i></button>
-                        <button type="button" class="btn-icon" onclick="moveField(${index}, 1)" ${index === formFields.length - 1 ? 'disabled' : ''} title="Descendre"><i class='bx bx-down-arrow-alt'></i></button>
-                        <button type="button" class="btn-icon danger" onclick="removeField(${index})" ${isSystem ? 'disabled title="Champ système protégé"' : 'title="Supprimer"'}><i class='bx bx-trash'></i></button>
+                        ` : ''}
+                        <button type="button" class="btn-icon" onclick="moveField(${index}, -1, ${parentIndex})" ${index === 0 ? 'disabled' : ''} title="Monter"><i class='bx bx-up-arrow-alt'></i></button>
+                        <button type="button" class="btn-icon" onclick="moveField(${index}, 1, ${parentIndex})" ${index === parentArray.length - 1 ? 'disabled' : ''} title="Descendre"><i class='bx bx-down-arrow-alt'></i></button>
+                        <button type="button" class="btn-icon danger" onclick="removeField(${index}, ${parentIndex})" ${isSystem ? 'disabled title="Champ système protégé"' : 'title="Supprimer"'}><i class='bx bx-trash'></i></button>
                     </div>
                 `;
                 container.appendChild(fieldEl);
-            });
+                
+                if (isGroup) {
+                    if (!field.children) field.children = [];
+                    field.children.forEach((childField, childIndex) => {
+                        renderField(childField, childIndex, field.children, index);
+                    });
+                    
+                    const addBtnWrap = document.createElement('div');
+                    addBtnWrap.style.marginLeft = '40px';
+                    addBtnWrap.style.marginBottom = '16px';
+                    addBtnWrap.innerHTML = `
+                        <button type="button" class="btn-secondary-sm" onclick="addFieldToGroup(${index})">
+                            <i class='bx bx-plus'></i> Ajouter un champ texte à ce groupe
+                        </button>
+                    `;
+                    container.appendChild(addBtnWrap);
+                }
+            }
+
+            formFields.forEach((field, index) => renderField(field, index, formFields, null));
 
             // Add event listeners for inputs
             container.querySelectorAll('.field-input-inline').forEach(input => {
                 input.addEventListener('change', (e) => {
-                    const idx = e.target.dataset.index;
-                    formFields[idx].label = e.target.value;
+                    const idx = parseInt(e.target.dataset.idx, 10);
+                    const pIdx = e.target.dataset.parent ? parseInt(e.target.dataset.parent, 10) : null;
+                    if (pIdx !== null) formFields[pIdx].children[idx].label = e.target.value;
+                    else formFields[idx].label = e.target.value;
                 });
             });
             container.querySelectorAll('.field-req-check').forEach(chk => {
                 chk.addEventListener('change', (e) => {
-                    const idx = e.target.dataset.index;
-                    formFields[idx].required = e.target.checked;
+                    const idx = parseInt(e.target.dataset.idx, 10);
+                    const pIdx = e.target.dataset.parent ? parseInt(e.target.dataset.parent, 10) : null;
+                    if (pIdx !== null) formFields[pIdx].children[idx].required = e.target.checked;
+                    else formFields[idx].required = e.target.checked;
                 });
             });
         }
 
-        window.moveField = function(index, dir) {
-            if (index + dir < 0 || index + dir >= formFields.length) return;
-            const temp = formFields[index];
-            formFields[index] = formFields[index + dir];
-            formFields[index + dir] = temp;
+        window.moveField = function(index, dir, parentIndex = null) {
+            const arr = parentIndex !== null ? formFields[parentIndex].children : formFields;
+            if (index + dir < 0 || index + dir >= arr.length) return;
+            const temp = arr[index];
+            arr[index] = arr[index + dir];
+            arr[index + dir] = temp;
             renderFieldsList();
         };
 
-        window.removeField = function(index) {
-            if (formFields[index].system) return;
-            formFields.splice(index, 1);
+        window.removeField = function(index, parentIndex = null) {
+            const arr = parentIndex !== null ? formFields[parentIndex].children : formFields;
+            if (arr[index].system) return;
+            arr.splice(index, 1);
+            renderFieldsList();
+        };
+
+        window.addFieldToGroup = function(parentIndex) {
+            if (!formFields[parentIndex].children) formFields[parentIndex].children = [];
+            formFields[parentIndex].children.push({ id: 'custom_' + Date.now(), label: 'Nouveau champ', type: 'text', icon: 'bx-text', required: false, system: false });
             renderFieldsList();
         };
 
@@ -560,6 +583,10 @@
         });
         document.getElementById('btnAddPhoneField').addEventListener('click', () => {
             formFields.push({ id: 'custom_' + Date.now(), label: 'Téléphone supplémentaire', type: 'tel', icon: 'bx-phone', required: false, system: false });
+            renderFieldsList();
+        });
+        document.getElementById('btnAddToggleGroup').addEventListener('click', () => {
+            formFields.push({ id: 'group_' + Date.now(), label: 'Nouveau Groupe (ex: Adresse temporaire)', type: 'toggle_group', icon: 'bx-list-plus', system: false, children: [] });
             renderFieldsList();
         });
 
