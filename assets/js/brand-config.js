@@ -39,6 +39,11 @@ window.BRAND = {
         nl: "OK MOBILITY GROUP, S.L.U. is de verwerkingsverantwoordelijke voor de persoonsgegevens van de betrokkene en informeert dat deze gegevens worden verwerkt in overeenstemming met Verordening (EU) 2016/679 van het Europees Parlement en de Raad van 27 april 2016 (AVG) en Organieke Wet 3/2018 van 5 december inzake de bescherming van persoonsgegevens en de waarborging van digitale rechten (LOPDGDD).",
     },
 
+    /* ── Map tiles ────────────────────────────────────────────────── */
+    maps: {
+        jawgToken: '57hzbCpz8pqZh7uPDy3eJgGD3WwJVmu1biqbb7wjToF9seDHoG8PeHEqE8JgFuoK',
+    },
+
     /* ── Fallback agencies (used by license-gate when API is unavailable) */
     fallbackAgencies: [
         { id: 'valencia_aero_01',    label: 'OK Mobility Valencia Aeropuerto' },

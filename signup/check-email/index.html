@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Vérifiez votre email — MobilityOS</title>
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
+    <link rel="stylesheet" href="/b2b.css">
+    <link rel="stylesheet" href="/auth/auth.css">
+</head>
+<body>
+
+    <header class="b2b-nav auth-nav">
+        <div class="nav-brand"><a href="/">MobilityOS</a></div>
+        <div class="nav-controls">
+            <a href="/login/" class="nav-link">Se connecter</a>
+        </div>
+    </header>
+
+    <main class="auth-page">
+        <section class="auth-card center-text">
+
+            <div class="email-icon-wrap">
+                <i class='bx bx-envelope'></i>
+            </div>
+
+            <h1 class="auth-title">Vérifiez votre email.</h1>
+            <p class="auth-subtitle">
+                Nous avons envoyé un lien de vérification à<br>
+                <span class="email-highlight" id="emailDisplay">votre adresse</span>
+            </p>
+
+            <div class="tip-card">
+                <i class='bx bx-info-circle'></i>
+                <span>Si l'email ne vous parvient pas, vérifiez votre dossier <strong>spam</strong> ou <strong>courrier indésirable</strong>. Le lien est valable 24 heures.</span>
+            </div>
+
+            <div class="divider">Vous n'avez rien reçu ?</div>
+
+            <button id="btnResend" class="btn-outline">
+                <i class='bx bx-refresh' id="resendIcon"></i>
+                <span id="resendText">Renvoyer l'email</span>
+            </button>
+
+            <p class="auth-footer">Mauvaise adresse ? <a href="/signup/">Recommencer</a></p>
+
+        </section>
+    </main>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const email = params.get('email') || '';
+        if (email) document.getElementById('emailDisplay').textContent = email;
+
+        const btnResend = document.getElementById('btnResend');
+        const resendText = document.getElementById('resendText');
+        const resendIcon = document.getElementById('resendIcon');
+        let cooldown = false;
+
+        btnResend.addEventListener('click', async () => {
+            if (cooldown || !email) return;
+            cooldown = true;
+            btnResend.disabled = true;
+            resendIcon.className = 'bx bx-loader-alt btn-spinner';
+            resendText.textContent = 'Envoi…';
+
+            // Re-trigger signup to regenerate verification link.
+            // Backend will return 409 if account already exists; we still treat it as success
+            // to avoid leaking account-existence info via this UI.
+            try {
+                await fetch('/api/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, name: '_resend', company: '_resend' }),
+                }).catch(() => {});
+            } finally {
+                resendIcon.className = 'bx bx-check';
+                resendText.textContent = 'Email renvoyé';
+                setTimeout(() => {
+                    resendIcon.className = 'bx bx-refresh';
+                    resendText.textContent = "Renvoyer l'email";
+                    btnResend.disabled = false;
+                    cooldown = false;
+                }, 30000);
+            }
+        });
+    </script>
+</body>
+</html>

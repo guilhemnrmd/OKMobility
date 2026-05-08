@@ -19,7 +19,7 @@ const API_TOKEN  = process.env.CLOUDFLARE_API_TOKEN;
 const CF_EMAIL = process.env.CLOUDFLARE_EMAIL;
 const CF_GLOBAL_API_KEY = process.env.CLOUDFLARE_GLOBAL_API_KEY;
 const KEY_NAME   = process.env.TURN_KEY_NAME || 'OKMobility-WebRTC';
-const DEFAULT_PAGES_PROJECT_NAME = 'ok-mobility-form';
+const DEFAULT_PAGES_PROJECT_NAME = 'okmobility';
 const WRANGLER_PROJECT_NAME = process.env.WRANGLER_PROJECT_NAME || DEFAULT_PAGES_PROJECT_NAME;
 const AUTO_DEPLOY = process.env.AUTO_DEPLOY === '1';
 
@@ -87,27 +87,6 @@ async function deployPages(projectName) {
 async function main() {
   console.log(`\n🔑  Création de la clé TURN "${KEY_NAME}"…\n`);
 
-  // 0. Vérifier que le token voit bien l'account
-  const accountsRes = await fetch('https://api.cloudflare.com/client/v4/accounts', {
-    headers: {
-      ...authHeaders,
-      'Content-Type': 'application/json'
-    }
-  });
-  const accountsJson = await accountsRes.json();
-  const accounts = Array.isArray(accountsJson?.result) ? accountsJson.result : [];
-
-  if (!accountsRes.ok || !accountsJson.success || accounts.length === 0) {
-    console.error(`
-❌  Le token est valide mais ne voit aucun compte Cloudflare.
-
-Corrige le token avec ces réglages exacts :
-  - Permission: Account | Cloudflare Calls | Edit
-  - Account Resources: Include | Specific account | ${ACCOUNT_ID}
-`);
-    process.exit(1);
-  }
-
   // 1. Créer la clé TURN
   const createRes = await fetch(
     `https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/calls/turn_keys`,
@@ -171,12 +150,12 @@ Vérifie :
 🧪  Vérification (doit retourner 200 + JSON iceServers) :
 
   curl -s -o - -w "\\nHTTP %{http_code}\\n" -X POST \\
-    -H "Origin: https://ok-mobility-retailer.pages.dev" \\
-    https://ok-mobility-retailer.pages.dev/api/turn-credentials
+    -H "Origin: https://okmobility.pages.dev" \\
+    https://okmobility.pages.dev/api/turn-credentials
 
 Exemples :
   node setup/create-turn-key.mjs
-  WRANGLER_PROJECT_NAME=ok-mobility-form AUTO_DEPLOY=1 node setup/create-turn-key.mjs
+  WRANGLER_PROJECT_NAME=okmobility AUTO_DEPLOY=1 node setup/create-turn-key.mjs
 `);
 }
 

@@ -73,6 +73,22 @@
     const inId         = document.getElementById('newAgencyId');
     const inName       = document.getElementById('newAgencyName');
     const inExpiry     = document.getElementById('newAgencyExpiry');
+    const inAddress    = document.getElementById('newAgencyAddress');
+    const inLanguage   = document.getElementById('newAgencyLanguage');
+
+    // Map section
+    const btnToggleMap = document.getElementById('btnToggleMap');
+    const adminMapSection = document.getElementById('adminMapSection');
+    const adminMapContainer = document.getElementById('adminMapContainer');
+    const mapEventCount = document.getElementById('mapEventCount');
+    const mapAgencyCount = document.getElementById('mapAgencyCount');
+
+    // Log detail modal
+    const logDetailOverlay = document.getElementById('logDetailOverlay');
+    const logDetailModal = document.getElementById('logDetailModal');
+    const logDetailClose = document.getElementById('logDetailClose');
+    const logDetailBody = document.getElementById('logDetailBody');
+    const logDetailMapContainer = document.getElementById('logDetailMapContainer');
 
     let editingId = null; // null = new agency
     let agenciesCache = [];
@@ -80,6 +96,14 @@
     let toastTimer = null;
     let syncTimer = null;
     let lastRenderedSnapshot = '[]';
+    let adminMap = null;
+    let adminMapVisible = false;
+    let logDetailMapInstance = null;
+
+    // ── JawgMaps token (from brand-config.js) ─────────────────────────────
+    function getMapToken() {
+        return window.BRAND?.maps?.jawgToken ?? '';
+    }
 
     function setAuthenticatedUi(isAuthenticated) {
         if (authGate) authGate.style.display = isAuthenticated ? 'none' : 'flex';
@@ -91,8 +115,14 @@
         if (btnAdd) btnAdd.style.display = isAuthenticated ? 'inline-flex' : 'none';
         if (btnRefresh) btnRefresh.style.display = isAuthenticated ? 'inline-flex' : 'none';
         if (btnLogout) btnLogout.style.display = isAuthenticated ? 'inline-flex' : 'none';
+        if (btnToggleMap) btnToggleMap.style.display = isAuthenticated ? 'inline-flex' : 'none';
         if (!isAuthenticated && adminSyncIndicator) {
             adminSyncIndicator.classList.remove('active');
+        }
+        if (!isAuthenticated && adminMapSection) {
+            adminMapSection.style.display = 'none';
+            adminMapVisible = false;
+            if (btnToggleMap) btnToggleMap.classList.remove('active');
         }
     }
 
@@ -221,14 +251,58 @@
 
         const recentEvents = Array.isArray(a.telemetry?.recentEvents) ? a.telemetry.recentEvents : [];
         const logsListHtml = recentEvents.length > 0
-            ? recentEvents.map((evt) => `
-                <div class="agency-log-item">
+            ? recentEvents.map((evt, idx) => {
+                const cityLabel = evt.city || '—';
+                const regionLabel = evt.region ? ` · ${evt.region}` : '';
+                const flag = (evt.country && evt.country.length === 2)
+                    ? String.fromCodePoint(...[...evt.country.toUpperCase()].map(c => 0x1F1E0 + c.charCodeAt(0) - 65))
+                    : '🌐';
+                return `
+                <div class="agency-log-item" data-log-index="${idx}" data-agency-id="${escHtml(a.id)}">
                     <span><i class='bx bx-time-five'></i> <strong>${formatDateTime(evt.at)}</strong></span>
-                    <span><i class='bx bx-world'></i> ${escHtml(evt.country || 'XX')}</span>
+                    <span class="log-location">
+                        <i class='bx bx-map-pin'></i>
+                        ${escHtml(cityLabel)}<span class="log-location-sub">${escHtml(regionLabel)}</span>
+                    </span>
+                    <span>${flag} ${escHtml(evt.country || 'XX')}</span>
                     <span><i class='bx bx-devices'></i> ${escHtml(evt.device || 'unknown')}</span>
                 </div>
-            `).join('')
+            `}).join('')
             : '<div class="agency-log-item"><span>Aucun log de connexion disponible.</span></div>';
+
+        const countries30d = (a.telemetry?.countries30d && typeof a.telemetry.countries30d === 'object')
+            ? Object.entries(a.telemetry.countries30d).sort((x, y) => y[1] - x[1])
+            : [];
+        const maxCount = countries30d[0]?.[1] || 1;
+        const countriesHtml = countries30d.length > 0
+            ? countries30d.map(([cc, count]) => {
+                const pct = Math.round((count / maxCount) * 100);
+                const flag = cc.length === 2
+                    ? String.fromCodePoint(...[...cc.toUpperCase()].map(c => 0x1F1E0 + c.charCodeAt(0) - 65))
+                    : '🌐';
+                return `<div class="country-bar-row">
+                    <span class="country-bar-label">${flag} ${escHtml(cc)}</span>
+                    <span class="country-bar-track"><span class="country-bar-fill" style="width:${pct}%"></span></span>
+                    <span class="country-bar-count">${count}</span>
+                </div>`;
+            }).join('')
+            : '<div class="agency-log-item"><span>Aucune donnée pays disponible.</span></div>';
+
+        // Cities breakdown (30d)
+        const cities30d = (a.telemetry?.cities30d && typeof a.telemetry.cities30d === 'object')
+            ? Object.entries(a.telemetry.cities30d).sort((x, y) => y[1] - x[1])
+            : [];
+        const maxCityCount = cities30d[0]?.[1] || 1;
+        const citiesHtml = cities30d.length > 0
+            ? cities30d.map(([city, count]) => {
+                const pct = Math.round((count / maxCityCount) * 100);
+                return `<div class="country-bar-row">
+                    <span class="country-bar-label">🏙️ ${escHtml(city)}</span>
+                    <span class="country-bar-track"><span class="country-bar-fill" style="width:${pct}%"></span></span>
+                    <span class="country-bar-count">${count}</span>
+                </div>`;
+            }).join('')
+            : '<div class="agency-log-item"><span>Aucune donnée ville disponible.</span></div>';
 
         card.innerHTML = `
             <div class="agency-card-header">
@@ -253,6 +327,8 @@
                 <span><i class='bx bx-${a.firstActivation ? 'radio-circle' : 'check-circle'}'></i> ${a.firstActivation ? 'CGU en attente' : 'CGU acceptées'}</span>
                 <span><i class='bx bx-devices'></i> Postes (30j)&nbsp;: <strong>${a.telemetry?.uniqueDevices30d || 0}</strong></span>
                 <span><i class='bx bx-world'></i> Zone&nbsp;: <strong>${a.telemetry?.lastSeenCountry || '—'}</strong></span>
+                ${a.agencyAddress ? `<span><i class='bx bx-map-pin'></i> ${escHtml(a.agencyAddress)}</span>` : ''}
+                ${a.agencyLanguage ? `<span><i class='bx bx-globe'></i> ${escHtml(a.agencyLanguage.toUpperCase())}</span>` : ''}
             </div>
             <div class="agency-actions">
                 <button class="btn-sm btn-edit">
@@ -267,6 +343,12 @@
                 <button class="btn-sm btn-logs">
                     <i class='bx bx-list-ul'></i> Logs
                 </button>
+                <button class="btn-sm btn-countries">
+                    <i class='bx bx-bar-chart-alt-2'></i> Pays
+                </button>
+                <button class="btn-sm btn-cities">
+                    <i class='bx bx-buildings'></i> Villes
+                </button>
                 ${isRevoked ? `<button class="btn-sm danger btn-delete" title="Supprimer définitivement cette licence révoquée">
                     <i class='bx bx-trash'></i> Supprimer
                 </button>` : ''}
@@ -274,6 +356,14 @@
             <div class="agency-logs" id="logs_${escHtml(a.id)}">
                 <div class="agency-logs-title">Connexions récentes</div>
                 <div class="agency-logs-list">${logsListHtml}</div>
+            </div>
+            <div class="agency-countries" id="countries_${escHtml(a.id)}">
+                <div class="agency-logs-title"><i class='bx bx-bar-chart-alt-2'></i> Pays (30j)</div>
+                <div class="countries-bar-list">${countriesHtml}</div>
+            </div>
+            <div class="agency-cities" id="cities_${escHtml(a.id)}">
+                <div class="agency-logs-title"><i class='bx bx-buildings'></i> Villes (30j)</div>
+                <div class="countries-bar-list">${citiesHtml}</div>
             </div>
             <div class="edit-form" id="ef_${escHtml(a.id)}">
                 <!-- inline edit, opened by JS -->
@@ -360,6 +450,44 @@
             });
         }
 
+        const countriesBtn = card.querySelector('.btn-countries');
+        const countriesPanel = card.querySelector('.agency-countries');
+        if (countriesBtn && countriesPanel) {
+            countriesBtn.addEventListener('click', () => {
+                countriesPanel.classList.toggle('open');
+                const isOpen = countriesPanel.classList.contains('open');
+                countriesBtn.innerHTML = isOpen
+                    ? "<i class='bx bx-x'></i> Fermer pays"
+                    : "<i class='bx bx-bar-chart-alt-2'></i> Pays";
+            });
+        }
+
+        // Cities
+        const citiesBtn = card.querySelector('.btn-cities');
+        const citiesPanel = card.querySelector('.agency-cities');
+        if (citiesBtn && citiesPanel) {
+            citiesBtn.addEventListener('click', () => {
+                citiesPanel.classList.toggle('open');
+                const isOpen = citiesPanel.classList.contains('open');
+                citiesBtn.innerHTML = isOpen
+                    ? "<i class='bx bx-x'></i> Fermer villes"
+                    : "<i class='bx bx-buildings'></i> Villes";
+            });
+        }
+
+        // Clickable log items → detail modal
+        card.querySelectorAll('.agency-log-item[data-log-index]').forEach((item) => {
+            item.addEventListener('click', () => {
+                const agencyId = item.dataset.agencyId;
+                const logIndex = parseInt(item.dataset.logIndex, 10);
+                const agency = agenciesCache.find((ag) => ag.id === agencyId);
+                if (!agency) return;
+                const evt = agency.telemetry?.recentEvents?.[logIndex];
+                if (!evt) return;
+                openLogDetail(evt, agency.agencyName || agency.id);
+            });
+        });
+
         return card;
     }
 
@@ -404,13 +532,15 @@
         lastRenderedSnapshot = snapshotAgencies(agenciesCache);
     }
 
-    function applyUpsertLocally({ agencyId, agencyName, licenseExpiresAt }) {
+    function applyUpsertLocally({ agencyId, agencyName, licenseExpiresAt, agencyAddress, agencyLanguage }) {
         const idx = agenciesCache.findIndex((a) => a.id === agencyId);
         if (idx === -1) {
             agenciesCache.push({
                 id: agencyId,
                 agencyName,
                 licenseExpiresAt,
+                agencyAddress: agencyAddress || null,
+                agencyLanguage: agencyLanguage || null,
                 firstActivation: true,
                 licenseVersion: 1
             });
@@ -422,6 +552,8 @@
             ...previous,
             agencyName,
             licenseExpiresAt,
+            agencyAddress: agencyAddress !== undefined ? agencyAddress : (previous.agencyAddress || null),
+            agencyLanguage: agencyLanguage !== undefined ? agencyLanguage : (previous.agencyLanguage || null),
             licenseVersion: (previous.licenseVersion || 1) + 1
         };
     }
@@ -548,6 +680,8 @@
         const next = new Date();
         next.setMonth(next.getMonth() + 1);
         inExpiry.value = next.toISOString().slice(0, 10);
+        inAddress.value = '';
+        inLanguage.value = '';
         inId.disabled = false;
         addTitle.textContent = 'Nouvelle agence';
         addError.textContent = '';
@@ -561,6 +695,8 @@
         inId.value = a.id;
         inName.value = a.agencyName || '';
         inExpiry.value = a.licenseExpiresAt ? a.licenseExpiresAt.slice(0, 10) : '';
+        inAddress.value = a.agencyAddress || '';
+        inLanguage.value = a.agencyLanguage || '';
         inId.disabled = true;
         addTitle.textContent = 'Modifier l\'agence';
         addError.textContent = '';
@@ -595,7 +731,9 @@
             action: 'upsert',
             agencyId: id,
             agencyName: name,
-            licenseExpiresAt: new Date(expiry + 'T23:59:59Z').toISOString()
+            licenseExpiresAt: new Date(expiry + 'T23:59:59Z').toISOString(),
+            agencyAddress: inAddress.value.trim() || null,
+            agencyLanguage: inLanguage.value || null,
         };
 
         try {
@@ -770,6 +908,305 @@
             handleAuthSubmit();
         }
     });
+
+    // ── Global Map (MapLibre GL + clustering) ─────────────────────────────────
+    function collectGeoEvents() {
+        const features = [];
+        let agencyCount = 0;
+
+        for (const agency of agenciesCache) {
+            const events = Array.isArray(agency.telemetry?.recentEvents) ? agency.telemetry.recentEvents : [];
+            let hasGeo = false;
+            for (const evt of events) {
+                if (Number.isFinite(evt.lat) && Number.isFinite(evt.lon)) {
+                    features.push({
+                        type: 'Feature',
+                        geometry: { type: 'Point', coordinates: [evt.lon, evt.lat] },
+                        properties: {
+                            agencyId: agency.id,
+                            agencyName: agency.agencyName || agency.id,
+                            at: evt.at || '',
+                            country: evt.country || 'XX',
+                            city: evt.city || '',
+                            region: evt.region || '',
+                            regionCode: evt.regionCode || '',
+                            timezone: evt.timezone || '',
+                            device: evt.device || ''
+                        }
+                    });
+                    hasGeo = true;
+                }
+            }
+            if (hasGeo) agencyCount++;
+        }
+
+        return { geojson: { type: 'FeatureCollection', features }, agencyCount };
+    }
+
+    function clusterColor(count) {
+        if (count < 5) return '#34C759';    // green
+        if (count < 20) return '#FF9500';   // orange
+        return '#FF3B30';                    // red
+    }
+
+    function clusterSize(count) {
+        if (count < 5) return 28;
+        if (count < 20) return 36;
+        return 44;
+    }
+
+    function initAdminMap() {
+        if (adminMap || !adminMapContainer) return;
+        const mapToken = getMapToken();
+        if (!mapToken) return;
+
+        adminMap = new maplibregl.Map({
+            container: adminMapContainer,
+            style: `https://api.jawg.io/styles/jawg-streets.json?access-token=${mapToken}`,
+            center: [2.3522, 48.8566],
+            zoom: 4,
+            attributionControl: true
+        });
+
+        adminMap.on('load', () => {
+            adminMap.addSource('events', {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: [] },
+                cluster: true,
+                clusterMaxZoom: 14,
+                clusterRadius: 45
+            });
+
+            adminMap.addLayer({
+                id: 'clusters',
+                type: 'circle',
+                source: 'events',
+                filter: ['has', 'point_count'],
+                paint: {
+                    'circle-color': [
+                        'step', ['get', 'point_count'],
+                        '#34C759', 5,
+                        '#FF9500', 20,
+                        '#FF3B30'
+                    ],
+                    'circle-radius': [
+                        'step', ['get', 'point_count'],
+                        14, 5,
+                        18, 20,
+                        22
+                    ],
+                    'circle-stroke-width': 2,
+                    'circle-stroke-color': 'rgba(255,255,255,0.7)',
+                    'circle-opacity': 0.85
+                }
+            });
+
+            adminMap.addLayer({
+                id: 'cluster-count',
+                type: 'symbol',
+                source: 'events',
+                filter: ['has', 'point_count'],
+                layout: {
+                    'text-field': ['get', 'point_count_abbreviated'],
+                    'text-font': ['Open Sans Bold'],
+                    'text-size': 11
+                },
+                paint: {
+                    'text-color': '#fff'
+                }
+            });
+
+            adminMap.addLayer({
+                id: 'unclustered-point',
+                type: 'circle',
+                source: 'events',
+                filter: ['!', ['has', 'point_count']],
+                paint: {
+                    'circle-color': '#2054EA',
+                    'circle-radius': 6,
+                    'circle-stroke-width': 2,
+                    'circle-stroke-color': 'rgba(255,255,255,0.8)'
+                }
+            });
+
+            // Click cluster → zoom
+            adminMap.on('click', 'clusters', (e) => {
+                const features = adminMap.queryRenderedFeatures(e.point, { layers: ['clusters'] });
+                const clusterId = features[0]?.properties?.cluster_id;
+                if (clusterId == null) return;
+                adminMap.getSource('events').getClusterExpansionZoom(clusterId, (err, zoom) => {
+                    if (err) return;
+                    adminMap.easeTo({
+                        center: features[0].geometry.coordinates,
+                        zoom: zoom
+                    });
+                });
+            });
+
+            // Click individual point → detail modal
+            adminMap.on('click', 'unclustered-point', (e) => {
+                const props = e.features?.[0]?.properties;
+                if (!props) return;
+                openLogDetail({
+                    at: props.at,
+                    country: props.country,
+                    city: props.city,
+                    region: props.region,
+                    regionCode: props.regionCode,
+                    timezone: props.timezone,
+                    lat: e.features[0].geometry.coordinates[1],
+                    lon: e.features[0].geometry.coordinates[0],
+                    device: props.device
+                }, props.agencyName);
+            });
+
+            // Cursor style
+            adminMap.on('mouseenter', 'clusters', () => { adminMap.getCanvas().style.cursor = 'pointer'; });
+            adminMap.on('mouseleave', 'clusters', () => { adminMap.getCanvas().style.cursor = ''; });
+            adminMap.on('mouseenter', 'unclustered-point', () => { adminMap.getCanvas().style.cursor = 'pointer'; });
+            adminMap.on('mouseleave', 'unclustered-point', () => { adminMap.getCanvas().style.cursor = ''; });
+
+            refreshMapData();
+        });
+    }
+
+    function refreshMapData() {
+        if (!adminMap) return;
+
+        const { geojson, agencyCount } = collectGeoEvents();
+        const source = adminMap.getSource('events');
+        if (source) {
+            source.setData(geojson);
+        }
+
+        if (mapEventCount) mapEventCount.textContent = `${geojson.features.length} connexion${geojson.features.length !== 1 ? 's' : ''}`;
+        if (mapAgencyCount) mapAgencyCount.textContent = `${agencyCount} agence${agencyCount !== 1 ? 's' : ''}`;
+
+        // Fit bounds to all points
+        if (geojson.features.length > 0) {
+            const coords = geojson.features.map((f) => f.geometry.coordinates);
+            const lngs = coords.map((c) => c[0]);
+            const lats = coords.map((c) => c[1]);
+            const bounds = [
+                [Math.min(...lngs), Math.min(...lats)],
+                [Math.max(...lngs), Math.max(...lats)]
+            ];
+            try {
+                adminMap.fitBounds(bounds, { padding: 50, maxZoom: 12 });
+            } catch { /* ignore bounds error for single point */ }
+        }
+    }
+
+    function toggleMap() {
+        adminMapVisible = !adminMapVisible;
+        if (adminMapSection) adminMapSection.style.display = adminMapVisible ? 'flex' : 'none';
+        if (btnToggleMap) btnToggleMap.classList.toggle('active', adminMapVisible);
+
+        if (adminMapVisible) {
+            if (!adminMap) {
+                initAdminMap();
+            } else {
+                adminMap.resize();
+                refreshMapData();
+            }
+        }
+    }
+
+    if (btnToggleMap) {
+        btnToggleMap.addEventListener('click', toggleMap);
+    }
+
+    // ── Log Detail Modal ─────────────────────────────────────────────────────
+    function openLogDetail(evt, agencyName) {
+        if (!logDetailModal || !logDetailOverlay || !logDetailBody) return;
+
+        const flag = (evt.country && evt.country.length === 2)
+            ? String.fromCodePoint(...[...evt.country.toUpperCase()].map(c => 0x1F1E0 + c.charCodeAt(0) - 65))
+            : '🌐';
+
+        const rows = [
+            { icon: 'bx-buildings', label: 'Agence', value: agencyName },
+            { icon: 'bx-time-five', label: 'Date & heure', value: formatDateTime(evt.at) },
+            { icon: 'bx-map-pin', label: 'Ville', value: evt.city || '—' },
+            { icon: 'bx-map', label: 'Région', value: evt.region ? `${evt.region}${evt.regionCode ? ' (' + evt.regionCode + ')' : ''}` : '—' },
+            { icon: 'bx-world', label: 'Pays', value: `${flag} ${evt.country || 'XX'}` },
+            { icon: 'bx-timer', label: 'Fuseau horaire', value: evt.timezone || '—' },
+            { icon: 'bx-devices', label: 'Device (hash)', value: evt.device || '—' },
+        ];
+
+        logDetailBody.innerHTML = rows.map((r) => `
+            <div class="log-detail-row">
+                <div class="log-detail-icon"><i class='bx ${r.icon}'></i></div>
+                <div class="log-detail-info">
+                    <div class="log-detail-label">${escHtml(r.label)}</div>
+                    <div class="log-detail-value">${escHtml(r.value)}</div>
+                </div>
+            </div>
+        `).join('');
+
+        logDetailOverlay.style.display = 'block';
+        logDetailModal.style.display = 'flex';
+
+        // Mini-map
+        if (logDetailMapInstance) {
+            logDetailMapInstance.remove();
+            logDetailMapInstance = null;
+        }
+
+        if (Number.isFinite(evt.lat) && Number.isFinite(evt.lon) && logDetailMapContainer) {
+            logDetailMapContainer.style.display = 'block';
+            logDetailMapContainer.innerHTML = '';
+
+            const mapToken = getMapToken();
+            if (mapToken && typeof maplibregl !== 'undefined') {
+                requestAnimationFrame(() => {
+                    logDetailMapInstance = new maplibregl.Map({
+                        container: logDetailMapContainer,
+                        style: `https://api.jawg.io/styles/jawg-streets.json?access-token=${mapToken}`,
+                        center: [evt.lon, evt.lat],
+                        zoom: 12,
+                        scrollZoom: false,
+                        attributionControl: false
+                    });
+                    new maplibregl.Marker({ color: '#2054EA' })
+                        .setLngLat([evt.lon, evt.lat])
+                        .addTo(logDetailMapInstance);
+                });
+            }
+        } else if (logDetailMapContainer) {
+            logDetailMapContainer.style.display = 'none';
+        }
+    }
+
+    function closeLogDetail() {
+        if (logDetailOverlay) logDetailOverlay.style.display = 'none';
+        if (logDetailModal) logDetailModal.style.display = 'none';
+        if (logDetailMapInstance) {
+            logDetailMapInstance.remove();
+            logDetailMapInstance = null;
+        }
+    }
+
+    if (logDetailClose) logDetailClose.addEventListener('click', closeLogDetail);
+    if (logDetailOverlay) logDetailOverlay.addEventListener('click', closeLogDetail);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeLogDetail();
+    });
+
+    // Refresh map data after agencies load
+    const _origRenderAgenciesFromCache = renderAgenciesFromCache;
+    // We need to intercept the render to also refresh the map.
+    // Instead of monkey-patching, let's just call refreshMapData after each cache render.
+    // Let's observe the agencyList for DOM changes.
+    if (adminMapContainer) {
+        const obs = new MutationObserver(() => {
+            if (adminMapVisible && adminMap) {
+                refreshMapData();
+            }
+        });
+        obs.observe(agencyList, { childList: true });
+    }
 
     updateSelectionUi();
 

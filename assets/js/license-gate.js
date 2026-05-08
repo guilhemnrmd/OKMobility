@@ -237,7 +237,7 @@ function loadCache(agencyId) {
 
 // ── Server calls ──────────────────────────────────────────────────────────────
 async function apiCheckLicense(agencyId) {
-    const res = await fetch(`/api/check-license?agency=${encodeURIComponent(agencyId)}`);
+    const res = await fetch(`/api/check-license?agency=${encodeURIComponent(agencyId)}&source=retailer`);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     return res.json();
 }
@@ -449,7 +449,13 @@ window.runLicenseGate = async function () {
         if (agencyName) localStorage.setItem(AGENCY_NAME_STORAGE_KEY, agencyName);
         else localStorage.removeItem(AGENCY_NAME_STORAGE_KEY);
     } catch (_) {}
-    
+
+    const agencyLanguage = license?.agencyLanguage || null;
+    try {
+        if (agencyLanguage) localStorage.setItem('okm_agency_language', agencyLanguage);
+        else localStorage.removeItem('okm_agency_language');
+    } catch (_) {}
+
     // Display license expiration status discreetly in header.
     displayLicenseStatus(license?.licenseExpiresAt);
 

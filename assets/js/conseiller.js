@@ -25,7 +25,12 @@
 // 1. State & Configuration
 // ============================================================================
 const config = {
-    publicClientUrl: 'https://ok-mobility-retailer.pages.dev/',
+    publicClientUrl: (() => {
+        if (typeof window === 'undefined') return 'https://okmobility.pages.dev/client/';
+        // Always use the current origin so the QR code points to the right environment
+        // (prod → prod, Cloudflare preview → preview, localhost → localhost)
+        return window.location.origin + '/client/';
+    })(),
     peerPrefix: 'OKM-',
     codeLength: 6,
     iceServers: [
@@ -154,7 +159,8 @@ const state = {
     displayCode: null,
     qrCodeInstance: null,
     currentData: {},
-    mapDebounceTimer: null
+    mapDebounceTimer: null,
+    tempMapDebounceTimer: null
 };
 
 // ============================================================================
@@ -178,6 +184,9 @@ const dom = {
     qrLightbox: document.getElementById('qrLightbox'),
     qrLightboxFrame: document.getElementById('qrLightboxFrame'),
     qrCodeLarge: document.getElementById('qrCodeLarge'),
+    addressMapExpandBtn: document.getElementById('addressMapExpandBtn'),
+    mapLightbox:         document.getElementById('mapLightbox'),
+    mapLightboxCloseBtn: document.getElementById('mapLightboxCloseBtn'),
     qrHint: document.getElementById('qrHint'),
     titleLiveData: document.getElementById('titleLiveData'),
     connectionStatus: document.getElementById('connectionStatus'),
@@ -202,8 +211,10 @@ const dom = {
     valCity: document.getElementById('valCity'),
     lblDataTempAddress: document.getElementById('lblDataTempAddress'),
     valTempAddress: document.getElementById('valTempAddress'),
-    lblDataTempZipCity: document.getElementById('lblDataTempZipCity'),
-    valTempZipCity: document.getElementById('valTempZipCity'),
+    lblDataTempZipCode: document.getElementById('lblDataTempZipCode'),
+    valTempZipCode: document.getElementById('valTempZipCode'),
+    lblDataTempCity: document.getElementById('lblDataTempCity'),
+    valTempCity: document.getElementById('valTempCity'),
     lblDataPhoneCode: document.getElementById('lblDataPhoneCode'),
     valPhoneCode: document.getElementById('valPhoneCode'),
     lblDataPhone: document.getElementById('lblDataPhone'),
@@ -219,7 +230,8 @@ const dom = {
     valEmail: document.getElementById('valEmail'),
     // Rows (for showing/hiding temp address)
     rowTempAddress: document.getElementById('rowTempAddress'),
-    rowTempZipCity: document.getElementById('rowTempZipCity'),
+    rowTempZipCode: document.getElementById('rowTempZipCode'),
+    rowTempCity: document.getElementById('rowTempCity'),
     rowPhone2: document.getElementById('rowPhone2'),
     rowPhone2Number: document.getElementById('rowPhone2Number')
 };
@@ -530,12 +542,16 @@ function resetQrLightboxTilt() {
 // ============================================================================
 // Fetch ephemeral Cloudflare TURN credentials.
 // Falls back to the hardcoded openrelay servers if the API is unavailable.
+// Always fetches from the canonical production URL so that TURN secrets are
+// available regardless of whether the advisor is on localhost, a preview
+// deployment, or production itself. Preview deployments do not have secrets.
 async function fetchTurnCredentials() {
+    const turnApiUrl = 'https://okmobility.pages.dev/api/turn-credentials';
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), TURN_FETCH_TIMEOUT_MS);
 
     try {
-        const response = await fetch('/api/turn-credentials', {
+        const response = await fetch(turnApiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             signal: controller.signal
@@ -719,6 +735,9 @@ function showSetupView() {
 function showLiveDataView() {
     dom.setupView.style.display = 'none';
     dom.liveDataView.style.display = 'flex';
+    dom.liveDataView.classList.remove('live-data-entrance');
+    void dom.liveDataView.offsetWidth; // force reflow
+    dom.liveDataView.classList.add('live-data-entrance');
     dom.disconnectedView.style.display = 'none';
 }
 
@@ -752,10 +771,14 @@ function handleIncomingData(data) {
     }
     
     // Update displayed values
-    // Trigger map refresh when any address field changes
-    const addrFields = ['address', 'country', 'zipCode', 'city', 'hasTempAddress', 'tempAddress', 'tempZipCode', 'tempCity'];
-    if (addrFields.some(k => cleanData[k] !== undefined)) {
-        scheduleMapRefresh();
+    // Trigger map refresh when relevant address fields change (separate timers per map)
+    const mainAddrFields = ['address', 'country', 'zipCode', 'city'];
+    const tempAddrFields = ['tempAddress', 'tempZipCode', 'tempCity', 'hasTempAddress'];
+    if (mainAddrFields.some(k => cleanData[k] !== undefined)) {
+        scheduleMainMapRefresh();
+    }
+    if (tempAddrFields.some(k => cleanData[k] !== undefined)) {
+        scheduleTempMapRefresh();
     }
 
     if (cleanData.address !== undefined) {
@@ -778,23 +801,31 @@ function handleIncomingData(data) {
         highlightField('valCity');
     }
     
-    // Handle temporary address visibility
+    // Handle temporary address visibility with expand animation
     if (cleanData.hasTempAddress !== undefined) {
         const show = cleanData.hasTempAddress;
-        dom.rowTempAddress.style.display = show ? 'flex' : 'none';
-        dom.rowTempZipCity.style.display = show ? 'flex' : 'none';
+        [dom.rowTempAddress, dom.rowTempZipCode, dom.rowTempCity].forEach(el => {
+            if (show) {
+                el.classList.add('row-expanded');
+            } else {
+                el.classList.remove('row-expanded');
+            }
+        });
     }
-    
+
     if (cleanData.tempAddress !== undefined) {
         dom.valTempAddress.textContent = cleanData.tempAddress || '-';
         highlightField('valTempAddress');
     }
-    
-    if (cleanData.tempZipCode !== undefined || cleanData.tempCity !== undefined) {
-        const zip = cleanData.tempZipCode || state.currentData.tempZipCode || '';
-        const city = cleanData.tempCity || state.currentData.tempCity || '';
-        dom.valTempZipCity.textContent = `${zip} ${city}`.trim() || '-';
-        highlightField('valTempZipCity');
+
+    if (cleanData.tempZipCode !== undefined) {
+        dom.valTempZipCode.textContent = cleanData.tempZipCode || '-';
+        highlightField('valTempZipCode');
+    }
+
+    if (cleanData.tempCity !== undefined) {
+        dom.valTempCity.textContent = cleanData.tempCity || '-';
+        highlightField('valTempCity');
     }
     
     if (cleanData.phoneCode !== undefined) {
@@ -817,8 +848,8 @@ function handleIncomingData(data) {
 
     if (cleanData.phone2Code !== undefined || cleanData.phone2Number !== undefined) {
         const hasPhone2 = (cleanData.phone2Code || state.currentData.phone2Code || '') || (cleanData.phone2Number || state.currentData.phone2Number || '');
-        if (dom.rowPhone2) dom.rowPhone2.style.display = hasPhone2 ? 'flex' : 'none';
-        if (dom.rowPhone2Number) dom.rowPhone2Number.style.display = hasPhone2 ? 'flex' : 'none';
+        if (dom.rowPhone2) dom.rowPhone2.classList.toggle('row-expanded', !!hasPhone2);
+        if (dom.rowPhone2Number) dom.rowPhone2Number.classList.toggle('row-expanded', !!hasPhone2);
         if (cleanData.phone2Code !== undefined) {
             dom.valPhone2Code.textContent = cleanData.phone2Code || '-';
             highlightField('valPhone2Code');
@@ -835,6 +866,41 @@ function handleIncomingData(data) {
     if (cleanData.email !== undefined) {
         dom.valEmail.textContent = cleanData.email || '-';
         highlightField('valEmail');
+    }
+
+    // Handle custom fields (keys starting with 'custom_')
+    const customContainer = document.getElementById('customFieldsContainer');
+    if (customContainer) {
+        Object.keys(cleanData).forEach(key => {
+            if (!key.startsWith('custom_')) return;
+            const value = cleanData[key] || '-';
+            let row = document.getElementById('row_' + key);
+            if (!row) {
+                row = document.createElement('div');
+                row.className = 'data-row';
+                row.id = 'row_' + key;
+                row.innerHTML = `
+                    <div class="data-info">
+                        <span class="data-label">${key.replace('custom_', '').replace(/_/g, ' ')}</span>
+                        <span class="data-value" id="val_${key}">-</span>
+                    </div>
+                    <button class="btn-copy" data-field="${key}" title="Copiar">
+                        <i class='bx bx-copy'></i>
+                    </button>
+                `;
+                customContainer.appendChild(row);
+                // Add copy handler
+                row.querySelector('.btn-copy').addEventListener('click', (e) => {
+                    const val = row.querySelector('.data-value').textContent;
+                    copyToClipboard(val, e.currentTarget);
+                });
+            }
+            const valEl = document.getElementById('val_' + key);
+            if (valEl) {
+                valEl.textContent = value;
+                highlightField('val_' + key);
+            }
+        });
     }
 }
 
@@ -898,8 +964,9 @@ function clearDisplayedData() {
     dom.valCountry.textContent = '-';
     dom.valZipCode.textContent = '-';
     dom.valCity.textContent = '-';
-    dom.valTempAddress.textContent = '-';
-    dom.valTempZipCity.textContent = '-';
+    dom.valTempAddress.textContent  = '-';
+    dom.valTempZipCode.textContent  = '-';
+    dom.valTempCity.textContent     = '-';
     dom.valPhoneCode.textContent = '-';
     dom.valPhone.textContent = '-';
     if (dom.phoneWarning) dom.phoneWarning.style.display = 'none';
@@ -907,11 +974,16 @@ function clearDisplayedData() {
     if (dom.valPhone2) dom.valPhone2.textContent = '-';
     if (dom.phone2Warning) dom.phone2Warning.style.display = 'none';
     dom.valEmail.textContent = '-';
-    dom.rowTempAddress.style.display = 'none';
-    dom.rowTempZipCity.style.display = 'none';
-    if (dom.rowPhone2) dom.rowPhone2.style.display = 'none';
-    if (dom.rowPhone2Number) dom.rowPhone2Number.style.display = 'none';
+    dom.rowTempAddress.classList.remove('row-expanded');
+    dom.rowTempZipCode.classList.remove('row-expanded');
+    dom.rowTempCity.classList.remove('row-expanded');
+    if (dom.rowPhone2) dom.rowPhone2.classList.remove('row-expanded');
+    if (dom.rowPhone2Number) dom.rowPhone2Number.classList.remove('row-expanded');
+    // Clear custom fields
+    const customContainer = document.getElementById('customFieldsContainer');
+    if (customContainer) customContainer.innerHTML = '';
     hideAddressMap();
+    hideTempAddressMap();
 }
 
 function clearSessionData() {
@@ -953,60 +1025,101 @@ function restartSession() {
 }
 
 // ============================================================================
-// 10. Address Map (Leaflet + OpenStreetMap + Photon geocoding)
+// 10. Address Map (MapLibre GL + JawgMaps vector tiles + Places geocoding)
 // ============================================================================
-let mapInstance   = null;
-let mainMarker    = null;
-let tempMarker    = null;
+let mapInstance = null;
+let mainMarker  = null;
+let agencyCenter = null;       // [lon, lat] — geocoded from agencyAddress after license gate
+let mapHasClientAddress = false; // true once the map has flown to a real client address
 
-const TEMP_ICON = new Promise(resolve => {
-    // Built after Leaflet loads
-    document.addEventListener('DOMContentLoaded', () => resolve(), { once: true });
-});
+let tempMapInstance = null;
+let tempMapMarker   = null;
 
-function getLeafletIcon(color) {
-    // Leaflet default icon with a CSS hue-rotate trick via className on the pane
-    return L.icon({
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-        iconSize:    [25, 41],
-        iconAnchor:  [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize:  [41, 41],
-        className: color === 'temp' ? 'leaflet-marker-icon-temp' : ''
+function preloadMapTiles(center) {
+    const token = window.BRAND?.maps?.jawgToken ?? '';
+    if (!token || mapInstance) return; // skip if map already created
+
+    const div = document.createElement('div');
+    div.style.cssText = 'position:fixed;left:-9999px;top:0;width:400px;height:280px;pointer-events:none;';
+    document.body.appendChild(div);
+
+    const preload = new maplibregl.Map({
+        container: div,
+        style: `https://api.jawg.io/styles/jawg-streets.json?access-token=${token}`,
+        zoom: 13,
+        center,
+        interactive: false,
+        attributionControl: false,
+        trackResize: false
+    });
+
+    preload.once('idle', () => {
+        preload.remove();
+        div.remove();
     });
 }
 
 function ensureMap() {
     if (mapInstance) return;
-    const container = document.getElementById('addressMap');
-    mapInstance = L.map(container, {
-        zoomControl: true,
-        scrollWheelZoom: false,
+    const token = window.BRAND?.maps?.jawgToken ?? '';
+    mapInstance = new maplibregl.Map({
+        container: 'addressMap',
+        style: `https://api.jawg.io/styles/jawg-streets.json?access-token=${token}`,
+        zoom: 13,
+        center: agencyCenter ?? [2.3522, 48.8566],  // Agency location or Paris fallback
+        scrollZoom: false,
         attributionControl: true,
-        trackResize: false       // we use ResizeObserver instead
+        trackResize: false
     });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© <a href="https://openstreetmap.org" target="_blank">OpenStreetMap</a>',
-        maxZoom: 19,
-        keepBuffer: 4       // preload 4 extra tile rows/cols around viewport when panning
-    }).addTo(mapInstance);
-
-    // ResizeObserver reliably handles size changes (hidden→visible, responsive, etc.)
+    const container = document.getElementById('addressMap');
     const ro = new ResizeObserver(() => {
         if (container.offsetWidth > 0 && container.offsetHeight > 0) {
-            mapInstance.invalidateSize({ animate: false, pan: false });
+            mapInstance.resize();
         }
     });
     ro.observe(container);
 }
 
+function ensureTempMap() {
+    if (tempMapInstance) return;
+    const token = window.BRAND?.maps?.jawgToken ?? '';
+    tempMapInstance = new maplibregl.Map({
+        container: 'tempAddressMap',
+        style: `https://api.jawg.io/styles/jawg-streets.json?access-token=${token}`,
+        zoom: 15,
+        center: agencyCenter ?? [2.3522, 48.8566],
+        scrollZoom: false,
+        attributionControl: true,
+        trackResize: false
+    });
+    const container = document.getElementById('tempAddressMap');
+    const ro = new ResizeObserver(() => {
+        if (container.offsetWidth > 0 && container.offsetHeight > 0) {
+            tempMapInstance.resize();
+        }
+    });
+    ro.observe(container);
+}
+
+function applyView(center, bounds) {
+    function doView() {
+        mapInstance.stop(); // cancel any ongoing animation
+        if (bounds) {
+            mapInstance.fitBounds(bounds, { padding: 60, maxZoom: 16 });
+        } else {
+            mapInstance.flyTo({ center, zoom: 15 });
+        }
+    }
+    if (mapInstance.loaded()) { doView(); }
+    else { mapInstance.once('load', doView); }
+}
+
 async function geocode(query) {
     if (!query || query.length < 5) return null;
+    const token = window.BRAND?.maps?.jawgToken ?? '';
     try {
-        const params = new URLSearchParams({ q: query, limit: 1, lang: 'en' });
-        const resp = await fetch(`https://photon.komoot.io/api/?${params}`);
+        const params = new URLSearchParams({ text: query, size: 1, lang: 'fr', 'access-token': token });
+        const resp = await fetch(`https://api.jawg.io/places/v1/search?${params}`);
         if (!resp.ok) return null;
         const data = await resp.json();
         const f = data.features?.[0];
@@ -1024,75 +1137,153 @@ function buildTempQuery(data) {
     return [data.tempAddress, data.tempZipCode, data.tempCity].filter(Boolean).join(', ');
 }
 
-async function refreshMap() {
+async function refreshMainMap() {
     const data  = state.currentData;
     const query = buildMainQuery(data);
 
-    if (!query || !data.address) {
-        hideAddressMap();
-        return;
-    }
+    if (!query || !data.address) { hideAddressMap(); return; }
 
     const coords = await geocode(query);
     if (!coords) { hideAddressMap(); return; }
 
-    // 1. Make the container visible FIRST so the browser can compute its dimensions
     showAddressMap();
-
-    // 2. Wait for the browser to complete layout, THEN create/update the map
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-
-    // 3. Now create the map (container has real dimensions)
     ensureMap();
+    mapHasClientAddress = true;
+
+    const labelEl = document.getElementById('addressMapLabel');
+    if (labelEl) {
+        labelEl.textContent = [data.address, data.zipCode, data.city].filter(Boolean).join(', ');
+    }
 
     // 4. Force Leaflet to re-measure the container — catches any residual layout pass
     //    that could have shifted the container between show() and ensureMap()
     mapInstance.invalidateSize({ animate: false, pan: false });
 
     if (mainMarker) { mainMarker.remove(); mainMarker = null; }
-    mainMarker = L.marker([coords.lat, coords.lon], { icon: getLeafletIcon('main') })
-        .addTo(mapInstance)
-        .bindPopup(`<strong>${data.address || ''}</strong><br>${[data.zipCode, data.city, data.country].filter(Boolean).join(', ')}`);
+    mainMarker = new maplibregl.Marker({ color: '#3B82F6' })
+        .setLngLat([coords.lon, coords.lat])
+        .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(
+            `<strong>${data.address || ''}</strong><br>${[data.zipCode, data.city, data.country].filter(Boolean).join(', ')}`
+        ))
+        .addTo(mapInstance);
 
-    if (tempMarker) { tempMarker.remove(); tempMarker = null; }
+    applyView([coords.lon, coords.lat]);
+}
 
-    const tempBadge = document.getElementById('addressMapTempBadge');
+async function refreshTempMap() {
+    const data = state.currentData;
 
-    if (data.hasTempAddress && data.tempAddress) {
-        const tq     = buildTempQuery(data);
-        const tcoords = await geocode(tq);
-        if (tcoords) {
-            tempMarker = L.marker([tcoords.lat, tcoords.lon], { icon: getLeafletIcon('temp') })
-                .addTo(mapInstance)
-                .bindPopup(`<strong>${data.tempAddress}</strong><br>${[data.tempZipCode, data.tempCity].filter(Boolean).join(', ')}`);
-            if (tempBadge) tempBadge.style.display = 'inline-flex';
-            const group = L.featureGroup([mainMarker, tempMarker]);
-            mapInstance.fitBounds(group.getBounds().pad(0.3));
-        } else {
-            if (tempBadge) tempBadge.style.display = 'none';
-            mapInstance.setView([coords.lat, coords.lon], 15);
-        }
-    } else {
-        if (tempBadge) tempBadge.style.display = 'none';
-        mapInstance.setView([coords.lat, coords.lon], 15);
+    if (!data.hasTempAddress || !data.tempAddress) { hideTempAddressMap(); return; }
+
+    const tcoords = await geocode(buildTempQuery(data));
+    if (!tcoords) { hideTempAddressMap(); return; }
+
+    showTempAddressMap();
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    ensureTempMap();
+
+    const tempLabelEl = document.getElementById('tempAddressMapLabel');
+    if (tempLabelEl) {
+        tempLabelEl.textContent = [data.tempAddress, data.tempZipCode, data.tempCity].filter(Boolean).join(', ');
     }
+
+    if (tempMapMarker) { tempMapMarker.remove(); tempMapMarker = null; }
+    tempMapMarker = new maplibregl.Marker({ color: '#8B5CF6' })
+        .setLngLat([tcoords.lon, tcoords.lat])
+        .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(
+            `<strong>${data.tempAddress}</strong><br>${[data.tempZipCode, data.tempCity].filter(Boolean).join(', ')}`
+        ))
+        .addTo(tempMapInstance);
+
+    function doTempView() {
+        tempMapInstance.stop();
+        tempMapInstance.flyTo({ center: [tcoords.lon, tcoords.lat], zoom: 15 });
+    }
+    if (tempMapInstance.loaded()) { doTempView(); }
+    else { tempMapInstance.once('load', doTempView); }
+}
+
+function updateMapsColumnVisibility() {
+    const col = document.querySelector('.live-col-maps');
+    if (!col) return;
+    const mainVisible = document.getElementById('addressMapWrapper')?.classList.contains('map-visible');
+    const tempVisible = document.getElementById('tempAddressMapWrapper')?.classList.contains('map-visible');
+    col.classList.toggle('has-map', !!(mainVisible || tempVisible));
 }
 
 function showAddressMap() {
     const w = document.getElementById('addressMapWrapper');
-    if (w) w.style.display = 'block';
+    if (w) { w.classList.add('map-visible'); updateMapsColumnVisibility(); }
 }
 
 function hideAddressMap() {
     const w = document.getElementById('addressMapWrapper');
-    if (w) w.style.display = 'none';
+    if (w) { w.classList.remove('map-visible'); updateMapsColumnVisibility(); }
     if (mainMarker) { mainMarker.remove(); mainMarker = null; }
-    if (tempMarker) { tempMarker.remove(); tempMarker = null; }
+    mapHasClientAddress = false;
 }
 
-function scheduleMapRefresh() {
+function showTempAddressMap() {
+    const w = document.getElementById('tempAddressMapWrapper');
+    if (w) { w.classList.add('map-visible'); updateMapsColumnVisibility(); }
+}
+
+function hideTempAddressMap() {
+    const w = document.getElementById('tempAddressMapWrapper');
+    if (w) { w.classList.remove('map-visible'); updateMapsColumnVisibility(); }
+    if (tempMapMarker) { tempMapMarker.remove(); tempMapMarker = null; }
+}
+
+function scheduleMainMapRefresh() {
     clearTimeout(state.mapDebounceTimer);
-    state.mapDebounceTimer = setTimeout(refreshMap, 900);
+    state.mapDebounceTimer = setTimeout(refreshMainMap, 900);
+}
+
+function scheduleTempMapRefresh() {
+    clearTimeout(state.tempMapDebounceTimer);
+    state.tempMapDebounceTimer = setTimeout(refreshTempMap, 900);
+}
+
+// ── Map lightbox ──────────────────────────────────────────────────
+let mapLightboxInstance = null;
+
+function openMapLightbox(sourceMap, markerColor, labelElId) {
+    if (!dom.mapLightbox || !sourceMap) return;
+    const token  = window.BRAND?.maps?.jawgToken ?? '';
+    const center = sourceMap.getCenter();
+    const zoom   = sourceMap.getZoom();
+
+    const src = document.getElementById(labelElId ?? 'addressMapLabel');
+    const dst = document.getElementById('mapLightboxLabel');
+    if (src && dst) dst.textContent = src.textContent;
+
+    dom.mapLightbox.classList.add('is-open');
+    dom.mapLightbox.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+
+    mapLightboxInstance = new maplibregl.Map({
+        container: 'addressMapLarge',
+        style: `https://api.jawg.io/styles/jawg-streets.json?access-token=${token}`,
+        center: [center.lng, center.lat],
+        zoom,
+        scrollZoom: true
+    });
+
+    const marker = markerColor === '#8B5CF6' ? tempMapMarker : mainMarker;
+    if (marker) {
+        new maplibregl.Marker({ color: markerColor ?? '#3B82F6' })
+            .setLngLat(marker.getLngLat())
+            .addTo(mapLightboxInstance);
+    }
+}
+
+function closeMapLightbox() {
+    if (!dom.mapLightbox) return;
+    dom.mapLightbox.classList.remove('is-open');
+    dom.mapLightbox.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    if (mapLightboxInstance) { mapLightboxInstance.remove(); mapLightboxInstance = null; }
 }
 
 // ============================================================================
@@ -1122,7 +1313,8 @@ function copyFieldValue(field) {
         zipCode: dom.valZipCode.textContent,
         city: dom.valCity.textContent,
         tempAddress: dom.valTempAddress.textContent,
-        tempZipCity: dom.valTempZipCity.textContent,
+        tempZipCode: dom.valTempZipCode.textContent,
+        tempCity:    dom.valTempCity.textContent,
         phoneCode: dom.valPhoneCode.textContent,
         phoneNumber: dom.valPhone.textContent,
         phone2Code: dom.valPhone2Code?.textContent || '',
@@ -1143,7 +1335,8 @@ function copyAllData() {
     
     if (data.hasTempAddress) {
         if (data.tempAddress) text += `Dirección temporal: ${data.tempAddress}\n`;
-        if (data.tempZipCode || data.tempCity) text += `CP / Ciudad (temp): ${data.tempZipCode || ''} ${data.tempCity || ''}\n`;
+        if (data.tempZipCode) text += `CP (temp): ${data.tempZipCode}\n`;
+        if (data.tempCity)    text += `Ciudad (temp): ${data.tempCity}\n`;
     }
     
     if (data.phoneCode) text += `Prefijo telefónico: ${data.phoneCode}\n`;
@@ -1182,9 +1375,31 @@ if (dom.qrLightboxFrame) {
     dom.qrLightboxFrame.addEventListener('click', closeQrLightbox);
 }
 
+if (dom.addressMapExpandBtn) {
+    dom.addressMapExpandBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        openMapLightbox(mapInstance, '#3B82F6', 'addressMapLabel');
+    });
+}
+
+const tempAddressMapExpandBtn = document.getElementById('tempAddressMapExpandBtn');
+if (tempAddressMapExpandBtn) {
+    tempAddressMapExpandBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        openMapLightbox(tempMapInstance, '#8B5CF6', 'tempAddressMapLabel');
+    });
+}
+if (dom.mapLightbox) {
+    dom.mapLightbox.querySelector('.map-lightbox-backdrop')?.addEventListener('click', closeMapLightbox);
+}
+if (dom.mapLightboxCloseBtn) {
+    dom.mapLightboxCloseBtn.addEventListener('click', e => { e.stopPropagation(); closeMapLightbox(); });
+}
+
 document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
         closeQrLightbox();
+        closeMapLightbox();
     }
 });
 
@@ -1257,6 +1472,43 @@ if (typeof window.runLicenseGate === 'function') {
                     slogan.title = agencyName;
                 }
             }
+
+            // ── Agency address → default map center ──────────────────────────
+            const agencyAddress = cached?.agencyAddress || null;
+            if (agencyAddress) {
+                const SESSION_KEY = 'okm_agency_center_' + agencyId;
+                const cachedCenter = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
+                if (cachedCenter) {
+                    agencyCenter = cachedCenter;
+                    preloadMapTiles(agencyCenter);
+                } else {
+                    geocode(agencyAddress).then(coords => {
+                        if (coords) {
+                            agencyCenter = [coords.lon, coords.lat];
+                            try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(agencyCenter)); } catch (_) {}
+                            preloadMapTiles(agencyCenter);
+                            // If the map is open but no client address has been shown yet, re-center on agency
+                            if (mapInstance && !mapHasClientAddress) {
+                                mapInstance.jumpTo({ center: agencyCenter });
+                            }
+                        }
+                    });
+                }
+            } else {
+                preloadMapTiles([2.3522, 48.8566]); // Paris fallback
+            }
+
+            // ── Agency language → pre-select language selector ───────────────
+            const agencyLanguage = cached?.agencyLanguage || null;
+            if (agencyLanguage && dom.langSelect) {
+                const validLangs = ['en', 'fr', 'es', 'it', 'pt', 'de', 'nl'];
+                if (validLangs.includes(agencyLanguage)) {
+                    dom.langSelect.value = agencyLanguage;
+                    state.lang = agencyLanguage;
+                    if (dom.langDisplay) dom.langDisplay.textContent = languageNames[agencyLanguage] || agencyLanguage;
+                }
+            }
+            // ─────────────────────────────────────────────────────────────────
 
             initializePeer();
         })

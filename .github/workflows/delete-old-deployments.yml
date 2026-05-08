@@ -1,0 +1,94 @@
+name: Delete old Cloudflare Pages deployments
+
+on:
+  schedule:
+    # Every Sunday at 02:00 UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+    inputs:
+      keep:
+        description: 'Number of recent deployments to keep (per branch)'
+        required: false
+        default: '5'
+
+jobs:
+  delete-old-deployments:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete old deployments
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ff6231688658a3f9acaa90fec7b3a218
+          PROJECT_NAME: okmobility
+          KEEP: ${{ github.event.inputs.keep || '5' }}
+        run: |
+          set -euo pipefail
+
+          echo "📋 Fetching deployments for project: $PROJECT_NAME"
+
+          page=1
+          all_deployments="[]"
+
+          while true; do
+            response=$(curl -s -f \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PROJECT_NAME/deployments?per_page=25&page=$page")
+
+            success=$(echo "$response" | jq -r '.success')
+            if [ "$success" != "true" ]; then
+              echo "❌ API error: $(echo "$response" | jq -r '.errors')"
+              exit 1
+            fi
+
+            count=$(echo "$response" | jq '.result | length')
+            echo "  Page $page: $count deployments"
+
+            all_deployments=$(echo "$all_deployments $(echo "$response" | jq '.result')" | jq -s '.[0] + .[1]')
+
+            if [ "$count" -lt 25 ]; then
+              break
+            fi
+            page=$((page + 1))
+          done
+
+          total=$(echo "$all_deployments" | jq 'length')
+          echo "✅ Total deployments found: $total"
+
+          # Group by branch, sort by created_on desc, skip the $KEEP most recent per branch
+          to_delete=$(echo "$all_deployments" | jq --argjson keep "$KEEP" '
+            group_by(.deployment_trigger.metadata.branch // "unknown")
+            | map(sort_by(.created_on) | reverse | .[$keep:])
+            | flatten
+            | map({id: .id, branch: (.deployment_trigger.metadata.branch // "unknown"), created: .created_on})
+          ')
+
+          delete_count=$(echo "$to_delete" | jq 'length')
+          echo "🗑️  Deployments to delete: $delete_count (keeping $KEEP per branch)"
+
+          if [ "$delete_count" -eq 0 ]; then
+            echo "Nothing to clean up."
+            exit 0
+          fi
+
+          errors=0
+          while IFS= read -r deployment; do
+            id=$(echo "$deployment" | jq -r '.id')
+            branch=$(echo "$deployment" | jq -r '.branch')
+            created=$(echo "$deployment" | jq -r '.created')
+
+            echo "  Deleting [$branch] $id (created: $created)"
+
+            del_response=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PROJECT_NAME/deployments/$id")
+
+            if [ "$del_response" = "200" ] || [ "$del_response" = "204" ]; then
+              echo "    ✅ Deleted"
+            else
+              echo "    ⚠️  HTTP $del_response — skipping (may be a production deployment)"
+              errors=$((errors + 1))
+            fi
+          done < <(echo "$to_delete" | jq -c '.[]')
+
+          echo ""
+          echo "Done. Deleted: $((delete_count - errors)) | Skipped: $errors"

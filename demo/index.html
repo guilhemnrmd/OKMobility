@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MobilityOS — Demo Flow</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+<link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+<style>
+:root {
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-display: 'Outfit', 'Inter', sans-serif;
+    --color-accent: #2054EA;
+    --color-gradient-end: #05C4E8;
+    --color-text: #17181D;
+    --color-text-sec: #5B6070;
+    --glass-bg: rgba(245, 249, 255, 0.74);
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --radius-xl: 28px;
+    --radius-lg: 22px;
+    --radius-md: 13px;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font-sans);
+    background: #fff;
+    color: var(--color-text);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+}
+
+/* Ambient blobs — same as real app */
+.ambient-background { position: fixed; inset: -8vh -8vw; z-index: -1; overflow: hidden; pointer-events: none; }
+.blob { position: absolute; filter: blur(80px); opacity: 0.55; border-radius: 50%; animation: float 20s infinite ease-in-out; }
+.blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #2054EA; }
+.blob-2 { bottom: -10%; right: -10%; width: 60vw; height: 60vw; background: #05DBF3; animation-delay: -5s; }
+.blob-3 { top: 40%; left: 40%; width: 40vw; height: 40vw; background: #4F46E5; animation-delay: -10s; }
+@keyframes float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+}
+
+.demo-stage { display: flex; align-items: center; gap: 60px; z-index: 10; }
+
+/* ─── Phone (Client) ─── */
+.phone {
+    width: 300px; height: 600px;
+    background: #f5f5f7;
+    border-radius: 42px;
+    border: 4px solid #d1d1d6;
+    padding: 55px 0 25px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(31,38,135,0.13), 0 8px 24px rgba(31,38,135,0.07);
+}
+.phone::before { content: ''; position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 90px; height: 22px; background: #17181D; border-radius: 14px; z-index: 10; }
+.phone-screen { height: 100%; background: #fff; overflow: hidden; display: flex; flex-direction: column; }
+
+/* Phone header — glass style */
+.phone-header {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    padding: 12px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.phone-header .brand { display: flex; align-items: center; gap: 6px; }
+.phone-header .brand .logo-circle {
+    width: 24px; height: 24px; border-radius: 6px;
+    background: linear-gradient(135deg, #2054EA, #05C4E8);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: #fff;
+}
+.phone-header .brand span { font-size: 11px; font-weight: 600; color: var(--color-text-sec); text-transform: uppercase; letter-spacing: 0.04em; }
+.phone-header .lang-pill { background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.08); border-radius: 20px; padding: 4px 10px; font-size: 10px; color: var(--color-text-sec); display: flex; align-items: center; gap: 4px; }
+
+.phone-title {
+    padding: 16px 20px 8px;
+    font-family: var(--font-display);
+    font-size: 20px; font-weight: 700;
+    background: linear-gradient(125deg, var(--color-accent), var(--color-gradient-end));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.phone-form { padding: 4px 16px; display: flex; flex-direction: column; gap: 12px; overflow: hidden; flex: 1; }
+
+/* Form field */
+.phone-field { opacity: 0; transform: translateY(8px); }
+.phone-field.visible { opacity: 1; transform: translateY(0); transition: all 0.4s cubic-bezier(0.16,1,0.3,1); }
+.phone-field label {
+    display: block; font-size: 9.5px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    color: var(--color-text-sec); margin-bottom: 4px; margin-left: 4px;
+}
+.phone-field .input-box {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.93);
+    border: 1px solid rgba(32,84,234,0.09);
+    border-radius: var(--radius-md);
+    padding: 11px 12px;
+    box-shadow: 0 2px 8px rgba(32,84,234,0.04), inset 0 0.75px 0 rgba(255,255,255,0.88);
+    min-height: 42px; font-size: 13px; color: var(--color-text);
+}
+.phone-field .input-box i { color: var(--color-text-sec); font-size: 15px; flex-shrink: 0; }
+.phone-field .input-box.typing { border-color: rgba(32,84,234,0.35); box-shadow: 0 0 0 3px rgba(32,84,234,0.08), 0 2px 8px rgba(32,84,234,0.04); }
+.cursor { display: inline-block; width: 2px; height: 15px; background: var(--color-accent); animation: blink 0.8s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ─── Flow connector ─── */
+.flow-connector { display: flex; flex-direction: column; align-items: center; gap: 10px; opacity: 0; }
+.flow-connector.active { opacity: 1; transition: opacity 0.6s ease; }
+.flow-lock { font-size: 20px; }
+.flow-dots { display: flex; gap: 6px; }
+.flow-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--color-accent); opacity: 0.3; }
+.flow-dot.pulse { animation: dotP 1.2s ease-in-out infinite; }
+.flow-dot:nth-child(2) { animation-delay: 0.2s; }
+.flow-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dotP { 0%,100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.3); } }
+.flow-label { font-size: 10px; color: var(--color-text-sec); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
+
+/* ─── Laptop (Retailer) ─── */
+.laptop {
+    width: 480px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 0.5px solid rgba(255,255,255,0.28);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(31,38,135,0.13), 0 8px 24px rgba(31,38,135,0.07),
+                inset 0 1px 0 rgba(255,255,255,0.82);
+}
+.laptop-bar {
+    height: 36px; background: rgba(255,255,255,0.5);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    display: flex; align-items: center; padding: 0 14px; gap: 7px;
+}
+.laptop-bar .dot { width: 11px; height: 11px; border-radius: 50%; }
+.laptop-bar .dot:nth-child(1) { background: #ff5f57; }
+.laptop-bar .dot:nth-child(2) { background: #ffbd2e; }
+.laptop-bar .dot:nth-child(3) { background: #28c840; }
+.laptop-bar .url { margin-left: 16px; font-size: 11px; color: var(--color-text-sec); background: rgba(0,0,0,0.04); padding: 4px 14px; border-radius: 6px; }
+
+.laptop-screen { padding: 24px; min-height: 420px; }
+.laptop-screen .brand-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.laptop-screen .brand-row .logo-circle { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, #2054EA, #05C4E8); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; }
+.laptop-screen .brand-row span { font-size: 11px; font-weight: 600; color: var(--color-text-sec); text-transform: uppercase; letter-spacing: 0.04em; }
+
+.laptop-title {
+    font-family: var(--font-display); font-size: 22px; font-weight: 700;
+    background: linear-gradient(125deg, var(--color-accent), var(--color-gradient-end));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 16px;
+}
+.status-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(52,199,89,0.1); border: 1px solid rgba(52,199,89,0.2);
+    border-radius: 20px; padding: 5px 12px; font-size: 11px; font-weight: 600;
+    color: #34C759; margin-bottom: 16px; opacity: 0;
+}
+.status-pill.visible { opacity: 1; transition: opacity 0.5s ease; }
+.status-dot-live { width: 6px; height: 6px; border-radius: 50%; background: #34C759; animation: sPulse 1.5s ease infinite; }
+@keyframes sPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+/* Data rows — matches real app .data-row */
+.data-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.7);
+    border: 0.5px solid rgba(255,255,255,0.3);
+    border-radius: var(--radius-md);
+    margin-bottom: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03), inset 0 0.5px 0 rgba(255,255,255,0.8);
+    opacity: 0; transform: translateX(10px);
+}
+.data-row.visible { opacity: 1; transform: translateX(0); transition: all 0.5s cubic-bezier(0.16,1,0.3,1); }
+.data-row .label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-sec); }
+.data-row .value { font-size: 14px; font-weight: 500; color: var(--color-text); text-align: right; }
+.data-row .value.flash { animation: flashVal 0.4s ease; }
+@keyframes flashVal { from { color: var(--color-accent); transform: translateY(-3px); opacity: 0.7; } to { color: var(--color-text); transform: translateY(0); opacity: 1; } }
+.data-row .copy-btn { width: 30px; height: 30px; border-radius: 50%; background: rgba(0,0,0,0.04); border: none; display: flex; align-items: center; justify-content: center; color: var(--color-text-sec); font-size: 14px; flex-shrink: 0; }
+
+/* Watermark */
+.watermark { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); font-size: 12px; color: rgba(0,0,0,0.2); font-weight: 500; letter-spacing: 0.5px; z-index: 10; }
+</style>
+</head>
+<body>
+
+<div class="ambient-background">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+</div>
+
+<div class="demo-stage">
+    <!-- Phone (Client) -->
+    <div class="phone">
+        <div class="phone-screen">
+            <div class="phone-header">
+                <div class="brand"><div class="logo-circle">M</div><span>OK Mobility</span></div>
+                <div class="lang-pill"><i class='bx bx-globe'></i> FR</div>
+            </div>
+            <div class="phone-title">Vos informations</div>
+            <div class="phone-form">
+                <div class="phone-field" id="f1">
+                    <label>Adresse de résidence</label>
+                    <div class="input-box" id="ib1"><i class='bx bx-map'></i><span id="t1"></span></div>
+                </div>
+                <div class="phone-field" id="f2">
+                    <label>Code Postal</label>
+                    <div class="input-box" id="ib2"><i class='bx bx-hash'></i><span id="t2"></span></div>
+                </div>
+                <div class="phone-field" id="f3">
+                    <label>Téléphone</label>
+                    <div class="input-box" id="ib3"><i class='bx bx-phone'></i><span id="t3"></span></div>
+                </div>
+                <div class="phone-field" id="f4">
+                    <label>E-mail</label>
+                    <div class="input-box" id="ib4"><i class='bx bx-envelope'></i><span id="t4"></span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flow Connector -->
+    <div class="flow-connector" id="flowConn">
+        <div class="flow-lock">🔒</div>
+        <div class="flow-dots">
+            <div class="flow-dot pulse"></div>
+            <div class="flow-dot pulse"></div>
+            <div class="flow-dot pulse"></div>
+        </div>
+        <div class="flow-label">WebRTC P2P</div>
+    </div>
+
+    <!-- Laptop (Retailer) -->
+    <div class="laptop">
+        <div class="laptop-bar">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            <span class="url">okmobility.pages.dev/retailer</span>
+        </div>
+        <div class="laptop-screen">
+            <div class="brand-row"><div class="logo-circle">M</div><span>OK Mobility · Palma Centro</span></div>
+            <div class="laptop-title">Données du client</div>
+            <div class="status-pill" id="statusPill"><div class="status-dot-live"></div>Connecté — Session active</div>
+
+            <div class="data-row" id="ar1"><span class="label">Adresse</span><span class="value" id="av1">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
+            <div class="data-row" id="ar2"><span class="label">Code Postal</span><span class="value" id="av2">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
+            <div class="data-row" id="ar3"><span class="label">Téléphone</span><span class="value" id="av3">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
+            <div class="data-row" id="ar4"><span class="label">E-mail</span><span class="value" id="av4">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
+        </div>
+    </div>
+</div>
+
+<div class="watermark">MobilityOS — Digital Check-In</div>
+
+<script>
+const data = [
+    { field: 'f1', input: 'ib1', text: 't1', row: 'ar1', val: 'av1', value: '15 Rue de Rivoli' },
+    { field: 'f2', input: 'ib2', text: 't2', row: 'ar2', val: 'av2', value: '75001' },
+    { field: 'f3', input: 'ib3', text: 't3', row: 'ar3', val: 'av3', value: '+33 6 12 34 56 78' },
+    { field: 'f4', input: 'ib4', text: 't4', row: 'ar4', val: 'av4', value: 'marie.dupont@email.com' }
+];
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function typeText(textEl, inputEl, text, agentVal, agentRow, speed = 50) {
+    inputEl.classList.add('typing');
+    const cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    inputEl.appendChild(cursor);
+    agentRow.classList.add('visible');
+
+    for (let i = 0; i < text.length; i++) {
+        textEl.textContent = text.slice(0, i + 1);
+        if (i % 2 === 0) {
+            agentVal.textContent = text.slice(0, i + 1);
+            agentVal.classList.add('flash');
+            setTimeout(() => agentVal.classList.remove('flash'), 200);
+        }
+        await sleep(speed);
+    }
+    agentVal.textContent = text;
+    cursor.remove();
+    inputEl.classList.remove('typing');
+    await sleep(250);
+}
+
+async function runDemo() {
+    data.forEach(d => {
+        document.getElementById(d.field).classList.remove('visible');
+        document.getElementById(d.input).classList.remove('typing');
+        document.getElementById(d.text).textContent = '';
+        document.getElementById(d.row).classList.remove('visible');
+        document.getElementById(d.val).textContent = '—';
+    });
+    document.getElementById('flowConn').classList.remove('active');
+    document.getElementById('statusPill').classList.remove('visible');
+
+    await sleep(800);
+    document.getElementById('flowConn').classList.add('active');
+    document.getElementById('statusPill').classList.add('visible');
+    await sleep(500);
+
+    for (const d of data) {
+        document.getElementById(d.field).classList.add('visible');
+        await sleep(180);
+        await typeText(
+            document.getElementById(d.text),
+            document.getElementById(d.input),
+            d.value,
+            document.getElementById(d.val),
+            document.getElementById(d.row)
+        );
+        await sleep(350);
+    }
+    await sleep(3500);
+    runDemo();
+}
+runDemo();
+</script>
+</body>
+</html>

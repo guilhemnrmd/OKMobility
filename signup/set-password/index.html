@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Choisissez un mot de passe — MobilityOS</title>
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
+    <link rel="stylesheet" href="/b2b.css">
+    <link rel="stylesheet" href="/auth/auth.css">
+</head>
+<body>
+
+    <header class="b2b-nav auth-nav">
+        <div class="nav-brand"><a href="/">MobilityOS</a></div>
+    </header>
+
+    <main class="auth-page">
+        <section class="auth-card">
+
+            <h1 class="auth-title">Choisissez un mot de passe.</h1>
+            <p class="auth-subtitle">Dernière étape pour activer votre compte d'essai.</p>
+
+            <div id="alertBanner" class="alert"></div>
+
+            <form id="setPasswordForm" class="auth-form" novalidate>
+
+                <div class="field">
+                    <label class="field-label" for="inputPassword">Mot de passe</label>
+                    <div class="field-input-wrap">
+                        <input type="password" id="inputPassword" class="field-input"
+                               placeholder="Au moins 8 caractères" autocomplete="new-password" required
+                               style="padding-right: 3rem;">
+                        <i class='bx bx-lock-alt field-icon'></i>
+                        <button type="button" class="btn-toggle-pwd" id="btnTogglePwd" aria-label="Afficher">
+                            <i class='bx bx-show' id="eyeIcon"></i>
+                        </button>
+                    </div>
+                    <div class="password-strength" id="strengthWrapper" style="display:none">
+                        <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+                        <span class="strength-label" id="strengthLabel"></span>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="field-label" for="inputConfirm">Confirmer</label>
+                    <div class="field-input-wrap">
+                        <input type="password" id="inputConfirm" class="field-input"
+                               placeholder="Répétez votre mot de passe" autocomplete="new-password" required>
+                        <i class='bx bx-lock field-icon'></i>
+                    </div>
+                </div>
+
+                <ul class="requirements" id="requirementsList">
+                    <li id="req-length"><i class='bx bx-circle'></i> Au moins 8 caractères</li>
+                    <li id="req-upper"><i class='bx bx-circle'></i> Une lettre majuscule</li>
+                    <li id="req-number"><i class='bx bx-circle'></i> Un chiffre</li>
+                    <li id="req-match"><i class='bx bx-circle'></i> Les mots de passe correspondent</li>
+                </ul>
+
+                <button type="submit" id="btnSubmit" class="btn-submit">
+                    <span id="btnText">Créer mon compte</span>
+                    <i class='bx bx-loader-alt btn-spinner' id="btnSpinner" style="display:none"></i>
+                </button>
+
+            </form>
+
+        </section>
+    </main>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('token');
+        if (!token) window.location.href = '/signup/?error=invalid_token';
+
+        const pwdInput = document.getElementById('inputPassword');
+        const confirmInput = document.getElementById('inputConfirm');
+        const eyeIcon = document.getElementById('eyeIcon');
+        const strengthWrapper = document.getElementById('strengthWrapper');
+        const strengthFill = document.getElementById('strengthFill');
+        const strengthLabel = document.getElementById('strengthLabel');
+        const btnSubmit = document.getElementById('btnSubmit');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const alertBanner = document.getElementById('alertBanner');
+
+        document.getElementById('btnTogglePwd').addEventListener('click', () => {
+            const hidden = pwdInput.type === 'password';
+            pwdInput.type = hidden ? 'text' : 'password';
+            eyeIcon.className = hidden ? 'bx bx-hide' : 'bx bx-show';
+        });
+
+        pwdInput.addEventListener('input', () => {
+            const v = pwdInput.value;
+            strengthWrapper.style.display = v ? 'block' : 'none';
+            updateRequirements(v, confirmInput.value);
+            updateStrength(v);
+        });
+        confirmInput.addEventListener('input', () => {
+            updateRequirements(pwdInput.value, confirmInput.value);
+        });
+
+        function updateRequirements(pwd, confirm) {
+            setReq('req-length', pwd.length >= 8);
+            setReq('req-upper', /[A-Z]/.test(pwd));
+            setReq('req-number', /[0-9]/.test(pwd));
+            setReq('req-match', pwd.length > 0 && pwd === confirm);
+        }
+        function setReq(id, ok) {
+            const li = document.getElementById(id);
+            li.classList.toggle('met', ok);
+            li.querySelector('i').className = ok ? 'bx bx-check-circle' : 'bx bx-circle';
+        }
+        function updateStrength(pwd) {
+            let score = 0;
+            if (pwd.length >= 8) score++;
+            if (pwd.length >= 12) score++;
+            if (/[A-Z]/.test(pwd)) score++;
+            if (/[0-9]/.test(pwd)) score++;
+            if (/[^A-Za-z0-9]/.test(pwd)) score++;
+            const levels = [
+                { pct: 20, color: '#ff5050', label: 'Très faible' },
+                { pct: 40, color: '#ff9500', label: 'Faible' },
+                { pct: 60, color: '#ffcc00', label: 'Moyen' },
+                { pct: 80, color: '#6ed476', label: 'Fort' },
+                { pct: 100, color: '#ffffff', label: 'Très fort' },
+            ];
+            const lvl = levels[Math.min(score, 4)];
+            strengthFill.style.width = lvl.pct + '%';
+            strengthFill.style.background = lvl.color;
+            strengthLabel.textContent = lvl.label;
+        }
+
+        document.getElementById('setPasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const password = pwdInput.value;
+            const confirm = confirmInput.value;
+            if (password.length < 8) {
+                showAlert('Le mot de passe doit contenir au moins 8 caractères.', 'error');
+                return;
+            }
+            if (password !== confirm) {
+                showAlert('Les mots de passe ne correspondent pas.', 'error');
+                return;
+            }
+
+            setLoading(true);
+            hideAlert();
+            try {
+                const res = await fetch('/api/set-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, password }),
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    window.location.href = '/dashboard/';
+                } else {
+                    showAlert(data.error || 'Une erreur est survenue.', 'error');
+                }
+            } catch {
+                showAlert('Erreur de connexion. Veuillez réessayer.', 'error');
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        function setLoading(on) {
+            btnSubmit.disabled = on;
+            btnText.textContent = on ? 'Création…' : 'Créer mon compte';
+            btnSpinner.style.display = on ? 'inline-block' : 'none';
+        }
+        function showAlert(msg, type) {
+            alertBanner.textContent = msg;
+            alertBanner.className = `alert alert-${type} show`;
+        }
+        function hideAlert() { alertBanner.className = 'alert'; }
+    </script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Créer un compte — MobilityOS</title>
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
+    <link rel="stylesheet" href="/b2b.css">
+    <link rel="stylesheet" href="/auth/auth.css">
+</head>
+<body>
+
+    <header class="b2b-nav auth-nav">
+        <div class="nav-brand"><a href="/">MobilityOS</a></div>
+        <div class="nav-controls">
+            <a href="/login/" class="nav-link">Se connecter</a>
+        </div>
+    </header>
+
+    <main class="auth-page">
+        <section class="auth-card">
+
+            <span class="trial-pill">
+                <i class='bx bx-gift'></i>
+                30 jours d'essai — sans CB
+            </span>
+
+            <h1 class="auth-title">Créez votre compte.</h1>
+            <p class="auth-subtitle">Bienvenue sur MobilityOS. Activez votre licence d'essai en quelques secondes.</p>
+
+            <div id="alertBanner" class="alert"></div>
+
+            <form id="signupForm" class="auth-form" novalidate>
+
+                <div class="field">
+                    <label class="field-label" for="inputName">Nom complet</label>
+                    <div class="field-input-wrap">
+                        <input type="text" id="inputName" name="name" class="field-input"
+                               placeholder="Jean Dupont" autocomplete="name" required>
+                        <i class='bx bx-user field-icon'></i>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="field-label" for="inputEmail">Email professionnel</label>
+                    <div class="field-input-wrap">
+                        <input type="email" id="inputEmail" name="email" class="field-input"
+                               placeholder="jean@monagence.com" autocomplete="email" required>
+                        <i class='bx bx-envelope field-icon'></i>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="field-label" for="inputCompany">Nom de votre agence</label>
+                    <div class="field-input-wrap">
+                        <input type="text" id="inputCompany" name="company" class="field-input"
+                               placeholder="Mon Agence Automobile" autocomplete="organization" required>
+                        <i class='bx bx-building field-icon'></i>
+                    </div>
+                </div>
+
+                <div class="terms-row">
+                    <input type="checkbox" id="inputTerms" required>
+                    <label for="inputTerms">J'accepte les <a href="#">conditions d'utilisation</a> et la <a href="#">politique de confidentialité</a>.</label>
+                </div>
+
+                <button type="submit" id="btnSubmit" class="btn-submit">
+                    <span id="btnText">Créer mon compte d'essai</span>
+                    <i class='bx bx-loader-alt btn-spinner' id="btnSpinner" style="display:none"></i>
+                </button>
+
+            </form>
+
+            <p class="auth-footer">Déjà un compte ? <a href="/login/">Se connecter</a></p>
+
+        </section>
+    </main>
+
+    <script>
+        const form = document.getElementById('signupForm');
+        const btnSubmit = document.getElementById('btnSubmit');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const alertBanner = document.getElementById('alertBanner');
+
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('error') === 'invalid_token') {
+            showAlert("Lien invalide. Veuillez recommencer l'inscription.", 'error');
+        } else if (params.get('error') === 'expired_token') {
+            showAlert('Votre lien de vérification a expiré (24h). Veuillez recommencer.', 'error');
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('inputName').value.trim();
+            const email = document.getElementById('inputEmail').value.trim();
+            const company = document.getElementById('inputCompany').value.trim();
+            const terms = document.getElementById('inputTerms').checked;
+
+            if (!name || !email || !company) {
+                showAlert('Veuillez remplir tous les champs.', 'error');
+                return;
+            }
+            if (!terms) {
+                showAlert("Veuillez accepter les conditions d'utilisation.", 'error');
+                return;
+            }
+
+            setLoading(true);
+            hideAlert();
+
+            try {
+                const res = await fetch('/api/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, company }),
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    if (data._devVerifyUrl) {
+                        showAlert('Mode dev — lien de vérification : ' + data._devVerifyUrl, 'success');
+                        setLoading(false);
+                        return;
+                    }
+                    window.location.href = `/signup/check-email/?email=${encodeURIComponent(email)}`;
+                } else {
+                    showAlert(data.error || 'Une erreur est survenue.', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showAlert('Erreur de connexion. Veuillez réessayer.', 'error');
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        function setLoading(on) {
+            btnSubmit.disabled = on;
+            btnText.textContent = on ? 'Envoi…' : "Créer mon compte d'essai";
+            btnSpinner.style.display = on ? 'inline-block' : 'none';
+        }
+        function showAlert(msg, type) {
+            alertBanner.textContent = msg;
+            alertBanner.className = `alert alert-${type} show`;
+        }
+        function hideAlert() { alertBanner.className = 'alert'; }
+    </script>
+</body>
+</html>
