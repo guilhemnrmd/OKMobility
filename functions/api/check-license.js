@@ -293,6 +293,19 @@ export async function onRequest(context) {
         }
     }
 
+    let formSettings = null;
+    if (license.ownerEmail && env.OKM_ACCOUNTS) {
+        try {
+            const accountRaw = await env.OKM_ACCOUNTS.get(`account:${license.ownerEmail}`);
+            if (accountRaw) {
+                const account = JSON.parse(accountRaw);
+                formSettings = account.formSettings || null;
+            }
+        } catch (e) {
+            // Ignore if we can't fetch account
+        }
+    }
+
     return new Response(JSON.stringify({
         valid: true,
         agencyName: license.agencyName,
@@ -301,6 +314,7 @@ export async function onRequest(context) {
         licenseVersion: license.licenseVersion || 1,
         agencyAddress: license.agencyAddress || null,
         agencyLanguage: license.agencyLanguage || null,
+        formSettings: formSettings
     }), { status: 200, headers: buildHeaders(trustedOrigin) });
 
 }

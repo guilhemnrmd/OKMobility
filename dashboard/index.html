@@ -176,40 +176,42 @@
                             </label>
                         </div>
 
+                        <div class="field" style="margin-top: 1.5rem; margin-bottom: 0.5rem;">
+                            <label class="field-label">Thème par défaut</label>
+                            <div class="field-input-wrap">
+                                <select id="formTheme" class="field-input">
+                                    <option value="dark">Sombre (Par défaut)</option>
+                                    <option value="light">Clair</option>
+                                </select>
+                                <i class='bx bx-moon field-icon'></i>
+                            </div>
+                        </div>
+
+                        <div class="field" style="margin-bottom: 0.5rem;">
+                            <label class="field-label">Logo personnalisé (URL)</label>
+                            <div class="field-input-wrap">
+                                <input type="url" id="formLogo" class="field-input" placeholder="https://votresite.com/logo.png">
+                                <i class='bx bx-image field-icon'></i>
+                            </div>
+                        </div>
+
+                        <div class="field" style="margin-bottom: 0.5rem;">
+                            <label class="field-label">Couleurs des fonds animés (Blobs)</label>
+                            <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                                <input type="color" id="formBlob1" value="#2054EA" title="Couleur 1" style="width: 40px; height: 40px; border: none; border-radius: 8px; cursor: pointer;">
+                                <input type="color" id="formBlob2" value="#05DBF3" title="Couleur 2" style="width: 40px; height: 40px; border: none; border-radius: 8px; cursor: pointer;">
+                                <input type="color" id="formBlob3" value="#4F46E5" title="Couleur 3" style="width: 40px; height: 40px; border: none; border-radius: 8px; cursor: pointer;">
+                            </div>
+                        </div>
+
                         <div id="customAlert" class="inline-alert"></div>
                         <div class="form-actions">
                             <button type="submit" class="btn-primary-sm" id="btnSaveCustom">
-                                <span id="btnSaveCustomText">Enregistrer</span>
+                                <span id="btnSaveCustomText">Enregistrer l'apparence</span>
                                 <i class='bx bx-loader-alt btn-spinner' id="btnSaveCustomSpinner" style="display:none"></i>
                             </button>
                         </div>
                     </form>
-                </div>
-
-                <div class="dash-card dash-card-locked">
-                    <div class="lock-overlay">
-                        <div class="lock-content">
-                            <i class='bx bx-crown'></i>
-                            <h3>Personnalisation avancée</h3>
-                            <p>Logo personnalisé, couleurs de marque, message d'accueil et domaine personnalisé.</p>
-                            <a href="mailto:contact@mobilityos.com" class="btn-primary-sm" style="text-decoration:none;">Passer à Pro</a>
-                        </div>
-                    </div>
-                    <h3 class="card-title">Personnalisation avancée</h3>
-                    <div class="field" style="pointer-events:none;filter:blur(4px);margin-bottom:0.5rem;">
-                        <label class="field-label">Logo personnalisé</label>
-                        <div class="field-input-wrap">
-                            <input type="text" class="field-input" placeholder="URL de votre logo" disabled>
-                            <i class='bx bx-image field-icon'></i>
-                        </div>
-                    </div>
-                    <div class="field" style="pointer-events:none;filter:blur(4px);">
-                        <label class="field-label">Message d'accueil client</label>
-                        <div class="field-input-wrap">
-                            <input type="text" class="field-input" placeholder="Bienvenue chez…" disabled>
-                            <i class='bx bx-message field-icon'></i>
-                        </div>
-                    </div>
                 </div>
             </section>
 
@@ -322,6 +324,12 @@
             if (s.language) document.getElementById('formLanguage').value = s.language;
             document.getElementById('formShowTempAddress').checked = s.showTempAddress !== false;
             document.getElementById('formShowSecondPhone').checked = s.showSecondPhone !== false;
+            
+            if (s.theme) document.getElementById('formTheme').value = s.theme;
+            if (s.logoUrl) document.getElementById('formLogo').value = s.logoUrl;
+            if (s.blob1) document.getElementById('formBlob1').value = s.blob1;
+            if (s.blob2) document.getElementById('formBlob2').value = s.blob2;
+            if (s.blob3) document.getElementById('formBlob3').value = s.blob3;
         }
 
         function renderAgencies() {
@@ -460,9 +468,15 @@
             btn.disabled = true; txt.textContent = 'Enregistrement…'; spin.style.display = 'inline-block';
 
             const formSettings = {
+                ...currentUser.formSettings, // Keep existing fields
                 language: document.getElementById('formLanguage').value,
                 showTempAddress: document.getElementById('formShowTempAddress').checked,
                 showSecondPhone: document.getElementById('formShowSecondPhone').checked,
+                theme: document.getElementById('formTheme').value,
+                logoUrl: document.getElementById('formLogo').value,
+                blob1: document.getElementById('formBlob1').value,
+                blob2: document.getElementById('formBlob2').value,
+                blob3: document.getElementById('formBlob3').value,
             };
 
             try {

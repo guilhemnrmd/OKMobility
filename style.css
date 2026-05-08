@@ -110,7 +110,7 @@
 
 /* Dark Mode Support (Automatic) */
 @media (prefers-color-scheme: dark) {
-    :root {
+    html:not(.theme-light) {
         --color-bg-primary: #17181D;
         --color-text-primary: #FFFFFF;
         --color-text-secondary: #D0D4DE;
@@ -132,6 +132,29 @@
         --app-cursor-url: url('/assets/cursors/qr-cursor-dark-24.png') 2 2;
         --app-cursor-click-url: url('/assets/cursors/qr-cursor-click-dark-24.png') 3 3;
     }
+}
+
+/* Forced Dark Mode */
+html.theme-dark {
+    --color-bg-primary: #17181D;
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #D0D4DE;
+    --color-border: rgba(255, 255, 255, 0.15);
+    
+    --glass-bg: rgba(28, 28, 30, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    
+    --blob-1: #2054EA;
+    --blob-2: #05DBF3;
+    --blob-3: #2054EA;
+
+    --color-status-ok: #66d089;
+    --color-status-warning: #ffc171;
+    --color-status-critical: #ff8f88;
+
+    --app-cursor-url: url('/assets/cursors/qr-cursor-dark-24.png') 2 2;
+    --app-cursor-click-url: url('/assets/cursors/qr-cursor-click-dark-24.png') 3 3;
 }
 
 /* =========================================================================

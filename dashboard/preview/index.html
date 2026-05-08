@@ -220,6 +220,26 @@
                 if (data.authenticated && data.user) {
                     const settings = data.user.formSettings || {};
                     
+                    // Thème clair/sombre
+                    if (settings.theme === 'light') {
+                        document.documentElement.classList.remove('theme-dark');
+                        document.documentElement.classList.add('theme-light');
+                    } else if (settings.theme === 'dark') {
+                        document.documentElement.classList.remove('theme-light');
+                        document.documentElement.classList.add('theme-dark');
+                    }
+
+                    // Couleurs des blobs
+                    if (settings.blob1) document.documentElement.style.setProperty('--blob-1', settings.blob1);
+                    if (settings.blob2) document.documentElement.style.setProperty('--blob-2', settings.blob2);
+                    if (settings.blob3) document.documentElement.style.setProperty('--blob-3', settings.blob3);
+
+                    // Logo
+                    if (settings.logoUrl) {
+                        const logoContainer = document.querySelector('.logo');
+                        logoContainer.innerHTML = `<img src="${settings.logoUrl}" alt="Logo" class="logo-img logo-img-brand" style="max-height: 40px; border-radius: 4px;">`;
+                    }
+
                     // Appliquer la langue
                     if (settings.language) {
                         const langs = {

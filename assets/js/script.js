@@ -430,9 +430,53 @@ async function hydrateAgencyBrandingFromUrl() {
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const payload = await res.json();
 
-        if (payload?.valid && typeof payload.agencyName === 'string' && payload.agencyName.trim()) {
-            state.agencyName = sanitizeAgencyName(payload.agencyName);
-            setAgencyBranding(state.agencyName);
+        if (payload?.valid) {
+            if (typeof payload.agencyName === 'string' && payload.agencyName.trim()) {
+                state.agencyName = sanitizeAgencyName(payload.agencyName);
+                setAgencyBranding(state.agencyName);
+            }
+
+            if (payload.formSettings) {
+                const s = payload.formSettings;
+
+                // Thème
+                if (s.theme === 'light') {
+                    document.documentElement.classList.remove('theme-dark');
+                    document.documentElement.classList.add('theme-light');
+                } else if (s.theme === 'dark') {
+                    document.documentElement.classList.remove('theme-light');
+                    document.documentElement.classList.add('theme-dark');
+                }
+
+                // Couleurs
+                if (s.blob1) document.documentElement.style.setProperty('--blob-1', s.blob1);
+                if (s.blob2) document.documentElement.style.setProperty('--blob-2', s.blob2);
+                if (s.blob3) document.documentElement.style.setProperty('--blob-3', s.blob3);
+
+                // Logo
+                if (s.logoUrl) {
+                    const logoContainer = document.querySelector('.logo');
+                    if (logoContainer) {
+                        logoContainer.innerHTML = `<img src="${s.logoUrl}" alt="Logo" class="logo-img logo-img-brand" style="max-height: 40px; border-radius: 4px;">`;
+                    }
+                }
+
+                // Affichage conditionnel (temp address & phone2)
+                if (s.showTempAddress === false) {
+                    const tempWrapper = document.getElementById('tempAddressWrapper');
+                    if (tempWrapper) tempWrapper.style.display = 'none';
+                }
+                if (s.showSecondPhone === false) {
+                    const phone2Section = document.getElementById('phone2Section');
+                    if (phone2Section) phone2Section.style.display = 'none';
+                }
+                
+                // Langue par défaut
+                if (s.language && dom.langSelect) {
+                    dom.langSelect.value = s.language;
+                    applyLanguage(s.language);
+                }
+            }
             return;
         }
     } catch (err) {
