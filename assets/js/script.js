@@ -325,6 +325,7 @@ const state = {
     advisorConnected: false,
     sendDebounceTimer: null,
     lastSentPayload: null,
+    lastAdvisorCode: null,
     agencyId: null,
     agencyName: null
 };
@@ -769,8 +770,12 @@ dom.form.addEventListener('submit', (e) => {
 
     dom.summaryContentBody.innerHTML = summaryHTML;
 
-    // Configure Send Button
-    // Note: The Send button logic has been removed as requested by the user
+    // Signal advisor that client confirmed their summary (triggers 5-min persistence)
+    if (state.advisorConnected && state.advisorConnection && state.advisorConnection.open) {
+        try {
+            state.advisorConnection.send({ type: 'summary-confirmed' });
+        } catch (_) { /* silent */ }
+    }
 
     // Transition UI
     document.getElementById('pageTitle').textContent = i18n[state.lang].summaryTitle;
@@ -1367,7 +1372,9 @@ async function connectToAdvisor() {
     const raw = dom.advisorCodeInput.value.trim().toUpperCase();
     if (!raw || raw.length < 4) return;
     const code = raw.startsWith('OKM-') ? raw : `OKM-${raw}`;
-    
+
+    state.lastAdvisorCode = raw.startsWith('OKM-') ? raw.slice(4) : raw;
+
     updateClientStatus('connecting');
     
     // Create our peer (auto-generated ID)
@@ -1940,3 +1947,13 @@ attachRealTimeListeners();
 initAddressAutocomplete();
 initSearchableSelects();
 checkUrlForAdvisorCode();
+
+// Auto-reconnect when phone is unlocked (Page Visibility API)
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return;
+    if (!state.lastAdvisorCode) return;
+    if (state.advisorConnected) return;
+    diagLog('Page visible again, auto-reconnecting to', state.lastAdvisorCode);
+    if (dom.advisorCodeInput) dom.advisorCodeInput.value = state.lastAdvisorCode;
+    setTimeout(() => connectToAdvisor(), 400);
+});

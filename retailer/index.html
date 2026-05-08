@@ -50,6 +50,9 @@
                         <option value="nl">Nederlands</option>
                     </select>
                 </div>
+                <button type="button" id="btnSuggestImprovement" class="btn-icon" aria-label="Suggérer une amélioration" title="Suggérer une amélioration">
+                    <i class='bx bx-comment-add'></i>
+                </button>
                 <button type="button" id="btnLinkStatus" class="btn-link-status" aria-label="Desconectar cliente" title="Desconectar cliente">
                     <i class='bx bx-link'></i>
                 </button>
@@ -128,6 +131,10 @@
             </div>
 
             <div id="liveDataView" class="live-data-view" style="display: none;">
+                <div id="summaryCountdownBanner" class="summary-countdown-banner" style="display:none;">
+                    <i class='bx bx-time-five'></i>
+                    <span id="summaryCountdownText">Résumé confirmé — données visibles encore <strong id="summaryCountdownValue">5:00</strong></span>
+                </div>
                 <div class="title-wrapper">
                     <h1 id="titleLiveData" class="gradient-text">Datos del cliente</h1>
                 </div>
@@ -375,6 +382,26 @@
                 <i class='bx bx-check-circle'></i>
                 <span>Acepto — Activar terminal</span>
             </button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- SUGGESTION MODAL                                            -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div id="suggestionModalOverlay" class="modal-overlay" style="display:none;"></div>
+    <div id="suggestionModal" class="advisor-modal glass-panel" role="dialog" aria-modal="true" style="display:none;">
+        <div class="modal-header">
+            <i class='bx bx-comment-add' style="font-size:1.4rem; margin-right:8px; color:var(--color-accent);"></i>
+            <h2 id="suggestionModalTitle">Suggérer une amélioration</h2>
+        </div>
+        <p id="suggestionModalDesc" class="modal-desc" style="font-size:0.85rem;">Décrivez ce qui pourrait être amélioré ou signaler un problème.</p>
+        <textarea id="suggestionText" rows="4" style="width:100%; border-radius:10px; padding:10px 12px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:inherit; font-family:inherit; font-size:0.9rem; resize:vertical; outline:none;" placeholder="Ex: Le champ X devrait..."></textarea>
+        <div class="modal-actions" style="grid-template-columns: 1fr 1fr;">
+            <button id="suggestionModalSend" class="btn-primary glass-btn">
+                <i class='bx bx-send'></i>
+                <span>Envoyer</span>
+            </button>
+            <button id="suggestionModalCancel" class="btn-secondary">Annuler</button>
         </div>
     </div>
 
