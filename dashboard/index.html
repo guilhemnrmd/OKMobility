@@ -411,9 +411,8 @@
 
         // Champs par défaut si l'agence n'en a pas
         const DEFAULT_FIELDS = [
-            { id: "address_block", label: "Bloc Adresse (Rue, CP, Ville, Pays)", type: "address_block", icon: "bx-map", required: true, system: true },
-            { id: "phone", label: "Téléphone", type: "tel", icon: "bx-phone", required: true, system: true },
-            { id: "email", label: "E-mail", type: "email", icon: "bx-envelope", required: true, system: true }
+            { id: "email", label: "E-mail", type: "email", icon: "bx-envelope", required: true, system: false },
+            { id: "address_block", label: "Bloc Adresse", type: "address_block", icon: "bx-map", required: true, system: false }
         ];
 
         async function init() {
@@ -480,7 +479,6 @@
             container.innerHTML = '';
             
             function renderField(field, index, parentArray, parentIndex = null) {
-                const isSystem = field.system;
                 const isGroup = field.type === 'toggle_group';
                 
                 const fieldEl = document.createElement('div');
@@ -499,7 +497,7 @@
                         <input type="text" class="field-input-inline" value="${escHtml(field.label)}" 
                             data-idx="${index}" ${parentIndex !== null ? `data-parent="${parentIndex}"` : ''}>
                         <span class="field-subtitle">
-                            ${isGroup ? 'Groupe déroulant (Conteneur)' : (isSystem ? 'Champ standard (Requis)' : 'Champ personnalisé')}
+                            ${isGroup ? 'Groupe déroulant (Conteneur)' : 'Champ du formulaire'}
                         </span>
                     </div>
                     <div class="field-actions">
@@ -510,7 +508,7 @@
                         ` : ''}
                         <button type="button" class="btn-icon" onclick="moveField(${index}, -1, ${parentIndex})" ${index === 0 ? 'disabled' : ''} title="Monter"><i class='bx bx-up-arrow-alt'></i></button>
                         <button type="button" class="btn-icon" onclick="moveField(${index}, 1, ${parentIndex})" ${index === parentArray.length - 1 ? 'disabled' : ''} title="Descendre"><i class='bx bx-down-arrow-alt'></i></button>
-                        <button type="button" class="btn-icon danger" onclick="removeField(${index}, ${parentIndex})" ${isSystem ? 'disabled title="Champ système protégé"' : 'title="Supprimer"'}><i class='bx bx-trash'></i></button>
+                        <button type="button" class="btn-icon danger" onclick="removeField(${index}, ${parentIndex})" title="Supprimer"><i class='bx bx-trash'></i></button>
                     </div>
                 `;
                 container.appendChild(fieldEl);
@@ -572,7 +570,6 @@
 
         window.removeField = function(index, parentIndex = null) {
             const arr = parentIndex !== null ? formFields[parentIndex].children : formFields;
-            if (arr[index].system) return;
             arr.splice(index, 1);
             renderFieldsList();
         };
