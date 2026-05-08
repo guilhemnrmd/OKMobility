@@ -130,10 +130,10 @@
                         <h2>Personnalisation du formulaire</h2>
                         <p>Adaptez le formulaire client à votre agence.</p>
                     </div>
-                    <a href="/dashboard/preview/" target="_blank" class="btn-secondary" style="display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none;">
+                    <button type="button" id="btnPreviewClient" class="btn-secondary" style="display: inline-flex; align-items: center; gap: 0.5rem;">
                         <i class='bx bx-show'></i>
                         Prévisualiser mon formulaire
-                    </a>
+                    </button>
                 </div>
 
                 <div class="dash-card">
@@ -391,7 +391,9 @@
                         ${iconHtml}
                         <div style="display: flex; flex-direction: column;">
                             <input type="text" class="field-input-inline" value="${escHtml(field.label)}" data-index="${index}" style="border: none; background: transparent; font-weight: 600; font-size: 0.9rem; outline: none; border-bottom: 1px dashed transparent; transition: 0.2s;" onfocus="this.style.borderBottomColor='var(--color-accent)'" onblur="this.style.borderBottomColor='transparent'">
-                            <span style="font-size: 0.7rem; color: var(--color-text-secondary); text-transform: uppercase;">${field.type} ${isSystem ? ' (Système)' : ''}</span>
+                            <span style="font-size: 0.7rem; color: var(--color-text-secondary); opacity: 0.8;">
+                                ${isSystem ? 'Champ standard (Requis)' : 'Champ personnalisé'}
+                            </span>
                         </div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 5px;">
@@ -576,6 +578,15 @@
         });
 
         // ── Customization form ────────────────────────────────
+        document.getElementById('btnPreviewClient').addEventListener('click', () => {
+            const agencies = currentUser.agencies || [];
+            if (agencies.length > 0) {
+                window.open('/client/?agency=' + agencies[0].id, '_blank');
+            } else {
+                alert("Vous n'avez pas encore d'agence pour prévisualiser le formulaire.");
+            }
+        });
+
         document.getElementById('btnSaveCustom').addEventListener('click', async () => {
             const btn = document.getElementById('btnSaveCustom');
             const txt = document.getElementById('btnSaveCustomText');
