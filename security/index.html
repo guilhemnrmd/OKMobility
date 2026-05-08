@@ -13,9 +13,9 @@
         .scroll-container { scroll-snap-type: none; overflow-y: visible; height: auto; }
         .b2b-nav { position: sticky; top: 0; z-index: 100; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background: rgba(0,0,0,0.85); }
         .document-wrapper { max-width: 800px; margin: 80px auto 40px; padding: 0 1.5rem; }
-        .doc-header { text-align: center; margin-bottom: 3rem; }
+        .doc-header { text-align: left; margin-bottom: 3rem; }
         .doc-header h1 { font-size: clamp(2rem, 5vw, 2.5rem); margin-bottom: 0.5rem; color: #fff; }
-        .meta-info { color: var(--text-secondary); font-size: 0.85rem; display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; }
+        .meta-info { color: var(--text-secondary); font-size: 0.85rem; display: flex; justify-content: flex-start; gap: 1.5rem; flex-wrap: wrap; }
         .glass-panel { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 2rem; margin-bottom: 1.5rem; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
         .glass-panel h2 { font-size: 1.3rem; color: #fff; margin-bottom: 1.2rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; }
         .glass-panel p, .glass-panel li { color: var(--text-secondary); line-height: 1.7; margin-bottom: 0.75rem; }
@@ -102,15 +102,33 @@
             <section class="glass-panel reveal">
                 <h2 data-i18n="h3Title">3. Quelles données sont stockées ?</h2>
                 <table class="data-table">
-                    <thead><tr><th data-i18n="thData">Donnée</th><th data-i18n="thStored">Est-elle stockée ?</th></tr></thead>
+                    <thead><tr><th data-i18n="thData">Donnée</th><th data-i18n="thStored">Stockée ?</th><th data-i18n="thWhere">Où / durée</th></tr></thead>
                     <tbody>
-                        <tr><td data-i18n="td1Data">Adresse / CP / Ville du client</td><td><i class='bx bx-x icon-no'></i> <span data-i18n="td1Stored">Non — uniquement en RAM</span></td></tr>
-                        <tr><td data-i18n="td2Data">Téléphone et e-mail</td><td><i class='bx bx-x icon-no'></i> <span data-i18n="td2Stored">Non — transmission P2P uniquement</span></td></tr>
-                        <tr><td data-i18n="td3Data">Adresse temporaire (hôtel/Airbnb)</td><td><i class='bx bx-x icon-no'></i> <span data-i18n="td3Stored">Non — même canal P2P</span></td></tr>
-                        <tr><td data-i18n="td4Data">Code de session (6 chiffres)</td><td><i class='bx bx-x icon-no'></i> <span data-i18n="td4Stored">Non — expire à la fermeture</span></td></tr>
-                        <tr><td data-i18n="td5Data">Nom de l'agence (licence)</td><td><i class='bx bx-check icon-yes'></i> <span data-i18n="td5Stored">Oui — en KV (pas une donnée personnelle)</span></td></tr>
-                        <tr><td data-i18n="td6Data">Date d'expiration de la licence</td><td><i class='bx bx-check icon-yes'></i> <span data-i18n="td6Stored">Oui — en KV (pas une donnée personnelle)</span></td></tr>
-                        <tr><td data-i18n="td7Data">IP + date d'acceptation des CGU</td><td><i class='bx bx-check icon-yes'></i> <span data-i18n="td7Stored">Oui — en KV (registre légal)</span></td></tr>
+                        <tr>
+                            <td data-i18n="td1Data">Données personnelles du client (adresse, CP, ville, téléphone, email, adresse temporaire)</td>
+                            <td><i class='bx bx-x icon-no'></i> <span data-i18n="td1Stored">Non</span></td>
+                            <td data-i18n="td1Where">RAM uniquement — transit P2P chiffré vers le conseiller</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="td2Data">Code de session (6 caractères)</td>
+                            <td><i class='bx bx-x icon-no'></i> <span data-i18n="td2Stored">Non</span></td>
+                            <td data-i18n="td2Where">Expire à la fermeture de session ou à la déconnexion manuelle</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="td3Data">Métadonnées d'agence (nom, expiration licence)</td>
+                            <td><i class='bx bx-check icon-yes'></i> <span data-i18n="td3Stored">Oui</span></td>
+                            <td data-i18n="td3Where">KV Cloudflare — pas des données personnelles</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="td4Data">IP + date d'activation (1re acceptation des CGU)</td>
+                            <td><i class='bx bx-check icon-yes'></i> <span data-i18n="td4Stored">Oui</span></td>
+                            <td data-i18n="td4Where">KV Cloudflare — registre légal, une seule entrée par terminal</td>
+                        </tr>
+                        <tr>
+                            <td data-i18n="td5Data">Données d'usage anonymes (type d'appareil, pays, ville)</td>
+                            <td><i class='bx bx-check icon-yes'></i> <span data-i18n="td5Stored">Oui</span></td>
+                            <td data-i18n="td5Where">KV Cloudflare — 30 jours glissants, aucun lien avec les données client</td>
+                        </tr>
                     </tbody>
                 </table>
             </section>
@@ -145,18 +163,7 @@
                     <li><i class='bx bx-check-circle icon-yes'></i> <span data-i18n="h6L1">Respecte le principe de minimisation du RGPD (Art. 5.1.c).</span></li>
                     <li><i class='bx bx-check-circle icon-yes'></i> <span data-i18n="h6L2">Aucune base de données clients. Les données ne touchent pas de serveur.</span></li>
                     <li><i class='bx bx-check-circle icon-yes'></i> <span data-i18n="h6L3">Canal P2P chiffré de bout en bout.</span></li>
-                    <li><i class='bx bx-check-circle icon-yes'></i> <span data-i18n="h6L4">Stockage KV restreint aux données de licences agence.</span></li>
-                </ul>
-            </section>
-
-            <section class="glass-panel reveal">
-                <h2 data-i18n="h7Title">7. Références de code</h2>
-                <ul style="font-family: monospace; font-size: 0.85rem;">
-                    <li><span style="color:#fff;">functions/api/check-license.js</span><br><span data-i18n="h7L1">Vérification de licence — ne lit/écrit aucune donnée client</span></li>
-                    <li style="margin-top: 0.75rem;"><span style="color:#fff;">functions/api/admin-agencies.js</span><br><span data-i18n="h7L2">Gestion licences — écrit uniquement les métadonnées KV</span></li>
-                    <li style="margin-top: 0.75rem;"><span style="color:#fff;">functions/api/accept-terms.js</span><br><span data-i18n="h7L3">Enregistre IP + date d'acceptation</span></li>
-                    <li style="margin-top: 0.75rem;"><span style="color:#fff;">functions/api/turn-credentials.js</span><br><span data-i18n="h7L4">Génère des identifiants TURN éphémères</span></li>
-                    <li style="margin-top: 0.75rem;"><span style="color:#fff;">retailer/index.html</span><br><span data-i18n="h7L5">Mention légale affichée</span></li>
+                    <li><i class='bx bx-check-circle icon-yes'></i> <span data-i18n="h6L4">Stockage KV restreint aux données de licences agence et au registre légal.</span></li>
                 </ul>
                 <div style="margin-top: 1.5rem; text-align: right; color: var(--text-secondary); font-size: 0.8rem;" data-i18n="docFooter">
                     Guilhem Normand — 2026 — Document confidentiel
