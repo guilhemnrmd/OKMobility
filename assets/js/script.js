@@ -411,77 +411,19 @@ function setAgencyBranding(agencyName) {
 // 2b. Dynamic Fields Renderer
 // ============================================================================
 
-/**
- * Maps a system field id to its existing wrapper element ID in the DOM.
- * System fields are pre-built in the HTML, custom fields are injected.
- */
-const SYSTEM_FIELD_WRAPPERS = {
-    address_block:  ['wrap_address', 'wrap_zipCode_city', 'wrap_country'],
-    address:        ['wrap_address'],
-    zipCode:        ['wrap_zipCode_city'],
-    city:           ['wrap_zipCode_city'],
-    country:        ['wrap_country'],
-    phone:          ['wrap_phone_group'],
-    email:          ['wrap_email']
-};
-
-/**
- * Renders the form fields based on the `fields` array from formSettings.
- * - System fields: reorders existing DOM elements.
- * - Custom fields: creates new input elements and appends them.
- */
 function renderDynamicFields(fields) {
     const container = document.getElementById('dynamicFormFields');
     if (!container) return;
 
-    // Collect all existing system wrappers
-    const existingWrappers = {};
-    for (const [fieldId, wrapperIds] of Object.entries(SYSTEM_FIELD_WRAPPERS)) {
-        wrapperIds.forEach(wrapperId => {
-            const el = document.getElementById(wrapperId);
-            if (el && !existingWrappers[wrapperId]) {
-                existingWrappers[wrapperId] = el;
-            }
-        });
-    }
-
-    // Also capture temp address and phone2 wrappers
-    const tempAddressWrapper = document.getElementById('tempAddressWrapper');
-    const phone2Wrapper = document.getElementById('phone2Wrapper');
-
-    // Detach all children from the container temporarily
-    const detachedChildren = [];
-    while (container.firstChild) {
-        detachedChildren.push(container.removeChild(container.firstChild));
-    }
-
-    // Track which system wrappers we've already re-attached
-    const reattached = new Set();
+    // Clear container
+    container.innerHTML = '';
 
     function renderFields(fieldsArray, parentElement) {
         fieldsArray.forEach(field => {
-            if (field.system) {
-                const wrapperIds = SYSTEM_FIELD_WRAPPERS[field.id] || [];
-                wrapperIds.forEach(wrapperId => {
-                    if (wrapperId && existingWrappers[wrapperId] && !reattached.has(wrapperId)) {
-                        parentElement.appendChild(existingWrappers[wrapperId]);
-                        reattached.add(wrapperId);
-                    }
-                });
-
-                // Backward compatibility: append hardcoded tempAddress and phone2 if needed
-                if (field.id === 'address_block' && tempAddressWrapper && !reattached.has('tempAddressWrapper')) {
-                    parentElement.appendChild(tempAddressWrapper);
-                    reattached.add('tempAddressWrapper');
-                }
-                if (field.id === 'phone' && phone2Wrapper && !reattached.has('phone2Wrapper')) {
-                    parentElement.appendChild(phone2Wrapper);
-                    reattached.add('phone2Wrapper');
-                }
-            } else if (field.type === 'toggle_group') {
+            if (field.type === 'toggle_group') {
                 // Create a toggle group
                 const groupWrap = document.createElement('div');
-                groupWrap.className = 'temp-address-wrapper active'; // Base class
+                groupWrap.className = 'temp-address-wrapper active';
                 groupWrap.style.animation = 'slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
                 groupWrap.style.marginTop = 'var(--spacing-lg)';
                 groupWrap.style.marginBottom = 'var(--spacing-md)';
@@ -498,62 +440,51 @@ function renderDynamicFields(fields) {
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.id = `chk_${field.id}`;
+                checkbox.name = `chk_${field.id}`;
                 
-                const checkmark = document.createElement('span');
-                checkmark.className = 'checkmark';
+                const spanCheck = document.createElement('span');
+                spanCheck.className = 'checkmark';
                 
-                const textSpan = document.createElement('span');
-                textSpan.textContent = field.label || 'Groupe';
+                const spanText = document.createElement('span');
+                spanText.textContent = field.label || 'Groupe';
                 
                 labelWrap.appendChild(checkbox);
-                labelWrap.appendChild(checkmark);
-                labelWrap.appendChild(textSpan);
+                labelWrap.appendChild(spanCheck);
+                labelWrap.appendChild(spanText);
                 headerDiv.appendChild(labelWrap);
                 toggleDiv.appendChild(headerDiv);
+                groupWrap.appendChild(toggleDiv);
                 
-                const sectionDiv = document.createElement('div');
-                sectionDiv.className = 'temp-address-sliding-section';
-                sectionDiv.id = `section_${field.id}`;
+                const slidingSec = document.createElement('div');
+                slidingSec.className = 'temp-address-sliding-section';
+                slidingSec.style.display = 'none'; // Hidden by default
                 
                 const innerDiv = document.createElement('div');
                 innerDiv.className = 'temp-address-content-inner';
                 
-                sectionDiv.appendChild(innerDiv);
-                groupWrap.appendChild(toggleDiv);
-                groupWrap.appendChild(sectionDiv);
-                parentElement.appendChild(groupWrap);
+                slidingSec.appendChild(innerDiv);
+                groupWrap.appendChild(slidingSec);
                 
-                // Toggle Logic
-                checkbox.addEventListener('change', (e) => {
-                    if (e.target.checked) {
-                        sectionDiv.classList.add('expanded');
-                        groupWrap.classList.add('active');
-                        // Set required on children if needed
-                        innerDiv.querySelectorAll('input').forEach(i => {
-                            if (i.dataset.req === 'true') i.required = true;
-                        });
-                    } else {
-                        sectionDiv.classList.remove('expanded');
-                        // groupWrap.classList.remove('active'); // keep it active or it loses style depending on b2b.css
-                        // Remove required
-                        innerDiv.querySelectorAll('input').forEach(i => {
-                            i.removeAttribute('required');
-                        });
-                    }
+                checkbox.addEventListener('change', () => {
+                    const active = checkbox.checked;
+                    slidingSec.style.display = active ? 'block' : 'none';
+                    // Update required status of children
+                    innerDiv.querySelectorAll('input, select').forEach(input => {
+                        if (input.dataset.req === 'true') input.required = active;
+                    });
                 });
                 
-                // Render children inside the inner container
+                parentElement.appendChild(groupWrap);
+                
                 if (field.children && field.children.length > 0) {
                     renderFields(field.children, innerDiv);
                 }
-                
             } else if (field.type === 'address_block') {
                 // Custom Address Block
                 const wrap = document.createElement('div');
                 wrap.className = 'form-group-row';
                 wrap.style.cssText = 'animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); flex-direction: column; gap: 1rem; width: 100%;';
                 
-                // Address input
                 const addressWrap = document.createElement('div');
                 addressWrap.className = 'input-wrapper address-wrapper';
                 addressWrap.innerHTML = `
@@ -565,7 +496,6 @@ function renderDynamicFields(fields) {
                     <ul class="address-suggestions" id="${field.id}_sugg" role="listbox"></ul>
                 `;
                 
-                // Zip + City row
                 const row = document.createElement('div');
                 row.className = 'form-group-row';
                 
@@ -604,20 +534,18 @@ function renderDynamicFields(fields) {
                 wrap.appendChild(row);
                 parentElement.appendChild(wrap);
                 
-                // We must bind autocomplete after the element is in the DOM
                 setTimeout(() => {
                     const inputEl = document.getElementById(`${field.id}_addr`);
                     const listEl = document.getElementById(`${field.id}_sugg`);
                     const zipEl = document.getElementById(`${field.id}_zip`);
                     const cityEl = document.getElementById(`${field.id}_city`);
-                    // Find the nearest overflow-hidden wrapper (e.g. the toggle inner div)
                     const overflowEl = inputEl.closest('.temp-address-content-inner');
                     if (window.bindAddressField) {
                         window.bindAddressField(inputEl, listEl, zipEl, cityEl, null, overflowEl);
                     }
                 }, 0);
             } else {
-                // Custom field
+                // Standard field (text, email, tel, etc.)
                 const wrapper = document.createElement('div');
                 wrapper.className = 'input-wrapper';
                 wrapper.id = `wrap_${field.id}`;
@@ -635,7 +563,7 @@ function renderDynamicFields(fields) {
 
                 const label = document.createElement('label');
                 label.setAttribute('for', field.id);
-                label.textContent = field.label || 'Champ personnalisé';
+                label.textContent = field.label || 'Champ';
 
                 const inputWrap = document.createElement('div');
                 inputWrap.className = 'input-with-icon';
@@ -649,7 +577,6 @@ function renderDynamicFields(fields) {
                 input.name = field.id;
                 input.placeholder = field.placeholder || '';
                 
-                // Store required status via dataset because if inside a toggle, it only becomes required when toggle is active
                 if (field.required) {
                     input.dataset.req = 'true';
                     input.required = true;
@@ -665,20 +592,6 @@ function renderDynamicFields(fields) {
     }
 
     renderFields(fields, container);
-
-    // Re-attach any system wrappers that weren't in the fields list (safety net)
-    for (const [wrapperId, el] of Object.entries(existingWrappers)) {
-        if (!reattached.has(wrapperId)) {
-            container.appendChild(el);
-            reattached.add(wrapperId);
-        }
-    }
-    if (tempAddressWrapper && !container.contains(tempAddressWrapper)) {
-        container.appendChild(tempAddressWrapper);
-    }
-    if (phone2Wrapper && !container.contains(phone2Wrapper)) {
-        container.appendChild(phone2Wrapper);
-    }
 }
 
 async function hydrateAgencyBrandingFromUrl() {
