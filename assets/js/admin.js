@@ -116,6 +116,8 @@
         if (btnRefresh) btnRefresh.style.display = isAuthenticated ? 'inline-flex' : 'none';
         if (btnLogout) btnLogout.style.display = isAuthenticated ? 'inline-flex' : 'none';
         if (btnToggleMap) btnToggleMap.style.display = isAuthenticated ? 'inline-flex' : 'none';
+        const btnFld = document.getElementById('btnFieldConfig');
+        if (btnFld) btnFld.style.display = isAuthenticated ? 'inline-flex' : 'none';
         if (!isAuthenticated && adminSyncIndicator) {
             adminSyncIndicator.classList.remove('active');
         }
@@ -1209,6 +1211,189 @@
     }
 
     updateSelectionUi();
+
+    // ── Field Config ───────────────────────────────────────────────────────────
+    const FIELD_CONFIG_KEY = 'okm_form_config';
+
+    const DEFAULT_FIELD_CONFIG = [
+        {
+            id: 'address_block', label: 'Adresse principale', enabled: true,
+            fields: [
+                { id: 'address',  label: 'Adresse',      enabled: true, required: true },
+                { id: 'zipCode',  label: 'Code postal',  enabled: true, required: true },
+                { id: 'city',     label: 'Ville',        enabled: true, required: true },
+                { id: 'country',  label: 'Pays',         enabled: true, required: true }
+            ]
+        },
+        {
+            id: 'temp_address_block', label: 'Adresse temporaire (optionnel)', enabled: true,
+            fields: [
+                { id: 'tempAddress', label: 'Adresse temporaire', enabled: true, required: false },
+                { id: 'tempZipCode', label: 'CP temporaire',      enabled: true, required: false },
+                { id: 'tempCity',    label: 'Ville temporaire',   enabled: true, required: false }
+            ]
+        },
+        {
+            id: 'phone_block', label: 'Téléphone principal', enabled: true,
+            fields: [
+                { id: 'countryCode', label: 'Indicatif',  enabled: true, required: true },
+                { id: 'phone',       label: 'Téléphone',  enabled: true, required: true }
+            ]
+        },
+        {
+            id: 'phone2_block', label: '2e téléphone (optionnel)', enabled: true,
+            fields: [
+                { id: 'countryCode2', label: 'Indicatif (2)',  enabled: true, required: false },
+                { id: 'phone2',       label: '2e téléphone',  enabled: true, required: false }
+            ]
+        },
+        {
+            id: 'email_block', label: 'Email', enabled: true,
+            fields: [
+                { id: 'email', label: 'Email', enabled: true, required: true }
+            ]
+        }
+    ];
+
+    function loadFieldConfig() {
+        try {
+            const raw = localStorage.getItem(FIELD_CONFIG_KEY);
+            return raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(DEFAULT_FIELD_CONFIG));
+        } catch {
+            return JSON.parse(JSON.stringify(DEFAULT_FIELD_CONFIG));
+        }
+    }
+
+    function saveFieldConfig(cfg) {
+        try { localStorage.setItem(FIELD_CONFIG_KEY, JSON.stringify(cfg)); } catch { /* quota */ }
+    }
+
+    function renderFieldConfigUI() {
+        const cfg = loadFieldConfig();
+        const list = document.getElementById('fieldConfigList');
+        if (!list) return;
+        list.innerHTML = '';
+
+        cfg.forEach((block, bi) => {
+            const blockEl = document.createElement('div');
+            blockEl.className = 'fc-block';
+
+            const header = document.createElement('div');
+            header.className = 'fc-block-header';
+
+            const arrows = document.createElement('div');
+            arrows.className = 'fc-block-arrows';
+            const up = document.createElement('button');
+            up.className = 'fc-btn-arrow'; up.innerHTML = '▲'; up.title = 'Monter le bloc';
+            up.disabled = (bi === 0);
+            up.addEventListener('click', () => { if (bi > 0) { [cfg[bi-1], cfg[bi]] = [cfg[bi], cfg[bi-1]]; saveFieldConfig(cfg); renderFieldConfigUI(); } });
+            const dn = document.createElement('button');
+            dn.className = 'fc-btn-arrow'; dn.innerHTML = '▼'; dn.title = 'Descendre le bloc';
+            dn.disabled = (bi === cfg.length - 1);
+            dn.addEventListener('click', () => { if (bi < cfg.length-1) { [cfg[bi], cfg[bi+1]] = [cfg[bi+1], cfg[bi]]; saveFieldConfig(cfg); renderFieldConfigUI(); } });
+            arrows.appendChild(up); arrows.appendChild(dn);
+
+            const labelInput = document.createElement('input');
+            labelInput.type = 'text'; labelInput.value = block.label;
+            labelInput.addEventListener('change', () => { cfg[bi].label = labelInput.value; saveFieldConfig(cfg); });
+
+            const toggle = document.createElement('label');
+            toggle.className = 'fc-block-toggle';
+            const chk = document.createElement('input');
+            chk.type = 'checkbox'; chk.checked = block.enabled;
+            chk.addEventListener('change', () => { cfg[bi].enabled = chk.checked; saveFieldConfig(cfg); });
+            toggle.appendChild(chk);
+            toggle.appendChild(document.createTextNode('Visible'));
+
+            header.appendChild(arrows);
+            header.appendChild(labelInput);
+            header.appendChild(toggle);
+            blockEl.appendChild(header);
+
+            const fieldsEl = document.createElement('div');
+            fieldsEl.className = 'fc-fields';
+
+            block.fields.forEach((field, fi) => {
+                const row = document.createElement('div');
+                row.className = 'fc-field';
+
+                const farrows = document.createElement('div');
+                farrows.className = 'fc-field-arrows';
+                const fup = document.createElement('button');
+                fup.className = 'fc-btn-arrow'; fup.innerHTML = '▲';
+                fup.disabled = (fi === 0);
+                fup.addEventListener('click', () => { if (fi > 0) { [cfg[bi].fields[fi-1], cfg[bi].fields[fi]] = [cfg[bi].fields[fi], cfg[bi].fields[fi-1]]; saveFieldConfig(cfg); renderFieldConfigUI(); } });
+                const fdn = document.createElement('button');
+                fdn.className = 'fc-btn-arrow'; fdn.innerHTML = '▼';
+                fdn.disabled = (fi === block.fields.length - 1);
+                fdn.addEventListener('click', () => { if (fi < block.fields.length-1) { [cfg[bi].fields[fi], cfg[bi].fields[fi+1]] = [cfg[bi].fields[fi+1], cfg[bi].fields[fi]]; saveFieldConfig(cfg); renderFieldConfigUI(); } });
+                farrows.appendChild(fup); farrows.appendChild(fdn);
+
+                const fLabel = document.createElement('input');
+                fLabel.type = 'text'; fLabel.value = field.label;
+                fLabel.addEventListener('change', () => { cfg[bi].fields[fi].label = fLabel.value; saveFieldConfig(cfg); });
+
+                const fId = document.createElement('span');
+                fId.className = 'fc-field-id'; fId.textContent = field.id;
+
+                const fChk = document.createElement('input');
+                fChk.type = 'checkbox'; fChk.checked = field.enabled;
+                if (field.required) fChk.disabled = true;
+                fChk.title = field.required ? 'Champ obligatoire' : '';
+                fChk.addEventListener('change', () => { cfg[bi].fields[fi].enabled = fChk.checked; saveFieldConfig(cfg); });
+
+                row.appendChild(farrows);
+                row.appendChild(fLabel);
+                row.appendChild(fId);
+                row.appendChild(fChk);
+                fieldsEl.appendChild(row);
+            });
+
+            blockEl.appendChild(fieldsEl);
+            list.appendChild(blockEl);
+        });
+    }
+
+    function openFieldConfigModal() {
+        renderFieldConfigUI();
+        const overlay = document.getElementById('fieldConfigOverlay');
+        const modal = document.getElementById('fieldConfigModal');
+        if (overlay) overlay.style.display = 'block';
+        if (modal) modal.style.display = 'block';
+    }
+
+    function closeFieldConfigModal() {
+        const overlay = document.getElementById('fieldConfigOverlay');
+        const modal = document.getElementById('fieldConfigModal');
+        if (overlay) overlay.style.display = 'none';
+        if (modal) modal.style.display = 'none';
+    }
+
+    const btnFieldConfig = document.getElementById('btnFieldConfig');
+    if (btnFieldConfig) btnFieldConfig.addEventListener('click', openFieldConfigModal);
+
+    const fieldConfigOverlay = document.getElementById('fieldConfigOverlay');
+    if (fieldConfigOverlay) fieldConfigOverlay.addEventListener('click', closeFieldConfigModal);
+
+    const fieldConfigClose = document.getElementById('fieldConfigClose');
+    if (fieldConfigClose) fieldConfigClose.addEventListener('click', closeFieldConfigModal);
+
+    const fieldConfigSave = document.getElementById('fieldConfigSave');
+    if (fieldConfigSave) {
+        fieldConfigSave.addEventListener('click', () => {
+            closeFieldConfigModal();
+            showMsg('Configuration des champs enregistrée.');
+        });
+    }
+
+    const fieldConfigReset = document.getElementById('fieldConfigReset');
+    if (fieldConfigReset) {
+        fieldConfigReset.addEventListener('click', () => {
+            localStorage.removeItem(FIELD_CONFIG_KEY);
+            renderFieldConfigUI();
+            showMsg('Configuration réinitialisée.');
+        });
+    }
 
     // ── Boot ───────────────────────────────────────────────────────────────────
     loadAgencies();

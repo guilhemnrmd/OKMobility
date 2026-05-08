@@ -38,6 +38,9 @@
                 <button id="btnToggleMap" class="btn-icon" title="Cartographie" aria-label="Cartographie" style="display:none;">
                     <i class='bx bx-map-alt'></i>
                 </button>
+                <button id="btnFieldConfig" class="btn-icon" title="Configurer les champs du formulaire" aria-label="Configurer les champs" style="display:none;">
+                    <i class='bx bx-slider-alt'></i>
+                </button>
                 <button id="btnAddAgency" class="btn-icon" title="Ajouter une agence" aria-label="Ajouter une agence">
                     <i class='bx bx-plus'></i>
                 </button>
@@ -201,6 +204,30 @@
         </div>
         <div id="logDetailBody" class="log-detail-body"></div>
         <div id="logDetailMapContainer" class="log-detail-map okm-map"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- FIELD CONFIG MODAL                                          -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div id="fieldConfigOverlay" class="modal-overlay" style="display:none;"></div>
+    <div id="fieldConfigModal" class="advisor-modal glass-panel field-config-modal" role="dialog" aria-modal="true" style="display:none; width:min(96vw,560px); max-height:85vh; overflow-y:auto;">
+        <div class="modal-header">
+            <i class='bx bx-slider-alt' style="font-size:1.4rem;margin-right:8px;color:var(--color-accent);"></i>
+            <h2>Champs du formulaire</h2>
+            <button id="fieldConfigClose" style="margin-left:auto; background:none; border:none; color:inherit; cursor:pointer; font-size:1.3rem; line-height:1;"><i class='bx bx-x'></i></button>
+        </div>
+        <p style="font-size:0.82rem; color:var(--color-text-secondary); margin-bottom:12px;">Réorganisez les blocs et champs, renommez les libellés, activez ou masquez les éléments.</p>
+        <div id="fieldConfigList" class="field-config-list"></div>
+        <div class="modal-actions" style="margin-top:16px; grid-template-columns: 1fr 1fr;">
+            <button id="fieldConfigSave" class="btn-primary glass-btn">
+                <i class='bx bx-save'></i>
+                <span>Enregistrer</span>
+            </button>
+            <button id="fieldConfigReset" class="btn-secondary">
+                <i class='bx bx-reset'></i>
+                Réinitialiser
+            </button>
+        </div>
     </div>
 
     <script src="https://unpkg.com/maplibre-gl@5.7.0/dist/maplibre-gl.js"></script>

@@ -848,3 +848,101 @@
         background: rgba(var(--color-accent-rgb), 0.1);
     }
 }
+
+/* ── Field Config Modal ───────────────────────────────────────────────────── */
+.field-config-modal { padding: 20px; }
+
+.field-config-list { display: flex; flex-direction: column; gap: 10px; }
+
+.fc-block {
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.03);
+}
+
+.fc-block-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.04);
+    cursor: default;
+}
+
+.fc-block-header input[type="text"] {
+    flex: 1;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 0.88rem;
+    color: inherit;
+    font-family: inherit;
+}
+
+.fc-block-header input[type="text"]:focus { outline: 1px solid var(--color-accent); }
+
+.fc-block-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.78rem;
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+}
+
+.fc-block-toggle input[type="checkbox"] { accent-color: var(--color-accent); }
+
+.fc-block-arrows {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.fc-btn-arrow {
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: 2px 4px;
+    font-size: 0.85rem;
+    line-height: 1;
+    border-radius: 4px;
+    transition: color 0.15s, background 0.15s;
+}
+.fc-btn-arrow:hover { color: #fff; background: rgba(255,255,255,0.08); }
+.fc-btn-arrow:disabled { opacity: 0.25; cursor: default; }
+
+.fc-fields { padding: 6px 8px 8px; display: flex; flex-direction: column; gap: 4px; }
+
+.fc-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    font-size: 0.85rem;
+}
+
+.fc-field-arrows { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
+
+.fc-field input[type="text"] {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 5px;
+    padding: 3px 7px;
+    font-size: 0.82rem;
+    color: inherit;
+    font-family: inherit;
+}
+
+.fc-field input[type="text"]:focus { outline: 1px solid var(--color-accent); }
+
+.fc-field input[type="checkbox"] { accent-color: var(--color-accent); flex-shrink: 0; }
+
+.fc-field-id { font-size: 0.72rem; color: var(--color-text-secondary); font-family: monospace; flex-shrink: 0; }
