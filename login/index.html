@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Connexion — MobilityOS</title>
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
+    <link rel="stylesheet" href="/b2b.css">
+    <link rel="stylesheet" href="/auth/auth.css">
+</head>
+<body>
+
+    <header class="b2b-nav">
+        <div class="nav-brand">
+            <a href="/" style="color: inherit; text-decoration: none;">MobilityOS</a>
+        </div>
+        <div class="nav-controls">
+            <!-- Language Selector -->
+            <div class="lang-selector magnetic">
+                <i class='bx bx-globe'></i>
+                <span id="langDisplay">Français</span>
+                <select id="languageSelect" aria-label="Sélectionner la langue">
+                    <option value="en">English</option>
+                    <option value="fr" selected>Français</option>
+                    <option value="es">Español</option>
+                    <option value="it">Italiano</option>
+                    <option value="pt">Português</option>
+                    <option value="de">Deutsch</option>
+                    <option value="nl">Nederlands</option>
+                </select>
+            </div>
+            <a href="/signup/" class="btn-secondary magnetic" style="padding: 0.5rem 1.25rem; font-size: 0.875rem; border-radius: 999px;" data-i18n="navSignup">Créer un compte</a>
+        </div>
+    </header>
+
+    <main class="auth-page">
+        <section class="auth-card">
+
+            <h1 class="auth-title" data-i18n="loginTitle">Bon retour.</h1>
+            <p class="auth-subtitle" data-i18n="loginSubtitle">Connectez-vous à votre espace MobilityOS.</p>
+
+            <div id="alertBanner" class="alert"></div>
+
+            <form id="loginForm" class="auth-form" novalidate>
+
+                <div class="field">
+                    <label class="field-label" for="inputEmail" data-i18n="lblEmail">Adresse email</label>
+                    <div class="field-input-wrap">
+                        <input type="email" id="inputEmail" class="field-input"
+                               placeholder="jean@monagence.com" autocomplete="email" required>
+                        <i class='bx bx-envelope field-icon'></i>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="field-label" for="inputPassword" data-i18n="lblPassword">Mot de passe</label>
+                    <div class="field-input-wrap">
+                        <input type="password" id="inputPassword" class="field-input"
+                               placeholder="••••••••" autocomplete="current-password" required
+                               style="padding-right: 3rem;">
+                        <i class='bx bx-lock-alt field-icon'></i>
+                        <button type="button" class="btn-toggle-pwd" aria-label="Afficher">
+                            <i class='bx bx-show' id="eyeIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" id="btnSubmit" class="btn-submit">
+                    <span id="btnText" data-i18n="btnSubmit">Se connecter</span>
+                    <i class='bx bx-loader-alt btn-spinner' id="btnSpinner" style="display:none"></i>
+                </button>
+
+            </form>
+
+            <p class="auth-footer">
+                <span data-i18n="footerNoAccount">Pas encore de compte ?</span>
+                <a href="/signup/" data-i18n="footerSignup">Essai gratuit 30 jours</a>
+            </p>
+
+        </section>
+    </main>
+
+    <script>
+        // ── Internationalization (i18n) ───────────────────────
+        const i18n = {
+            fr: {
+                navSignup: "Créer un compte",
+                loginTitle: "Bon retour.",
+                loginSubtitle: "Connectez-vous à votre espace MobilityOS.",
+                lblEmail: "Adresse email",
+                lblPassword: "Mot de passe",
+                btnSubmit: "Se connecter",
+                btnLoggingIn: "Connexion…",
+                footerNoAccount: "Pas encore de compte ?",
+                footerSignup: "Essai gratuit 30 jours",
+                alertEmpty: "Veuillez remplir tous les champs.",
+                alertSessionExpired: "Votre session a expiré. Veuillez vous reconnecter.",
+                alertError: "Identifiants incorrects.",
+                alertConnError: "Erreur de connexion. Veuillez réessayer."
+            },
+            en: {
+                navSignup: "Create an account",
+                loginTitle: "Welcome back.",
+                loginSubtitle: "Sign in to your MobilityOS workspace.",
+                lblEmail: "Email address",
+                lblPassword: "Password",
+                btnSubmit: "Sign in",
+                btnLoggingIn: "Signing in…",
+                footerNoAccount: "No account yet?",
+                footerSignup: "30-day free trial",
+                alertEmpty: "Please fill in all fields.",
+                alertSessionExpired: "Your session has expired. Please log in again.",
+                alertError: "Incorrect credentials.",
+                alertConnError: "Connection error. Please try again."
+            },
+            es: {
+                navSignup: "Crear una cuenta",
+                loginTitle: "Bienvenido de nuevo.",
+                loginSubtitle: "Inicie sesión en su espacio MobilityOS.",
+                lblEmail: "Correo electrónico",
+                lblPassword: "Contraseña",
+                btnSubmit: "Iniciar sesión",
+                btnLoggingIn: "Iniciando sesión…",
+                footerNoAccount: "¿Aún no tienes cuenta?",
+                footerSignup: "Prueba gratuita de 30 días",
+                alertEmpty: "Por favor, complete todos los campos.",
+                alertSessionExpired: "Su sesión ha caducado. Por favor, inicie sesión de nuevo.",
+                alertError: "Credenciales incorrectas.",
+                alertConnError: "Error de conexión. Por favor, inténtelo de nuevo."
+            },
+            it: {
+                navSignup: "Crea un account",
+                loginTitle: "Bentornato.",
+                loginSubtitle: "Accedi al tuo spazio MobilityOS.",
+                lblEmail: "Indirizzo email",
+                lblPassword: "Password",
+                btnSubmit: "Accedi",
+                btnLoggingIn: "Accesso in corso…",
+                footerNoAccount: "Non hai ancora un account?",
+                footerSignup: "Prova gratuita di 30 giorni",
+                alertEmpty: "Si prega di compilare tutti i campi.",
+                alertSessionExpired: "La sessione è scaduta. Per favore, accedi di nuovo.",
+                alertError: "Credenziali errate.",
+                alertConnError: "Errore di connessione. Per favore, riprova."
+            },
+            pt: {
+                navSignup: "Criar uma conta",
+                loginTitle: "Bem-vindo de volta.",
+                loginSubtitle: "Inicie sessão no seu espaço MobilityOS.",
+                lblEmail: "Endereço de e-mail",
+                lblPassword: "Palavra-passe",
+                btnSubmit: "Entrar",
+                btnLoggingIn: "A entrar…",
+                footerNoAccount: "Ainda não tem conta?",
+                footerSignup: "Teste gratuito de 30 dias",
+                alertEmpty: "Por favor, preencha todos os campos.",
+                alertSessionExpired: "A sua sessão expirou. Por favor, inicie sessão novamente.",
+                alertError: "Credenciais incorretas.",
+                alertConnError: "Erro de conexão. Por favor, tente novamente."
+            },
+            de: {
+                navSignup: "Konto erstellen",
+                loginTitle: "Willkommen zurück.",
+                loginSubtitle: "Melden Sie sich bei Ihrem MobilityOS-Arbeitsbereich an.",
+                lblEmail: "E-Mail-Adresse",
+                lblPassword: "Passwort",
+                btnSubmit: "Anmelden",
+                btnLoggingIn: "Anmeldung…",
+                footerNoAccount: "Noch kein Konto?",
+                footerSignup: "30 Tage kostenlos testen",
+                alertEmpty: "Bitte füllen Sie alle Felder aus.",
+                alertSessionExpired: "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
+                alertError: "Ungültige Anmeldedaten.",
+                alertConnError: "Verbindungsfehler. Bitte versuchen Sie es erneut."
+            },
+            nl: {
+                navSignup: "Account aanmaken",
+                loginTitle: "Welkom terug.",
+                loginSubtitle: "Meld u aan bij uw MobilityOS-werkruimte.",
+                lblEmail: "E-mailadres",
+                lblPassword: "Wachtwoord",
+                btnSubmit: "Inloggen",
+                btnLoggingIn: "Inloggen…",
+                footerNoAccount: "Nog geen account?",
+                footerSignup: "30 dagen gratis proberen",
+                alertEmpty: "Vul alle velden in.",
+                alertSessionExpired: "Uw sessie is verlopen. Log opnieuw in.",
+                alertError: "Onjuiste inloggegevens.",
+                alertConnError: "Verbindingsfout. Probeer het opnieuw."
+            }
+        };
+
+        let currentDict = i18n.en;
+
+        const updateLanguage = (lang) => {
+            currentDict = i18n[lang] || i18n['en'];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (currentDict[key]) {
+                    el.textContent = currentDict[key];
+                }
+            });
+            document.documentElement.lang = lang;
+            localStorage.setItem('userLanguage', lang);
+        };
+
+        // Auto-detect language: Storage > Browser > Default(fr)
+        const supportedLangs = ['fr','en','es','it','pt','de','nl'];
+        const storedLang = localStorage.getItem('userLanguage');
+        const browserLang = (navigator.language || 'fr').slice(0, 2).toLowerCase();
+        const initialLang = storedLang || (supportedLangs.includes(browserLang) ? browserLang : 'en');
+        
+        const langSelect = document.getElementById('languageSelect');
+        const langDisplay = document.getElementById('langDisplay');
+        if (langSelect) {
+            langSelect.value = initialLang;
+            if (langDisplay) langDisplay.textContent = langSelect.options[langSelect.selectedIndex].text;
+            langSelect.addEventListener('change', (e) => {
+                const lang = e.target.value;
+                if (langDisplay) langDisplay.textContent = e.target.options[e.target.selectedIndex].text;
+                updateLanguage(lang);
+            });
+        }
+        updateLanguage(initialLang);
+
+        // ── Interactive Effects (Magnetic) ─────────────────────
+        const magneticElements = document.querySelectorAll('.magnetic');
+        magneticElements.forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                const x = (e.clientX - rect.left) - rect.width / 2;
+                const y = (e.clientY - rect.top) - rect.height / 2;
+                btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+            });
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = `translate(0px, 0px)`;
+            });
+        });
+
+        // Ambient Cursor Glow
+        const ambientGlow = document.createElement('div');
+        ambientGlow.className = 'ambient-cursor-glow';
+        document.body.appendChild(ambientGlow);
+        document.addEventListener('mousemove', (e) => {
+            ambientGlow.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+        });
+
+        // Redirect if already authenticated
+        fetch('/api/auth/session')
+            .then(r => r.json())
+            .then(data => { if (data.authenticated) window.location.href = '/dashboard/'; })
+            .catch(() => {});
+
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('reason') === 'session_expired') {
+            showAlert(currentDict.alertSessionExpired, 'error');
+        }
+
+        document.querySelector('.btn-toggle-pwd').addEventListener('click', () => {
+            const input = document.getElementById('inputPassword');
+            const icon = document.getElementById('eyeIcon');
+            const hidden = input.type === 'password';
+            input.type = hidden ? 'text' : 'password';
+            icon.className = hidden ? 'bx bx-hide' : 'bx bx-show';
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('inputEmail').value.trim();
+            const password = document.getElementById('inputPassword').value;
+            if (!email || !password) {
+                showAlert(currentDict.alertEmpty, 'error');
+                return;
+            }
+            setLoading(true);
+            hideAlert();
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password }),
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    window.location.href = params.get('next') || '/dashboard/';
+                } else {
+                    showAlert(data.error || currentDict.alertError, 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showAlert(currentDict.alertConnError, 'error');
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        function setLoading(on) {
+            const btn = document.getElementById('btnSubmit');
+            btn.disabled = on;
+            document.getElementById('btnText').textContent = on ? currentDict.btnLoggingIn : currentDict.btnSubmit;
+            document.getElementById('btnSpinner').style.display = on ? 'inline-block' : 'none';
+        }
+        function showAlert(msg, type) {
+            const el = document.getElementById('alertBanner');
+            el.textContent = msg;
+            el.className = `alert alert-${type} show`;
+        }
+        function hideAlert() {
+            document.getElementById('alertBanner').className = 'alert';
+        }
+    </script>
+</body>
+</html>

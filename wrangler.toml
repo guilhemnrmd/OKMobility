@@ -6,3 +6,11 @@ pages_build_output_dir = "."
 binding = "OKM_LICENSES"
 id = "8edd81d0d2e248bda2a399197c4d179e"
 preview_id = "b971db86aee54e92a44a79925ca1bd89"
+
+# OKM_ACCOUNTS KV namespace must be created in the Cloudflare dashboard
+# and added as a binding under Settings > Functions > KV namespace bindings.
+# For local dev with wrangler pages dev, uncomment and fill in real IDs:
+[[kv_namespaces]]
+binding = "OKM_ACCOUNTS"
+id = "8ad90060668c4430b43e5f8442118b03"
+preview_id = "4dc10f1517dd434c81bc68254bd4d162"

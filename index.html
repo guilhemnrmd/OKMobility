@@ -1,296 +1,263 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="fr" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
-    <meta name="referrer" content="same-origin">
-    <title>OK Mobility</title>
+    
+    <!-- SEO Optimization -->
+    <title>MobilityOS - Plateforme B2B</title>
+    <meta name="description" content="Découvrez notre plateforme SaaS de mobilité B2B. Interface en marque blanche, gestion dynamique et design Liquid Glass premium pour optimiser vos locations.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://votredomaine.com/">
+    
+    <!-- Icons -->
     <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
-    
-    <!-- Boxicons (self-hosted) -->
     <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
-
-    <!-- Flag icons — SVG sprites, cross-platform flag display -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css?v=47">
     
-    <!-- Brand Config (white-label) -->
-    <script src="/assets/js/brand-config.js"></script>
-
-    <!-- PeerJS -->
-    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <!-- B2B Custom Styles -->
+    <link rel="stylesheet" href="/b2b.css">
+    
+    <!-- B2B Logic -->
+    <script src="/b2b.js" defer></script>
 </head>
 <body>
-    
-    <!-- Dynamic Ambient Background -->
-    <div class="ambient-background">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
-    </div>
 
-    <!-- Main Liquid Glass Container -->
-    <main class="glass-container">
+    <!-- Header / Navbar -->
+    <header class="b2b-nav">
+        <div class="nav-brand">
+            MobilityOS
+        </div>
+        <div class="nav-controls">
+            <!-- Language Selector -->
+            <div class="lang-selector magnetic">
+                <i class='bx bx-globe'></i>
+                <span id="langDisplay">Français</span>
+                <select id="languageSelect" aria-label="Sélectionner la langue">
+                    <option value="en">English</option>
+                    <option value="fr" selected>Français</option>
+                    <option value="es">Español</option>
+                    <option value="it">Italiano</option>
+                    <option value="pt">Português</option>
+                    <option value="de">Deutsch</option>
+                    <option value="nl">Nederlands</option>
+                </select>
+            </div>
+            <!-- Login / Dashboard -->
+            <a href="/login/" class="btn-login-header magnetic" aria-label="Accès Vendeur" title="Accès Vendeur">
+                <i class='bx bx-user'></i>
+                <span data-i18n="navLogin">Accès Vendeur</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Scroll Snapping Container -->
+    <div class="scroll-container">
         
-        <!-- Header & Language Selector -->
-        <header class="glass-header">
-            <div class="header-brand">
-                <div class="logo">
-                    <picture class="logo-picture">
-                        <source media="(max-width: 640px)" srcset="/assets/logos/okm-logo-mobile-white.svg">
-                        <img src="/assets/logos/okm-logo-white.svg" alt="OK Mobility Logo" class="logo-img logo-img-brand">
-                    </picture>
-                </div>
-                <span class="brand-slogan" id="agencyBrandText">The Global Mobility Platform</span>
-            </div>
-            
-            <div class="header-controls">
-                <div class="lang-selector">
-                    <i class='bx bx-globe'></i>
-                    <span id="langDisplay">English</span>
-                    <select id="languageSelect" aria-label="Select language">
-                        <option value="en" selected>English</option>
-                        <option value="fr">Français</option>
-                        <option value="es">Español</option>
-                        <option value="it">Italiano</option>
-                        <option value="pt">Português</option>
-                        <option value="de">Deutsch</option>
-                        <option value="nl">Nederlands</option>
-                    </select>
-                </div>
-                <button type="button" id="btnOpenAdvisorModal" class="btn-icon" aria-label="Connecter un conseiller" title="Connecter un conseiller">
-                    <i class='bx bx-link'></i>
-                </button>
-                <button id="btnReset" class="btn-reset" aria-label="Reset">
-                    <i class='bx bx-rotate-left'></i>
-                </button>
-            </div>
-        </header>
-
-        <section class="form-content">
-            
-            <div class="title-wrapper">
-                <h1 id="pageTitle" class="gradient-text">Vos informations</h1>
-            </div>
-
-            <form id="clientForm" class="modern-form" novalidate>
+        <!-- Section 1: Hero -->
+        <section class="snap-section hero">
+            <div class="hero-content" style="text-align: left;">
+                <!-- Title with new blur-fade animation -->
+                <h1 class="magnetic blur-reveal" data-i18n="heroTitle">La fin des saisies au comptoir.</h1>
+                <p class="blur-reveal" style="animation-delay: 0.3s; text-align: left;" data-i18n="heroSubtitle">La solution universelle pour les hôtels, agences et accueils physiques. Vos clients scannent un QR code, saisissent leurs informations sur leur smartphone, et vous les recevez instantanément. Zéro serveur, 100% sécurisé via WebRTC.</p>
                 
-                <!-- Address Section (Free Text) -->
-                <div class="input-wrapper address-wrapper">
-                    <label for="address" id="lblAddress">Adresse de résidence</label>
-                    <div class="input-with-icon">
-                        <i class='bx bx-map'></i>
-                        <input type="text" id="address" name="address" placeholder="15 Rue de Rivoli" autocomplete="off" required>
-                    </div>
-                    <ul class="address-suggestions" id="addressSuggestions" role="listbox"></ul>
+                <a href="/signup/" class="btn-primary magnetic blur-reveal" style="animation-delay: 0.5s;">
+                    <span data-i18n="btnDemo">Demander une démo</span> <i class='bx bx-right-arrow-alt'></i>
+                </a>
+                
+                <div class="ai-disclaimer blur-reveal" style="animation-delay: 0.7s; margin-top: 3rem;">
+                    <i class='bx bx-sparkles'></i>
+                    <span data-i18n="aiDisclaimer">Généré automatiquement à partir de votre profil d'entreprise.</span>
                 </div>
-
-                <!-- Postal Code & City -->
-                <div class="form-group-row">
-                    <div class="input-wrapper zip-wrapper">
-                        <label for="zipCode" id="lblZipCode">Code Postal</label>
-                        <div class="input-with-icon">
-                            <i class='bx bx-hash'></i>
-                            <input type="text" id="zipCode" name="zipCode" placeholder="75001" required>
-                        </div>
-                    </div>
-                    <div class="input-wrapper city-wrapper">
-                        <label for="city" id="lblCity">Ville</label>
-                        <div class="input-with-icon">
-                            <i class='bx bx-buildings'></i>
-                            <input type="text" id="city" name="city" placeholder="Paris" required>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Country -->
-                <div class="input-wrapper">
-                    <label for="country" id="lblCountry">Pays</label>
-                    <div class="cs-wrap" id="countryWrap">
-                        <span class="cs-face" id="countryDisplay">🇫🇷 France</span>
-                        <input class="cs-search" type="text" autocomplete="off" spellcheck="false" aria-label="Rechercher un pays">
-                        <i class='bx bx-chevron-down cs-arrow'></i>
-                        <ul class="cs-list" role="listbox"></ul>
-                        <select id="country" name="country" class="cs-hidden" tabindex="-1" aria-hidden="true">
-                            <option value="FR" selected>🇫🇷 France</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Expanding Temporary Address Wrapper -->
-                <div class="temp-address-wrapper" id="tempAddressWrapper">
-                    <!-- Temporary Address Checkbox -->
-                    <div class="temp-address-toggle">
-                        <div class="toggle-header" id="tempToggleHeader">
-                            <label class="custom-checkbox">
-                                <input type="checkbox" id="hasTempAddress" name="hasTempAddress">
-                                <span class="checkmark"></span>
-                                <span id="lblTempAddressCheck">J'ai une adresse temporaire locale</span>
-                            </label>
-                            <button type="button" class="info-btn" id="btnTempInfo" title="Utilisé si vous séjournez temporairement dans une autre adresse pendant votre location." aria-label="Information">
-                                <i class='bx bx-info-circle'></i>
-                            </button>
-                        </div>
-                        <!-- Tooltip content hidden by default -->
-                        <div class="info-tooltip glass-panel" id="tempTooltip" style="display: none;">
-                            <p id="txtTempTooltip">Renseignez cette adresse si vous séjournez temporairement à un autre endroit (ex: Hôtel, Airbnb) pendant la durée de votre location.</p>
-                        </div>
-                    </div>
-
-                    <!-- Temporary Address Fields (Hidden by CSS by default) -->
-                    <div class="temp-address-sliding-section" id="tempAddressSection">
-                        <div class="temp-address-content-inner">
-                            <div class="input-wrapper address-wrapper">
-                                <label for="tempAddress" id="lblTempAddress">Adresse temporaire</label>
-                                <div class="input-with-icon">
-                                    <i class='bx bx-map-pin'></i>
-                                    <input type="text" id="tempAddress" name="tempAddress" placeholder="Hotel Plaza" autocomplete="off">
-                                </div>
-                                <ul class="address-suggestions" id="tempAddressSuggestions" role="listbox"></ul>
-                            </div>
-                            <div class="form-group-row">
-                                <div class="input-wrapper zip-wrapper">
-                                    <label for="tempZipCode" id="lblTempZipCode">Code Postal</label>
-                                    <div class="input-with-icon">
-                                        <i class='bx bx-hash'></i>
-                                        <input type="text" id="tempZipCode" name="tempZipCodePlaceholder" placeholder="">
-                                    </div>
-                                </div>
-                                <div class="input-wrapper city-wrapper">
-                                    <label for="tempCity" id="lblTempCity">Ville</label>
-                                    <div class="input-with-icon">
-                                        <i class='bx bx-buildings'></i>
-                                        <input type="text" id="tempCity" name="tempCityPlaceholder" placeholder="">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Phone Section with separate dial code and number -->
-                <div class="form-group-row">
-                    <div class="input-wrapper zip-wrapper">
-                        <label for="countryCode" id="lblPhoneCode">Indicatif</label>
-                        <div class="phone-country-box cs-wrap" id="countryCodeWrap">
-                            <span class="cs-face" id="countryCodeDisplay">🇫🇷 +33</span>
-                            <input class="cs-search" type="text" autocomplete="off" spellcheck="false" aria-label="Rechercher un indicatif">
-                            <i class='bx bx-chevron-down cs-arrow'></i>
-                            <ul class="cs-list" role="listbox"></ul>
-                            <select id="countryCode" name="countryCode" class="cs-hidden" tabindex="-1" aria-hidden="true">
-                                <option value="+33" selected>🇫🇷 France (+33)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="input-wrapper city-wrapper">
-                        <label for="phone" id="lblPhone">Numéro de téléphone</label>
-                        <div class="input-with-icon">
-                            <i class='bx bx-phone'></i>
-                            <input type="tel" id="phone" name="phone" pattern="^[0-9\s]+$" placeholder="6 12 34 56 78" required>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Second Phone (optional) -->
-                <div class="temp-address-wrapper" id="phone2Wrapper">
-                    <div class="temp-address-toggle">
-                        <div class="toggle-header phone2-toggle-header" id="btnTogglePhone2">
-                            <label class="custom-checkbox">
-                                <input type="checkbox" id="hasPhone2" name="hasPhone2">
-                                <span class="checkmark"></span>
-                                <span id="lblPhone2Toggle">Añadir segundo teléfono</span>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="temp-address-sliding-section" id="phone2Section">
-                        <div class="temp-address-content-inner">
-                            <div class="form-group-row">
-                                <div class="input-wrapper zip-wrapper">
-                                    <label for="countryCode2" id="lblPhoneCode2">Indicatif</label>
-                                    <div class="phone-country-box cs-wrap" id="countryCode2Wrap">
-                                        <span class="cs-face" id="countryCode2Display">🇫🇷 +33</span>
-                                        <input class="cs-search" type="text" autocomplete="off" spellcheck="false" aria-label="Rechercher un indicatif">
-                                        <i class='bx bx-chevron-down cs-arrow'></i>
-                                        <ul class="cs-list" role="listbox"></ul>
-                                        <select id="countryCode2" name="countryCode2" class="cs-hidden" tabindex="-1" aria-hidden="true">
-                                            <option value="+33">🇫🇷 France (+33)</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="input-wrapper city-wrapper">
-                                    <label for="phone2" id="lblPhone2">2e téléphone (optionnel)</label>
-                                    <div class="input-with-icon">
-                                        <i class='bx bx-phone'></i>
-                                        <input type="tel" id="phone2" name="phone2" pattern="^[0-9\s]+$" placeholder="6 12 34 56 78">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Email Section -->
-                <div class="input-wrapper">
-                    <label for="email" id="lblEmail">E-mail</label>
-                    <div class="input-with-icon">
-                        <i class='bx bx-envelope'></i>
-                        <!-- inputmode="email" triggers email keyboard on mobile -->
-                        <input type="email" id="email" name="email" inputmode="email" placeholder="jean.dupont@email.com" required>
-                    </div>
-                </div>
-
-                <!-- Actions -->
-                <div class="form-actions">
-                    <button type="submit" id="btnGenerate" class="btn-primary glass-btn">
-                        <span id="txtBtnGenerate">Générer mon résumé</span>
-                    </button>
-                    <p class="legal-text">
-                        OK MOBILITY GROUP, S.L.U. es el Responsable del tratamiento de los datos personales del Interesado y le informa de que estos datos se tratarán de conformidad con lo dispuesto en el Reglamento (UE) 2016/679, de 27 de abril (GDPR), y la Ley Orgánica 3/2018, de 5 de diciembre (LOPDG).
-                    </p>
-                </div> <!-- Closes form-actions -->
-            </form>
-
-            <!-- Success / Summary View (Hidden by default) -->
-            <div id="summaryView" class="summary-view" style="display: none;">
-                <div class="summary-card glass-panel">
-                    <div class="summary-content" id="summaryContentBody">
-                        <!-- Filled via JS -->
-                    </div>
-                    <div class="summary-actions">
-                        <button id="btnEdit" class="btn-secondary">
-                            <i class='bx bx-edit-alt'></i>
-                            <span id="txtBtnEdit">Modifier</span>
-                        </button>
-                    </div>
-                </div>
-            <p class="legal-text">
-                OK MOBILITY GROUP, S.L.U. es el Responsable del tratamiento de los datos personales del Interesado y le informa de que estos datos se tratarán de conformidad con lo dispuesto en el Reglamento (UE) 2016/679, de 27 de abril (GDPR), y la Ley Orgánica 3/2018, de 5 de diciembre (LOPDG).
-            </p>
             </div>
-
+            <!-- Scroll indicator -->
+            <div class="scroll-indicator">
+                <i class='bx bx-chevron-down'></i>
+            </div>
         </section>
 
-        <!-- Advisor Connection Modal -->
-        <div class="modal-overlay" id="advisorModalOverlay" style="display: none;"></div>
-        <div class="advisor-modal glass-panel" id="advisorModal" role="dialog" aria-modal="true" aria-labelledby="advisorModalTitle" style="display: none;">
-            <div class="modal-header">
-                <h2 id="advisorModalTitle">Connecter un conseiller</h2>
+        <!-- Section 2: Video Placeholder -->
+        <section class="snap-section video-section">
+            <div class="video-container glass-card reveal magnetic-card">
+                <div class="shine"></div>
+                <div class="video-placeholder">
+                    <button class="play-btn magnetic" aria-label="Play">
+                        <i class='bx bx-play'></i>
+                    </button>
+                    <span data-i18n="videoWatch">Voir le fonctionnement</span>
+                </div>
             </div>
-            <p id="advisorModalDesc" class="modal-desc">Saisissez le code fourni par le conseiller.</p>
-            <div class="input-with-icon">
-                <i class='bx bx-link'></i>
-                <input type="text" id="advisorCodeInput" placeholder="XXXXXX" maxlength="6" autocomplete="off" style="text-transform: uppercase;">
-            </div>
-            <div class="modal-actions">
-                <button id="advisorModalCancel" class="btn-secondary">Annuler</button>
-            </div>
-        </div>
-        
-    </main>
+        </section>
 
-    <script src="/assets/js/script.js?v=32"></script>
+        <!-- Section 2.1: Problem / Solution -->
+        <section class="snap-section problem-section">
+            <div class="content-wrapper reveal" style="text-align: left;">
+                <h2 data-i18n="probTitle" style="font-size: clamp(2rem, 5vw, 3rem); color: #fff; margin-bottom: 1rem;">L'ancien monde.</h2>
+                <p class="large-text" data-i18n="probDesc" style="color: var(--text-secondary); font-size: 1.3rem; line-height: 1.6; margin-bottom: 3rem;">Saisie manuelle. Fautes de frappe. Files d'attente interminables. La collecte de données au comptoir fait perdre de 3 à 5 minutes par client.</p>
+                
+                <h2 style="font-size: clamp(2rem, 5vw, 3rem); color: #4CAF50; margin-bottom: 1rem;" data-i18n="solTitle">Le nouveau monde.</h2>
+                <p class="large-text" data-i18n="solDesc" style="color: #fff; font-size: 1.3rem; line-height: 1.6;">Le client scanne un QR code et saisit ses informations lui-même. Vous les recevez instantanément. Zéro friction.</p>
+            </div>
+        </section>
+
+        <!-- Section 2.2: The Experience -->
+        <section class="snap-section experience-section" style="display: flex; flex-direction: column; justify-content: center;">
+            <h2 class="reveal" data-i18n="expTitle" style="text-align: left; margin-bottom: 3rem; font-size: clamp(1.8rem, 4vw, 2.5rem); padding: 0 2rem;">Une expérience à 360°</h2>
+            <div class="experience-grid">
+                <div class="experience-card glass-card reveal magnetic-card">
+                    <div class="shine"></div>
+                    <i class='bx bx-laptop' style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+                    <h3 data-i18n="expAgentTitle" style="margin-bottom: 1.5rem; font-size: 1.5rem;">Côté Conseiller</h3>
+                    <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 1rem;">
+                        <li><i class='bx bx-check' style="color: #4CAF50;"></i> <span data-i18n="expAgent1">Génère un QR code unique en 1 clic</span></li>
+                        <li><i class='bx bx-check' style="color: #4CAF50;"></i> <span data-i18n="expAgent2">Reçoit les données en temps réel</span></li>
+                        <li><i class='bx bx-check' style="color: #4CAF50;"></i> <span data-i18n="expAgent3">Copie instantanée vers le CRM interne</span></li>
+                    </ul>
+                </div>
+                <div class="experience-card glass-card reveal magnetic-card" style="transition-delay: 0.1s;">
+                    <div class="shine"></div>
+                    <i class='bx bx-mobile' style="font-size: 3rem; color: #4CAF50; margin-bottom: 1rem;"></i>
+                    <h3 data-i18n="expClientTitle" style="margin-bottom: 1.5rem; font-size: 1.5rem;">Côté Client</h3>
+                    <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 1rem;">
+                        <li><i class='bx bx-check' style="color: #4CAF50;"></i> <span data-i18n="expClient1">Scanne sans installer d'application</span></li>
+                        <li><i class='bx bx-check' style="color: #4CAF50;"></i> <span data-i18n="expClient2">Saisie simplifiée (autocomplétion mondiale)</span></li>
+                        <li><i class='bx bx-check' style="color: #4CAF50;"></i> <span data-i18n="expClient3">Transmission P2P chiffrée de bout en bout</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Features -->
+        <section class="snap-section features-section">
+            <div class="features">
+                <div class="glass-card reveal magnetic-card">
+                    <div class="shine"></div>
+                    <i class='bx bx-palette'></i>
+                    <h3 data-i18n="feat1Title">Interface Adaptative</h3>
+                    <p data-i18n="feat1Desc">Votre logo, vos couleurs, vos champs. L'interface s'adapte intégralement à votre identité visuelle.</p>
+                </div>
+                <div class="glass-card reveal magnetic-card" style="transition-delay: 0.1s;">
+                    <div class="shine"></div>
+                    <i class='bx bx-globe'></i>
+                    <h3 data-i18n="feat2Title">7 langues natives</h3>
+                    <p data-i18n="feat2Desc">Détection automatique de la langue du smartphone. Autocomplétion d'adresse mondiale.</p>
+                </div>
+                <div class="glass-card reveal magnetic-card" style="transition-delay: 0.2s;">
+                    <div class="shine"></div>
+                    <i class='bx bx-timer'></i>
+                    <h3 data-i18n="feat3Title">ROI dès le 1er jour</h3>
+                    <p data-i18n="feat3Desc">3 à 5 minutes économisées par dossier. Jusqu'à 6 heures récupérées par jour pour un comptoir de 2 agents.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3.1: Architecture Edge -->
+        <section class="snap-section architecture-section">
+            <div class="content-wrapper reveal" style="max-width: 800px; margin: 0 auto; width: 100%; text-align: left;">
+                <h2 data-i18n="archTitle" style="font-size: clamp(1.8rem, 4vw, 2.5rem); text-align: left; margin-bottom: 1rem;">Conçu pour l'Edge.</h2>
+                <p data-i18n="archDesc" style="color: var(--text-secondary); text-align: left; margin-bottom: 3rem;">Rendement de niveau entreprise dès le premier jour, sans serveurs à gérer.</p>
+                <div class="comparison-table glass-card" style="padding: 2rem;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead>
+                            <tr>
+                                <th style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);"></th>
+                                <th data-i18n="archTrad" style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-secondary);">Traditionnel</th>
+                                <th data-i18n="archNew" style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); color: #4CAF50; font-size: 1.2rem;">MobilityOS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td data-i18n="archLat" style="padding: 1.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">Latence de réseau</td>
+                                <td style="padding: 1.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-secondary);">100-300ms</td>
+                                <td style="padding: 1.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: #fff;">&lt; 20ms</td>
+                            </tr>
+                            <tr>
+                                <td data-i18n="archData" style="padding: 1.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">Stockage des données</td>
+                                <td data-i18n="archDataTrad" style="padding: 1.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-secondary);">Base de données centralisée</td>
+                                <td data-i18n="archDataNew" style="padding: 1.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: #fff;">Zéro (Transfert P2P)</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 1.5rem 1rem;">SLA Disponibilité</td>
+                                <td style="padding: 1.5rem 1rem; color: var(--text-secondary);">99.9%</td>
+                                <td style="padding: 1.5rem 1rem; color: #fff;">99.99%<sup style="color: var(--text-secondary); font-size: 0.7rem; margin-left: 2px;">1</sup></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Privacy -->
+        <section class="snap-section privacy-section">
+            <div class="privacy-content reveal">
+                <div class="lock-icon-container magnetic">
+                    <i class='bx bx-lock-alt'></i>
+                </div>
+                <h2 data-i18n="privTitle">Sécurité Absolue.</h2>
+                <p data-i18n="privDesc">Vos données sont protégées par chiffrement de bout en bout. Nous utilisons la technologie WebRTC peer-to-peer : aucune donnée personnelle n'est stockée sur nos serveurs. Vos échanges clients-vendeurs restent strictement confidentiels et conformes au RGPD.</p>
+                <div style="margin-top: 2rem;">
+                    <a href="/security/" class="btn-secondary magnetic" style="display:inline-flex; align-items:center; gap:0.5rem; text-decoration:none;"><i class='bx bx-file'></i> <span data-i18n="btnSecurityNote">Lire la note technique</span></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Pricing -->
+        <section class="snap-section pricing-section">
+            <h2 class="reveal" data-i18n="priceTitle">Des tarifs adaptés à votre flotte.</h2>
+            <div class="pricing-cards">
+                <div class="glass-card reveal pricing-card magnetic-card">
+                    <div class="shine"></div>
+                    <h3 data-i18n="plan1Name">Indépendant</h3>
+                    <div class="price"><span data-i18n="plan1Price">2€</span><span data-i18n="perMonth">/mois</span></div>
+                    <div class="yearly-price" data-i18n="plan1Year">Soit 20€/an</div>
+                    <ul>
+                        <li><i class='bx bx-check'></i> <span data-i18n="plan1Feat1">1 Agence</span></li>
+                        <li><i class='bx bx-check'></i> <span data-i18n="plan1Feat2">Logo & Couleurs</span></li>
+                        <li><i class='bx bx-check'></i> <span data-i18n="plan1Feat3">Champs personnalisés</span></li>
+                    </ul>
+                    <a href="mailto:guilhem.normand@icloud.com" class="btn-secondary" data-i18n="btnChoose">Choisir</a>
+                </div>
+                <div class="glass-card reveal pricing-card featured magnetic-card" style="transition-delay: 0.1s;">
+                    <div class="shine"></div>
+                    <div class="badge" data-i18n="badgePopular">Le plus populaire</div>
+                    <h3 data-i18n="plan2Name">Multi-Agences</h3>
+                    <div class="price"><span data-i18n="plan2Price">8€</span><span data-i18n="perMonth">/mois</span></div>
+                    <div class="yearly-price" data-i18n="plan2Year">Soit 80€/an</div>
+                    <ul>
+                        <li><i class='bx bx-check'></i> <span data-i18n="plan2Feat1">Jusqu'à 10 Agences</span></li>
+                        <li><i class='bx bx-check'></i> <span data-i18n="plan2Feat2">Déploiement centralisé</span></li>
+                        <li><i class='bx bx-check'></i> <span data-i18n="plan2Feat3">Support prioritaire</span></li>
+                    </ul>
+                    <a href="/signup/" class="btn-primary" data-i18n="btnContact">Démarrer l'essai</a>
+                </div>
+                <div class="glass-card reveal pricing-card magnetic-card" style="transition-delay: 0.2s;">
+                    <div class="shine"></div>
+                    <h3 data-i18n="plan3Name">Réseau & Franchise</h3>
+                    <div class="price"><span class="price-text" data-i18n="plan3Price">Sur devis</span></div>
+                    <div class="yearly-price" data-i18n="plan3Year">Contactez-nous</div>
+                    <ul>
+                        <li><i class='bx bx-check'></i> <span data-i18n="plan3Feat1">Marque blanche intégrale</span></li>
+                        <li><i class='bx bx-check'></i> <span data-i18n="plan3Feat2">Intégration API</span></li>
+                        <li><i class='bx bx-check'></i> <span data-i18n="plan3Feat3">Développement spécifique</span></li>
+                    </ul>
+                    <a href="mailto:guilhem.normand@icloud.com" class="btn-secondary" data-i18n="btnQuote">Nous contacter</a>
+                </div>
+            </div>
+            <div class="apple-footnotes" style="max-width: 800px; margin: 3rem auto 1.5rem; padding: 0 2rem; font-size: 0.75rem; color: rgba(255,255,255,0.35); text-align: left; line-height: 1.6;">
+                <p style="margin-bottom: 0.4rem;"><sup style="font-size: 0.6em; vertical-align: super; margin-right: 2px;">1</sup> <span data-i18n="fn1">Disponibilité garantie contractuellement par l'infrastructure Cloudflare Edge, avec plus de 300 points de présence mondiaux.</span></p>
+                <p style="margin-bottom: 0.4rem;"><sup style="font-size: 0.6em; vertical-align: super; margin-right: 2px;">2</sup> <span data-i18n="fn2">Le protocole WebRTC chiffre nativement les transferts de données en DTLS/SRTP de bout en bout.</span></p>
+            </div>
+            
+            <footer class="b2b-footer">
+                <div style="margin-bottom: 1rem; display: flex; gap: 2rem; justify-content: center;">
+                    <a href="/security/" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;" data-i18n="navSecurity">Sécurité & Confidentialité</a>
+                    <a href="/faq/" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;" data-i18n="navFaq">FAQ & Objections IT</a>
+                </div>
+                <p>&copy; 2026 MobilityOS. <span data-i18n="footerRights">Tous droits réservés.</span></p>
+            </footer>
+        </section>
+
+    </div>
+
 </body>
 </html>

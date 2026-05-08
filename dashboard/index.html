@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Tableau de bord — MobilityOS</title>
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
+    <link rel="stylesheet" href="/b2b.css">
+    <link rel="stylesheet" href="/auth/auth.css">
+    <link rel="stylesheet" href="/dashboard/dashboard.css">
+    <style>
+        /* =========================================================================
+           Form Builder UI (Dashboard Premium Design)
+           ========================================================================= */
+        .fields-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 1.5rem;
+        }
+        .field-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: var(--color-panel-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .field-item:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+            transform: translateY(-2px);
+            border-color: rgba(32, 84, 234, 0.3); /* Accent subtle */
+        }
+        .field-icon-wrap {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(32, 84, 234, 0.08); /* Light accent */
+            color: var(--color-accent);
+            border-radius: 10px;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+        .field-info {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            margin: 0 16px;
+        }
+        .field-input-inline {
+            border: none;
+            background: transparent;
+            font-family: var(--font-family-sans);
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--color-text-primary);
+            outline: none;
+            border-bottom: 2px solid transparent;
+            transition: border-color 0.2s;
+            padding: 2px 0;
+            width: 100%;
+        }
+        .field-input-inline:focus {
+            border-bottom-color: var(--color-accent);
+        }
+        .field-subtitle {
+            font-size: 0.75rem;
+            color: var(--color-text-secondary);
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+        .field-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .field-req-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-right: 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .btn-icon {
+            background: transparent;
+            border: none;
+            color: var(--color-text-secondary);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.3rem;
+        }
+        .btn-icon:hover:not(:disabled) {
+            background: rgba(0,0,0,0.06);
+            color: var(--color-text-primary);
+        }
+        .btn-icon.danger:hover:not(:disabled) {
+            background: rgba(255, 59, 48, 0.1);
+            color: #FF3B30;
+        }
+        .btn-icon:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        .theme-dark .field-item {
+            background: rgba(255,255,255,0.02);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .theme-dark .field-item:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            border-color: rgba(255,255,255,0.15);
+        }
+        .theme-dark .btn-icon:hover:not(:disabled) {
+            background: rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body class="dashboard-page">
+
+    <div class="dashboard-wrapper">
+
+        <!-- ── Sidebar ─────────────────────────────────────────── -->
+        <aside class="dashboard-sidebar">
+
+            <a href="/" class="sidebar-brand">
+                <span>MobilityOS</span>
+            </a>
+
+            <nav class="sidebar-nav" role="navigation">
+                <button class="nav-item active" data-tab="profile">
+                    <i class='bx bx-user'></i><span>Profil</span>
+                </button>
+                <button class="nav-item" data-tab="agencies">
+                    <i class='bx bx-buildings'></i><span>Agences</span>
+                </button>
+                <button class="nav-item" data-tab="customization">
+                    <i class='bx bx-palette'></i><span>Personnalisation</span>
+                </button>
+                <button class="nav-item" data-tab="contact">
+                    <i class='bx bx-headphone'></i><span>Contact</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-avatar" id="userAvatar">–</div>
+                <div class="user-details">
+                    <span class="user-name" id="userName">Chargement…</span>
+                    <span class="user-plan" id="userPlanBadge">Essai gratuit</span>
+                </div>
+                <button class="btn-logout" id="btnLogout" title="Se déconnecter">
+                    <i class='bx bx-log-out'></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- ── Main ────────────────────────────────────────────── -->
+        <main class="dashboard-main">
+
+            <div class="trial-banner" id="trialBanner" style="display:none">
+                <i class='bx bx-time-five'></i>
+                <span id="trialBannerText">Votre période d'essai se termine dans <strong>30 jours</strong></span>
+                <a href="mailto:contact@mobilityos.com" class="btn-upgrade">Passer à Pro</a>
+            </div>
+
+            <!-- ── Profil ────────────────────────────────────── -->
+            <section class="tab-content active" id="tab-profile">
+                <div class="tab-header">
+                    <h2>Informations personnelles</h2>
+                    <p>Gérez les informations de votre compte.</p>
+                </div>
+
+                <div class="dash-card">
+                    <form id="profileForm" novalidate>
+                        <div class="form-grid">
+                            <div class="input-wrapper">
+                                <label for="profileName">Nom complet</label>
+                                <div class="input-with-icon">
+                                    <i class='bx bx-user'></i>
+                                    <input type="text" id="profileName" placeholder="Jean Dupont" autocomplete="name">
+                                </div>
+                            </div>
+                            <div class="input-wrapper">
+                                <label for="profileEmail">Adresse email</label>
+                                <div class="input-with-icon">
+                                    <i class='bx bx-envelope'></i>
+                                    <input type="email" id="profileEmail" disabled>
+                                </div>
+                            </div>
+                            <div class="input-wrapper">
+                                <label for="profileCompany">Nom de l'entreprise</label>
+                                <div class="input-with-icon">
+                                    <i class='bx bx-building'></i>
+                                    <input type="text" id="profileCompany" placeholder="Mon Agence" autocomplete="organization">
+                                </div>
+                            </div>
+                            <div class="input-wrapper">
+                                <label for="profilePhone">Téléphone</label>
+                                <div class="input-with-icon">
+                                    <i class='bx bx-phone'></i>
+                                    <input type="tel" id="profilePhone" placeholder="+33 6 12 34 56 78" autocomplete="tel">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="profileAlert" class="inline-alert"></div>
+                        <div class="form-actions" style="margin-top: 1rem; justify-content: flex-end;">
+                            <button type="submit" class="btn-primary" id="btnSaveProfile" style="width: auto;">
+                                <span id="btnSaveProfileText">Enregistrer</span>
+                                <i class='bx bx-loader-alt btn-spinner' id="btnSaveProfileSpinner" style="display:none"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- ── Agences ───────────────────────────────────── -->
+            <section class="tab-content" id="tab-agencies">
+                <div class="tab-header">
+                    <h2>Mes agences</h2>
+                    <p>Gérez vos agences et leurs liens d'accès conseiller.</p>
+                </div>
+
+                <div id="agencyList"></div>
+
+                <button class="btn-add-agency" id="btnAddAgency">
+                    <i class='bx bx-plus'></i>
+                    Ajouter une agence
+                </button>
+            </section>
+
+            <!-- ── Personnalisation ──────────────────────────── -->
+            <section class="tab-content" id="tab-customization">
+                <div class="tab-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h2>Personnalisation du formulaire</h2>
+                        <p>Adaptez le formulaire client à votre agence.</p>
+                    </div>
+                    <button type="button" id="btnPreviewClient" class="btn-secondary" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                        <i class='bx bx-show'></i>
+                        Prévisualiser mon formulaire
+                    </button>
+                </div>
+
+                <div class="dash-card">
+                    <h3 class="card-title">Paramètres de base</h3>
+                    <form id="customizationForm" novalidate>
+
+                        <div class="input-wrapper" style="margin-bottom: 0.5rem;">
+                            <label for="formLanguage">Langue par défaut du formulaire</label>
+                            <div class="input-with-icon">
+                                <i class='bx bx-globe'></i>
+                                <select id="formLanguage">
+                                    <option value="fr">Français</option>
+                                    <option value="en">English</option>
+                                    <option value="es">Español</option>
+                                    <option value="it">Italiano</option>
+                                    <option value="pt">Português</option>
+                                    <option value="de">Deutsch</option>
+                                    <option value="nl">Nederlands</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+
+                <div class="dash-card">
+                    <h3 class="card-title">Champs du formulaire (Form Builder)</h3>
+                    <p style="font-size: 0.85rem; color: var(--color-text-secondary); margin-bottom: 1rem;">
+                        Ajoutez, supprimez et réorganisez les champs que vos clients doivent remplir.
+                    </p>
+                    <div id="fieldsList" class="fields-list">
+                        <!-- Fields will be dynamically injected here -->
+                    </div>
+                    <div style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <button type="button" class="btn-secondary-sm" id="btnAddTextField">
+                            <i class='bx bx-text'></i> Texte court
+                        </button>
+                        <button type="button" class="btn-secondary-sm" id="btnAddEmailField">
+                            <i class='bx bx-envelope'></i> E-mail
+                        </button>
+                        <button type="button" class="btn-secondary-sm" id="btnAddPhoneField">
+                            <i class='bx bx-phone'></i> Téléphone
+                        </button>
+                        <button type="button" class="btn-secondary-sm" id="btnAddAddressBlock">
+                            <i class='bx bx-map-pin'></i> Bloc Adresse
+                        </button>
+                        <button type="button" class="btn-secondary-sm" id="btnAddToggleGroup">
+                            <i class='bx bx-list-plus'></i> Groupe déroulant (Tiroir)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="dash-card">
+                    <h3 class="card-title">Apparence & Thème</h3>
+                    <form id="appearanceForm" novalidate>
+
+                        <div class="input-wrapper" style="margin-top: 1.5rem; margin-bottom: 0.5rem;">
+                            <label>Thème par défaut</label>
+                            <div class="input-with-icon">
+                                <i class='bx bx-moon'></i>
+                                <select id="formTheme">
+                                    <option value="dark">Sombre (Par défaut)</option>
+                                    <option value="light">Clair</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="input-wrapper" style="margin-bottom: 0.5rem;">
+                            <label>Logo personnalisé (URL)</label>
+                            <div class="input-with-icon">
+                                <i class='bx bx-image'></i>
+                                <input type="url" id="formLogo" placeholder="https://votresite.com/logo.png">
+                            </div>
+                        </div>
+
+                        <div class="input-wrapper" style="margin-bottom: 0.5rem;">
+                            <label>Couleurs des fonds animés (Blobs)</label>
+                            <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                                <input type="color" id="formBlob1" value="#2054EA" title="Couleur 1" style="width: 44px; height: 44px; border: none; border-radius: 8px; cursor: pointer; padding: 0; background: none;">
+                                <input type="color" id="formBlob2" value="#05DBF3" title="Couleur 2" style="width: 44px; height: 44px; border: none; border-radius: 8px; cursor: pointer; padding: 0; background: none;">
+                                <input type="color" id="formBlob3" value="#4F46E5" title="Couleur 3" style="width: 44px; height: 44px; border: none; border-radius: 8px; cursor: pointer; padding: 0; background: none;">
+                            </div>
+                        </div>
+
+                        <div id="appearanceAlert" class="inline-alert"></div>
+                        <div class="form-actions" style="margin-top: 1rem; justify-content: flex-end;">
+                            <button type="button" class="btn-primary" id="btnSaveCustom" style="width: auto;">
+                                <span id="btnSaveCustomText">Enregistrer tous les paramètres</span>
+                                <i class='bx bx-loader-alt btn-spinner' id="btnSaveCustomSpinner" style="display:none"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- ── Contact ───────────────────────────────────── -->
+            <section class="tab-content" id="tab-contact">
+                <div class="tab-header">
+                    <h2>Contact & support</h2>
+                    <p>Besoin d'aide ou souhaitez passer à une offre Pro ?</p>
+                </div>
+
+                <div class="dash-card">
+                    <div class="contact-grid">
+                        <a href="mailto:contact@mobilityos.com" class="contact-card">
+                            <i class='bx bx-envelope'></i>
+                            <span>contact@mobilityos.com</span>
+                        </a>
+                    </div>
+                    <div class="plan-info-card" id="planInfoCard">
+                        <div class="plan-info-header">
+                            <span class="plan-name" id="planName">Essai gratuit</span>
+                            <span class="plan-badge" id="planBadge">Essai</span>
+                        </div>
+                        <p class="plan-detail" id="planDetail">Votre période d'essai est en cours.</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ── Add Agency Modal ─────────────────────────────────── -->
+    <div id="addAgencyModal" class="modal-overlay" style="display:none" aria-modal="true" role="dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Nouvelle agence</h3>
+                <button class="btn-close" id="btnCloseAgencyModal" aria-label="Fermer">
+                    <i class='bx bx-x'></i>
+                </button>
+            </div>
+            <div id="agencyModalAlert" class="inline-alert"></div>
+            <form id="addAgencyForm" novalidate>
+                <div class="field">
+                    <label class="field-label" for="newAgencyName">Nom de l'agence</label>
+                    <div class="field-input-wrap">
+                        <input type="text" id="newAgencyName" class="field-input"
+                               placeholder="Agence Paris Centre" required>
+                        <i class='bx bx-building field-icon'></i>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary-sm" id="btnCancelAgency">Annuler</button>
+                    <button type="submit" class="btn-primary-sm" id="btnCreateAgency">
+                        <span id="btnCreateAgencyText">Créer</span>
+                        <i class='bx bx-loader-alt btn-spinner' id="btnCreateAgencySpinner" style="display:none"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let formFields = [];
+
+        // Champs par défaut si l'agence n'en a pas
+        const DEFAULT_FIELDS = [
+            { id: "email", label: "E-mail", type: "email", icon: "bx-envelope", required: true, system: false },
+            { id: "address_block", label: "Bloc Adresse", type: "address_block", icon: "bx-map", required: true, system: false }
+        ];
+
+        async function init() {
+            try {
+                const res = await fetch('/api/auth/session');
+                const data = await res.json();
+                if (!data.authenticated) {
+                    window.location.href = '/login/?reason=session_expired';
+                    return;
+                }
+                currentUser = data.user;
+                renderUser();
+                renderTrialBanner();
+                renderProfileTab();
+                renderCustomizationTab();
+                renderAgencies();
+                renderContactTab();
+            } catch {
+                window.location.href = '/login/';
+            }
+        }
+
+        function renderUser() {
+            const u = currentUser;
+            document.getElementById('userAvatar').textContent = (u.name || u.email)[0].toUpperCase();
+            document.getElementById('userName').textContent = u.name || u.email;
+            document.getElementById('userPlanBadge').textContent = u.plan === 'trial' ? 'Essai gratuit' : 'Pro';
+        }
+
+        function renderTrialBanner() {
+            if (currentUser.plan !== 'trial') return;
+            const endsAt = new Date(currentUser.trialEndsAt);
+            const days = Math.max(0, Math.ceil((endsAt - new Date()) / 86400000));
+            document.getElementById('trialBannerText').innerHTML =
+                `Votre période d'essai se termine dans <strong>${days} jour${days !== 1 ? 's' : ''}</strong>`;
+            document.getElementById('trialBanner').style.display = 'flex';
+        }
+
+        function renderProfileTab() {
+            const u = currentUser;
+            document.getElementById('profileName').value = u.name || '';
+            document.getElementById('profileEmail').value = u.email || '';
+            document.getElementById('profileCompany').value = u.company || '';
+            document.getElementById('profilePhone').value = u.phone || '';
+        }
+
+        function renderCustomizationTab() {
+            const s = currentUser.formSettings || {};
+            if (s.language) document.getElementById('formLanguage').value = s.language;
+            
+            if (s.theme) document.getElementById('formTheme').value = s.theme;
+            if (s.logoUrl) document.getElementById('formLogo').value = s.logoUrl;
+            if (s.blob1) document.getElementById('formBlob1').value = s.blob1;
+            if (s.blob2) document.getElementById('formBlob2').value = s.blob2;
+            if (s.blob3) document.getElementById('formBlob3').value = s.blob3;
+
+            // Load fields
+            formFields = Array.isArray(s.fields) && s.fields.length > 0 ? [...s.fields] : [...DEFAULT_FIELDS];
+            renderFieldsList();
+        }
+
+        function renderFieldsList() {
+            const container = document.getElementById('fieldsList');
+            container.innerHTML = '';
+            
+            function renderField(field, index, parentArray, parentIndex = null) {
+                const isGroup = field.type === 'toggle_group';
+                
+                const fieldEl = document.createElement('div');
+                fieldEl.className = 'field-item';
+                if (parentIndex !== null) {
+                    fieldEl.style.marginLeft = '40px';
+                    fieldEl.style.borderLeft = '3px solid var(--color-accent)';
+                    fieldEl.style.borderRadius = '0 var(--radius-md) var(--radius-md) 0';
+                }
+                
+                fieldEl.innerHTML = `
+                    <div class="field-icon-wrap">
+                        <i class='bx ${field.icon}'></i>
+                    </div>
+                    <div class="field-info">
+                        <input type="text" class="field-input-inline" value="${escHtml(field.label)}" 
+                            data-idx="${index}" ${parentIndex !== null ? `data-parent="${parentIndex}"` : ''}>
+                        <span class="field-subtitle">
+                            ${isGroup ? 'Groupe déroulant (Conteneur)' : 'Champ du formulaire'}
+                        </span>
+                    </div>
+                    <div class="field-actions">
+                        ${!isGroup ? `
+                        <label class="field-req-label">
+                            <input type="checkbox" class="field-req-check" data-idx="${index}" ${parentIndex !== null ? `data-parent="${parentIndex}"` : ''} ${field.required ? 'checked' : ''}> Requis
+                        </label>
+                        ` : ''}
+                        <button type="button" class="btn-icon" onclick="moveField(${index}, -1, ${parentIndex})" ${index === 0 ? 'disabled' : ''} title="Monter"><i class='bx bx-up-arrow-alt'></i></button>
+                        <button type="button" class="btn-icon" onclick="moveField(${index}, 1, ${parentIndex})" ${index === parentArray.length - 1 ? 'disabled' : ''} title="Descendre"><i class='bx bx-down-arrow-alt'></i></button>
+                        <button type="button" class="btn-icon danger" onclick="removeField(${index}, ${parentIndex})" title="Supprimer"><i class='bx bx-trash'></i></button>
+                    </div>
+                `;
+                container.appendChild(fieldEl);
+                
+                if (isGroup) {
+                    if (!field.children) field.children = [];
+                    field.children.forEach((childField, childIndex) => {
+                        renderField(childField, childIndex, field.children, index);
+                    });
+                    
+                    const addBtnWrap = document.createElement('div');
+                    addBtnWrap.style.marginLeft = '40px';
+                    addBtnWrap.style.marginBottom = '16px';
+                    addBtnWrap.innerHTML = `
+                        <div class="input-with-icon" style="max-width: 250px; display: inline-flex;">
+                            <i class='bx bx-plus' style="left: 1rem; color: var(--color-accent);"></i>
+                            <select class="field-input" style="padding-left: 2.5rem; color: var(--color-accent); font-weight: 500; cursor: pointer; border-color: rgba(var(--color-accent-rgb), 0.3);" onchange="if(this.value) { addFieldToGroup(${index}, this.value); this.value=''; }">
+                                <option value="">Ajouter un champ au groupe...</option>
+                                <option value="text">Texte court</option>
+                                <option value="email">E-mail</option>
+                                <option value="tel">Téléphone</option>
+                                <option value="address_block">Bloc Adresse complet</option>
+                            </select>
+                        </div>
+                    `;
+                    container.appendChild(addBtnWrap);
+                }
+            }
+
+            formFields.forEach((field, index) => renderField(field, index, formFields, null));
+
+            // Add event listeners for inputs
+            container.querySelectorAll('.field-input-inline').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    const idx = parseInt(e.target.dataset.idx, 10);
+                    const pIdx = e.target.dataset.parent ? parseInt(e.target.dataset.parent, 10) : null;
+                    if (pIdx !== null) formFields[pIdx].children[idx].label = e.target.value;
+                    else formFields[idx].label = e.target.value;
+                });
+            });
+            container.querySelectorAll('.field-req-check').forEach(chk => {
+                chk.addEventListener('change', (e) => {
+                    const idx = parseInt(e.target.dataset.idx, 10);
+                    const pIdx = e.target.dataset.parent ? parseInt(e.target.dataset.parent, 10) : null;
+                    if (pIdx !== null) formFields[pIdx].children[idx].required = e.target.checked;
+                    else formFields[idx].required = e.target.checked;
+                });
+            });
+        }
+
+        window.moveField = function(index, dir, parentIndex = null) {
+            const arr = parentIndex !== null ? formFields[parentIndex].children : formFields;
+            if (index + dir < 0 || index + dir >= arr.length) return;
+            const temp = arr[index];
+            arr[index] = arr[index + dir];
+            arr[index + dir] = temp;
+            renderFieldsList();
+        };
+
+        window.removeField = function(index, parentIndex = null) {
+            const arr = parentIndex !== null ? formFields[parentIndex].children : formFields;
+            arr.splice(index, 1);
+            renderFieldsList();
+        };
+
+        window.addFieldToGroup = function(parentIndex, type) {
+            if (!formFields[parentIndex].children) formFields[parentIndex].children = [];
+            
+            const baseId = 'custom_' + Date.now();
+            let newField;
+            
+            switch(type) {
+                case 'email':
+                    newField = { id: baseId, label: 'E-mail supplémentaire', type: 'email', icon: 'bx-envelope', required: false, system: false };
+                    break;
+                case 'tel':
+                    newField = { id: baseId, label: 'Téléphone supplémentaire', type: 'tel', icon: 'bx-phone', required: false, system: false };
+                    break;
+                case 'address_block':
+                    newField = { id: 'address_block_' + Date.now(), label: 'Bloc Adresse complet', type: 'address_block', icon: 'bx-map', required: false, system: false };
+                    break;
+                case 'text':
+                default:
+                    newField = { id: baseId, label: 'Nouveau champ texte', type: 'text', icon: 'bx-text', required: false, system: false };
+                    break;
+            }
+            
+            formFields[parentIndex].children.push(newField);
+            renderFieldsList();
+        };
+
+        document.getElementById('btnAddTextField').addEventListener('click', () => {
+            formFields.push({ id: 'custom_' + Date.now(), label: 'Nouveau champ', type: 'text', icon: 'bx-text', required: false, system: false });
+            renderFieldsList();
+        });
+        document.getElementById('btnAddEmailField').addEventListener('click', () => {
+            formFields.push({ id: 'custom_' + Date.now(), label: 'E-mail supplémentaire', type: 'email', icon: 'bx-envelope', required: false, system: false });
+            renderFieldsList();
+        });
+        document.getElementById('btnAddPhoneField').addEventListener('click', () => {
+            formFields.push({ id: 'custom_' + Date.now(), label: 'Téléphone supplémentaire', type: 'tel', icon: 'bx-phone', required: false, system: false });
+            renderFieldsList();
+        });
+        document.getElementById('btnAddAddressBlock').addEventListener('click', () => {
+            formFields.push({ id: 'address_block_' + Date.now(), label: 'Bloc Adresse complet', type: 'address_block', icon: 'bx-map', required: false, system: false, children: [] });
+            renderFieldsList();
+        });
+        document.getElementById('btnAddToggleGroup').addEventListener('click', () => {
+            formFields.push({ id: 'group_' + Date.now(), label: 'Nouveau Groupe (ex: Adresse temporaire)', type: 'toggle_group', icon: 'bx-list-plus', system: false, children: [] });
+            renderFieldsList();
+        });
+
+        function renderAgencies() {
+            const agencies = currentUser.agencies || [];
+            const list = document.getElementById('agencyList');
+            list.innerHTML = '';
+
+            if (agencies.length === 0) {
+                list.innerHTML = '<p class="empty-state">Aucune agence configurée.</p>';
+                return;
+            }
+
+            const origin = window.location.origin;
+            agencies.forEach(agency => {
+                const url = `${origin}/retailer/?agency=${agency.id}`;
+                const card = document.createElement('div');
+                card.className = 'agency-card';
+                card.innerHTML = `
+                    <div class="agency-icon"><i class='bx bx-buildings'></i></div>
+                    <div class="agency-info">
+                        <div class="agency-name">${escHtml(agency.name)}</div>
+                        <div class="agency-url">/retailer/?agency=${agency.id}</div>
+                    </div>
+                    <span class="agency-status-badge">Essai</span>
+                    <div class="agency-actions">
+                        <a href="${url}" target="_blank" class="btn-agency-action" title="Ouvrir la page conseiller">
+                            <i class='bx bx-link-external'></i>
+                        </a>
+                        <button class="btn-agency-action" title="Copier le lien" data-url="${escHtml(url)}">
+                            <i class='bx bx-link'></i>
+                        </button>
+                        <button class="btn-agency-action danger" title="Supprimer" data-id="${agency.id}"
+                            ${agencies.length <= 1 ? 'disabled' : ''}>
+                            <i class='bx bx-trash'></i>
+                        </button>
+                    </div>`;
+                list.appendChild(card);
+            });
+
+            list.querySelectorAll('.btn-agency-action[data-url]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(btn.dataset.url).then(() => {
+                        const i = btn.querySelector('i');
+                        i.className = 'bx bx-check';
+                        btn.style.color = '#6ed476';
+                        setTimeout(() => { i.className = 'bx bx-link'; btn.style.color = ''; }, 2000);
+                    });
+                });
+            });
+
+            list.querySelectorAll('.btn-agency-action.danger').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    if (!confirm('Supprimer cette agence ?')) return;
+                    const id = btn.dataset.id;
+                    try {
+                        const res = await fetch(`/api/dashboard/agencies?id=${id}`, { method: 'DELETE' });
+                        const data = await res.json();
+                        if (res.ok) {
+                            currentUser.agencies = currentUser.agencies.filter(a => a.id !== id);
+                            renderAgencies();
+                        } else {
+                            alert(data.error || 'Erreur.');
+                        }
+                    } catch { alert('Erreur de connexion.'); }
+                });
+            });
+        }
+
+        function renderContactTab() {
+            const u = currentUser;
+            const endsAt = new Date(u.trialEndsAt);
+            const days = Math.max(0, Math.ceil((endsAt - new Date()) / 86400000));
+            const dateStr = endsAt.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            document.getElementById('planName').textContent = u.plan === 'trial' ? 'Essai gratuit' : 'Pro';
+            document.getElementById('planBadge').textContent = u.plan === 'trial' ? 'Essai' : 'Pro';
+
+            document.getElementById('planDetail').innerHTML = u.plan === 'trial'
+                ? `Votre période d'essai se termine le <strong>${dateStr}</strong> (dans ${days} jour${days !== 1 ? 's' : ''}).<br>Pour continuer après cette date, <a href="mailto:contact@mobilityos.com">contactez-nous</a>.`
+                : `Abonnement actif. Merci de votre confiance.`;
+        }
+
+        // ── Tab Nav ───────────────────────────────────────────
+        document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+            });
+        });
+
+        // ── Logout ────────────────────────────────────────────
+        document.getElementById('btnLogout').addEventListener('click', async () => {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = '/login/';
+        });
+
+        // ── Profile form ──────────────────────────────────────
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSaveProfile');
+            const txt = document.getElementById('btnSaveProfileText');
+            const spin = document.getElementById('btnSaveProfileSpinner');
+            btn.disabled = true; txt.textContent = 'Enregistrement…'; spin.style.display = 'inline-block';
+            try {
+                const res = await fetch('/api/dashboard/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: document.getElementById('profileName').value,
+                        company: document.getElementById('profileCompany').value,
+                        phone: document.getElementById('profilePhone').value,
+                    }),
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    currentUser.name = document.getElementById('profileName').value;
+                    currentUser.company = document.getElementById('profileCompany').value;
+                    currentUser.phone = document.getElementById('profilePhone').value;
+                    renderUser();
+                    showInline('profileAlert', 'Informations enregistrées.', 'success');
+                } else {
+                    showInline('profileAlert', data.error || 'Erreur.', 'error');
+                }
+            } catch {
+                showInline('profileAlert', 'Erreur de connexion.', 'error');
+            } finally {
+                btn.disabled = false; txt.textContent = 'Enregistrer'; spin.style.display = 'none';
+            }
+        });
+
+        // ── Customization form ────────────────────────────────
+        document.getElementById('btnPreviewClient').addEventListener('click', () => {
+            const agencies = currentUser.agencies || [];
+            if (agencies.length > 0) {
+                window.open('/client/?agency=' + agencies[0].id, '_blank');
+            } else {
+                alert("Vous n'avez pas encore d'agence pour prévisualiser le formulaire.");
+            }
+        });
+
+        document.getElementById('btnSaveCustom').addEventListener('click', async () => {
+            const btn = document.getElementById('btnSaveCustom');
+            const txt = document.getElementById('btnSaveCustomText');
+            const spin = document.getElementById('btnSaveCustomSpinner');
+            btn.disabled = true; txt.textContent = 'Enregistrement…'; spin.style.display = 'inline-block';
+
+            const formSettings = {
+                ...currentUser.formSettings, // Keep existing fields
+                language: document.getElementById('formLanguage').value,
+                theme: document.getElementById('formTheme').value,
+                logoUrl: document.getElementById('formLogo').value,
+                blob1: document.getElementById('formBlob1').value,
+                blob2: document.getElementById('formBlob2').value,
+                blob3: document.getElementById('formBlob3').value,
+                fields: formFields
+            };
+
+            try {
+                const res = await fetch('/api/dashboard/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ formSettings }),
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    currentUser.formSettings = { ...currentUser.formSettings, ...formSettings };
+                    showInline('appearanceAlert', 'Paramètres enregistrés.', 'success');
+                } else {
+                    showInline('appearanceAlert', data.error || 'Erreur.', 'error');
+                }
+            } catch {
+                showInline('appearanceAlert', 'Erreur de connexion.', 'error');
+            } finally {
+                btn.disabled = false; txt.textContent = 'Enregistrer tous les paramètres'; spin.style.display = 'none';
+            }
+        });
+
+        // ── Add agency ────────────────────────────────────────
+        document.getElementById('btnAddAgency').addEventListener('click', () => {
+            document.getElementById('newAgencyName').value = '';
+            document.getElementById('agencyModalAlert').className = 'inline-alert';
+            document.getElementById('addAgencyModal').style.display = 'flex';
+            setTimeout(() => document.getElementById('newAgencyName').focus(), 50);
+        });
+
+        function closeModal() {
+            document.getElementById('addAgencyModal').style.display = 'none';
+        }
+        document.getElementById('btnCloseAgencyModal').addEventListener('click', closeModal);
+        document.getElementById('btnCancelAgency').addEventListener('click', closeModal);
+        document.getElementById('addAgencyModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeModal();
+        });
+
+        document.getElementById('addAgencyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('newAgencyName').value.trim();
+            if (!name) return;
+
+            const btn = document.getElementById('btnCreateAgency');
+            const txt = document.getElementById('btnCreateAgencyText');
+            const spin = document.getElementById('btnCreateAgencySpinner');
+            btn.disabled = true; txt.textContent = 'Création…'; spin.style.display = 'inline-block';
+
+            try {
+                const res = await fetch('/api/dashboard/agencies', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name }),
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    currentUser.agencies.push(data.agency);
+                    renderAgencies();
+                    closeModal();
+                } else {
+                    showInline('agencyModalAlert', data.error || 'Erreur.', 'error');
+                }
+            } catch {
+                showInline('agencyModalAlert', 'Erreur de connexion.', 'error');
+            } finally {
+                btn.disabled = false; txt.textContent = 'Créer'; spin.style.display = 'none';
+            }
+        });
+
+        // ── Utils ─────────────────────────────────────────────
+        function showInline(id, msg, type) {
+            const el = document.getElementById(id);
+            el.textContent = msg;
+            el.className = `inline-alert inline-alert-${type} show`;
+            setTimeout(() => { el.className = 'inline-alert'; }, 4000);
+        }
+        function escHtml(s) {
+            return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+        init();
+    </script>
+</body>
+</html>

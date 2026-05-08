@@ -407,6 +407,193 @@ function setAgencyBranding(agencyName) {
     dom.agencyBrandText.textContent = agencyName || DEFAULT_BRAND_SLOGAN;
 }
 
+// ============================================================================
+// 2b. Dynamic Fields Renderer
+// ============================================================================
+
+function renderDynamicFields(fields) {
+    const container = document.getElementById('dynamicFormFields');
+    if (!container) return;
+
+    // Clear container
+    container.innerHTML = '';
+
+    function renderFields(fieldsArray, parentElement) {
+        fieldsArray.forEach(field => {
+            if (field.type === 'toggle_group') {
+                // Create a toggle group
+                const groupWrap = document.createElement('div');
+                groupWrap.className = 'temp-address-wrapper active';
+                groupWrap.style.animation = 'slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                groupWrap.style.marginTop = 'var(--spacing-lg)';
+                groupWrap.style.marginBottom = 'var(--spacing-md)';
+                
+                const toggleDiv = document.createElement('div');
+                toggleDiv.className = 'temp-address-toggle';
+                
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'toggle-header';
+                
+                const labelWrap = document.createElement('label');
+                labelWrap.className = 'custom-checkbox';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `chk_${field.id}`;
+                checkbox.name = `chk_${field.id}`;
+                
+                const spanCheck = document.createElement('span');
+                spanCheck.className = 'checkmark';
+                
+                const spanText = document.createElement('span');
+                spanText.textContent = field.label || 'Groupe';
+                
+                labelWrap.appendChild(checkbox);
+                labelWrap.appendChild(spanCheck);
+                labelWrap.appendChild(spanText);
+                headerDiv.appendChild(labelWrap);
+                toggleDiv.appendChild(headerDiv);
+                groupWrap.appendChild(toggleDiv);
+                
+                const slidingSec = document.createElement('div');
+                slidingSec.className = 'temp-address-sliding-section';
+                slidingSec.style.display = 'none'; // Hidden by default
+                
+                const innerDiv = document.createElement('div');
+                innerDiv.className = 'temp-address-content-inner';
+                
+                slidingSec.appendChild(innerDiv);
+                groupWrap.appendChild(slidingSec);
+                
+                checkbox.addEventListener('change', () => {
+                    const active = checkbox.checked;
+                    slidingSec.style.display = active ? 'block' : 'none';
+                    // Update required status of children
+                    innerDiv.querySelectorAll('input, select').forEach(input => {
+                        if (input.dataset.req === 'true') input.required = active;
+                    });
+                });
+                
+                parentElement.appendChild(groupWrap);
+                
+                if (field.children && field.children.length > 0) {
+                    renderFields(field.children, innerDiv);
+                }
+            } else if (field.type === 'address_block') {
+                // Custom Address Block
+                const wrap = document.createElement('div');
+                wrap.className = 'form-group-row';
+                wrap.style.cssText = 'animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); flex-direction: column; gap: 1rem; width: 100%;';
+                
+                const addressWrap = document.createElement('div');
+                addressWrap.className = 'input-wrapper address-wrapper';
+                addressWrap.innerHTML = `
+                    <label for="${field.id}_addr" id="lbl_${field.id}_addr">${field.label || 'Adresse'}</label>
+                    <div class="input-with-icon">
+                        <i class='bx bx-map-pin'></i>
+                        <input type="text" id="${field.id}_addr" name="${field.id}_addr" placeholder="123 Rue de la Paix" autocomplete="off">
+                    </div>
+                    <ul class="address-suggestions" id="${field.id}_sugg" role="listbox"></ul>
+                `;
+                
+                const row = document.createElement('div');
+                row.className = 'form-group-row';
+                
+                const zipWrap = document.createElement('div');
+                zipWrap.className = 'input-wrapper zip-wrapper';
+                zipWrap.innerHTML = `
+                    <label for="${field.id}_zip">Code Postal</label>
+                    <div class="input-with-icon">
+                        <i class='bx bx-hash'></i>
+                        <input type="text" id="${field.id}_zip" name="${field.id}_zip" placeholder="75000">
+                    </div>
+                `;
+                
+                const cityWrap = document.createElement('div');
+                cityWrap.className = 'input-wrapper city-wrapper';
+                cityWrap.innerHTML = `
+                    <label for="${field.id}_city">Ville</label>
+                    <div class="input-with-icon">
+                        <i class='bx bx-buildings'></i>
+                        <input type="text" id="${field.id}_city" name="${field.id}_city" placeholder="Paris">
+                    </div>
+                `;
+                
+                if (field.required) {
+                    addressWrap.querySelector('input').dataset.req = 'true';
+                    zipWrap.querySelector('input').dataset.req = 'true';
+                    cityWrap.querySelector('input').dataset.req = 'true';
+                    addressWrap.querySelector('input').required = true;
+                    zipWrap.querySelector('input').required = true;
+                    cityWrap.querySelector('input').required = true;
+                }
+                
+                row.appendChild(zipWrap);
+                row.appendChild(cityWrap);
+                wrap.appendChild(addressWrap);
+                wrap.appendChild(row);
+                parentElement.appendChild(wrap);
+                
+                setTimeout(() => {
+                    const inputEl = document.getElementById(`${field.id}_addr`);
+                    const listEl = document.getElementById(`${field.id}_sugg`);
+                    const zipEl = document.getElementById(`${field.id}_zip`);
+                    const cityEl = document.getElementById(`${field.id}_city`);
+                    const overflowEl = inputEl.closest('.temp-address-content-inner');
+                    if (window.bindAddressField) {
+                        window.bindAddressField(inputEl, listEl, zipEl, cityEl, null, overflowEl);
+                    }
+                }, 0);
+            } else {
+                // Standard field (text, email, tel, etc.)
+                const wrapper = document.createElement('div');
+                wrapper.className = 'input-wrapper';
+                wrapper.id = `wrap_${field.id}`;
+                wrapper.style.cssText = 'animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);';
+
+                const iconMap = {
+                    text: 'bx-text',
+                    email: 'bx-envelope',
+                    tel: 'bx-phone',
+                    number: 'bx-calculator',
+                    date: 'bx-calendar',
+                    url: 'bx-link'
+                };
+                const iconClass = field.icon || iconMap[field.type] || 'bx-edit-alt';
+
+                const label = document.createElement('label');
+                label.setAttribute('for', field.id);
+                label.textContent = field.label || 'Champ';
+
+                const inputWrap = document.createElement('div');
+                inputWrap.className = 'input-with-icon';
+
+                const icon = document.createElement('i');
+                icon.className = `bx ${iconClass}`;
+
+                const input = document.createElement('input');
+                input.type = field.type === 'tel' ? 'tel' : (field.type || 'text');
+                input.id = field.id;
+                input.name = field.id;
+                input.placeholder = field.placeholder || '';
+                
+                if (field.required) {
+                    input.dataset.req = 'true';
+                    input.required = true;
+                }
+
+                inputWrap.appendChild(icon);
+                inputWrap.appendChild(input);
+                wrapper.appendChild(label);
+                wrapper.appendChild(inputWrap);
+                parentElement.appendChild(wrapper);
+            }
+        });
+    }
+
+    renderFields(fields, container);
+}
+
 async function hydrateAgencyBrandingFromUrl() {
     const params = new URLSearchParams(window.location.search);
     const agencyId = sanitizeAgencyId(params.get('agency'));
@@ -430,9 +617,52 @@ async function hydrateAgencyBrandingFromUrl() {
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const payload = await res.json();
 
-        if (payload?.valid && typeof payload.agencyName === 'string' && payload.agencyName.trim()) {
-            state.agencyName = sanitizeAgencyName(payload.agencyName);
-            setAgencyBranding(state.agencyName);
+        if (payload?.valid) {
+            if (typeof payload.agencyName === 'string' && payload.agencyName.trim()) {
+                state.agencyName = sanitizeAgencyName(payload.agencyName);
+                setAgencyBranding(state.agencyName);
+            }
+
+            const s = payload.formSettings || {};
+            
+            // Thème
+            if (s.theme === 'light') {
+                document.documentElement.classList.remove('theme-dark');
+                document.documentElement.classList.add('theme-light');
+            } else if (s.theme === 'dark') {
+                document.documentElement.classList.remove('theme-light');
+                document.documentElement.classList.add('theme-dark');
+            }
+
+            // Couleurs
+            if (s.blob1) document.documentElement.style.setProperty('--blob-1', s.blob1);
+            if (s.blob2) document.documentElement.style.setProperty('--blob-2', s.blob2);
+            if (s.blob3) document.documentElement.style.setProperty('--blob-3', s.blob3);
+
+            // Logo
+            if (s.logoUrl) {
+                const logoContainer = document.querySelector('.logo');
+                if (logoContainer) {
+                    logoContainer.innerHTML = `<img src="${s.logoUrl}" alt="Logo" class="logo-img logo-img-brand" style="max-height: 40px; border-radius: 4px;">`;
+                }
+            }
+            
+            // Langue par défaut
+            if (s.language && dom.langSelect) {
+                dom.langSelect.value = s.language;
+                applyLanguage(s.language);
+            }
+
+            // Champs dynamiques personnalisés
+            if (Array.isArray(s.fields) && s.fields.length > 0) {
+                renderDynamicFields(s.fields);
+            } else {
+                // Fallback aux champs par défaut (important pour les nouveaux comptes)
+                renderDynamicFields([
+                    { id: "email", label: "E-mail", type: "email", icon: "bx-envelope", required: true, system: false },
+                    { id: "address_block", label: "Bloc Adresse", type: "address_block", icon: "bx-map", required: true, system: false }
+                ]);
+            }
             return;
         }
     } catch (err) {
@@ -452,6 +682,7 @@ function applyLanguage(langCode) {
     if (!t) return;
 
     state.lang = langCode;
+    localStorage.setItem('userLanguage', langCode);
 
     // Sync lang display label
     const langNames    = { fr: 'Français', en: 'English', es: 'Español', it: 'Italiano', pt: 'Português', de: 'Deutsch', nl: 'Nederlands' };
@@ -466,43 +697,44 @@ function applyLanguage(langCode) {
     dom.html.setAttribute('dir', t.dir);
     dom.html.setAttribute('lang', langCode);
 
-    // Update Text Nodes
-    document.getElementById('pageTitle').textContent = t.pageTitle;
+    // Update Text Nodes (Safe checks)
+    const pageTitle = document.getElementById('pageTitle');
+    if (pageTitle) pageTitle.textContent = t.pageTitle;
     
-    document.getElementById('lblAddress').textContent = t.address;
-    dom.address.placeholder = t.addressPlaceholder;
+    const lblAddress = document.getElementById('lblAddress');
+    if (lblAddress) lblAddress.textContent = t.address;
+    if (dom.address) dom.address.placeholder = t.addressPlaceholder;
 
     const countryLabel = document.getElementById('lblCountry');
-    if (countryLabel) {
-        countryLabel.textContent = t.country || 'Country';
-    }
+    if (countryLabel) countryLabel.textContent = t.country || 'Country';
     
     // Temporary Address Texts
-    dom.lblTempAddressCheck.textContent = t.tempAddressCheck;
-    dom.txtTempTooltip.textContent = t.tempTooltip;
+    if (dom.lblTempAddressCheck) dom.lblTempAddressCheck.textContent = t.tempAddressCheck;
+    if (dom.txtTempTooltip) dom.txtTempTooltip.textContent = t.tempTooltip;
     
-    dom.lblTempAddress.textContent = t.tempAddress;
-    dom.tempAddress.placeholder = t.addressPlaceholder;
+    if (dom.lblTempAddress) dom.lblTempAddress.textContent = t.tempAddress;
+    if (dom.tempAddress) dom.tempAddress.placeholder = t.addressPlaceholder;
     
-    dom.lblTempZipCode.textContent = t.tempZipCode;
-    dom.tempZipCode.placeholder = t.placeholderZip;
+    if (dom.lblTempZipCode) dom.lblTempZipCode.textContent = t.tempZipCode;
+    if (dom.tempZipCode) dom.tempZipCode.placeholder = t.placeholderZip;
     
-    dom.lblTempCity.textContent = t.tempCity;
-    dom.tempCity.placeholder = t.placeholderCity;
+    if (dom.lblTempCity) dom.lblTempCity.textContent = t.tempCity;
+    if (dom.tempCity) dom.tempCity.placeholder = t.placeholderCity;
     
-    document.getElementById('lblZipCode').textContent = t.zipCode;
-    dom.zipCode.placeholder = t.placeholderZip;
+    const lblZipCode = document.getElementById('lblZipCode');
+    if (lblZipCode) lblZipCode.textContent = t.zipCode;
+    if (dom.zipCode) dom.zipCode.placeholder = t.placeholderZip;
     
-    document.getElementById('lblCity').textContent = t.city;
-    dom.city.placeholder = t.placeholderCity;
+    const lblCity = document.getElementById('lblCity');
+    if (lblCity) lblCity.textContent = t.city;
+    if (dom.city) dom.city.placeholder = t.placeholderCity;
 
     const phoneCodeLabel = document.getElementById('lblPhoneCode');
-    if (phoneCodeLabel) {
-        phoneCodeLabel.textContent = t.phoneCode || 'Calling code';
-    }
+    if (phoneCodeLabel) phoneCodeLabel.textContent = t.phoneCode || 'Calling code';
     
-    document.getElementById('lblPhone').textContent = t.phone;
-    dom.phone.placeholder = t.placeholderPhone;
+    const lblPhone = document.getElementById('lblPhone');
+    if (lblPhone) lblPhone.textContent = t.phone;
+    if (dom.phone) dom.phone.placeholder = t.placeholderPhone;
 
     const lblPhone2 = document.getElementById('lblPhone2');
     if (lblPhone2) lblPhone2.textContent = t.phone2 || '2nd phone (optional)';
@@ -516,15 +748,21 @@ function applyLanguage(langCode) {
     const lblPhoneCode2 = document.getElementById('lblPhoneCode2');
     if (lblPhoneCode2) lblPhoneCode2.textContent = t.phoneCode || 'Calling code';
 
-    document.getElementById('lblEmail').textContent = t.email;
-    dom.email.placeholder = t.placeholderEmail;
+    const lblEmail = document.getElementById('lblEmail');
+    if (lblEmail) lblEmail.textContent = t.email;
+    if (dom.email) dom.email.placeholder = t.placeholderEmail;
     
-    document.getElementById('txtBtnGenerate').textContent = t.btnGenerate;
-    document.getElementById('txtBtnEdit').textContent = t.btnEdit;
+    const txtBtnGenerate = document.getElementById('txtBtnGenerate');
+    if (txtBtnGenerate) txtBtnGenerate.textContent = t.btnGenerate;
+    const txtBtnEdit = document.getElementById('txtBtnEdit');
+    if (txtBtnEdit) txtBtnEdit.textContent = t.btnEdit;
     
     // Met à jour le h1 selon la vue active
-    const summaryVisible = dom.summaryView && dom.summaryView.style.display !== 'none';
-    document.getElementById('pageTitle').textContent = summaryVisible ? t.summaryTitle : t.pageTitle;
+    const pageTitleFinal = document.getElementById('pageTitle');
+    if (pageTitleFinal) {
+        const summaryVisible = dom.summaryView && dom.summaryView.style.display !== 'none';
+        pageTitleFinal.textContent = summaryVisible ? t.summaryTitle : t.pageTitle;
+    }
     
     // Legal Texts
     document.querySelectorAll('.legal-text').forEach(el => {
@@ -767,6 +1005,24 @@ dom.form.addEventListener('submit', (e) => {
         </div>
     `;
 
+    // Custom fields (non-system) — collect from dynamicFormFields
+    const container = document.getElementById('dynamicFormFields');
+    if (container) {
+        const customInputs = container.querySelectorAll('input[id^="custom_"]');
+        customInputs.forEach(input => {
+            if (input.value.trim()) {
+                const label = container.querySelector(`label[for="${input.id}"]`);
+                const labelText = label ? label.textContent : input.id;
+                summaryHTML += `
+                    <div class="summary-row">
+                        <span class="summary-label">${labelText}</span>
+                        <span class="summary-value">${input.value}</span>
+                    </div>
+                `;
+            }
+        });
+    }
+
     dom.summaryContentBody.innerHTML = summaryHTML;
 
     // Configure Send Button
@@ -802,8 +1058,7 @@ function detectUserLanguage() {
     return 'es'; 
 }
 
-state.lang = sessionStorage.getItem('okm_lang') || detectUserLanguage();
-sessionStorage.removeItem('okm_lang');
+state.lang = localStorage.getItem('userLanguage') || detectUserLanguage();
 dom.langSelect.value = state.lang; // Sync UI Select box
 applyLanguage(state.lang);
 hydrateAgencyBrandingFromUrl();
@@ -1514,7 +1769,7 @@ function buildAdvisorPayload() {
     const phoneValue = clampText(dom.phone?.value || '', 40);
     const formattedPhone = `${phoneCode} ${phoneValue}`.replace(/\s+/g, ' ').trim();
     
-    return {
+    const basePayload = {
         language: state.lang,
         address: clampText(dom.address?.value || '', 140),
         country: clampText(countryName, 80),
@@ -1531,6 +1786,17 @@ function buildAdvisorPayload() {
         phone2Number: state.phone2Visible ? clampText(dom.phone2?.value || '', 40) : '',
         email: clampText(dom.email?.value || '', 120)
     };
+
+    // Collect custom fields
+    const container = document.getElementById('dynamicFormFields');
+    if (container) {
+        const customInputs = container.querySelectorAll('input[id^="custom_"]');
+        customInputs.forEach(input => {
+            basePayload[input.id] = clampText(input.value || '', 200);
+        });
+    }
+
+    return basePayload;
 }
 
 function getPayloadPatch(previousPayload, nextPayload) {
@@ -1612,6 +1878,16 @@ function attachRealTimeListeners() {
     if (dom.hasTempAddress) {
         dom.hasTempAddress.addEventListener('change', () => {
             setTimeout(sendFormDataToAdvisor, 100);
+        });
+    }
+
+    // Listen for custom fields input via event delegation
+    const dynamicContainer = document.getElementById('dynamicFormFields');
+    if (dynamicContainer) {
+        dynamicContainer.addEventListener('input', (e) => {
+            if (e.target.id && e.target.id.startsWith('custom_')) {
+                debouncedSendToAdvisor();
+            }
         });
     }
 }
@@ -1868,71 +2144,69 @@ function renderAddressSuggestions(features, listEl, onSelect, closeList) {
     listEl.classList.add('open');
 }
 
+window.bindAddressField = function(inputEl, listEl, zipEl, cityEl, countryEl, overflowEl) {
+    if (!inputEl || !listEl) return;
+    let timer = null;
+
+    function closeList() {
+        listEl.classList.remove('open');
+        if (overflowEl) {
+            listEl.addEventListener('transitionend', () => {
+                overflowEl.style.overflow = '';
+            }, { once: true });
+        }
+    }
+
+    inputEl.addEventListener('input', () => {
+        const q = inputEl.value.trim();
+        clearTimeout(timer);
+        if (q.length < 3) { closeList(); return; }
+        timer = setTimeout(async () => {
+            try {
+                // If it's the main input, try to bias by currently selected country
+                const countryCode = (inputEl === dom.address && state.countrySelectedManually) ? (dom.country?.value || '') : '';
+                let features = await fetchPhotonSuggestions(q, state.lang);
+                if (countryCode) {
+                    features = features.filter(f =>
+                        (f.properties?.countrycode || '').toLowerCase() === countryCode.toLowerCase()
+                    );
+                }
+                if (overflowEl) overflowEl.style.overflow = 'visible';
+                renderAddressSuggestions(features, listEl, (formatted, props) => {
+                    inputEl.value = formatted;
+                    const zip  = props.postcode || '';
+                    const city = props.city || props.town || props.village || '';
+                    
+                    if (zip && zipEl) zipEl.value = zip;
+                    if (city && cityEl) cityEl.value = city;
+                    
+                    if (countryEl) {
+                        const cc = (props.countrycode || props.country_code || '').toUpperCase();
+                        if (cc && countryEl.value !== cc) {
+                            countryEl.value = cc;
+                            countryEl.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    }
+                    debouncedSendToAdvisor();
+                }, closeList);
+                if (overflowEl && !listEl.classList.contains('open')) overflowEl.style.overflow = '';
+            } catch (_) { /* silent */ }
+        }, 380);
+    });
+
+    inputEl.addEventListener('blur',    () => setTimeout(() => closeList(), 160));
+    inputEl.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeList(); });
+};
+
 function initAddressAutocomplete() {
     const mainInput  = dom.address;
     const mainList   = document.getElementById('addressSuggestions');
     const tempInput  = dom.tempAddress;
     const tempList   = document.getElementById('tempAddressSuggestions');
+    const tempInner  = document.querySelector('.temp-address-content-inner');
 
-    // overflowEl: .temp-address-content-inner has overflow:hidden for its slide animation;
-    // temporarily set to visible while suggestions are open so they aren't clipped.
-    function bindField(inputEl, listEl, getCountry, overflowEl) {
-        if (!inputEl || !listEl) return;
-        let timer = null;
-
-        function closeList() {
-            listEl.classList.remove('open');
-            if (overflowEl) {
-                listEl.addEventListener('transitionend', () => {
-                    overflowEl.style.overflow = '';
-                }, { once: true });
-            }
-        }
-
-        inputEl.addEventListener('input', () => {
-            const q = inputEl.value.trim();
-            clearTimeout(timer);
-            if (q.length < 3) { closeList(); return; }
-            timer = setTimeout(async () => {
-                try {
-                    const countryCode = getCountry ? getCountry() : '';
-                    let features = await fetchPhotonSuggestions(q, state.lang);
-                    if (countryCode) {
-                        features = features.filter(f =>
-                            (f.properties?.countrycode || '').toLowerCase() === countryCode.toLowerCase()
-                        );
-                    }
-                    if (overflowEl) overflowEl.style.overflow = 'visible';
-                    renderAddressSuggestions(features, listEl, (formatted, props) => {
-                        inputEl.value = formatted;
-                        const zip  = props.postcode || '';
-                        const city = props.city || props.town || props.village || '';
-                        if (inputEl === mainInput) {
-                            if (zip  && dom.zipCode)  dom.zipCode.value  = zip;
-                            if (city && dom.city)      dom.city.value     = city;
-                            const cc = (props.countrycode || props.country_code || '').toUpperCase();
-                            if (cc && dom.country && dom.country.value !== cc) {
-                                dom.country.value = cc;
-                                dom.country.dispatchEvent(new Event('change', { bubbles: true }));
-                            }
-                        } else {
-                            if (zip  && dom.tempZipCode)  dom.tempZipCode.value  = zip;
-                            if (city && dom.tempCity)      dom.tempCity.value     = city;
-                        }
-                        debouncedSendToAdvisor();
-                    }, closeList);
-                    if (overflowEl && !listEl.classList.contains('open')) overflowEl.style.overflow = '';
-                } catch (_) { /* network error — silent */ }
-            }, 380);
-        });
-
-        inputEl.addEventListener('blur',    () => setTimeout(() => closeList(), 160));
-        inputEl.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeList(); });
-    }
-
-    const tempInner = document.querySelector('.temp-address-content-inner');
-    bindField(mainInput, mainList, () => state.countrySelectedManually ? (dom.country?.value || '') : '');
-    bindField(tempInput, tempList, null, tempInner);
+    window.bindAddressField(mainInput, mainList, dom.zipCode, dom.city, dom.country, null);
+    window.bindAddressField(tempInput, tempList, dom.tempZipCode, dom.tempCity, null, tempInner);
 }
 
 // Initialize

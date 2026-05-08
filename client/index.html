@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+    <meta name="referrer" content="same-origin">
+    <title>OK Mobility</title>
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    
+    <!-- Boxicons (self-hosted) -->
+    <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
+
+    <!-- Flag icons — SVG sprites, cross-platform flag display -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/style.css?v=47">
+    
+    <!-- Brand Config (white-label) -->
+    <script src="/assets/js/brand-config.js"></script>
+
+    <!-- PeerJS -->
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+</head>
+<body>
+    
+    <!-- Dynamic Ambient Background -->
+    <div class="ambient-background">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <!-- Main Liquid Glass Container -->
+    <main class="glass-container">
+        
+        <!-- Header & Language Selector -->
+        <header class="glass-header">
+            <div class="header-brand">
+                <div class="logo">
+                    <picture class="logo-picture">
+                        <source media="(max-width: 640px)" srcset="/assets/logos/okm-logo-mobile-white.svg">
+                        <img src="/assets/logos/okm-logo-white.svg" alt="OK Mobility Logo" class="logo-img logo-img-brand">
+                    </picture>
+                </div>
+                <span class="brand-slogan" id="agencyBrandText">The Global Mobility Platform</span>
+                <div class="client-status">
+                    <div id="clientStatusIndicator" class="status-indicator waiting"></div>
+                    <span id="clientStatusText">Not connected</span>
+                </div>
+            </div>
+            
+            <div class="header-controls">
+                <div class="lang-selector">
+                    <i class='bx bx-globe'></i>
+                    <span id="langDisplay">English</span>
+                    <select id="languageSelect" aria-label="Select language">
+                        <option value="en" selected>English</option>
+                        <option value="fr">Français</option>
+                        <option value="es">Español</option>
+                        <option value="it">Italiano</option>
+                        <option value="pt">Português</option>
+                        <option value="de">Deutsch</option>
+                        <option value="nl">Nederlands</option>
+                    </select>
+                </div>
+                <button type="button" id="btnOpenAdvisorModal" class="btn-icon" aria-label="Connecter un conseiller" title="Connecter un conseiller">
+                    <i class='bx bx-link'></i>
+                </button>
+                <button id="btnReset" class="btn-reset" aria-label="Reset">
+                    <i class='bx bx-rotate-left'></i>
+                </button>
+            </div>
+        </header>
+
+        <section class="form-content">
+            
+            <div class="title-wrapper">
+                <h1 id="pageTitle" class="gradient-text">Vos informations</h1>
+            </div>
+
+            <form id="clientForm" class="modern-form" novalidate>
+                <div id="dynamicFormFields"></div>
+                
+                <!-- Actions -->
+                <div class="form-actions">
+                    <button type="submit" id="btnGenerate" class="btn-primary glass-btn">
+                        <span id="txtBtnGenerate">Générer mon résumé</span>
+                    </button>
+                    <p class="legal-text">
+                        OK MOBILITY GROUP, S.L.U. es el Responsable del tratamiento de los datos personales del Interesado y le informa de que estos datos se tratarán de conformidad con lo dispuesto en el Reglamento (UE) 2016/679, de 27 de abril (GDPR), y la Ley Orgánica 3/2018, de 5 de diciembre (LOPDG).
+                    </p>
+                </div> <!-- Closes form-actions -->
+            </form>
+
+            <!-- Success / Summary View (Hidden by default) -->
+            <div id="summaryView" class="summary-view" style="display: none;">
+                <div class="summary-card glass-panel">
+                    <div class="summary-content" id="summaryContentBody">
+                        <!-- Filled via JS -->
+                    </div>
+                    <div class="summary-actions">
+                        <button id="btnEdit" class="btn-secondary">
+                            <i class='bx bx-edit-alt'></i>
+                            <span id="txtBtnEdit">Modifier</span>
+                        </button>
+                    </div>
+                </div>
+            <p class="legal-text">
+                OK MOBILITY GROUP, S.L.U. es el Responsable del tratamiento de los datos personales del Interesado y le informa de que estos datos se tratarán de conformidad con lo dispuesto en el Reglamento (UE) 2016/679, de 27 de abril (GDPR), y la Ley Orgánica 3/2018, de 5 de diciembre (LOPDG).
+            </p>
+            </div>
+
+        </section>
+
+        <!-- Advisor Connection Modal -->
+        <div class="modal-overlay" id="advisorModalOverlay" style="display: none;"></div>
+        <div class="advisor-modal glass-panel" id="advisorModal" role="dialog" aria-modal="true" aria-labelledby="advisorModalTitle" style="display: none;">
+            <div class="modal-header">
+                <h2 id="advisorModalTitle">Connecter un conseiller</h2>
+            </div>
+            <p id="advisorModalDesc" class="modal-desc">Saisissez le code fourni par le conseiller.</p>
+            <div class="input-with-icon">
+                <i class='bx bx-link'></i>
+                <input type="text" id="advisorCodeInput" placeholder="XXXXXX" maxlength="6" autocomplete="off" style="text-transform: uppercase;">
+            </div>
+            <div class="modal-actions">
+                <button id="advisorModalCancel" class="btn-secondary">Annuler</button>
+            </div>
+        </div>
+        
+    </main>
+
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <script src="https://unpkg.com/libphonenumber-js@1.11.18/bundle/libphonenumber-js.min.js"></script>
+    <script src="/assets/js/script.js?v=33"></script>
+</body>
+</html>
