@@ -12,10 +12,26 @@
 </head>
 <body>
 
-    <header class="b2b-nav auth-nav">
-        <div class="nav-brand"><a href="/">MobilityOS</a></div>
+    <header class="b2b-nav">
+        <div class="nav-brand">
+            <a href="/" style="color: inherit; text-decoration: none;">MobilityOS</a>
+        </div>
         <div class="nav-controls">
-            <a href="/signup/" class="nav-link" data-i18n="navSignup">Créer un compte</a>
+            <!-- Language Selector -->
+            <div class="lang-selector magnetic">
+                <i class='bx bx-globe'></i>
+                <span id="langDisplay">Français</span>
+                <select id="languageSelect" aria-label="Sélectionner la langue">
+                    <option value="en">English</option>
+                    <option value="fr" selected>Français</option>
+                    <option value="es">Español</option>
+                    <option value="it">Italiano</option>
+                    <option value="pt">Português</option>
+                    <option value="de">Deutsch</option>
+                    <option value="nl">Nederlands</option>
+                </select>
+            </div>
+            <a href="/signup/" class="btn-secondary magnetic" style="padding: 0.5rem 1.25rem; font-size: 0.875rem; border-radius: 999px;" data-i18n="navSignup">Créer un compte</a>
         </div>
     </header>
 
@@ -193,7 +209,41 @@
         const supportedLangs = ['fr','en','es','it','pt','de','nl'];
         const browserLang = (navigator.language || 'fr').slice(0, 2).toLowerCase();
         const detectedLang = supportedLangs.includes(browserLang) ? browserLang : 'en';
+        
+        const langSelect = document.getElementById('languageSelect');
+        const langDisplay = document.getElementById('langDisplay');
+        if (langSelect) {
+            langSelect.value = detectedLang;
+            if (langDisplay) langDisplay.textContent = langSelect.options[langSelect.selectedIndex].text;
+            langSelect.addEventListener('change', (e) => {
+                const lang = e.target.value;
+                if (langDisplay) langDisplay.textContent = e.target.options[e.target.selectedIndex].text;
+                updateLanguage(lang);
+            });
+        }
         updateLanguage(detectedLang);
+
+        // ── Interactive Effects (Magnetic) ─────────────────────
+        const magneticElements = document.querySelectorAll('.magnetic');
+        magneticElements.forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                const x = (e.clientX - rect.left) - rect.width / 2;
+                const y = (e.clientY - rect.top) - rect.height / 2;
+                btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+            });
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = `translate(0px, 0px)`;
+            });
+        });
+
+        // Ambient Cursor Glow
+        const ambientGlow = document.createElement('div');
+        ambientGlow.className = 'ambient-cursor-glow';
+        document.body.appendChild(ambientGlow);
+        document.addEventListener('mousemove', (e) => {
+            ambientGlow.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+        });
 
         // Redirect if already authenticated
         fetch('/api/auth/session')
