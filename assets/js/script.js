@@ -688,6 +688,7 @@ function applyLanguage(langCode) {
     if (!t) return;
 
     state.lang = langCode;
+    localStorage.setItem('userLanguage', langCode);
 
     // Sync lang display label
     const langNames    = { fr: 'Français', en: 'English', es: 'Español', it: 'Italiano', pt: 'Português', de: 'Deutsch', nl: 'Nederlands' };
@@ -1056,8 +1057,7 @@ function detectUserLanguage() {
     return 'es'; 
 }
 
-state.lang = sessionStorage.getItem('okm_lang') || detectUserLanguage();
-sessionStorage.removeItem('okm_lang');
+state.lang = localStorage.getItem('userLanguage') || detectUserLanguage();
 dom.langSelect.value = state.lang; // Sync UI Select box
 applyLanguage(state.lang);
 hydrateAgencyBrandingFromUrl();

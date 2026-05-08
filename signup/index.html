@@ -256,13 +256,15 @@
                 }
             });
             document.documentElement.lang = lang;
+            localStorage.setItem('userLanguage', lang);
         };
 
-        // Auto-detect language
+        // Auto-detect language: Storage > Browser > Default(fr)
         const supportedLangs = ['fr','en','es','it','pt','de','nl'];
+        const storedLang = localStorage.getItem('userLanguage');
         const browserLang = (navigator.language || 'fr').slice(0, 2).toLowerCase();
-        const detectedLang = supportedLangs.includes(browserLang) ? browserLang : 'en';
-        updateLanguage(detectedLang);
+        const initialLang = storedLang || (supportedLangs.includes(browserLang) ? browserLang : 'en');
+        updateLanguage(initialLang);
 
         const form = document.getElementById('signupForm');
         const btnSubmit = document.getElementById('btnSubmit');

@@ -203,17 +203,19 @@
                 }
             });
             document.documentElement.lang = lang;
+            localStorage.setItem('userLanguage', lang);
         };
 
-        // Auto-detect language
+        // Auto-detect language: Storage > Browser > Default(fr)
         const supportedLangs = ['fr','en','es','it','pt','de','nl'];
+        const storedLang = localStorage.getItem('userLanguage');
         const browserLang = (navigator.language || 'fr').slice(0, 2).toLowerCase();
-        const detectedLang = supportedLangs.includes(browserLang) ? browserLang : 'en';
+        const initialLang = storedLang || (supportedLangs.includes(browserLang) ? browserLang : 'en');
         
         const langSelect = document.getElementById('languageSelect');
         const langDisplay = document.getElementById('langDisplay');
         if (langSelect) {
-            langSelect.value = detectedLang;
+            langSelect.value = initialLang;
             if (langDisplay) langDisplay.textContent = langSelect.options[langSelect.selectedIndex].text;
             langSelect.addEventListener('change', (e) => {
                 const lang = e.target.value;
@@ -221,7 +223,7 @@
                 updateLanguage(lang);
             });
         }
-        updateLanguage(detectedLang);
+        updateLanguage(initialLang);
 
         // ── Interactive Effects (Magnetic) ─────────────────────
         const magneticElements = document.querySelectorAll('.magnetic');

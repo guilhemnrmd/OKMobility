@@ -488,11 +488,21 @@
                 }
             });
             document.documentElement.lang = lang;
+            localStorage.setItem('userLanguage', lang);
         };
 
         const langSelect = document.getElementById('languageSelect');
         const langDisplay = document.getElementById('langDisplay');
+        
+        // Initial language detection: Storage > Browser > Default(fr)
+        const storedLang = localStorage.getItem('userLanguage');
+        const browserLang = (navigator.language || 'fr').slice(0, 2).toLowerCase();
+        const supportedLangs = Object.keys(i18n);
+        const initialLang = storedLang || (supportedLangs.includes(browserLang) ? browserLang : 'fr');
+
         if (langSelect && langDisplay) {
+            langSelect.value = initialLang;
+            langDisplay.textContent = langSelect.options[langSelect.selectedIndex].text;
             langSelect.addEventListener('change', (e) => {
                 const text = e.target.options[e.target.selectedIndex].text;
                 const lang = e.target.value;
@@ -500,16 +510,7 @@
                 updateLanguage(lang);
             });
         }
-
-        // Auto-detect language from browser
-        const supportedLangs = ['fr','en','es','it','pt','de','nl'];
-        const browserLang = (navigator.language || 'fr').slice(0, 2).toLowerCase();
-        const detectedLang = supportedLangs.includes(browserLang) ? browserLang : 'en';
-        if (langSelect) {
-            langSelect.value = detectedLang;
-            if (langDisplay) langDisplay.textContent = langSelect.options[langSelect.selectedIndex].text;
-        }
-        updateLanguage(detectedLang);
+        updateLanguage(initialLang);
 
         // 3. Scroll Reveal Animation within the Scroll Container
         const scrollContainer = document.querySelector('.scroll-container');
