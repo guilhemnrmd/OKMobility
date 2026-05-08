@@ -79,6 +79,7 @@
                 fn1: "Disponibilité garantie contractuellement par l'infrastructure Cloudflare Edge, avec plus de 300 points de présence mondiaux.",
                 fn2: "Le protocole WebRTC chiffre nativement les transferts de données en DTLS/SRTP de bout en bout.",
                 navFaq: "FAQ & Objections IT",
+                navLogin: "Accès Vendeur",
                 footerRights: "Tous droits réservés."
             },
             en: {
@@ -145,6 +146,7 @@
                 fn1: "Availability contractually guaranteed by Cloudflare Edge infrastructure, with over 300 global points of presence.",
                 fn2: "The WebRTC protocol natively encrypts data transfers via end-to-end DTLS/SRTP.",
                 navFaq: "FAQ & IT Objections",
+                navLogin: "Seller Access",
                 footerRights: "All rights reserved."
             },
             es: {
@@ -211,6 +213,7 @@
                 fn1: "Disponibilidad garantizada contractualmente por la infraestructura Cloudflare Edge, con más de 300 puntos de presencia globales.",
                 fn2: "El protocolo WebRTC cifra de forma nativa las transferencias de datos mediante DTLS/SRTP de extremo a extremo.",
                 navFaq: "FAQ y Objeciones IT",
+                navLogin: "Acceso Vendedor",
                 footerRights: "Todos los derechos reservados."
             },
             it: {
@@ -277,6 +280,7 @@
                 fn1: "Disponibilità garantita contrattualmente dall'infrastruttura Cloudflare Edge, con oltre 300 punti di presenza globali.",
                 fn2: "Il protocollo WebRTC crittografa nativamente i trasferimenti di dati tramite DTLS/SRTP end-to-end.",
                 navFaq: "FAQ e Obiezioni IT",
+                navLogin: "Accesso Venditore",
                 footerRights: "Tutti i diritti riservati."
             },
             pt: {

@@ -665,8 +665,14 @@ async function hydrateAgencyBrandingFromUrl() {
                 }
 
                 // Champs dynamiques personnalisés
-                if (Array.isArray(s.fields) && s.fields.length > 0) {
+                if (Array.isArray(s.fields)) {
                     renderDynamicFields(s.fields);
+                } else {
+                    // Fallback aux champs par défaut si non définis
+                    renderDynamicFields([
+                        { id: "email", label: "E-mail", type: "email", icon: "bx-envelope", required: true, system: false },
+                        { id: "address_block", label: "Bloc Adresse", type: "address_block", icon: "bx-map", required: true, system: false }
+                    ]);
                 }
             }
             return;
@@ -703,43 +709,44 @@ function applyLanguage(langCode) {
     dom.html.setAttribute('dir', t.dir);
     dom.html.setAttribute('lang', langCode);
 
-    // Update Text Nodes
-    document.getElementById('pageTitle').textContent = t.pageTitle;
+    // Update Text Nodes (Safe checks)
+    const pageTitle = document.getElementById('pageTitle');
+    if (pageTitle) pageTitle.textContent = t.pageTitle;
     
-    document.getElementById('lblAddress').textContent = t.address;
-    dom.address.placeholder = t.addressPlaceholder;
+    const lblAddress = document.getElementById('lblAddress');
+    if (lblAddress) lblAddress.textContent = t.address;
+    if (dom.address) dom.address.placeholder = t.addressPlaceholder;
 
     const countryLabel = document.getElementById('lblCountry');
-    if (countryLabel) {
-        countryLabel.textContent = t.country || 'Country';
-    }
+    if (countryLabel) countryLabel.textContent = t.country || 'Country';
     
     // Temporary Address Texts
-    dom.lblTempAddressCheck.textContent = t.tempAddressCheck;
-    dom.txtTempTooltip.textContent = t.tempTooltip;
+    if (dom.lblTempAddressCheck) dom.lblTempAddressCheck.textContent = t.tempAddressCheck;
+    if (dom.txtTempTooltip) dom.txtTempTooltip.textContent = t.tempTooltip;
     
-    dom.lblTempAddress.textContent = t.tempAddress;
-    dom.tempAddress.placeholder = t.addressPlaceholder;
+    if (dom.lblTempAddress) dom.lblTempAddress.textContent = t.tempAddress;
+    if (dom.tempAddress) dom.tempAddress.placeholder = t.addressPlaceholder;
     
-    dom.lblTempZipCode.textContent = t.tempZipCode;
-    dom.tempZipCode.placeholder = t.placeholderZip;
+    if (dom.lblTempZipCode) dom.lblTempZipCode.textContent = t.tempZipCode;
+    if (dom.tempZipCode) dom.tempZipCode.placeholder = t.placeholderZip;
     
-    dom.lblTempCity.textContent = t.tempCity;
-    dom.tempCity.placeholder = t.placeholderCity;
+    if (dom.lblTempCity) dom.lblTempCity.textContent = t.tempCity;
+    if (dom.tempCity) dom.tempCity.placeholder = t.placeholderCity;
     
-    document.getElementById('lblZipCode').textContent = t.zipCode;
-    dom.zipCode.placeholder = t.placeholderZip;
+    const lblZipCode = document.getElementById('lblZipCode');
+    if (lblZipCode) lblZipCode.textContent = t.zipCode;
+    if (dom.zipCode) dom.zipCode.placeholder = t.placeholderZip;
     
-    document.getElementById('lblCity').textContent = t.city;
-    dom.city.placeholder = t.placeholderCity;
+    const lblCity = document.getElementById('lblCity');
+    if (lblCity) lblCity.textContent = t.city;
+    if (dom.city) dom.city.placeholder = t.placeholderCity;
 
     const phoneCodeLabel = document.getElementById('lblPhoneCode');
-    if (phoneCodeLabel) {
-        phoneCodeLabel.textContent = t.phoneCode || 'Calling code';
-    }
+    if (phoneCodeLabel) phoneCodeLabel.textContent = t.phoneCode || 'Calling code';
     
-    document.getElementById('lblPhone').textContent = t.phone;
-    dom.phone.placeholder = t.placeholderPhone;
+    const lblPhone = document.getElementById('lblPhone');
+    if (lblPhone) lblPhone.textContent = t.phone;
+    if (dom.phone) dom.phone.placeholder = t.placeholderPhone;
 
     const lblPhone2 = document.getElementById('lblPhone2');
     if (lblPhone2) lblPhone2.textContent = t.phone2 || '2nd phone (optional)';
