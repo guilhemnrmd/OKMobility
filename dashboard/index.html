@@ -529,6 +529,7 @@
                                 <option value="text">Texte court</option>
                                 <option value="email">E-mail</option>
                                 <option value="tel">Téléphone</option>
+                                <option value="address_block">Bloc Adresse complet</option>
                             </select>
                         </div>
                     `;
@@ -585,6 +586,9 @@
                     break;
                 case 'tel':
                     newField = { id: baseId, label: 'Téléphone supplémentaire', type: 'tel', icon: 'bx-phone', required: false, system: false };
+                    break;
+                case 'address_block':
+                    newField = { id: 'address_block_' + Date.now(), label: 'Bloc Adresse complet', type: 'address_block', icon: 'bx-map', required: false, system: false };
                     break;
                 case 'text':
                 default:

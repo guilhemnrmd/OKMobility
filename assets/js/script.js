@@ -546,6 +546,75 @@ function renderDynamicFields(fields) {
                     renderFields(field.children, innerDiv);
                 }
                 
+            } else if (field.type === 'address_block') {
+                // Custom Address Block
+                const wrap = document.createElement('div');
+                wrap.className = 'form-group-row';
+                wrap.style.cssText = 'animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); flex-direction: column; gap: 1rem; width: 100%;';
+                
+                // Address input
+                const addressWrap = document.createElement('div');
+                addressWrap.className = 'input-wrapper address-wrapper';
+                addressWrap.innerHTML = `
+                    <label for="${field.id}_addr" id="lbl_${field.id}_addr">${field.label || 'Adresse'}</label>
+                    <div class="input-with-icon">
+                        <i class='bx bx-map-pin'></i>
+                        <input type="text" id="${field.id}_addr" name="${field.id}_addr" placeholder="123 Rue de la Paix" autocomplete="off">
+                    </div>
+                    <ul class="address-suggestions" id="${field.id}_sugg" role="listbox"></ul>
+                `;
+                
+                // Zip + City row
+                const row = document.createElement('div');
+                row.className = 'form-group-row';
+                
+                const zipWrap = document.createElement('div');
+                zipWrap.className = 'input-wrapper zip-wrapper';
+                zipWrap.innerHTML = `
+                    <label for="${field.id}_zip">Code Postal</label>
+                    <div class="input-with-icon">
+                        <i class='bx bx-hash'></i>
+                        <input type="text" id="${field.id}_zip" name="${field.id}_zip" placeholder="75000">
+                    </div>
+                `;
+                
+                const cityWrap = document.createElement('div');
+                cityWrap.className = 'input-wrapper city-wrapper';
+                cityWrap.innerHTML = `
+                    <label for="${field.id}_city">Ville</label>
+                    <div class="input-with-icon">
+                        <i class='bx bx-buildings'></i>
+                        <input type="text" id="${field.id}_city" name="${field.id}_city" placeholder="Paris">
+                    </div>
+                `;
+                
+                if (field.required) {
+                    addressWrap.querySelector('input').dataset.req = 'true';
+                    zipWrap.querySelector('input').dataset.req = 'true';
+                    cityWrap.querySelector('input').dataset.req = 'true';
+                    addressWrap.querySelector('input').required = true;
+                    zipWrap.querySelector('input').required = true;
+                    cityWrap.querySelector('input').required = true;
+                }
+                
+                row.appendChild(zipWrap);
+                row.appendChild(cityWrap);
+                wrap.appendChild(addressWrap);
+                wrap.appendChild(row);
+                parentElement.appendChild(wrap);
+                
+                // We must bind autocomplete after the element is in the DOM
+                setTimeout(() => {
+                    const inputEl = document.getElementById(`${field.id}_addr`);
+                    const listEl = document.getElementById(`${field.id}_sugg`);
+                    const zipEl = document.getElementById(`${field.id}_zip`);
+                    const cityEl = document.getElementById(`${field.id}_city`);
+                    // Find the nearest overflow-hidden wrapper (e.g. the toggle inner div)
+                    const overflowEl = inputEl.closest('.temp-address-content-inner');
+                    if (window.bindAddressField) {
+                        window.bindAddressField(inputEl, listEl, zipEl, cityEl, null, overflowEl);
+                    }
+                }, 0);
             } else {
                 // Custom field
                 const wrapper = document.createElement('div');
@@ -582,8 +651,6 @@ function renderDynamicFields(fields) {
                 // Store required status via dataset because if inside a toggle, it only becomes required when toggle is active
                 if (field.required) {
                     input.dataset.req = 'true';
-                    // If it's not inside an inactive toggle group, make it required now
-                    // For simplicity, we make it required. The toggle logic removes it if unchecked.
                     input.required = true;
                 }
 
@@ -2162,71 +2229,69 @@ function renderAddressSuggestions(features, listEl, onSelect, closeList) {
     listEl.classList.add('open');
 }
 
+window.bindAddressField = function(inputEl, listEl, zipEl, cityEl, countryEl, overflowEl) {
+    if (!inputEl || !listEl) return;
+    let timer = null;
+
+    function closeList() {
+        listEl.classList.remove('open');
+        if (overflowEl) {
+            listEl.addEventListener('transitionend', () => {
+                overflowEl.style.overflow = '';
+            }, { once: true });
+        }
+    }
+
+    inputEl.addEventListener('input', () => {
+        const q = inputEl.value.trim();
+        clearTimeout(timer);
+        if (q.length < 3) { closeList(); return; }
+        timer = setTimeout(async () => {
+            try {
+                // If it's the main input, try to bias by currently selected country
+                const countryCode = (inputEl === dom.address && state.countrySelectedManually) ? (dom.country?.value || '') : '';
+                let features = await fetchPhotonSuggestions(q, state.lang);
+                if (countryCode) {
+                    features = features.filter(f =>
+                        (f.properties?.countrycode || '').toLowerCase() === countryCode.toLowerCase()
+                    );
+                }
+                if (overflowEl) overflowEl.style.overflow = 'visible';
+                renderAddressSuggestions(features, listEl, (formatted, props) => {
+                    inputEl.value = formatted;
+                    const zip  = props.postcode || '';
+                    const city = props.city || props.town || props.village || '';
+                    
+                    if (zip && zipEl) zipEl.value = zip;
+                    if (city && cityEl) cityEl.value = city;
+                    
+                    if (countryEl) {
+                        const cc = (props.countrycode || props.country_code || '').toUpperCase();
+                        if (cc && countryEl.value !== cc) {
+                            countryEl.value = cc;
+                            countryEl.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    }
+                    debouncedSendToAdvisor();
+                }, closeList);
+                if (overflowEl && !listEl.classList.contains('open')) overflowEl.style.overflow = '';
+            } catch (_) { /* silent */ }
+        }, 380);
+    });
+
+    inputEl.addEventListener('blur',    () => setTimeout(() => closeList(), 160));
+    inputEl.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeList(); });
+};
+
 function initAddressAutocomplete() {
     const mainInput  = dom.address;
     const mainList   = document.getElementById('addressSuggestions');
     const tempInput  = dom.tempAddress;
     const tempList   = document.getElementById('tempAddressSuggestions');
+    const tempInner  = document.querySelector('.temp-address-content-inner');
 
-    // overflowEl: .temp-address-content-inner has overflow:hidden for its slide animation;
-    // temporarily set to visible while suggestions are open so they aren't clipped.
-    function bindField(inputEl, listEl, getCountry, overflowEl) {
-        if (!inputEl || !listEl) return;
-        let timer = null;
-
-        function closeList() {
-            listEl.classList.remove('open');
-            if (overflowEl) {
-                listEl.addEventListener('transitionend', () => {
-                    overflowEl.style.overflow = '';
-                }, { once: true });
-            }
-        }
-
-        inputEl.addEventListener('input', () => {
-            const q = inputEl.value.trim();
-            clearTimeout(timer);
-            if (q.length < 3) { closeList(); return; }
-            timer = setTimeout(async () => {
-                try {
-                    const countryCode = getCountry ? getCountry() : '';
-                    let features = await fetchPhotonSuggestions(q, state.lang);
-                    if (countryCode) {
-                        features = features.filter(f =>
-                            (f.properties?.countrycode || '').toLowerCase() === countryCode.toLowerCase()
-                        );
-                    }
-                    if (overflowEl) overflowEl.style.overflow = 'visible';
-                    renderAddressSuggestions(features, listEl, (formatted, props) => {
-                        inputEl.value = formatted;
-                        const zip  = props.postcode || '';
-                        const city = props.city || props.town || props.village || '';
-                        if (inputEl === mainInput) {
-                            if (zip  && dom.zipCode)  dom.zipCode.value  = zip;
-                            if (city && dom.city)      dom.city.value     = city;
-                            const cc = (props.countrycode || props.country_code || '').toUpperCase();
-                            if (cc && dom.country && dom.country.value !== cc) {
-                                dom.country.value = cc;
-                                dom.country.dispatchEvent(new Event('change', { bubbles: true }));
-                            }
-                        } else {
-                            if (zip  && dom.tempZipCode)  dom.tempZipCode.value  = zip;
-                            if (city && dom.tempCity)      dom.tempCity.value     = city;
-                        }
-                        debouncedSendToAdvisor();
-                    }, closeList);
-                    if (overflowEl && !listEl.classList.contains('open')) overflowEl.style.overflow = '';
-                } catch (_) { /* network error — silent */ }
-            }, 380);
-        });
-
-        inputEl.addEventListener('blur',    () => setTimeout(() => closeList(), 160));
-        inputEl.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeList(); });
-    }
-
-    const tempInner = document.querySelector('.temp-address-content-inner');
-    bindField(mainInput, mainList, () => state.countrySelectedManually ? (dom.country?.value || '') : '');
-    bindField(tempInput, tempList, null, tempInner);
+    window.bindAddressField(mainInput, mainList, dom.zipCode, dom.city, dom.country, null);
+    window.bindAddressField(tempInput, tempList, dom.tempZipCode, dom.tempCity, null, tempInner);
 }
 
 // Initialize
