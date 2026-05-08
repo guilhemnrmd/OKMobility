@@ -522,9 +522,15 @@
                     addBtnWrap.style.marginLeft = '40px';
                     addBtnWrap.style.marginBottom = '16px';
                     addBtnWrap.innerHTML = `
-                        <button type="button" class="btn-secondary-sm" onclick="addFieldToGroup(${index})">
-                            <i class='bx bx-plus'></i> Ajouter un champ texte à ce groupe
-                        </button>
+                        <div class="input-with-icon" style="max-width: 250px; display: inline-flex;">
+                            <i class='bx bx-plus' style="left: 1rem; color: var(--color-accent);"></i>
+                            <select class="field-input" style="padding-left: 2.5rem; color: var(--color-accent); font-weight: 500; cursor: pointer; border-color: rgba(var(--color-accent-rgb), 0.3);" onchange="if(this.value) { addFieldToGroup(${index}, this.value); this.value=''; }">
+                                <option value="">Ajouter un champ au groupe...</option>
+                                <option value="text">Texte court</option>
+                                <option value="email">E-mail</option>
+                                <option value="tel">Téléphone</option>
+                            </select>
+                        </div>
                     `;
                     container.appendChild(addBtnWrap);
                 }
@@ -567,9 +573,26 @@
             renderFieldsList();
         };
 
-        window.addFieldToGroup = function(parentIndex) {
+        window.addFieldToGroup = function(parentIndex, type) {
             if (!formFields[parentIndex].children) formFields[parentIndex].children = [];
-            formFields[parentIndex].children.push({ id: 'custom_' + Date.now(), label: 'Nouveau champ', type: 'text', icon: 'bx-text', required: false, system: false });
+            
+            const baseId = 'custom_' + Date.now();
+            let newField;
+            
+            switch(type) {
+                case 'email':
+                    newField = { id: baseId, label: 'E-mail supplémentaire', type: 'email', icon: 'bx-envelope', required: false, system: false };
+                    break;
+                case 'tel':
+                    newField = { id: baseId, label: 'Téléphone supplémentaire', type: 'tel', icon: 'bx-phone', required: false, system: false };
+                    break;
+                case 'text':
+                default:
+                    newField = { id: baseId, label: 'Nouveau champ texte', type: 'text', icon: 'bx-text', required: false, system: false };
+                    break;
+            }
+            
+            formFields[parentIndex].children.push(newField);
             renderFieldsList();
         };
 
