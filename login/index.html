@@ -4,130 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="robots" content="noindex, nofollow">
-    <title>Connexion — OKMobility Platform</title>
+    <title>Connexion — MobilityOS</title>
     <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
     <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
-    <link rel="stylesheet" href="/style.css?v=47">
-    <style>
-        .platform-wordmark {
-            display: flex; align-items: center; gap: 10px; text-decoration: none;
-        }
-        .platform-wordmark i { font-size: 1.4rem; color: var(--color-accent); }
-        .platform-wordmark span {
-            font-family: var(--font-family-display);
-            font-weight: 700; font-size: 1.05rem; color: var(--color-text-primary);
-        }
-        .alert-banner {
-            padding: 12px 16px; border-radius: var(--radius-md);
-            font-size: 0.875rem; font-weight: 500; margin-bottom: var(--spacing-sm); display: none;
-        }
-        .alert-error { background: rgba(255,107,107,0.12); color: var(--color-error); border: 1px solid rgba(255,107,107,0.25); }
-        .alert-success { background: rgba(52,199,89,0.1); color: var(--color-success); border: 1px solid rgba(52,199,89,0.25); }
-        .btn-full { width: 100%; justify-content: center; }
-        .btn-spinner { animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .btn-toggle-password {
-            position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
-            background: none; border: none; color: var(--color-text-secondary);
-            cursor: pointer; padding: 4px; display: flex; align-items: center;
-            font-size: 1.1rem; transition: color var(--transition-base);
-        }
-        .btn-toggle-password:hover { color: var(--color-accent); }
-        .form-footer-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: var(--spacing-sm);
-        }
-        .form-footer-row a {
-            font-size: 0.85rem;
-            color: var(--color-accent);
-            text-decoration: none;
-        }
-        .form-footer-row a:hover { text-decoration: underline; }
-        .page-footer-link {
-            text-align: center; margin-top: var(--spacing-sm);
-            font-size: 0.875rem; color: var(--color-text-secondary);
-        }
-        .page-footer-link a {
-            color: var(--color-accent); text-decoration: none; font-weight: 500;
-        }
-        .page-footer-link a:hover { text-decoration: underline; }
-        .header-nav-link {
-            font-size: 0.875rem; color: var(--color-text-secondary); text-decoration: none;
-            font-weight: 500; padding: 8px 16px; border-radius: var(--radius-md);
-            transition: background var(--transition-base), color var(--transition-base);
-        }
-        .header-nav-link:hover { background: rgba(32,84,234,0.07); color: var(--color-accent); }
-    </style>
+    <link rel="stylesheet" href="/b2b.css">
+    <link rel="stylesheet" href="/auth/auth.css">
 </head>
 <body>
 
-    <div class="ambient-background">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
-    </div>
+    <header class="b2b-nav auth-nav">
+        <div class="nav-brand"><a href="/">MobilityOS</a></div>
+        <div class="nav-controls">
+            <a href="/signup/" class="nav-link">Créer un compte</a>
+        </div>
+    </header>
 
-    <main class="glass-container" style="max-width:460px;">
+    <main class="auth-page">
+        <section class="auth-card">
 
-        <header class="glass-header">
-            <div class="header-brand">
-                <a href="/" class="platform-wordmark">
-                    <i class='bx bx-grid-alt'></i>
-                    <span>OKMobility Platform</span>
-                </a>
-            </div>
-            <div class="header-controls">
-                <a href="/signup/" class="header-nav-link">Créer un compte</a>
-            </div>
-        </header>
+            <h1 class="auth-title">Bon retour.</h1>
+            <p class="auth-subtitle">Connectez-vous à votre espace MobilityOS.</p>
 
-        <section class="form-content">
+            <div id="alertBanner" class="alert"></div>
 
-            <div class="title-wrapper">
-                <h1 class="gradient-text">Connexion</h1>
-            </div>
+            <form id="loginForm" class="auth-form" novalidate>
 
-            <div id="alertBanner" class="alert-banner"></div>
-
-            <form id="loginForm" class="modern-form" novalidate>
-
-                <div class="input-group">
-                    <label class="input-label" for="inputEmail">Adresse email</label>
-                    <div class="input-wrapper">
-                        <i class='bx bx-envelope input-icon'></i>
-                        <input type="email" id="inputEmail" class="modern-input"
+                <div class="field">
+                    <label class="field-label" for="inputEmail">Adresse email</label>
+                    <div class="field-input-wrap">
+                        <input type="email" id="inputEmail" class="field-input"
                                placeholder="jean@monagence.com" autocomplete="email" required>
+                        <i class='bx bx-envelope field-icon'></i>
                     </div>
                 </div>
 
-                <div class="input-group">
-                    <label class="input-label" for="inputPassword">Mot de passe</label>
-                    <div class="input-wrapper" style="position:relative;">
-                        <i class='bx bx-lock-alt input-icon'></i>
-                        <input type="password" id="inputPassword" class="modern-input"
+                <div class="field">
+                    <label class="field-label" for="inputPassword">Mot de passe</label>
+                    <div class="field-input-wrap">
+                        <input type="password" id="inputPassword" class="field-input"
                                placeholder="••••••••" autocomplete="current-password" required
-                               style="padding-right: 48px;">
-                        <button type="button" class="btn-toggle-password" aria-label="Afficher le mot de passe">
+                               style="padding-right: 3rem;">
+                        <i class='bx bx-lock-alt field-icon'></i>
+                        <button type="button" class="btn-toggle-pwd" aria-label="Afficher">
                             <i class='bx bx-show' id="eyeIcon"></i>
                         </button>
                     </div>
                 </div>
 
-                <div class="form-footer-row">
-                    <span></span>
-                    <a href="#">Mot de passe oublié ?</a>
-                </div>
-
-                <button type="submit" id="btnSubmit" class="btn-primary btn-full">
+                <button type="submit" id="btnSubmit" class="btn-submit">
                     <span id="btnText">Se connecter</span>
                     <i class='bx bx-loader-alt btn-spinner' id="btnSpinner" style="display:none"></i>
                 </button>
 
             </form>
 
-            <p class="page-footer-link">Pas encore de compte ? <a href="/signup/">Essai gratuit 30 jours</a></p>
+            <p class="auth-footer">Pas encore de compte ? <a href="/signup/">Essai gratuit 30 jours</a></p>
 
         </section>
     </main>
@@ -136,9 +67,7 @@
         // Redirect if already authenticated
         fetch('/api/auth/session')
             .then(r => r.json())
-            .then(data => {
-                if (data.authenticated) window.location.href = '/dashboard/';
-            })
+            .then(data => { if (data.authenticated) window.location.href = '/dashboard/'; })
             .catch(() => {});
 
         const params = new URLSearchParams(window.location.search);
@@ -146,40 +75,33 @@
             showAlert('Votre session a expiré. Veuillez vous reconnecter.', 'error');
         }
 
-        document.querySelector('.btn-toggle-password').addEventListener('click', () => {
+        document.querySelector('.btn-toggle-pwd').addEventListener('click', () => {
             const input = document.getElementById('inputPassword');
             const icon = document.getElementById('eyeIcon');
-            const isHidden = input.type === 'password';
-            input.type = isHidden ? 'text' : 'password';
-            icon.className = isHidden ? 'bx bx-hide' : 'bx bx-show';
+            const hidden = input.type === 'password';
+            input.type = hidden ? 'text' : 'password';
+            icon.className = hidden ? 'bx bx-hide' : 'bx bx-show';
         });
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const email = document.getElementById('inputEmail').value.trim();
             const password = document.getElementById('inputPassword').value;
-
             if (!email || !password) {
                 showAlert('Veuillez remplir tous les champs.', 'error');
                 return;
             }
-
             setLoading(true);
             hideAlert();
-
             try {
                 const res = await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password }),
                 });
-
                 const data = await res.json();
-
                 if (res.ok) {
-                    const next = params.get('next');
-                    window.location.href = next || '/dashboard/';
+                    window.location.href = params.get('next') || '/dashboard/';
                 } else {
                     showAlert(data.error || 'Identifiants incorrects.', 'error');
                 }
@@ -196,16 +118,13 @@
             document.getElementById('btnText').textContent = on ? 'Connexion…' : 'Se connecter';
             document.getElementById('btnSpinner').style.display = on ? 'inline-block' : 'none';
         }
-
         function showAlert(msg, type) {
             const el = document.getElementById('alertBanner');
             el.textContent = msg;
-            el.className = `alert-banner alert-${type}`;
-            el.style.display = 'block';
+            el.className = `alert alert-${type} show`;
         }
-
         function hideAlert() {
-            document.getElementById('alertBanner').style.display = 'none';
+            document.getElementById('alertBanner').className = 'alert';
         }
     </script>
 </body>

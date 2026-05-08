@@ -4,199 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="robots" content="noindex, nofollow">
-    <title>Créer un compte — OKMobility Platform</title>
+    <title>Créer un compte — MobilityOS</title>
     <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
     <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
-    <link rel="stylesheet" href="/style.css?v=47">
-    <style>
-        .platform-wordmark {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-        }
-        .platform-wordmark i {
-            font-size: 1.4rem;
-            color: var(--color-accent);
-        }
-        .platform-wordmark span {
-            font-family: var(--font-family-display);
-            font-weight: 700;
-            font-size: 1.05rem;
-            color: var(--color-text-primary);
-            letter-spacing: -0.01em;
-        }
-        .form-subtitle {
-            font-size: 0.9rem;
-            color: var(--color-text-secondary);
-            margin-top: 6px;
-        }
-        .trial-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(32, 84, 234, 0.08);
-            color: var(--color-accent);
-            padding: 5px 12px;
-            border-radius: 50px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-top: var(--spacing-xs);
-            border: 1px solid rgba(32, 84, 234, 0.15);
-        }
-        .alert-banner {
-            padding: 12px 16px;
-            border-radius: var(--radius-md);
-            font-size: 0.875rem;
-            font-weight: 500;
-            margin-bottom: var(--spacing-sm);
-            display: none;
-        }
-        .alert-error {
-            background: rgba(255, 107, 107, 0.12);
-            color: var(--color-error);
-            border: 1px solid rgba(255, 107, 107, 0.25);
-        }
-        .alert-success {
-            background: rgba(52, 199, 89, 0.1);
-            color: var(--color-success);
-            border: 1px solid rgba(52, 199, 89, 0.25);
-        }
-        .terms-row {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            margin: var(--spacing-xs) 0 var(--spacing-sm);
-        }
-        .terms-row input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--color-accent);
-            flex-shrink: 0;
-            margin-top: 2px;
-            cursor: pointer;
-        }
-        .terms-row label {
-            font-size: 0.85rem;
-            color: var(--color-text-secondary);
-            line-height: 1.5;
-            cursor: pointer;
-        }
-        .terms-row a {
-            color: var(--color-accent);
-            text-decoration: none;
-        }
-        .terms-row a:hover { text-decoration: underline; }
-        .btn-full { width: 100%; justify-content: center; }
-        .page-footer-link {
-            text-align: center;
-            margin-top: var(--spacing-sm);
-            font-size: 0.875rem;
-            color: var(--color-text-secondary);
-        }
-        .page-footer-link a {
-            color: var(--color-accent);
-            text-decoration: none;
-            font-weight: 500;
-        }
-        .page-footer-link a:hover { text-decoration: underline; }
-        .btn-spinner {
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .header-nav-link {
-            font-size: 0.875rem;
-            color: var(--color-text-secondary);
-            text-decoration: none;
-            font-weight: 500;
-            padding: 8px 16px;
-            border-radius: var(--radius-md);
-            transition: background var(--transition-base), color var(--transition-base);
-        }
-        .header-nav-link:hover {
-            background: rgba(32,84,234,0.07);
-            color: var(--color-accent);
-        }
-    </style>
+    <link rel="stylesheet" href="/b2b.css">
+    <link rel="stylesheet" href="/auth/auth.css">
 </head>
 <body>
 
-    <div class="ambient-background">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
-    </div>
+    <header class="b2b-nav auth-nav">
+        <div class="nav-brand"><a href="/">MobilityOS</a></div>
+        <div class="nav-controls">
+            <a href="/login/" class="nav-link">Se connecter</a>
+        </div>
+    </header>
 
-    <main class="glass-container" style="max-width:460px;">
+    <main class="auth-page">
+        <section class="auth-card">
 
-        <header class="glass-header">
-            <div class="header-brand">
-                <a href="/" class="platform-wordmark">
-                    <i class='bx bx-grid-alt'></i>
-                    <span>OKMobility Platform</span>
-                </a>
-            </div>
-            <div class="header-controls">
-                <a href="/login/" class="header-nav-link">Se connecter</a>
-            </div>
-        </header>
+            <span class="trial-pill">
+                <i class='bx bx-gift'></i>
+                30 jours d'essai — sans CB
+            </span>
 
-        <section class="form-content">
+            <h1 class="auth-title">Créez votre compte.</h1>
+            <p class="auth-subtitle">Bienvenue sur MobilityOS. Activez votre licence d'essai en quelques secondes.</p>
 
-            <div class="title-wrapper">
-                <h1 class="gradient-text">Créez votre compte</h1>
-                <div class="trial-badge">
-                    <i class='bx bx-gift'></i>
-                    30 jours d'essai gratuit
-                </div>
-            </div>
+            <div id="alertBanner" class="alert"></div>
 
-            <div id="alertBanner" class="alert-banner"></div>
+            <form id="signupForm" class="auth-form" novalidate>
 
-            <form id="signupForm" class="modern-form" novalidate>
-
-                <div class="input-group">
-                    <label class="input-label" for="inputName">Nom complet</label>
-                    <div class="input-wrapper">
-                        <i class='bx bx-user input-icon'></i>
-                        <input type="text" id="inputName" name="name" class="modern-input"
+                <div class="field">
+                    <label class="field-label" for="inputName">Nom complet</label>
+                    <div class="field-input-wrap">
+                        <input type="text" id="inputName" name="name" class="field-input"
                                placeholder="Jean Dupont" autocomplete="name" required>
+                        <i class='bx bx-user field-icon'></i>
                     </div>
                 </div>
 
-                <div class="input-group">
-                    <label class="input-label" for="inputEmail">Adresse email professionnelle</label>
-                    <div class="input-wrapper">
-                        <i class='bx bx-envelope input-icon'></i>
-                        <input type="email" id="inputEmail" name="email" class="modern-input"
+                <div class="field">
+                    <label class="field-label" for="inputEmail">Email professionnel</label>
+                    <div class="field-input-wrap">
+                        <input type="email" id="inputEmail" name="email" class="field-input"
                                placeholder="jean@monagence.com" autocomplete="email" required>
+                        <i class='bx bx-envelope field-icon'></i>
                     </div>
                 </div>
 
-                <div class="input-group">
-                    <label class="input-label" for="inputCompany">Nom de votre agence</label>
-                    <div class="input-wrapper">
-                        <i class='bx bx-building input-icon'></i>
-                        <input type="text" id="inputCompany" name="company" class="modern-input"
+                <div class="field">
+                    <label class="field-label" for="inputCompany">Nom de votre agence</label>
+                    <div class="field-input-wrap">
+                        <input type="text" id="inputCompany" name="company" class="field-input"
                                placeholder="Mon Agence Automobile" autocomplete="organization" required>
+                        <i class='bx bx-building field-icon'></i>
                     </div>
                 </div>
 
                 <div class="terms-row">
                     <input type="checkbox" id="inputTerms" required>
-                    <label for="inputTerms">
-                        J'accepte les <a href="#">conditions d'utilisation</a> et la <a href="#">politique de confidentialité</a>
-                    </label>
+                    <label for="inputTerms">J'accepte les <a href="#">conditions d'utilisation</a> et la <a href="#">politique de confidentialité</a>.</label>
                 </div>
 
-                <button type="submit" id="btnSubmit" class="btn-primary btn-full">
+                <button type="submit" id="btnSubmit" class="btn-submit">
                     <span id="btnText">Créer mon compte d'essai</span>
                     <i class='bx bx-loader-alt btn-spinner' id="btnSpinner" style="display:none"></i>
                 </button>
 
             </form>
 
-            <p class="page-footer-link">Déjà un compte ? <a href="/login/">Se connecter</a></p>
+            <p class="auth-footer">Déjà un compte ? <a href="/login/">Se connecter</a></p>
 
         </section>
     </main>
@@ -210,9 +87,9 @@
 
         const params = new URLSearchParams(window.location.search);
         if (params.get('error') === 'invalid_token') {
-            showAlert('Lien invalide. Veuillez recommencer l\'inscription.', 'error');
+            showAlert("Lien invalide. Veuillez recommencer l'inscription.", 'error');
         } else if (params.get('error') === 'expired_token') {
-            showAlert('Votre lien de vérification a expiré (valable 24h). Veuillez recommencer.', 'error');
+            showAlert('Votre lien de vérification a expiré (24h). Veuillez recommencer.', 'error');
         }
 
         form.addEventListener('submit', async (e) => {
@@ -228,7 +105,7 @@
                 return;
             }
             if (!terms) {
-                showAlert('Veuillez accepter les conditions d\'utilisation.', 'error');
+                showAlert("Veuillez accepter les conditions d'utilisation.", 'error');
                 return;
             }
 
@@ -241,19 +118,16 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, email, company }),
                 });
-
                 const data = await res.json();
-
                 if (res.ok) {
-                    // Dev: if no email service configured, show the link
                     if (data._devVerifyUrl) {
-                        showAlert('Mode dev : ' + data._devVerifyUrl, 'success');
+                        showAlert('Mode dev — lien de vérification : ' + data._devVerifyUrl, 'success');
                         setLoading(false);
                         return;
                     }
                     window.location.href = `/signup/check-email/?email=${encodeURIComponent(email)}`;
                 } else {
-                    showAlert(data.error || 'Une erreur est survenue. Veuillez réessayer.', 'error');
+                    showAlert(data.error || 'Une erreur est survenue.', 'error');
                 }
             } catch {
                 showAlert('Erreur de connexion. Veuillez réessayer.', 'error');
@@ -264,19 +138,14 @@
 
         function setLoading(on) {
             btnSubmit.disabled = on;
-            btnText.textContent = on ? 'Envoi en cours…' : 'Créer mon compte d\'essai';
+            btnText.textContent = on ? 'Envoi…' : "Créer mon compte d'essai";
             btnSpinner.style.display = on ? 'inline-block' : 'none';
         }
-
         function showAlert(msg, type) {
             alertBanner.textContent = msg;
-            alertBanner.className = `alert-banner alert-${type}`;
-            alertBanner.style.display = 'block';
+            alertBanner.className = `alert alert-${type} show`;
         }
-
-        function hideAlert() {
-            alertBanner.style.display = 'none';
-        }
+        function hideAlert() { alertBanner.className = 'alert'; }
     </script>
 </body>
 </html>

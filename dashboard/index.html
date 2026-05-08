@@ -4,46 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="robots" content="noindex, nofollow">
-    <title>Tableau de bord — OKMobility Platform</title>
+    <title>Tableau de bord — MobilityOS</title>
     <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
     <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
-    <link rel="stylesheet" href="/style.css?v=47">
-    <link rel="stylesheet" href="/dashboard/dashboard.css?v=1">
+    <link rel="stylesheet" href="/b2b.css">
+    <link rel="stylesheet" href="/auth/auth.css">
+    <link rel="stylesheet" href="/dashboard/dashboard.css">
 </head>
 <body class="dashboard-page">
 
-    <div class="ambient-background">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
-    </div>
-
     <div class="dashboard-wrapper">
 
-        <!-- ── Sidebar ─────────────────────────────────────── -->
+        <!-- ── Sidebar ─────────────────────────────────────────── -->
         <aside class="dashboard-sidebar">
 
-            <a href="/" class="sidebar-logo">
-                <i class='bx bx-grid-alt'></i>
-                <span>OKMobility Platform</span>
+            <a href="/" class="sidebar-brand">
+                <span>MobilityOS</span>
             </a>
 
             <nav class="sidebar-nav" role="navigation">
-                <button class="nav-item active" data-tab="profile" aria-label="Profil">
-                    <i class='bx bx-user'></i>
-                    <span>Profil</span>
+                <button class="nav-item active" data-tab="profile">
+                    <i class='bx bx-user'></i><span>Profil</span>
                 </button>
-                <button class="nav-item" data-tab="agencies" aria-label="Agences">
-                    <i class='bx bx-buildings'></i>
-                    <span>Agences</span>
+                <button class="nav-item" data-tab="agencies">
+                    <i class='bx bx-buildings'></i><span>Agences</span>
                 </button>
-                <button class="nav-item" data-tab="customization" aria-label="Personnalisation">
-                    <i class='bx bx-palette'></i>
-                    <span>Personnalisation</span>
+                <button class="nav-item" data-tab="customization">
+                    <i class='bx bx-palette'></i><span>Personnalisation</span>
                 </button>
-                <button class="nav-item" data-tab="contact" aria-label="Contact">
-                    <i class='bx bx-headphone'></i>
-                    <span>Contact</span>
+                <button class="nav-item" data-tab="contact">
+                    <i class='bx bx-headphone'></i><span>Contact</span>
                 </button>
             </nav>
 
@@ -59,71 +49,70 @@
             </div>
         </aside>
 
-        <!-- ── Main Content ────────────────────────────────── -->
+        <!-- ── Main ────────────────────────────────────────────── -->
         <main class="dashboard-main">
 
-            <!-- Trial Banner -->
             <div class="trial-banner" id="trialBanner" style="display:none">
                 <i class='bx bx-time-five'></i>
                 <span id="trialBannerText">Votre période d'essai se termine dans <strong>30 jours</strong></span>
-                <a href="mailto:contact@okmobility.com" class="btn-upgrade">Passer à Pro</a>
+                <a href="mailto:contact@mobilityos.com" class="btn-upgrade">Passer à Pro</a>
             </div>
 
-            <!-- ── Tab: Profil ────────────────────────────── -->
+            <!-- ── Profil ────────────────────────────────────── -->
             <section class="tab-content active" id="tab-profile">
                 <div class="tab-header">
                     <h2>Informations personnelles</h2>
-                    <p>Gérez les informations de votre compte</p>
+                    <p>Gérez les informations de votre compte.</p>
                 </div>
 
-                <div class="glass-card">
+                <div class="dash-card">
                     <form id="profileForm" novalidate>
                         <div class="form-grid">
-                            <div class="input-group">
-                                <label class="input-label" for="profileName">Nom complet</label>
-                                <div class="input-wrapper">
-                                    <i class='bx bx-user input-icon'></i>
-                                    <input type="text" id="profileName" class="modern-input" placeholder="Jean Dupont" autocomplete="name">
+                            <div class="field">
+                                <label class="field-label" for="profileName">Nom complet</label>
+                                <div class="field-input-wrap">
+                                    <input type="text" id="profileName" class="field-input" placeholder="Jean Dupont" autocomplete="name">
+                                    <i class='bx bx-user field-icon'></i>
                                 </div>
                             </div>
-                            <div class="input-group">
-                                <label class="input-label" for="profileEmail">Adresse email</label>
-                                <div class="input-wrapper">
-                                    <i class='bx bx-envelope input-icon'></i>
-                                    <input type="email" id="profileEmail" class="modern-input" disabled style="opacity:0.6;">
+                            <div class="field">
+                                <label class="field-label" for="profileEmail">Adresse email</label>
+                                <div class="field-input-wrap">
+                                    <input type="email" id="profileEmail" class="field-input" disabled>
+                                    <i class='bx bx-envelope field-icon'></i>
                                 </div>
                             </div>
-                            <div class="input-group">
-                                <label class="input-label" for="profileCompany">Nom de l'entreprise</label>
-                                <div class="input-wrapper">
-                                    <i class='bx bx-building input-icon'></i>
-                                    <input type="text" id="profileCompany" class="modern-input" placeholder="Mon Agence" autocomplete="organization">
+                            <div class="field">
+                                <label class="field-label" for="profileCompany">Nom de l'entreprise</label>
+                                <div class="field-input-wrap">
+                                    <input type="text" id="profileCompany" class="field-input" placeholder="Mon Agence" autocomplete="organization">
+                                    <i class='bx bx-building field-icon'></i>
                                 </div>
                             </div>
-                            <div class="input-group">
-                                <label class="input-label" for="profilePhone">Téléphone</label>
-                                <div class="input-wrapper">
-                                    <i class='bx bx-phone input-icon'></i>
-                                    <input type="tel" id="profilePhone" class="modern-input" placeholder="+33 6 12 34 56 78" autocomplete="tel">
+                            <div class="field">
+                                <label class="field-label" for="profilePhone">Téléphone</label>
+                                <div class="field-input-wrap">
+                                    <input type="tel" id="profilePhone" class="field-input" placeholder="+33 6 12 34 56 78" autocomplete="tel">
+                                    <i class='bx bx-phone field-icon'></i>
                                 </div>
                             </div>
                         </div>
                         <div id="profileAlert" class="inline-alert"></div>
                         <div class="form-actions">
-                            <button type="submit" class="btn-primary" id="btnSaveProfile">
+                            <button type="submit" class="btn-primary-sm" id="btnSaveProfile">
                                 <span id="btnSaveProfileText">Enregistrer</span>
-                                <i class='bx bx-loader-alt' id="btnSaveProfileSpinner" style="display:none;animation:spin 0.8s linear infinite;"></i>
+                                <i class='bx bx-loader-alt btn-spinner' id="btnSaveProfileSpinner" style="display:none"></i>
                             </button>
                         </div>
                     </form>
                 </div>
             </section>
 
-            <!-- ── Tab: Agences ───────────────────────────── -->
+            <!-- ── Agences ───────────────────────────────────── -->
             <section class="tab-content" id="tab-agencies">
                 <div class="tab-header">
                     <h2>Mes agences</h2>
-                    <p>Gérez vos agences et leurs liens d'accès conseiller</p>
+                    <p>Gérez vos agences et leurs liens d'accès conseiller.</p>
                 </div>
 
                 <div id="agencyList"></div>
@@ -132,32 +121,23 @@
                     <i class='bx bx-plus'></i>
                     Ajouter une agence
                 </button>
-
-                <!-- Shown but not blocking during trial (dev mode) -->
-                <div style="display:none" id="agencyTrialNotice"
-                     class="trial-banner" style="margin-top:12px;">
-                    <i class='bx bx-info-circle'></i>
-                    <span>La création de plusieurs agences est réservée aux abonnés <strong>Pro</strong>. <a href="mailto:contact@okmobility.com" style="color:var(--color-accent);">Nous contacter</a></span>
-                </div>
             </section>
 
-            <!-- ── Tab: Personnalisation ──────────────────── -->
+            <!-- ── Personnalisation ──────────────────────────── -->
             <section class="tab-content" id="tab-customization">
                 <div class="tab-header">
                     <h2>Personnalisation du formulaire</h2>
-                    <p>Adaptez le formulaire client à votre agence</p>
+                    <p>Adaptez le formulaire client à votre agence.</p>
                 </div>
 
-                <!-- Basic settings (all plans) -->
-                <div class="glass-card">
+                <div class="dash-card">
                     <h3 class="card-title">Paramètres de base</h3>
                     <form id="customizationForm" novalidate>
 
-                        <div class="input-group">
-                            <label class="input-label" for="formLanguage">Langue par défaut du formulaire</label>
-                            <div class="input-wrapper">
-                                <i class='bx bx-globe input-icon'></i>
-                                <select id="formLanguage" class="modern-input">
+                        <div class="field" style="margin-bottom: 0.5rem;">
+                            <label class="field-label" for="formLanguage">Langue par défaut du formulaire</label>
+                            <div class="field-input-wrap">
+                                <select id="formLanguage" class="field-input">
                                     <option value="fr">Français</option>
                                     <option value="en">English</option>
                                     <option value="es">Español</option>
@@ -166,80 +146,79 @@
                                     <option value="de">Deutsch</option>
                                     <option value="nl">Nederlands</option>
                                 </select>
+                                <i class='bx bx-globe field-icon'></i>
                             </div>
                         </div>
 
-                        <div class="toggle-group">
+                        <div class="toggle-row">
                             <label class="toggle-label" for="formShowTempAddress">
                                 <span>Afficher le champ adresse temporaire</span>
-                                <div class="toggle-switch">
+                                <span class="toggle-switch">
                                     <input type="checkbox" id="formShowTempAddress">
                                     <span class="toggle-track"></span>
-                                </div>
+                                </span>
                             </label>
                         </div>
 
-                        <div class="toggle-group" style="border-bottom:none;">
+                        <div class="toggle-row">
                             <label class="toggle-label" for="formShowSecondPhone">
-                                <span>Afficher le 2ème numéro de téléphone</span>
-                                <div class="toggle-switch">
+                                <span>Afficher le 2ᵉ numéro de téléphone</span>
+                                <span class="toggle-switch">
                                     <input type="checkbox" id="formShowSecondPhone">
                                     <span class="toggle-track"></span>
-                                </div>
+                                </span>
                             </label>
                         </div>
 
                         <div id="customAlert" class="inline-alert"></div>
                         <div class="form-actions">
-                            <button type="submit" class="btn-primary" id="btnSaveCustom">
+                            <button type="submit" class="btn-primary-sm" id="btnSaveCustom">
                                 <span id="btnSaveCustomText">Enregistrer</span>
-                                <i class='bx bx-loader-alt' id="btnSaveCustomSpinner" style="display:none;animation:spin 0.8s linear infinite;"></i>
+                                <i class='bx bx-loader-alt btn-spinner' id="btnSaveCustomSpinner" style="display:none"></i>
                             </button>
                         </div>
                     </form>
                 </div>
 
-                <!-- Advanced settings — Pro only (shown but locked) -->
-                <div class="glass-card glass-card-locked">
+                <div class="dash-card dash-card-locked">
                     <div class="lock-overlay">
                         <div class="lock-content">
                             <i class='bx bx-crown'></i>
                             <h3>Personnalisation avancée</h3>
                             <p>Logo personnalisé, couleurs de marque, message d'accueil et domaine personnalisé.</p>
-                            <a href="mailto:contact@okmobility.com" class="btn-primary" style="text-decoration:none;">Passer à Pro</a>
+                            <a href="mailto:contact@mobilityos.com" class="btn-primary-sm" style="text-decoration:none;">Passer à Pro</a>
                         </div>
                     </div>
-                    <!-- Blurred preview content -->
                     <h3 class="card-title">Personnalisation avancée</h3>
-                    <div class="input-group" style="pointer-events:none;filter:blur(3px);">
-                        <label class="input-label">Logo personnalisé</label>
-                        <div class="input-wrapper">
-                            <i class='bx bx-image input-icon'></i>
-                            <input type="text" class="modern-input" placeholder="URL de votre logo" disabled>
+                    <div class="field" style="pointer-events:none;filter:blur(4px);margin-bottom:0.5rem;">
+                        <label class="field-label">Logo personnalisé</label>
+                        <div class="field-input-wrap">
+                            <input type="text" class="field-input" placeholder="URL de votre logo" disabled>
+                            <i class='bx bx-image field-icon'></i>
                         </div>
                     </div>
-                    <div class="input-group" style="pointer-events:none;filter:blur(3px);">
-                        <label class="input-label">Message d'accueil</label>
-                        <div class="input-wrapper">
-                            <i class='bx bx-message input-icon'></i>
-                            <input type="text" class="modern-input" placeholder="Bienvenue chez…" disabled>
+                    <div class="field" style="pointer-events:none;filter:blur(4px);">
+                        <label class="field-label">Message d'accueil client</label>
+                        <div class="field-input-wrap">
+                            <input type="text" class="field-input" placeholder="Bienvenue chez…" disabled>
+                            <i class='bx bx-message field-icon'></i>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- ── Tab: Contact ───────────────────────────── -->
+            <!-- ── Contact ───────────────────────────────────── -->
             <section class="tab-content" id="tab-contact">
                 <div class="tab-header">
-                    <h2>Contact & Support</h2>
+                    <h2>Contact & support</h2>
                     <p>Besoin d'aide ou souhaitez passer à une offre Pro ?</p>
                 </div>
 
-                <div class="glass-card">
+                <div class="dash-card">
                     <div class="contact-grid">
-                        <a href="mailto:contact@okmobility.com" class="contact-card">
+                        <a href="mailto:contact@mobilityos.com" class="contact-card">
                             <i class='bx bx-envelope'></i>
-                            <span>contact@okmobility.com</span>
+                            <span>contact@mobilityos.com</span>
                         </a>
                     </div>
                     <div class="plan-info-card" id="planInfoCard">
@@ -255,46 +234,39 @@
         </main>
     </div>
 
-    <!-- ── Add Agency Modal ─────────────────────────────── -->
+    <!-- ── Add Agency Modal ─────────────────────────────────── -->
     <div id="addAgencyModal" class="modal-overlay" style="display:none" aria-modal="true" role="dialog">
-        <div class="modal-content glass-card">
+        <div class="modal-content">
             <div class="modal-header">
                 <h3>Nouvelle agence</h3>
-                <button class="btn-icon" id="btnCloseAgencyModal" aria-label="Fermer">
+                <button class="btn-close" id="btnCloseAgencyModal" aria-label="Fermer">
                     <i class='bx bx-x'></i>
                 </button>
             </div>
             <div id="agencyModalAlert" class="inline-alert"></div>
             <form id="addAgencyForm" novalidate>
-                <div class="input-group">
-                    <label class="input-label" for="newAgencyName">Nom de l'agence</label>
-                    <div class="input-wrapper">
-                        <i class='bx bx-building input-icon'></i>
-                        <input type="text" id="newAgencyName" class="modern-input"
+                <div class="field">
+                    <label class="field-label" for="newAgencyName">Nom de l'agence</label>
+                    <div class="field-input-wrap">
+                        <input type="text" id="newAgencyName" class="field-input"
                                placeholder="Agence Paris Centre" required>
+                        <i class='bx bx-building field-icon'></i>
                     </div>
                 </div>
                 <div class="modal-actions">
-                    <button type="button" class="btn-secondary" id="btnCancelAgency">Annuler</button>
-                    <button type="submit" class="btn-primary" id="btnCreateAgency">
-                        <span id="btnCreateAgencyText">Créer l'agence</span>
-                        <i class='bx bx-loader-alt' id="btnCreateAgencySpinner" style="display:none;animation:spin 0.8s linear infinite;"></i>
+                    <button type="button" class="btn-secondary-sm" id="btnCancelAgency">Annuler</button>
+                    <button type="submit" class="btn-primary-sm" id="btnCreateAgency">
+                        <span id="btnCreateAgencyText">Créer</span>
+                        <i class='bx bx-loader-alt btn-spinner' id="btnCreateAgencySpinner" style="display:none"></i>
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <style>
-        @keyframes spin { to { transform: rotate(360deg); } }
-    </style>
-
     <script>
-        // ── State ───────────────────────────────────────────
         let currentUser = null;
-        let agencies = [];
 
-        // ── Auth Guard ──────────────────────────────────────
         async function init() {
             try {
                 const res = await fetch('/api/auth/session');
@@ -315,7 +287,6 @@
             }
         }
 
-        // ── Render helpers ──────────────────────────────────
         function renderUser() {
             const u = currentUser;
             document.getElementById('userAvatar').textContent = (u.name || u.email)[0].toUpperCase();
@@ -325,12 +296,11 @@
 
         function renderTrialBanner() {
             if (currentUser.plan !== 'trial') return;
-            const banner = document.getElementById('trialBanner');
             const endsAt = new Date(currentUser.trialEndsAt);
-            const daysLeft = Math.max(0, Math.ceil((endsAt - new Date()) / (1000 * 60 * 60 * 24)));
+            const days = Math.max(0, Math.ceil((endsAt - new Date()) / 86400000));
             document.getElementById('trialBannerText').innerHTML =
-                `Votre période d'essai se termine dans <strong>${daysLeft} jour${daysLeft !== 1 ? 's' : ''}</strong>`;
-            banner.style.display = 'flex';
+                `Votre période d'essai se termine dans <strong>${days} jour${days !== 1 ? 's' : ''}</strong>`;
+            document.getElementById('trialBanner').style.display = 'flex';
         }
 
         function renderProfileTab() {
@@ -343,19 +313,18 @@
 
         function renderCustomizationTab() {
             const s = currentUser.formSettings || {};
-            const langSelect = document.getElementById('formLanguage');
-            if (s.language) langSelect.value = s.language;
+            if (s.language) document.getElementById('formLanguage').value = s.language;
             document.getElementById('formShowTempAddress').checked = s.showTempAddress !== false;
             document.getElementById('formShowSecondPhone').checked = s.showSecondPhone !== false;
         }
 
         function renderAgencies() {
-            agencies = currentUser.agencies || [];
+            const agencies = currentUser.agencies || [];
             const list = document.getElementById('agencyList');
             list.innerHTML = '';
 
             if (agencies.length === 0) {
-                list.innerHTML = '<p style="color:var(--color-text-secondary);font-size:0.9rem;margin-bottom:12px;">Aucune agence configurée.</p>';
+                list.innerHTML = '<p class="empty-state">Aucune agence configurée.</p>';
                 return;
             }
 
@@ -364,19 +333,18 @@
                 const url = `${origin}/retailer/?agency=${agency.id}`;
                 const card = document.createElement('div');
                 card.className = 'agency-card';
-                card.dataset.id = agency.id;
                 card.innerHTML = `
                     <div class="agency-icon"><i class='bx bx-buildings'></i></div>
                     <div class="agency-info">
                         <div class="agency-name">${escHtml(agency.name)}</div>
                         <div class="agency-url">/retailer/?agency=${agency.id}</div>
                     </div>
-                    <span class="agency-status-badge badge-trial">Essai</span>
+                    <span class="agency-status-badge">Essai</span>
                     <div class="agency-actions">
-                        <button class="btn-copy-agency" title="Copier le lien conseiller" data-url="${escHtml(url)}">
+                        <button class="btn-agency-action" title="Copier le lien" data-url="${escHtml(url)}">
                             <i class='bx bx-link'></i>
                         </button>
-                        <button class="btn-delete-agency" title="Supprimer" data-id="${agency.id}"
+                        <button class="btn-agency-action danger" title="Supprimer" data-id="${agency.id}"
                             ${agencies.length <= 1 ? 'disabled' : ''}>
                             <i class='bx bx-trash'></i>
                         </button>
@@ -384,25 +352,20 @@
                 list.appendChild(card);
             });
 
-            // Copy buttons
-            list.querySelectorAll('.btn-copy-agency').forEach(btn => {
+            list.querySelectorAll('.btn-agency-action[data-url]').forEach(btn => {
                 btn.addEventListener('click', () => {
                     navigator.clipboard.writeText(btn.dataset.url).then(() => {
-                        const icon = btn.querySelector('i');
-                        icon.className = 'bx bx-check';
-                        btn.style.color = 'var(--color-success)';
-                        setTimeout(() => {
-                            icon.className = 'bx bx-link';
-                            btn.style.color = '';
-                        }, 2000);
+                        const i = btn.querySelector('i');
+                        i.className = 'bx bx-check';
+                        btn.style.color = '#6ed476';
+                        setTimeout(() => { i.className = 'bx bx-link'; btn.style.color = ''; }, 2000);
                     });
                 });
             });
 
-            // Delete buttons
-            list.querySelectorAll('.btn-delete-agency').forEach(btn => {
+            list.querySelectorAll('.btn-agency-action.danger').forEach(btn => {
                 btn.addEventListener('click', async () => {
-                    if (!confirm('Supprimer cette agence ? Cette action est irréversible.')) return;
+                    if (!confirm('Supprimer cette agence ?')) return;
                     const id = btn.dataset.id;
                     try {
                         const res = await fetch(`/api/dashboard/agencies?id=${id}`, { method: 'DELETE' });
@@ -411,11 +374,9 @@
                             currentUser.agencies = currentUser.agencies.filter(a => a.id !== id);
                             renderAgencies();
                         } else {
-                            alert(data.error || 'Erreur lors de la suppression.');
+                            alert(data.error || 'Erreur.');
                         }
-                    } catch {
-                        alert('Erreur de connexion.');
-                    }
+                    } catch { alert('Erreur de connexion.'); }
                 });
             });
         }
@@ -423,21 +384,18 @@
         function renderContactTab() {
             const u = currentUser;
             const endsAt = new Date(u.trialEndsAt);
-            const daysLeft = Math.max(0, Math.ceil((endsAt - new Date()) / (1000 * 60 * 60 * 24)));
+            const days = Math.max(0, Math.ceil((endsAt - new Date()) / 86400000));
             const dateStr = endsAt.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 
             document.getElementById('planName').textContent = u.plan === 'trial' ? 'Essai gratuit' : 'Pro';
             document.getElementById('planBadge').textContent = u.plan === 'trial' ? 'Essai' : 'Pro';
-            if (u.plan === 'pro') {
-                document.getElementById('planBadge').className = 'plan-badge badge-active';
-            }
+
             document.getElementById('planDetail').innerHTML = u.plan === 'trial'
-                ? `Votre période d'essai se termine le <strong>${dateStr}</strong> (dans ${daysLeft} jour${daysLeft !== 1 ? 's' : ''}).<br>
-                   Pour continuer à utiliser la plateforme après cette date, <a href="mailto:contact@okmobility.com" style="color:var(--color-accent);">contactez-nous</a>.`
-                : `Abonnement actif. Merci de votre confiance !`;
+                ? `Votre période d'essai se termine le <strong>${dateStr}</strong> (dans ${days} jour${days !== 1 ? 's' : ''}).<br>Pour continuer après cette date, <a href="mailto:contact@mobilityos.com">contactez-nous</a>.`
+                : `Abonnement actif. Merci de votre confiance.`;
         }
 
-        // ── Tab navigation ──────────────────────────────────
+        // ── Tab Nav ───────────────────────────────────────────
         document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
@@ -447,25 +405,19 @@
             });
         });
 
-        // ── Logout ──────────────────────────────────────────
+        // ── Logout ────────────────────────────────────────────
         document.getElementById('btnLogout').addEventListener('click', async () => {
             await fetch('/api/auth/logout', { method: 'POST' });
             window.location.href = '/login/';
         });
 
-        // ── Profile form ────────────────────────────────────
+        // ── Profile form ──────────────────────────────────────
         document.getElementById('profileForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSaveProfile');
-            const btnText = document.getElementById('btnSaveProfileText');
-            const spinner = document.getElementById('btnSaveProfileSpinner');
-            const alert = document.getElementById('profileAlert');
-
-            btn.disabled = true;
-            btnText.textContent = 'Enregistrement…';
-            spinner.style.display = 'inline-block';
-            alert.style.display = 'none';
-
+            const txt = document.getElementById('btnSaveProfileText');
+            const spin = document.getElementById('btnSaveProfileSpinner');
+            btn.disabled = true; txt.textContent = 'Enregistrement…'; spin.style.display = 'inline-block';
             try {
                 const res = await fetch('/api/dashboard/profile', {
                     method: 'PUT',
@@ -482,29 +434,24 @@
                     currentUser.company = document.getElementById('profileCompany').value;
                     currentUser.phone = document.getElementById('profilePhone').value;
                     renderUser();
-                    showInlineAlert('profileAlert', 'Informations enregistrées.', 'success');
+                    showInline('profileAlert', 'Informations enregistrées.', 'success');
                 } else {
-                    showInlineAlert('profileAlert', data.error || 'Erreur.', 'error');
+                    showInline('profileAlert', data.error || 'Erreur.', 'error');
                 }
             } catch {
-                showInlineAlert('profileAlert', 'Erreur de connexion.', 'error');
+                showInline('profileAlert', 'Erreur de connexion.', 'error');
             } finally {
-                btn.disabled = false;
-                btnText.textContent = 'Enregistrer';
-                spinner.style.display = 'none';
+                btn.disabled = false; txt.textContent = 'Enregistrer'; spin.style.display = 'none';
             }
         });
 
-        // ── Customization form ──────────────────────────────
+        // ── Customization form ────────────────────────────────
         document.getElementById('customizationForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSaveCustom');
-            const btnText = document.getElementById('btnSaveCustomText');
-            const spinner = document.getElementById('btnSaveCustomSpinner');
-
-            btn.disabled = true;
-            btnText.textContent = 'Enregistrement…';
-            spinner.style.display = 'inline-block';
+            const txt = document.getElementById('btnSaveCustomText');
+            const spin = document.getElementById('btnSaveCustomSpinner');
+            btn.disabled = true; txt.textContent = 'Enregistrement…'; spin.style.display = 'inline-block';
 
             const formSettings = {
                 language: document.getElementById('formLanguage').value,
@@ -521,35 +468,32 @@
                 const data = await res.json();
                 if (res.ok) {
                     currentUser.formSettings = { ...currentUser.formSettings, ...formSettings };
-                    showInlineAlert('customAlert', 'Paramètres enregistrés.', 'success');
+                    showInline('customAlert', 'Paramètres enregistrés.', 'success');
                 } else {
-                    showInlineAlert('customAlert', data.error || 'Erreur.', 'error');
+                    showInline('customAlert', data.error || 'Erreur.', 'error');
                 }
             } catch {
-                showInlineAlert('customAlert', 'Erreur de connexion.', 'error');
+                showInline('customAlert', 'Erreur de connexion.', 'error');
             } finally {
-                btn.disabled = false;
-                btnText.textContent = 'Enregistrer';
-                spinner.style.display = 'none';
+                btn.disabled = false; txt.textContent = 'Enregistrer'; spin.style.display = 'none';
             }
         });
 
-        // ── Add Agency Modal ─────────────────────────────────
+        // ── Add agency ────────────────────────────────────────
         document.getElementById('btnAddAgency').addEventListener('click', () => {
             document.getElementById('newAgencyName').value = '';
-            document.getElementById('agencyModalAlert').style.display = 'none';
+            document.getElementById('agencyModalAlert').className = 'inline-alert';
             document.getElementById('addAgencyModal').style.display = 'flex';
             setTimeout(() => document.getElementById('newAgencyName').focus(), 50);
         });
 
-        function closeAgencyModal() {
+        function closeModal() {
             document.getElementById('addAgencyModal').style.display = 'none';
         }
-
-        document.getElementById('btnCloseAgencyModal').addEventListener('click', closeAgencyModal);
-        document.getElementById('btnCancelAgency').addEventListener('click', closeAgencyModal);
+        document.getElementById('btnCloseAgencyModal').addEventListener('click', closeModal);
+        document.getElementById('btnCancelAgency').addEventListener('click', closeModal);
         document.getElementById('addAgencyModal').addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) closeAgencyModal();
+            if (e.target === e.currentTarget) closeModal();
         });
 
         document.getElementById('addAgencyForm').addEventListener('submit', async (e) => {
@@ -558,11 +502,9 @@
             if (!name) return;
 
             const btn = document.getElementById('btnCreateAgency');
-            const btnText = document.getElementById('btnCreateAgencyText');
-            const spinner = document.getElementById('btnCreateAgencySpinner');
-            btn.disabled = true;
-            btnText.textContent = 'Création…';
-            spinner.style.display = 'inline-block';
+            const txt = document.getElementById('btnCreateAgencyText');
+            const spin = document.getElementById('btnCreateAgencySpinner');
+            btn.disabled = true; txt.textContent = 'Création…'; spin.style.display = 'inline-block';
 
             try {
                 const res = await fetch('/api/dashboard/agencies', {
@@ -574,38 +516,30 @@
                 if (res.ok) {
                     currentUser.agencies.push(data.agency);
                     renderAgencies();
-                    closeAgencyModal();
+                    closeModal();
                 } else {
-                    showInlineAlert('agencyModalAlert', data.error || 'Erreur.', 'error');
+                    showInline('agencyModalAlert', data.error || 'Erreur.', 'error');
                 }
             } catch {
-                showInlineAlert('agencyModalAlert', 'Erreur de connexion.', 'error');
+                showInline('agencyModalAlert', 'Erreur de connexion.', 'error');
             } finally {
-                btn.disabled = false;
-                btnText.textContent = "Créer l'agence";
-                spinner.style.display = 'none';
+                btn.disabled = false; txt.textContent = 'Créer'; spin.style.display = 'none';
             }
         });
 
-        // ── Utilities ───────────────────────────────────────
-        function showInlineAlert(id, message, type) {
+        // ── Utils ─────────────────────────────────────────────
+        function showInline(id, msg, type) {
             const el = document.getElementById(id);
-            el.textContent = message;
-            el.className = `inline-alert inline-alert-${type}`;
-            el.style.display = 'block';
-            setTimeout(() => { el.style.display = 'none'; }, 4000);
+            el.textContent = msg;
+            el.className = `inline-alert inline-alert-${type} show`;
+            setTimeout(() => { el.className = 'inline-alert'; }, 4000);
+        }
+        function escHtml(s) {
+            return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
-        function escHtml(str) {
-            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-        }
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 
-        // ── Keyboard shortcut: Escape closes modal ──────────
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeAgencyModal();
-        });
-
-        // ── Start ───────────────────────────────────────────
         init();
     </script>
 </body>
