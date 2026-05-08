@@ -623,57 +623,45 @@ async function hydrateAgencyBrandingFromUrl() {
                 setAgencyBranding(state.agencyName);
             }
 
-            if (payload.formSettings) {
-                const s = payload.formSettings;
+            const s = payload.formSettings || {};
+            
+            // Thème
+            if (s.theme === 'light') {
+                document.documentElement.classList.remove('theme-dark');
+                document.documentElement.classList.add('theme-light');
+            } else if (s.theme === 'dark') {
+                document.documentElement.classList.remove('theme-light');
+                document.documentElement.classList.add('theme-dark');
+            }
 
-                // Thème
-                if (s.theme === 'light') {
-                    document.documentElement.classList.remove('theme-dark');
-                    document.documentElement.classList.add('theme-light');
-                } else if (s.theme === 'dark') {
-                    document.documentElement.classList.remove('theme-light');
-                    document.documentElement.classList.add('theme-dark');
-                }
+            // Couleurs
+            if (s.blob1) document.documentElement.style.setProperty('--blob-1', s.blob1);
+            if (s.blob2) document.documentElement.style.setProperty('--blob-2', s.blob2);
+            if (s.blob3) document.documentElement.style.setProperty('--blob-3', s.blob3);
 
-                // Couleurs
-                if (s.blob1) document.documentElement.style.setProperty('--blob-1', s.blob1);
-                if (s.blob2) document.documentElement.style.setProperty('--blob-2', s.blob2);
-                if (s.blob3) document.documentElement.style.setProperty('--blob-3', s.blob3);
+            // Logo
+            if (s.logoUrl) {
+                const logoContainer = document.querySelector('.logo');
+                if (logoContainer) {
+                    logoContainer.innerHTML = `<img src="${s.logoUrl}" alt="Logo" class="logo-img logo-img-brand" style="max-height: 40px; border-radius: 4px;">`;
+                }
+            }
+            
+            // Langue par défaut
+            if (s.language && dom.langSelect) {
+                dom.langSelect.value = s.language;
+                applyLanguage(s.language);
+            }
 
-                // Logo
-                if (s.logoUrl) {
-                    const logoContainer = document.querySelector('.logo');
-                    if (logoContainer) {
-                        logoContainer.innerHTML = `<img src="${s.logoUrl}" alt="Logo" class="logo-img logo-img-brand" style="max-height: 40px; border-radius: 4px;">`;
-                    }
-                }
-
-                // Affichage conditionnel (temp address & phone2)
-                if (s.showTempAddress === false) {
-                    const tempWrapper = document.getElementById('tempAddressWrapper');
-                    if (tempWrapper) tempWrapper.style.display = 'none';
-                }
-                if (s.showSecondPhone === false) {
-                    const phone2Section = document.getElementById('phone2Section');
-                    if (phone2Section) phone2Section.style.display = 'none';
-                }
-                
-                // Langue par défaut
-                if (s.language && dom.langSelect) {
-                    dom.langSelect.value = s.language;
-                    applyLanguage(s.language);
-                }
-
-                // Champs dynamiques personnalisés
-                if (Array.isArray(s.fields)) {
-                    renderDynamicFields(s.fields);
-                } else {
-                    // Fallback aux champs par défaut si non définis
-                    renderDynamicFields([
-                        { id: "email", label: "E-mail", type: "email", icon: "bx-envelope", required: true, system: false },
-                        { id: "address_block", label: "Bloc Adresse", type: "address_block", icon: "bx-map", required: true, system: false }
-                    ]);
-                }
+            // Champs dynamiques personnalisés
+            if (Array.isArray(s.fields) && s.fields.length > 0) {
+                renderDynamicFields(s.fields);
+            } else {
+                // Fallback aux champs par défaut (important pour les nouveaux comptes)
+                renderDynamicFields([
+                    { id: "email", label: "E-mail", type: "email", icon: "bx-envelope", required: true, system: false },
+                    { id: "address_block", label: "Bloc Adresse", type: "address_block", icon: "bx-map", required: true, system: false }
+                ]);
             }
             return;
         }
@@ -760,15 +748,21 @@ function applyLanguage(langCode) {
     const lblPhoneCode2 = document.getElementById('lblPhoneCode2');
     if (lblPhoneCode2) lblPhoneCode2.textContent = t.phoneCode || 'Calling code';
 
-    document.getElementById('lblEmail').textContent = t.email;
-    dom.email.placeholder = t.placeholderEmail;
+    const lblEmail = document.getElementById('lblEmail');
+    if (lblEmail) lblEmail.textContent = t.email;
+    if (dom.email) dom.email.placeholder = t.placeholderEmail;
     
-    document.getElementById('txtBtnGenerate').textContent = t.btnGenerate;
-    document.getElementById('txtBtnEdit').textContent = t.btnEdit;
+    const txtBtnGenerate = document.getElementById('txtBtnGenerate');
+    if (txtBtnGenerate) txtBtnGenerate.textContent = t.btnGenerate;
+    const txtBtnEdit = document.getElementById('txtBtnEdit');
+    if (txtBtnEdit) txtBtnEdit.textContent = t.btnEdit;
     
     // Met à jour le h1 selon la vue active
-    const summaryVisible = dom.summaryView && dom.summaryView.style.display !== 'none';
-    document.getElementById('pageTitle').textContent = summaryVisible ? t.summaryTitle : t.pageTitle;
+    const pageTitleFinal = document.getElementById('pageTitle');
+    if (pageTitleFinal) {
+        const summaryVisible = dom.summaryView && dom.summaryView.style.display !== 'none';
+        pageTitleFinal.textContent = summaryVisible ? t.summaryTitle : t.pageTitle;
+    }
     
     // Legal Texts
     document.querySelectorAll('.legal-text').forEach(el => {
