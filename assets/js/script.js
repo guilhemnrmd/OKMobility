@@ -376,9 +376,7 @@ const dom = {
     advisorModalDesc: document.getElementById('advisorModalDesc'),
     advisorModalCancel: document.getElementById('advisorModalCancel'),
     advisorCodeInput: document.getElementById('advisorCodeInput'),
-    advisorConnectionStatus: document.getElementById('advisorConnectionStatus'),
-    clientStatusIndicator: document.getElementById('clientStatusIndicator'),
-    clientStatusText: document.getElementById('clientStatusText')
+    advisorConnectionStatus: document.getElementById('advisorConnectionStatus')
 };
 
 function reinitDomRefs() {
@@ -442,6 +440,14 @@ function setAgencyBranding(agencyName) {
     dom.agencyBrandText.textContent = agencyName || DEFAULT_BRAND_SLOGAN;
 }
 
+function applyTheme(theme) {
+    const html = document.documentElement;
+    html.classList.remove('theme-light', 'theme-dark');
+    if (theme === 'light') html.classList.add('theme-light');
+    if (theme === 'dark')  html.classList.add('theme-dark');
+    // 'auto' → no class, prefers-color-scheme handles it
+}
+
 // ============================================================================
 // 2b. Dynamic Fields Renderer
 // ============================================================================
@@ -481,7 +487,7 @@ function renderDynamicFields(fields) {
                 spanCheck.className = 'checkmark';
                 
                 const spanText = document.createElement('span');
-                spanText.textContent = field.label || 'Groupe';
+                spanText.textContent = field.labels?.[state.lang] || field.label || 'Groupe';
                 
                 labelWrap.appendChild(checkbox);
                 labelWrap.appendChild(spanCheck);
@@ -515,42 +521,50 @@ function renderDynamicFields(fields) {
                     renderFields(field.children, innerDiv);
                 }
             } else if (field.type === 'address_block') {
-                // Custom Address Block
+                // Custom Address Block — labels use i18n translations
+                const t = i18n[state.lang] || i18n['en'];
                 const wrap = document.createElement('div');
                 wrap.className = 'form-group-row';
                 wrap.style.cssText = 'animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); flex-direction: column; gap: 1rem; width: 100%;';
-                
+
+                const addrLabel = field.labels?.[state.lang] || field.label || t.address || 'Address';
+                const zipLabel  = t.zipCode  || 'Postal Code';
+                const cityLabel = t.city     || 'City';
+                const addrPlaceholder = t.addressPlaceholder || '123 Main St';
+                const zipPlaceholder  = t.placeholderZip    || '75000';
+                const cityPlaceholder = t.placeholderCity   || 'Paris';
+
                 const addressWrap = document.createElement('div');
                 addressWrap.className = 'input-wrapper address-wrapper';
                 addressWrap.innerHTML = `
-                    <label for="${field.id}_addr" id="lbl_${field.id}_addr">${field.label || 'Adresse'}</label>
+                    <label for="${field.id}_addr" id="lbl_${field.id}_addr">${addrLabel}</label>
                     <div class="input-with-icon">
                         <i class='bx bx-map-pin'></i>
-                        <input type="text" id="${field.id}_addr" name="${field.id}_addr" placeholder="123 Rue de la Paix" autocomplete="off">
+                        <input type="text" id="${field.id}_addr" name="${field.id}_addr" placeholder="${addrPlaceholder}" autocomplete="off">
                     </div>
                     <ul class="address-suggestions" id="${field.id}_sugg" role="listbox"></ul>
                 `;
-                
+
                 const row = document.createElement('div');
                 row.className = 'form-group-row';
-                
+
                 const zipWrap = document.createElement('div');
                 zipWrap.className = 'input-wrapper zip-wrapper';
                 zipWrap.innerHTML = `
-                    <label for="${field.id}_zip">Code Postal</label>
+                    <label for="${field.id}_zip">${zipLabel}</label>
                     <div class="input-with-icon">
                         <i class='bx bx-hash'></i>
-                        <input type="text" id="${field.id}_zip" name="${field.id}_zip" placeholder="75000">
+                        <input type="text" id="${field.id}_zip" name="${field.id}_zip" placeholder="${zipPlaceholder}">
                     </div>
                 `;
-                
+
                 const cityWrap = document.createElement('div');
                 cityWrap.className = 'input-wrapper city-wrapper';
                 cityWrap.innerHTML = `
-                    <label for="${field.id}_city">Ville</label>
+                    <label for="${field.id}_city">${cityLabel}</label>
                     <div class="input-with-icon">
                         <i class='bx bx-buildings'></i>
-                        <input type="text" id="${field.id}_city" name="${field.id}_city" placeholder="Paris">
+                        <input type="text" id="${field.id}_city" name="${field.id}_city" placeholder="${cityPlaceholder}">
                     </div>
                 `;
                 
@@ -598,7 +612,7 @@ function renderDynamicFields(fields) {
 
                 const label = document.createElement('label');
                 label.setAttribute('for', field.id);
-                label.textContent = field.label || 'Champ';
+                label.textContent = field.labels?.[state.lang] || field.label || 'Champ';
 
                 const inputWrap = document.createElement('div');
                 inputWrap.className = 'input-with-icon';
@@ -660,14 +674,8 @@ async function hydrateAgencyBrandingFromUrl() {
 
             const s = payload.formSettings || {};
             
-            // Thème
-            if (s.theme === 'light') {
-                document.documentElement.classList.remove('theme-dark');
-                document.documentElement.classList.add('theme-light');
-            } else if (s.theme === 'dark') {
-                document.documentElement.classList.remove('theme-light');
-                document.documentElement.classList.add('theme-dark');
-            }
+            // Thème (auto = no class, let prefers-color-scheme handle it)
+            applyTheme(s.theme || 'auto');
 
             // Couleurs
             if (s.blob1) document.documentElement.style.setProperty('--blob-1', s.blob1);
@@ -812,10 +820,6 @@ function applyLanguage(langCode) {
     }
     if (dom.advisorCodeInput) {
         dom.advisorCodeInput.placeholder = t.advisorCodePlaceholder || 'XXXXXX';
-    }
-    // Update connection status text if not connected
-    if (dom.clientStatusText && !state.advisorConnected) {
-        dom.clientStatusText.textContent = t.statusNotConnected || 'Not connected';
     }
 
     if (state.globalCountriesData && state.globalCountriesData.length > 0) {
@@ -1752,47 +1756,12 @@ function disconnectFromAdvisor() {
     updateClientStatus('disconnected');
 }
 
-// Update connection status UI
+// Update connection status UI (via the link button only — status dot removed)
 function updateClientStatus(status) {
-    const t = i18n[state.lang] || i18n['es'];
-    const indicator = dom.clientStatusIndicator;
-    const text = dom.clientStatusText;
-
-    if (!indicator) {
-        if (dom.btnOpenAdvisorModal) {
-            dom.btnOpenAdvisorModal.classList.remove('connected', 'connecting');
-            if (status === 'connecting') dom.btnOpenAdvisorModal.classList.add('connecting');
-            if (status === 'connected') dom.btnOpenAdvisorModal.classList.add('connected');
-        }
-        return;
-    }
-
-    indicator.className = 'status-indicator';
-    
-    // Update button state
-    if (dom.btnOpenAdvisorModal) {
-        dom.btnOpenAdvisorModal.classList.remove('connected', 'connecting');
-    }
-    
-    switch (status) {
-        case 'connecting':
-            indicator.classList.add('connecting');
-            if (text) text.textContent = t.statusConnecting || 'Connecting...';
-            if (dom.btnOpenAdvisorModal) dom.btnOpenAdvisorModal.classList.add('connecting');
-            break;
-        case 'connected':
-            indicator.classList.add('connected');
-            if (text) text.textContent = t.statusConnected || 'Connected to advisor';
-            if (dom.btnOpenAdvisorModal) dom.btnOpenAdvisorModal.classList.add('connected');
-            break;
-        case 'error':
-            indicator.classList.add('error');
-            if (text) text.textContent = t.statusError || 'Connection error';
-            break;
-        default:
-            indicator.classList.add('disconnected');
-            if (text) text.textContent = t.statusNotConnected || 'Not connected';
-    }
+    if (!dom.btnOpenAdvisorModal) return;
+    dom.btnOpenAdvisorModal.classList.remove('connected', 'connecting');
+    if (status === 'connecting') dom.btnOpenAdvisorModal.classList.add('connecting');
+    if (status === 'connected')  dom.btnOpenAdvisorModal.classList.add('connected');
 }
 
 function clampText(value, maxLength) {

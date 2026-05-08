@@ -128,6 +128,83 @@
         .theme-dark .btn-icon:hover:not(:disabled) {
             background: rgba(255,255,255,0.1);
         }
+
+        /* ── Drag & Drop ──────────────────────────────────────────── */
+        .drag-handle {
+            cursor: grab;
+            color: var(--color-text-secondary);
+            opacity: 0.4;
+            font-size: 1.25rem;
+            padding: 0 8px 0 0;
+            flex-shrink: 0;
+            transition: opacity 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        .field-item:hover .drag-handle {
+            opacity: 0.75;
+        }
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+        .field-item.dragging {
+            opacity: 0.4;
+            box-shadow: none;
+            transform: none;
+        }
+        .field-item.drag-over {
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 2px rgba(32, 84, 234, 0.25);
+            background: rgba(32, 84, 234, 0.04);
+            transform: translateY(-2px);
+        }
+
+        /* ── Translations Panel ───────────────────────────────────── */
+        .translations-panel {
+            margin-top: 10px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: var(--radius-sm, 8px);
+            border: 1px solid var(--color-border);
+        }
+        .translations-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .trans-label {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .trans-lang {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--color-text-secondary);
+            opacity: 0.7;
+        }
+        .trans-input {
+            width: 100%;
+            padding: 6px 10px;
+            background: var(--color-input-bg, rgba(255,255,255,0.6));
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm, 8px);
+            font-size: 0.85rem;
+            color: var(--color-text-primary);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .trans-input:focus {
+            border-color: var(--color-accent);
+        }
+        .theme-dark .translations-panel {
+            background: rgba(255,255,255,0.03);
+        }
+        .theme-dark .trans-input {
+            background: rgba(255,255,255,0.06);
+        }
     </style>
 </head>
 <body class="dashboard-page">
@@ -314,7 +391,8 @@
                             <div class="input-with-icon">
                                 <i class='bx bx-moon'></i>
                                 <select id="formTheme">
-                                    <option value="dark">Sombre (Par défaut)</option>
+                                    <option value="auto">Automatique (suit le système)</option>
+                                    <option value="dark">Sombre</option>
                                     <option value="light">Clair</option>
                                 </select>
                             </div>
@@ -409,11 +487,22 @@
         let currentUser = null;
         let formFields = [];
 
-        // Champs par défaut si l'agence n'en a pas
+        // Champs par défaut si l'agence n'en a pas — avec traductions
         const DEFAULT_FIELDS = [
-            { id: "email", label: "E-mail", type: "email", icon: "bx-envelope", required: true, system: false },
-            { id: "address_block", label: "Bloc Adresse", type: "address_block", icon: "bx-map", required: true, system: false }
+            {
+                id: "address_block", label: "Adresse de résidence",
+                labels: { fr: "Adresse de résidence", en: "Residential address", es: "Dirección de residencia", it: "Indirizzo di residenza", pt: "Endereço de residência", de: "Wohnadresse", nl: "Woonadres" },
+                type: "address_block", icon: "bx-map", required: true, system: false
+            },
+            {
+                id: "email", label: "E-mail",
+                labels: { fr: "E-mail", en: "E-mail", es: "E-mail", it: "E-mail", pt: "E-mail", de: "E-Mail", nl: "E-mail" },
+                type: "email", icon: "bx-envelope", required: true, system: false
+            }
         ];
+
+        const LANGS      = ['fr','en','es','it','pt','de','nl'];
+        const LANG_NAMES = { fr:'FR', en:'EN', es:'ES', it:'IT', pt:'PT', de:'DE', nl:'NL' };
 
         async function init() {
             try {
@@ -462,110 +551,156 @@
         function renderCustomizationTab() {
             const s = currentUser.formSettings || {};
             if (s.language) document.getElementById('formLanguage').value = s.language;
-            
-            if (s.theme) document.getElementById('formTheme').value = s.theme;
+            document.getElementById('formTheme').value = s.theme || 'auto';
             if (s.logoUrl) document.getElementById('formLogo').value = s.logoUrl;
             if (s.blob1) document.getElementById('formBlob1').value = s.blob1;
             if (s.blob2) document.getElementById('formBlob2').value = s.blob2;
             if (s.blob3) document.getElementById('formBlob3').value = s.blob3;
-
-            // Load fields
-            formFields = Array.isArray(s.fields) && s.fields.length > 0 ? [...s.fields] : [...DEFAULT_FIELDS];
+            formFields = Array.isArray(s.fields) && s.fields.length > 0
+                ? JSON.parse(JSON.stringify(s.fields))
+                : JSON.parse(JSON.stringify(DEFAULT_FIELDS));
             renderFieldsList();
         }
+
+        // ── Drag state ───────────────────────────────────────────
+        let dragSrc = null; // { index, parentIndex }
 
         function renderFieldsList() {
             const container = document.getElementById('fieldsList');
             container.innerHTML = '';
-            
+
+            function getTarget(idx, pIdx) {
+                return pIdx !== null ? formFields[pIdx].children[idx] : formFields[idx];
+            }
+
             function renderField(field, index, parentArray, parentIndex = null) {
-                const isGroup = field.type === 'toggle_group';
-                
+                const isGroup  = field.type === 'toggle_group';
+                const isChild  = parentIndex !== null;
+                const transId  = `trans_${field.id}_${index}_${parentIndex ?? 'r'}`;
+
                 const fieldEl = document.createElement('div');
                 fieldEl.className = 'field-item';
-                if (parentIndex !== null) {
+                fieldEl.draggable = true;
+                if (isChild) {
                     fieldEl.style.marginLeft = '40px';
                     fieldEl.style.borderLeft = '3px solid var(--color-accent)';
                     fieldEl.style.borderRadius = '0 var(--radius-md) var(--radius-md) 0';
                 }
-                
+
                 fieldEl.innerHTML = `
-                    <div class="field-icon-wrap">
-                        <i class='bx ${field.icon}'></i>
-                    </div>
+                    <div class="drag-handle" title="Glisser pour réordonner"><i class='bx bx-grid-vertical'></i></div>
+                    <div class="field-icon-wrap"><i class='bx ${field.icon}'></i></div>
                     <div class="field-info">
-                        <input type="text" class="field-input-inline" value="${escHtml(field.label)}" 
-                            data-idx="${index}" ${parentIndex !== null ? `data-parent="${parentIndex}"` : ''}>
-                        <span class="field-subtitle">
-                            ${isGroup ? 'Groupe déroulant (Conteneur)' : 'Champ du formulaire'}
-                        </span>
+                        <input type="text" class="field-input-inline" value="${escHtml(field.label)}"
+                            data-idx="${index}" ${isChild ? `data-parent="${parentIndex}"` : ''}>
+                        <span class="field-subtitle">${isGroup ? 'Groupe déroulant (Conteneur)' : 'Champ du formulaire'}</span>
+                        <div class="translations-panel" id="${transId}" style="display:none;">
+                            <div class="translations-grid">
+                                ${LANGS.map(lang => `
+                                    <label class="trans-label">
+                                        <span class="trans-lang">${LANG_NAMES[lang]}</span>
+                                        <input type="text" class="trans-input" data-lang="${lang}"
+                                            value="${escHtml((field.labels || {})[lang] || '')}"
+                                            placeholder="${escHtml(field.label)}">
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
                     </div>
                     <div class="field-actions">
                         ${!isGroup ? `
                         <label class="field-req-label">
-                            <input type="checkbox" class="field-req-check" data-idx="${index}" ${parentIndex !== null ? `data-parent="${parentIndex}"` : ''} ${field.required ? 'checked' : ''}> Requis
-                        </label>
-                        ` : ''}
-                        <button type="button" class="btn-icon" onclick="moveField(${index}, -1, ${parentIndex})" ${index === 0 ? 'disabled' : ''} title="Monter"><i class='bx bx-up-arrow-alt'></i></button>
-                        <button type="button" class="btn-icon" onclick="moveField(${index}, 1, ${parentIndex})" ${index === parentArray.length - 1 ? 'disabled' : ''} title="Descendre"><i class='bx bx-down-arrow-alt'></i></button>
-                        <button type="button" class="btn-icon danger" onclick="removeField(${index}, ${parentIndex})" title="Supprimer"><i class='bx bx-trash'></i></button>
+                            <input type="checkbox" class="field-req-check"
+                                data-idx="${index}" ${isChild ? `data-parent="${parentIndex}"` : ''}
+                                ${field.required ? 'checked' : ''}> Requis
+                        </label>` : ''}
+                        <button type="button" class="btn-icon" title="Traductions" onclick="toggleTransPanel('${transId}')">
+                            <i class='bx bx-globe'></i>
+                        </button>
+                        <button type="button" class="btn-icon danger"
+                            onclick="removeField(${index}, ${parentIndex !== null ? parentIndex : 'null'})"
+                            title="Supprimer"><i class='bx bx-trash'></i></button>
                     </div>
                 `;
                 container.appendChild(fieldEl);
-                
+
+                // ── Label change ─────────────────────────────────
+                fieldEl.querySelector('.field-input-inline').addEventListener('change', (e) => {
+                    getTarget(index, parentIndex).label = e.target.value;
+                });
+
+                // ── Required toggle ──────────────────────────────
+                fieldEl.querySelector('.field-req-check')?.addEventListener('change', (e) => {
+                    getTarget(index, parentIndex).required = e.target.checked;
+                });
+
+                // ── Translation inputs ───────────────────────────
+                fieldEl.querySelectorAll('.trans-input').forEach(inp => {
+                    inp.addEventListener('input', (e) => {
+                        const t = getTarget(index, parentIndex);
+                        if (!t.labels) t.labels = {};
+                        t.labels[e.target.dataset.lang] = e.target.value;
+                    });
+                });
+
+                // ── Drag events ──────────────────────────────────
+                fieldEl.addEventListener('dragstart', (e) => {
+                    dragSrc = { index, parentIndex };
+                    e.dataTransfer.effectAllowed = 'move';
+                    setTimeout(() => fieldEl.classList.add('dragging'), 0);
+                });
+                fieldEl.addEventListener('dragend', () => {
+                    fieldEl.classList.remove('dragging');
+                    container.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+                    dragSrc = null;
+                });
+                fieldEl.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    if (!dragSrc) return;
+                    // Only highlight same-level items
+                    if (dragSrc.parentIndex === parentIndex) fieldEl.classList.add('drag-over');
+                });
+                fieldEl.addEventListener('dragleave', () => fieldEl.classList.remove('drag-over'));
+                fieldEl.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    fieldEl.classList.remove('drag-over');
+                    if (!dragSrc || dragSrc.index === index) return;
+                    if (dragSrc.parentIndex !== parentIndex) return; // no cross-level drops
+                    const arr = parentIndex !== null ? formFields[parentIndex].children : formFields;
+                    const [moved] = arr.splice(dragSrc.index, 1);
+                    arr.splice(index, 0, moved);
+                    renderFieldsList();
+                });
+
+                // ── Children (toggle groups) ─────────────────────
                 if (isGroup) {
                     if (!field.children) field.children = [];
-                    field.children.forEach((childField, childIndex) => {
-                        renderField(childField, childIndex, field.children, index);
-                    });
-                    
-                    const addBtnWrap = document.createElement('div');
-                    addBtnWrap.style.marginLeft = '40px';
-                    addBtnWrap.style.marginBottom = '16px';
-                    addBtnWrap.innerHTML = `
-                        <div class="input-with-icon" style="max-width: 250px; display: inline-flex;">
-                            <i class='bx bx-plus' style="left: 1rem; color: var(--color-accent);"></i>
-                            <select class="field-input" style="padding-left: 2.5rem; color: var(--color-accent); font-weight: 500; cursor: pointer; border-color: rgba(var(--color-accent-rgb), 0.3);" onchange="if(this.value) { addFieldToGroup(${index}, this.value); this.value=''; }">
-                                <option value="">Ajouter un champ au groupe...</option>
+                    field.children.forEach((child, ci) => renderField(child, ci, field.children, index));
+
+                    const addWrap = document.createElement('div');
+                    addWrap.style.cssText = 'margin-left:40px;margin-bottom:16px;';
+                    addWrap.innerHTML = `
+                        <div class="input-with-icon" style="max-width:260px;display:inline-flex;">
+                            <i class='bx bx-plus' style="left:1rem;color:var(--color-accent);"></i>
+                            <select style="padding-left:2.5rem;color:var(--color-accent);font-weight:500;cursor:pointer;border-color:rgba(var(--color-accent-rgb),0.3);"
+                                onchange="if(this.value){addFieldToGroup(${index},this.value);this.value='';}">
+                                <option value="">Ajouter un champ au groupe…</option>
                                 <option value="text">Texte court</option>
                                 <option value="email">E-mail</option>
                                 <option value="tel">Téléphone</option>
                                 <option value="address_block">Bloc Adresse complet</option>
                             </select>
-                        </div>
-                    `;
-                    container.appendChild(addBtnWrap);
+                        </div>`;
+                    container.appendChild(addWrap);
                 }
             }
 
-            formFields.forEach((field, index) => renderField(field, index, formFields, null));
-
-            // Add event listeners for inputs
-            container.querySelectorAll('.field-input-inline').forEach(input => {
-                input.addEventListener('change', (e) => {
-                    const idx = parseInt(e.target.dataset.idx, 10);
-                    const pIdx = e.target.dataset.parent ? parseInt(e.target.dataset.parent, 10) : null;
-                    if (pIdx !== null) formFields[pIdx].children[idx].label = e.target.value;
-                    else formFields[idx].label = e.target.value;
-                });
-            });
-            container.querySelectorAll('.field-req-check').forEach(chk => {
-                chk.addEventListener('change', (e) => {
-                    const idx = parseInt(e.target.dataset.idx, 10);
-                    const pIdx = e.target.dataset.parent ? parseInt(e.target.dataset.parent, 10) : null;
-                    if (pIdx !== null) formFields[pIdx].children[idx].required = e.target.checked;
-                    else formFields[idx].required = e.target.checked;
-                });
-            });
+            formFields.forEach((f, i) => renderField(f, i, formFields, null));
         }
 
-        window.moveField = function(index, dir, parentIndex = null) {
-            const arr = parentIndex !== null ? formFields[parentIndex].children : formFields;
-            if (index + dir < 0 || index + dir >= arr.length) return;
-            const temp = arr[index];
-            arr[index] = arr[index + dir];
-            arr[index + dir] = temp;
-            renderFieldsList();
+        window.toggleTransPanel = function(id) {
+            const el = document.getElementById(id);
+            if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
         };
 
         window.removeField = function(index, parentIndex = null) {
@@ -576,48 +711,35 @@
 
         window.addFieldToGroup = function(parentIndex, type) {
             if (!formFields[parentIndex].children) formFields[parentIndex].children = [];
-            
-            const baseId = 'custom_' + Date.now();
-            let newField;
-            
-            switch(type) {
-                case 'email':
-                    newField = { id: baseId, label: 'E-mail supplémentaire', type: 'email', icon: 'bx-envelope', required: false, system: false };
-                    break;
-                case 'tel':
-                    newField = { id: baseId, label: 'Téléphone supplémentaire', type: 'tel', icon: 'bx-phone', required: false, system: false };
-                    break;
-                case 'address_block':
-                    newField = { id: 'address_block_' + Date.now(), label: 'Bloc Adresse complet', type: 'address_block', icon: 'bx-map', required: false, system: false };
-                    break;
-                case 'text':
-                default:
-                    newField = { id: baseId, label: 'Nouveau champ texte', type: 'text', icon: 'bx-text', required: false, system: false };
-                    break;
-            }
-            
-            formFields[parentIndex].children.push(newField);
+            const id = 'custom_' + Date.now();
+            const MAP = {
+                email:         { id, label: 'E-mail supplémentaire',  labels: { fr:'E-mail supplémentaire', en:'Additional e-mail', es:'E-mail adicional', it:'E-mail aggiuntivo', pt:'E-mail adicional', de:'Zusatz-E-Mail', nl:'Extra e-mail' }, type:'email', icon:'bx-envelope' },
+                tel:           { id, label: 'Téléphone supplémentaire', labels: { fr:'Téléphone supplémentaire', en:'Additional phone', es:'Teléfono adicional', it:'Telefono aggiuntivo', pt:'Telefone adicional', de:'Zusatztelefon', nl:'Extra telefoon' }, type:'tel', icon:'bx-phone' },
+                address_block: { id:'address_block_'+Date.now(), label:'Bloc Adresse complet', labels: { fr:'Bloc Adresse complet', en:'Full address block', es:'Bloque dirección completo', it:'Blocco indirizzo completo', pt:'Bloco de endereço', de:'Adressblock', nl:'Adresblok' }, type:'address_block', icon:'bx-map' },
+                text:          { id, label: 'Nouveau champ texte',    labels: { fr:'Nouveau champ', en:'New field', es:'Nuevo campo', it:'Nuovo campo', pt:'Novo campo', de:'Neues Feld', nl:'Nieuw veld' }, type:'text', icon:'bx-text' }
+            };
+            formFields[parentIndex].children.push({ ...(MAP[type] || MAP.text), required: false, system: false });
             renderFieldsList();
         };
 
         document.getElementById('btnAddTextField').addEventListener('click', () => {
-            formFields.push({ id: 'custom_' + Date.now(), label: 'Nouveau champ', type: 'text', icon: 'bx-text', required: false, system: false });
+            formFields.push({ id:'custom_'+Date.now(), label:'Nouveau champ', labels:{ fr:'Nouveau champ', en:'New field', es:'Nuevo campo', it:'Nuovo campo', pt:'Novo campo', de:'Neues Feld', nl:'Nieuw veld' }, type:'text', icon:'bx-text', required:false, system:false });
             renderFieldsList();
         });
         document.getElementById('btnAddEmailField').addEventListener('click', () => {
-            formFields.push({ id: 'custom_' + Date.now(), label: 'E-mail supplémentaire', type: 'email', icon: 'bx-envelope', required: false, system: false });
+            formFields.push({ id:'custom_'+Date.now(), label:'E-mail supplémentaire', labels:{ fr:'E-mail supplémentaire', en:'Additional e-mail', es:'E-mail adicional', it:'E-mail aggiuntivo', pt:'E-mail adicional', de:'Zusatz-E-Mail', nl:'Extra e-mail' }, type:'email', icon:'bx-envelope', required:false, system:false });
             renderFieldsList();
         });
         document.getElementById('btnAddPhoneField').addEventListener('click', () => {
-            formFields.push({ id: 'custom_' + Date.now(), label: 'Téléphone supplémentaire', type: 'tel', icon: 'bx-phone', required: false, system: false });
+            formFields.push({ id:'custom_'+Date.now(), label:'Téléphone supplémentaire', labels:{ fr:'Téléphone supplémentaire', en:'Additional phone', es:'Teléfono adicional', it:'Telefono aggiuntivo', pt:'Telefone adicional', de:'Zusatztelefon', nl:'Extra telefoon' }, type:'tel', icon:'bx-phone', required:false, system:false });
             renderFieldsList();
         });
         document.getElementById('btnAddAddressBlock').addEventListener('click', () => {
-            formFields.push({ id: 'address_block_' + Date.now(), label: 'Bloc Adresse complet', type: 'address_block', icon: 'bx-map', required: false, system: false, children: [] });
+            formFields.push({ id:'address_block_'+Date.now(), label:'Bloc Adresse complet', labels:{ fr:'Bloc Adresse complet', en:'Full address block', es:'Bloque dirección completo', it:'Blocco indirizzo completo', pt:'Bloco de endereço', de:'Adressblock', nl:'Adresblok' }, type:'address_block', icon:'bx-map', required:false, system:false, children:[] });
             renderFieldsList();
         });
         document.getElementById('btnAddToggleGroup').addEventListener('click', () => {
-            formFields.push({ id: 'group_' + Date.now(), label: 'Nouveau Groupe (ex: Adresse temporaire)', type: 'toggle_group', icon: 'bx-list-plus', system: false, children: [] });
+            formFields.push({ id:'group_'+Date.now(), label:'Nouveau Groupe', labels:{ fr:'Nouveau Groupe', en:'New Group', es:'Nuevo Grupo', it:'Nuovo Gruppo', pt:'Novo Grupo', de:'Neue Gruppe', nl:'Nieuwe Groep' }, type:'toggle_group', icon:'bx-list-plus', system:false, children:[] });
             renderFieldsList();
         });
 
