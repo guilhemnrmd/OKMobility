@@ -424,10 +424,7 @@
 
         // Champs par défaut si l'agence n'en a pas
         const DEFAULT_FIELDS = [
-            { id: "address", label: "Adresse de résidence", type: "address", icon: "bx-map", required: true, system: true },
-            { id: "zipCode", label: "Code Postal", type: "text", icon: "bx-hash", required: true, system: true },
-            { id: "city", label: "Ville", type: "text", icon: "bx-buildings", required: true, system: true },
-            { id: "country", label: "Pays", type: "country", icon: "bx-globe", required: true, system: true },
+            { id: "address_block", label: "Bloc Adresse (Rue, CP, Ville, Pays)", type: "address_block", icon: "bx-map", required: true, system: true },
             { id: "phone", label: "Téléphone", type: "tel", icon: "bx-phone", required: true, system: true },
             { id: "email", label: "E-mail", type: "email", icon: "bx-envelope", required: true, system: true }
         ];

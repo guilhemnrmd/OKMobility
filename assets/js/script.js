@@ -416,12 +416,13 @@ function setAgencyBranding(agencyName) {
  * System fields are pre-built in the HTML, custom fields are injected.
  */
 const SYSTEM_FIELD_WRAPPERS = {
-    address:  'wrap_address',
-    zipCode:  'wrap_zipCode_city',
-    city:     'wrap_zipCode_city',   // shared wrapper with zipCode
-    country:  'wrap_country',
-    phone:    'wrap_phone_group',
-    email:    'wrap_email'
+    address_block:  ['wrap_address', 'wrap_zipCode_city', 'wrap_country'],
+    address:        ['wrap_address'],
+    zipCode:        ['wrap_zipCode_city'],
+    city:           ['wrap_zipCode_city'],
+    country:        ['wrap_country'],
+    phone:          ['wrap_phone_group'],
+    email:          ['wrap_email']
 };
 
 /**
@@ -435,11 +436,13 @@ function renderDynamicFields(fields) {
 
     // Collect all existing system wrappers
     const existingWrappers = {};
-    for (const [fieldId, wrapperId] of Object.entries(SYSTEM_FIELD_WRAPPERS)) {
-        const el = document.getElementById(wrapperId);
-        if (el && !existingWrappers[wrapperId]) {
-            existingWrappers[wrapperId] = el;
-        }
+    for (const [fieldId, wrapperIds] of Object.entries(SYSTEM_FIELD_WRAPPERS)) {
+        wrapperIds.forEach(wrapperId => {
+            const el = document.getElementById(wrapperId);
+            if (el && !existingWrappers[wrapperId]) {
+                existingWrappers[wrapperId] = el;
+            }
+        });
     }
 
     // Also capture temp address and phone2 wrappers
@@ -458,14 +461,16 @@ function renderDynamicFields(fields) {
     fields.forEach(field => {
         if (field.system) {
             // Re-attach the existing system wrapper
-            const wrapperId = SYSTEM_FIELD_WRAPPERS[field.id];
-            if (wrapperId && existingWrappers[wrapperId] && !reattached.has(wrapperId)) {
-                container.appendChild(existingWrappers[wrapperId]);
-                reattached.add(wrapperId);
-            }
+            const wrapperIds = SYSTEM_FIELD_WRAPPERS[field.id] || [];
+            wrapperIds.forEach(wrapperId => {
+                if (wrapperId && existingWrappers[wrapperId] && !reattached.has(wrapperId)) {
+                    container.appendChild(existingWrappers[wrapperId]);
+                    reattached.add(wrapperId);
+                }
+            });
 
-            // After 'country', re-attach temp address wrapper if it was present
-            if (field.id === 'country' && tempAddressWrapper) {
+            // After 'address_block', re-attach temp address wrapper if it was present
+            if (field.id === 'address_block' && tempAddressWrapper) {
                 container.appendChild(tempAddressWrapper);
             }
             // After 'phone', re-attach phone2 wrapper if it was present
