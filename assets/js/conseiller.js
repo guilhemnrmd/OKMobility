@@ -871,9 +871,22 @@ function handleIncomingData(data) {
     // Handle custom fields (keys starting with 'custom_')
     const customContainer = document.getElementById('customFieldsContainer');
     if (customContainer) {
+        // Build a flat lookup of field labels from formSettings (configured via dashboard)
+        const fieldLabelLookup = {};
+        const formFields = window.OKM_FORM_SETTINGS?.fields || [];
+        const lang = cleanData.language || 'es';
+        function indexFields(arr) {
+            arr.forEach(f => {
+                if (f.id) fieldLabelLookup[f.id] = (f.labels?.[lang]) || f.label || f.id;
+                if (f.children?.length) indexFields(f.children);
+            });
+        }
+        indexFields(formFields);
+
         Object.keys(cleanData).forEach(key => {
             if (!key.startsWith('custom_')) return;
             const value = cleanData[key] || '-';
+            const label = fieldLabelLookup[key] || key.replace('custom_', '').replace(/_/g, ' ');
             let row = document.getElementById('row_' + key);
             if (!row) {
                 row = document.createElement('div');
@@ -881,7 +894,7 @@ function handleIncomingData(data) {
                 row.id = 'row_' + key;
                 row.innerHTML = `
                     <div class="data-info">
-                        <span class="data-label">${key.replace('custom_', '').replace(/_/g, ' ')}</span>
+                        <span class="data-label">${label}</span>
                         <span class="data-value" id="val_${key}">-</span>
                     </div>
                     <button class="btn-copy" data-field="${key}" title="Copiar">
@@ -889,11 +902,14 @@ function handleIncomingData(data) {
                     </button>
                 `;
                 customContainer.appendChild(row);
-                // Add copy handler
                 row.querySelector('.btn-copy').addEventListener('click', (e) => {
                     const val = row.querySelector('.data-value').textContent;
                     copyToClipboard(val, e.currentTarget);
                 });
+            } else {
+                // Update label in case language changed
+                const labelEl = row.querySelector('.data-label');
+                if (labelEl) labelEl.textContent = label;
             }
             const valEl = document.getElementById('val_' + key);
             if (valEl) {

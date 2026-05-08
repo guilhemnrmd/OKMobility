@@ -456,158 +456,155 @@ function renderDynamicFields(fields) {
     const container = document.getElementById('dynamicFormFields');
     if (!container) return;
 
-    // Clear container
     container.innerHTML = '';
+
+    const iconMap = { text:'bx-text', email:'bx-envelope', tel:'bx-phone', number:'bx-calculator', date:'bx-calendar', url:'bx-link' };
 
     function renderFields(fieldsArray, parentElement) {
         fieldsArray.forEach(field => {
+
+            // ── Toggle Group ───────────────────────────────────────────
             if (field.type === 'toggle_group') {
-                // Create a toggle group
                 const groupWrap = document.createElement('div');
-                groupWrap.className = 'temp-address-wrapper active';
-                groupWrap.style.animation = 'slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-                groupWrap.style.marginTop = 'var(--spacing-lg)';
-                groupWrap.style.marginBottom = 'var(--spacing-md)';
-                
+                groupWrap.className = 'temp-address-wrapper';
+
                 const toggleDiv = document.createElement('div');
                 toggleDiv.className = 'temp-address-toggle';
-                
+
                 const headerDiv = document.createElement('div');
                 headerDiv.className = 'toggle-header';
-                
+
                 const labelWrap = document.createElement('label');
                 labelWrap.className = 'custom-checkbox';
-                
+
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
-                checkbox.id = `chk_${field.id}`;
+                checkbox.id   = `chk_${field.id}`;
                 checkbox.name = `chk_${field.id}`;
-                
+
                 const spanCheck = document.createElement('span');
                 spanCheck.className = 'checkmark';
-                
+
                 const spanText = document.createElement('span');
-                spanText.textContent = field.labels?.[state.lang] || field.label || 'Groupe';
-                
+                spanText.textContent = field.labels?.[state.lang] || field.label || 'Option';
+
                 labelWrap.appendChild(checkbox);
                 labelWrap.appendChild(spanCheck);
                 labelWrap.appendChild(spanText);
                 headerDiv.appendChild(labelWrap);
                 toggleDiv.appendChild(headerDiv);
                 groupWrap.appendChild(toggleDiv);
-                
+
                 const slidingSec = document.createElement('div');
-                slidingSec.className = 'temp-address-sliding-section';
-                slidingSec.style.display = 'none'; // Hidden by default
-                
+                slidingSec.className = 'temp-address-sliding-section'; // starts collapsed (CSS)
+
                 const innerDiv = document.createElement('div');
                 innerDiv.className = 'temp-address-content-inner';
-                
+
                 slidingSec.appendChild(innerDiv);
                 groupWrap.appendChild(slidingSec);
-                
+
+                // Use .expanded class — same CSS grid transition as static toggles
                 checkbox.addEventListener('change', () => {
                     const active = checkbox.checked;
-                    slidingSec.style.display = active ? 'block' : 'none';
-                    // Update required status of children
-                    innerDiv.querySelectorAll('input, select').forEach(input => {
-                        if (input.dataset.req === 'true') input.required = active;
+                    slidingSec.classList.toggle('expanded', active);
+                    groupWrap.classList.toggle('active', active);
+                    innerDiv.querySelectorAll('input, select').forEach(inp => {
+                        if (inp.dataset.req === 'true') inp.required = active;
                     });
                 });
-                
-                parentElement.appendChild(groupWrap);
-                
-                if (field.children && field.children.length > 0) {
-                    renderFields(field.children, innerDiv);
-                }
-            } else if (field.type === 'address_block') {
-                // Custom Address Block — labels use i18n translations
-                const t = i18n[state.lang] || i18n['en'];
-                const wrap = document.createElement('div');
-                wrap.className = 'form-group-row';
-                wrap.style.cssText = 'animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); flex-direction: column; gap: 1rem; width: 100%;';
 
-                const addrLabel = field.labels?.[state.lang] || field.label || t.address || 'Address';
-                const zipLabel  = t.zipCode  || 'Postal Code';
-                const cityLabel = t.city     || 'City';
+                // Click on header row toggles checkbox (same as static toggles)
+                headerDiv.addEventListener('click', (e) => {
+                    if (e.target.closest('.custom-checkbox')) return;
+                    checkbox.click();
+                });
+
+                parentElement.appendChild(groupWrap);
+
+                if (field.children?.length) renderFields(field.children, innerDiv);
+
+            // ── Address Block ──────────────────────────────────────────
+            } else if (field.type === 'address_block') {
+                const t = i18n[state.lang] || i18n['en'];
+                // Use canonical IDs so dom refs and buildAdvisorPayload work correctly
+                const isFirst = !document.getElementById('address');
+                const addrId  = isFirst ? 'address'  : `${field.id}_addr`;
+                const suggId  = isFirst ? 'addressSuggestions' : `${field.id}_sugg`;
+                const zipId   = isFirst ? 'zipCode'  : `${field.id}_zip`;
+                const cityId  = isFirst ? 'city'     : `${field.id}_city`;
+                const lblId   = isFirst ? 'lblAddress' : `lbl_${field.id}_addr`;
+                const wrapId  = isFirst ? 'wrap_address' : `wrap_${field.id}`;
+
+                const addrLabel       = field.labels?.[state.lang] || field.label || t.address || 'Address';
+                const zipLabel        = t.zipCode  || 'Postal Code';
+                const cityLabel       = t.city     || 'City';
                 const addrPlaceholder = t.addressPlaceholder || '123 Main St';
                 const zipPlaceholder  = t.placeholderZip    || '75000';
                 const cityPlaceholder = t.placeholderCity   || 'Paris';
 
+                const blockWrap = document.createElement('div');
+                blockWrap.className = 'input-wrapper address-wrapper';
+                blockWrap.id = wrapId;
+
                 const addressWrap = document.createElement('div');
                 addressWrap.className = 'input-wrapper address-wrapper';
                 addressWrap.innerHTML = `
-                    <label for="${field.id}_addr" id="lbl_${field.id}_addr">${addrLabel}</label>
+                    <label for="${addrId}" id="${lblId}">${addrLabel}</label>
                     <div class="input-with-icon">
-                        <i class='bx bx-map-pin'></i>
-                        <input type="text" id="${field.id}_addr" name="${field.id}_addr" placeholder="${addrPlaceholder}" autocomplete="off">
+                        <i class='bx bx-map'></i>
+                        <input type="text" id="${addrId}" name="${addrId}" placeholder="${addrPlaceholder}" autocomplete="off"${field.required ? ' required' : ''}>
                     </div>
-                    <ul class="address-suggestions" id="${field.id}_sugg" role="listbox"></ul>
+                    <ul class="address-suggestions" id="${suggId}" role="listbox"></ul>
                 `;
 
                 const row = document.createElement('div');
                 row.className = 'form-group-row';
+                row.id = isFirst ? 'wrap_zipCode_city' : '';
 
                 const zipWrap = document.createElement('div');
                 zipWrap.className = 'input-wrapper zip-wrapper';
                 zipWrap.innerHTML = `
-                    <label for="${field.id}_zip">${zipLabel}</label>
+                    <label for="${zipId}" id="${isFirst ? 'lblZipCode' : ''}">${zipLabel}</label>
                     <div class="input-with-icon">
                         <i class='bx bx-hash'></i>
-                        <input type="text" id="${field.id}_zip" name="${field.id}_zip" placeholder="${zipPlaceholder}">
+                        <input type="text" id="${zipId}" name="${zipId}" placeholder="${zipPlaceholder}"${field.required ? ' required' : ''}>
                     </div>
                 `;
 
                 const cityWrap = document.createElement('div');
                 cityWrap.className = 'input-wrapper city-wrapper';
                 cityWrap.innerHTML = `
-                    <label for="${field.id}_city">${cityLabel}</label>
+                    <label for="${cityId}" id="${isFirst ? 'lblCity' : ''}">${cityLabel}</label>
                     <div class="input-with-icon">
                         <i class='bx bx-buildings'></i>
-                        <input type="text" id="${field.id}_city" name="${field.id}_city" placeholder="${cityPlaceholder}">
+                        <input type="text" id="${cityId}" name="${cityId}" placeholder="${cityPlaceholder}"${field.required ? ' required' : ''}>
                     </div>
                 `;
-                
-                if (field.required) {
-                    addressWrap.querySelector('input').dataset.req = 'true';
-                    zipWrap.querySelector('input').dataset.req = 'true';
-                    cityWrap.querySelector('input').dataset.req = 'true';
-                    addressWrap.querySelector('input').required = true;
-                    zipWrap.querySelector('input').required = true;
-                    cityWrap.querySelector('input').required = true;
-                }
-                
+
                 row.appendChild(zipWrap);
                 row.appendChild(cityWrap);
-                wrap.appendChild(addressWrap);
-                wrap.appendChild(row);
-                parentElement.appendChild(wrap);
-                
+                parentElement.appendChild(addressWrap);
+                parentElement.appendChild(row);
+
                 setTimeout(() => {
-                    const inputEl = document.getElementById(`${field.id}_addr`);
-                    const listEl = document.getElementById(`${field.id}_sugg`);
-                    const zipEl = document.getElementById(`${field.id}_zip`);
-                    const cityEl = document.getElementById(`${field.id}_city`);
-                    const overflowEl = inputEl.closest('.temp-address-content-inner');
-                    if (window.bindAddressField) {
-                        window.bindAddressField(inputEl, listEl, zipEl, cityEl, null, overflowEl);
+                    const inputEl = document.getElementById(addrId);
+                    const listEl  = document.getElementById(suggId);
+                    const zipEl   = document.getElementById(zipId);
+                    const cityEl  = document.getElementById(cityId);
+                    const overflowEl = inputEl?.closest('.temp-address-content-inner');
+                    // Pass dom.country so country is auto-detected from address selection
+                    if (window.bindAddressField && inputEl && listEl) {
+                        window.bindAddressField(inputEl, listEl, zipEl, cityEl, isFirst ? dom.country : null, overflowEl);
                     }
                 }, 0);
+
+            // ── Standard Field ─────────────────────────────────────────
             } else {
-                // Standard field (text, email, tel, etc.)
                 const wrapper = document.createElement('div');
                 wrapper.className = 'input-wrapper';
                 wrapper.id = `wrap_${field.id}`;
-                wrapper.style.cssText = 'animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);';
 
-                const iconMap = {
-                    text: 'bx-text',
-                    email: 'bx-envelope',
-                    tel: 'bx-phone',
-                    number: 'bx-calculator',
-                    date: 'bx-calendar',
-                    url: 'bx-link'
-                };
                 const iconClass = field.icon || iconMap[field.type] || 'bx-edit-alt';
 
                 const label = document.createElement('label');
@@ -622,10 +619,9 @@ function renderDynamicFields(fields) {
 
                 const input = document.createElement('input');
                 input.type = field.type === 'tel' ? 'tel' : (field.type || 'text');
-                input.id = field.id;
+                input.id   = field.id;
                 input.name = field.id;
                 input.placeholder = field.placeholder || '';
-                
                 if (field.required) {
                     input.dataset.req = 'true';
                     input.required = true;

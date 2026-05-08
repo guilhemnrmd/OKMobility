@@ -162,48 +162,47 @@
         /* ── Translations Panel ───────────────────────────────────── */
         .translations-panel {
             margin-top: 10px;
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.03);
+            padding: 10px 12px 12px;
+            background: rgba(0,0,0,0.025);
             border-radius: var(--radius-sm, 8px);
             border: 1px solid var(--color-border);
         }
         .translations-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            gap: 6px 10px;
         }
         .trans-label {
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 2px;
         }
         .trans-lang {
-            font-size: 0.7rem;
-            font-weight: 600;
-            letter-spacing: 0.04em;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
             text-transform: uppercase;
-            color: var(--color-text-secondary);
-            opacity: 0.7;
+            color: var(--color-accent);
+            opacity: 0.75;
         }
         .trans-input {
             width: 100%;
-            padding: 6px 10px;
-            background: var(--color-input-bg, rgba(255,255,255,0.6));
+            padding: 5px 9px;
+            background: var(--color-panel-bg);
             border: 1px solid var(--color-border);
-            border-radius: var(--radius-sm, 8px);
-            font-size: 0.85rem;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-family: var(--font-family-sans);
             color: var(--color-text-primary);
             outline: none;
-            transition: border-color 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
         .trans-input:focus {
             border-color: var(--color-accent);
+            box-shadow: 0 0 0 2px rgba(32,84,234,0.12);
         }
         .theme-dark .translations-panel {
-            background: rgba(255,255,255,0.03);
-        }
-        .theme-dark .trans-input {
-            background: rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.025);
         }
     </style>
 </head>
@@ -490,9 +489,14 @@
         // Champs par défaut si l'agence n'en a pas — avec traductions
         const DEFAULT_FIELDS = [
             {
-                id: "address_block", label: "Adresse de résidence",
-                labels: { fr: "Adresse de résidence", en: "Residential address", es: "Dirección de residencia", it: "Indirizzo di residenza", pt: "Endereço de residência", de: "Wohnadresse", nl: "Woonadres" },
+                id: "address_block", label: "Adresse",
+                labels: { fr: "Adresse", en: "Address", es: "Dirección", it: "Indirizzo", pt: "Endereço", de: "Adresse", nl: "Adres" },
                 type: "address_block", icon: "bx-map", required: true, system: false
+            },
+            {
+                id: "phone", label: "Téléphone",
+                labels: { fr: "Téléphone", en: "Phone", es: "Teléfono", it: "Telefono", pt: "Telefone", de: "Telefon", nl: "Telefoon" },
+                type: "tel", icon: "bx-phone", required: true, system: false
             },
             {
                 id: "email", label: "E-mail",
@@ -713,10 +717,10 @@
             if (!formFields[parentIndex].children) formFields[parentIndex].children = [];
             const id = 'custom_' + Date.now();
             const MAP = {
-                email:         { id, label: 'E-mail supplémentaire',  labels: { fr:'E-mail supplémentaire', en:'Additional e-mail', es:'E-mail adicional', it:'E-mail aggiuntivo', pt:'E-mail adicional', de:'Zusatz-E-Mail', nl:'Extra e-mail' }, type:'email', icon:'bx-envelope' },
-                tel:           { id, label: 'Téléphone supplémentaire', labels: { fr:'Téléphone supplémentaire', en:'Additional phone', es:'Teléfono adicional', it:'Telefono aggiuntivo', pt:'Telefone adicional', de:'Zusatztelefon', nl:'Extra telefoon' }, type:'tel', icon:'bx-phone' },
-                address_block: { id:'address_block_'+Date.now(), label:'Bloc Adresse complet', labels: { fr:'Bloc Adresse complet', en:'Full address block', es:'Bloque dirección completo', it:'Blocco indirizzo completo', pt:'Bloco de endereço', de:'Adressblock', nl:'Adresblok' }, type:'address_block', icon:'bx-map' },
-                text:          { id, label: 'Nouveau champ texte',    labels: { fr:'Nouveau champ', en:'New field', es:'Nuevo campo', it:'Nuovo campo', pt:'Novo campo', de:'Neues Feld', nl:'Nieuw veld' }, type:'text', icon:'bx-text' }
+                email:         { id, label: 'E-mail',     labels: { fr:'E-mail',     en:'E-mail',    es:'E-mail',    it:'E-mail',    pt:'E-mail',    de:'E-Mail',    nl:'E-mail'    }, type:'email', icon:'bx-envelope' },
+                tel:           { id, label: 'Téléphone', labels: { fr:'Téléphone', en:'Phone',    es:'Teléfono', it:'Telefono', pt:'Telefone', de:'Telefon',  nl:'Telefoon'  }, type:'tel', icon:'bx-phone' },
+                address_block: { id:'address_block_'+Date.now(), label:'Adresse', labels: { fr:'Adresse', en:'Address', es:'Dirección', it:'Indirizzo', pt:'Endereço', de:'Adresse', nl:'Adres' }, type:'address_block', icon:'bx-map' },
+                text:          { id, label: 'Nouveau champ', labels: { fr:'Nouveau champ', en:'New field', es:'Nuevo campo', it:'Nuovo campo', pt:'Novo campo', de:'Neues Feld', nl:'Nieuw veld' }, type:'text', icon:'bx-text' }
             };
             formFields[parentIndex].children.push({ ...(MAP[type] || MAP.text), required: false, system: false });
             renderFieldsList();
@@ -727,15 +731,15 @@
             renderFieldsList();
         });
         document.getElementById('btnAddEmailField').addEventListener('click', () => {
-            formFields.push({ id:'custom_'+Date.now(), label:'E-mail supplémentaire', labels:{ fr:'E-mail supplémentaire', en:'Additional e-mail', es:'E-mail adicional', it:'E-mail aggiuntivo', pt:'E-mail adicional', de:'Zusatz-E-Mail', nl:'Extra e-mail' }, type:'email', icon:'bx-envelope', required:false, system:false });
+            formFields.push({ id:'custom_'+Date.now(), label:'E-mail', labels:{ fr:'E-mail', en:'E-mail', es:'E-mail', it:'E-mail', pt:'E-mail', de:'E-Mail', nl:'E-mail' }, type:'email', icon:'bx-envelope', required:false, system:false });
             renderFieldsList();
         });
         document.getElementById('btnAddPhoneField').addEventListener('click', () => {
-            formFields.push({ id:'custom_'+Date.now(), label:'Téléphone supplémentaire', labels:{ fr:'Téléphone supplémentaire', en:'Additional phone', es:'Teléfono adicional', it:'Telefono aggiuntivo', pt:'Telefone adicional', de:'Zusatztelefon', nl:'Extra telefoon' }, type:'tel', icon:'bx-phone', required:false, system:false });
+            formFields.push({ id:'custom_'+Date.now(), label:'Téléphone', labels:{ fr:'Téléphone', en:'Phone', es:'Teléfono', it:'Telefono', pt:'Telefone', de:'Telefon', nl:'Telefoon' }, type:'tel', icon:'bx-phone', required:false, system:false });
             renderFieldsList();
         });
         document.getElementById('btnAddAddressBlock').addEventListener('click', () => {
-            formFields.push({ id:'address_block_'+Date.now(), label:'Bloc Adresse complet', labels:{ fr:'Bloc Adresse complet', en:'Full address block', es:'Bloque dirección completo', it:'Blocco indirizzo completo', pt:'Bloco de endereço', de:'Adressblock', nl:'Adresblok' }, type:'address_block', icon:'bx-map', required:false, system:false, children:[] });
+            formFields.push({ id:'address_block_'+Date.now(), label:'Adresse', labels:{ fr:'Adresse', en:'Address', es:'Dirección', it:'Indirizzo', pt:'Endereço', de:'Adresse', nl:'Adres' }, type:'address_block', icon:'bx-map', required:false, system:false, children:[] });
             renderFieldsList();
         });
         document.getElementById('btnAddToggleGroup').addEventListener('click', () => {

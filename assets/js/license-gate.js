@@ -442,6 +442,9 @@ window.runLicenseGate = async function () {
         }).catch(() => { /* offline — continue with cached data */ });
     }
 
+    // Expose form settings so conseiller.js can use field labels for custom fields.
+    window.OKM_FORM_SETTINGS = license?.formSettings || {};
+
     // Keep agency display name in retailer header and storage for QR propagation.
     const agencyName = sanitizeAgencyName(license?.agencyName || '');
     applyRetailerAgencyBranding(agencyName);

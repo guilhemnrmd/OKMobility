@@ -685,6 +685,12 @@ select {
     gap: var(--spacing-sm);
 }
 
+#dynamicFormFields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
 .form-group-row {
     display: flex;
     gap: var(--spacing-sm);
