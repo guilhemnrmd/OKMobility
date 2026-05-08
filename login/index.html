@@ -15,22 +15,22 @@
     <header class="b2b-nav auth-nav">
         <div class="nav-brand"><a href="/">MobilityOS</a></div>
         <div class="nav-controls">
-            <a href="/signup/" class="nav-link">Créer un compte</a>
+            <a href="/signup/" class="nav-link" data-i18n="navSignup">Créer un compte</a>
         </div>
     </header>
 
     <main class="auth-page">
         <section class="auth-card">
 
-            <h1 class="auth-title">Bon retour.</h1>
-            <p class="auth-subtitle">Connectez-vous à votre espace MobilityOS.</p>
+            <h1 class="auth-title" data-i18n="loginTitle">Bon retour.</h1>
+            <p class="auth-subtitle" data-i18n="loginSubtitle">Connectez-vous à votre espace MobilityOS.</p>
 
             <div id="alertBanner" class="alert"></div>
 
             <form id="loginForm" class="auth-form" novalidate>
 
                 <div class="field">
-                    <label class="field-label" for="inputEmail">Adresse email</label>
+                    <label class="field-label" for="inputEmail" data-i18n="lblEmail">Adresse email</label>
                     <div class="field-input-wrap">
                         <input type="email" id="inputEmail" class="field-input"
                                placeholder="jean@monagence.com" autocomplete="email" required>
@@ -39,7 +39,7 @@
                 </div>
 
                 <div class="field">
-                    <label class="field-label" for="inputPassword">Mot de passe</label>
+                    <label class="field-label" for="inputPassword" data-i18n="lblPassword">Mot de passe</label>
                     <div class="field-input-wrap">
                         <input type="password" id="inputPassword" class="field-input"
                                placeholder="••••••••" autocomplete="current-password" required
@@ -52,18 +52,149 @@
                 </div>
 
                 <button type="submit" id="btnSubmit" class="btn-submit">
-                    <span id="btnText">Se connecter</span>
+                    <span id="btnText" data-i18n="btnSubmit">Se connecter</span>
                     <i class='bx bx-loader-alt btn-spinner' id="btnSpinner" style="display:none"></i>
                 </button>
 
             </form>
 
-            <p class="auth-footer">Pas encore de compte ? <a href="/signup/">Essai gratuit 30 jours</a></p>
+            <p class="auth-footer">
+                <span data-i18n="footerNoAccount">Pas encore de compte ?</span>
+                <a href="/signup/" data-i18n="footerSignup">Essai gratuit 30 jours</a>
+            </p>
 
         </section>
     </main>
 
     <script>
+        // ── Internationalization (i18n) ───────────────────────
+        const i18n = {
+            fr: {
+                navSignup: "Créer un compte",
+                loginTitle: "Bon retour.",
+                loginSubtitle: "Connectez-vous à votre espace MobilityOS.",
+                lblEmail: "Adresse email",
+                lblPassword: "Mot de passe",
+                btnSubmit: "Se connecter",
+                btnLoggingIn: "Connexion…",
+                footerNoAccount: "Pas encore de compte ?",
+                footerSignup: "Essai gratuit 30 jours",
+                alertEmpty: "Veuillez remplir tous les champs.",
+                alertSessionExpired: "Votre session a expiré. Veuillez vous reconnecter.",
+                alertError: "Identifiants incorrects.",
+                alertConnError: "Erreur de connexion. Veuillez réessayer."
+            },
+            en: {
+                navSignup: "Create an account",
+                loginTitle: "Welcome back.",
+                loginSubtitle: "Sign in to your MobilityOS workspace.",
+                lblEmail: "Email address",
+                lblPassword: "Password",
+                btnSubmit: "Sign in",
+                btnLoggingIn: "Signing in…",
+                footerNoAccount: "No account yet?",
+                footerSignup: "30-day free trial",
+                alertEmpty: "Please fill in all fields.",
+                alertSessionExpired: "Your session has expired. Please log in again.",
+                alertError: "Incorrect credentials.",
+                alertConnError: "Connection error. Please try again."
+            },
+            es: {
+                navSignup: "Crear una cuenta",
+                loginTitle: "Bienvenido de nuevo.",
+                loginSubtitle: "Inicie sesión en su espacio MobilityOS.",
+                lblEmail: "Correo electrónico",
+                lblPassword: "Contraseña",
+                btnSubmit: "Iniciar sesión",
+                btnLoggingIn: "Iniciando sesión…",
+                footerNoAccount: "¿Aún no tienes cuenta?",
+                footerSignup: "Prueba gratuita de 30 días",
+                alertEmpty: "Por favor, complete todos los campos.",
+                alertSessionExpired: "Su sesión ha caducado. Por favor, inicie sesión de nuevo.",
+                alertError: "Credenciales incorrectas.",
+                alertConnError: "Error de conexión. Por favor, inténtelo de nuevo."
+            },
+            it: {
+                navSignup: "Crea un account",
+                loginTitle: "Bentornato.",
+                loginSubtitle: "Accedi al tuo spazio MobilityOS.",
+                lblEmail: "Indirizzo email",
+                lblPassword: "Password",
+                btnSubmit: "Accedi",
+                btnLoggingIn: "Accesso in corso…",
+                footerNoAccount: "Non hai ancora un account?",
+                footerSignup: "Prova gratuita di 30 giorni",
+                alertEmpty: "Si prega di compilare tutti i campi.",
+                alertSessionExpired: "La sessione è scaduta. Per favore, accedi di nuovo.",
+                alertError: "Credenziali errate.",
+                alertConnError: "Errore di connessione. Per favore, riprova."
+            },
+            pt: {
+                navSignup: "Criar uma conta",
+                loginTitle: "Bem-vindo de volta.",
+                loginSubtitle: "Inicie sessão no seu espaço MobilityOS.",
+                lblEmail: "Endereço de e-mail",
+                lblPassword: "Palavra-passe",
+                btnSubmit: "Entrar",
+                btnLoggingIn: "A entrar…",
+                footerNoAccount: "Ainda não tem conta?",
+                footerSignup: "Teste gratuito de 30 dias",
+                alertEmpty: "Por favor, preencha todos os campos.",
+                alertSessionExpired: "A sua sessão expirou. Por favor, inicie sessão novamente.",
+                alertError: "Credenciais incorretas.",
+                alertConnError: "Erro de conexão. Por favor, tente novamente."
+            },
+            de: {
+                navSignup: "Konto erstellen",
+                loginTitle: "Willkommen zurück.",
+                loginSubtitle: "Melden Sie sich bei Ihrem MobilityOS-Arbeitsbereich an.",
+                lblEmail: "E-Mail-Adresse",
+                lblPassword: "Passwort",
+                btnSubmit: "Anmelden",
+                btnLoggingIn: "Anmeldung…",
+                footerNoAccount: "Noch kein Konto?",
+                footerSignup: "30 Tage kostenlos testen",
+                alertEmpty: "Bitte füllen Sie alle Felder aus.",
+                alertSessionExpired: "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
+                alertError: "Ungültige Anmeldedaten.",
+                alertConnError: "Verbindungsfehler. Bitte versuchen Sie es erneut."
+            },
+            nl: {
+                navSignup: "Account aanmaken",
+                loginTitle: "Welkom terug.",
+                loginSubtitle: "Meld u aan bij uw MobilityOS-werkruimte.",
+                lblEmail: "E-mailadres",
+                lblPassword: "Wachtwoord",
+                btnSubmit: "Inloggen",
+                btnLoggingIn: "Inloggen…",
+                footerNoAccount: "Nog geen account?",
+                footerSignup: "30 dagen gratis proberen",
+                alertEmpty: "Vul alle velden in.",
+                alertSessionExpired: "Uw sessie is verlopen. Log opnieuw in.",
+                alertError: "Onjuiste inloggegevens.",
+                alertConnError: "Verbindingsfout. Probeer het opnieuw."
+            }
+        };
+
+        let currentDict = i18n.en;
+
+        const updateLanguage = (lang) => {
+            currentDict = i18n[lang] || i18n['en'];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (currentDict[key]) {
+                    el.textContent = currentDict[key];
+                }
+            });
+            document.documentElement.lang = lang;
+        };
+
+        // Auto-detect language
+        const supportedLangs = ['fr','en','es','it','pt','de','nl'];
+        const browserLang = (navigator.language || 'fr').slice(0, 2).toLowerCase();
+        const detectedLang = supportedLangs.includes(browserLang) ? browserLang : 'en';
+        updateLanguage(detectedLang);
+
         // Redirect if already authenticated
         fetch('/api/auth/session')
             .then(r => r.json())
@@ -72,7 +203,7 @@
 
         const params = new URLSearchParams(window.location.search);
         if (params.get('reason') === 'session_expired') {
-            showAlert('Votre session a expiré. Veuillez vous reconnecter.', 'error');
+            showAlert(currentDict.alertSessionExpired, 'error');
         }
 
         document.querySelector('.btn-toggle-pwd').addEventListener('click', () => {
@@ -88,7 +219,7 @@
             const email = document.getElementById('inputEmail').value.trim();
             const password = document.getElementById('inputPassword').value;
             if (!email || !password) {
-                showAlert('Veuillez remplir tous les champs.', 'error');
+                showAlert(currentDict.alertEmpty, 'error');
                 return;
             }
             setLoading(true);
@@ -103,11 +234,11 @@
                 if (res.ok) {
                     window.location.href = params.get('next') || '/dashboard/';
                 } else {
-                    showAlert(data.error || 'Identifiants incorrects.', 'error');
+                    showAlert(data.error || currentDict.alertError, 'error');
                 }
             } catch (err) {
                 console.error(err);
-                showAlert('Erreur de connexion. Veuillez réessayer.', 'error');
+                showAlert(currentDict.alertConnError, 'error');
             } finally {
                 setLoading(false);
             }
@@ -116,7 +247,7 @@
         function setLoading(on) {
             const btn = document.getElementById('btnSubmit');
             btn.disabled = on;
-            document.getElementById('btnText').textContent = on ? 'Connexion…' : 'Se connecter';
+            document.getElementById('btnText').textContent = on ? currentDict.btnLoggingIn : currentDict.btnSubmit;
             document.getElementById('btnSpinner').style.display = on ? 'inline-block' : 'none';
         }
         function showAlert(msg, type) {
