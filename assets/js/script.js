@@ -339,7 +339,6 @@ const dom = {
     // Outputs
     summaryContentBody: document.getElementById('summaryContentBody'),
     btnEdit: document.getElementById('btnEdit'),
-    btnEdit: document.getElementById('btnEdit'),
     // Inputs Main Address
     address: document.getElementById('address'),
     country: document.getElementById('country'),
@@ -381,6 +380,42 @@ const dom = {
     clientStatusIndicator: document.getElementById('clientStatusIndicator'),
     clientStatusText: document.getElementById('clientStatusText')
 };
+
+function reinitDomRefs() {
+    dom.address         = document.getElementById('address');
+    dom.country         = document.getElementById('country');
+    dom.zipCode         = document.getElementById('zipCode');
+    dom.city            = document.getElementById('city');
+    dom.hasTempAddress  = document.getElementById('hasTempAddress');
+    dom.lblTempAddressCheck = document.getElementById('lblTempAddressCheck');
+    dom.txtTempTooltip  = document.getElementById('txtTempTooltip');
+    dom.btnTempInfo     = document.getElementById('btnTempInfo');
+    dom.tempTooltip     = document.getElementById('tempTooltip');
+    dom.tempAddressSection = document.getElementById('tempAddressSection');
+    dom.lblTempAddress  = document.getElementById('lblTempAddress');
+    dom.tempAddress     = document.getElementById('tempAddress');
+    dom.lblTempZipCode  = document.getElementById('lblTempZipCode');
+    dom.tempZipCode     = document.getElementById('tempZipCode');
+    dom.lblTempCity     = document.getElementById('lblTempCity');
+    dom.tempCity        = document.getElementById('tempCity');
+    dom.countryCode     = document.getElementById('countryCode');
+    dom.phone           = document.getElementById('phone');
+    dom.phone2Section   = document.getElementById('phone2Section');
+    dom.btnTogglePhone2 = document.getElementById('btnTogglePhone2');
+    dom.hasPhone2       = document.getElementById('hasPhone2');
+    dom.countryCode2    = document.getElementById('countryCode2');
+    dom.phone2          = document.getElementById('phone2');
+    dom.email           = document.getElementById('email');
+}
+
+function reinitFormBindings() {
+    reinitDomRefs();
+    attachRealTimeListeners();
+    initAddressAutocomplete();
+    initSearchableSelects();
+    initTempAddressToggle();
+    initPhone2Toggle();
+}
 
 const DEFAULT_BRAND_SLOGAN = window.BRAND?.slogan || 'The Global Mobility Platform';
 
@@ -653,15 +688,11 @@ async function hydrateAgencyBrandingFromUrl() {
                 applyLanguage(s.language);
             }
 
-            // Champs dynamiques personnalisés
+            // Champs dynamiques personnalisés — seulement si l'agence a configuré des champs custom
+            // Sinon le HTML statique par défaut reste intact
             if (Array.isArray(s.fields) && s.fields.length > 0) {
                 renderDynamicFields(s.fields);
-            } else {
-                // Fallback aux champs par défaut (important pour les nouveaux comptes)
-                renderDynamicFields([
-                    { id: "email", label: "E-mail", type: "email", icon: "bx-envelope", required: true, system: false },
-                    { id: "address_block", label: "Bloc Adresse", type: "address_block", icon: "bx-map", required: true, system: false }
-                ]);
+                reinitFormBindings();
             }
             return;
         }
@@ -873,43 +904,56 @@ function resetClientForm() {
 // 4. Temporary Address Toggle
 // ============================================================================
 
-dom.hasTempAddress.addEventListener('change', (e) => {
-    const wrapper = document.getElementById('tempAddressWrapper');
-    if (e.target.checked) {
-        dom.tempAddressSection.classList.add('expanded');
-        wrapper.classList.add('active');
-        dom.tempAddress.setAttribute('required', 'true');
-        dom.tempZipCode.setAttribute('required', 'true');
-        dom.tempCity.setAttribute('required', 'true');
-    } else {
-        dom.tempAddressSection.classList.remove('expanded');
-        wrapper.classList.remove('active');
-        dom.tempAddress.removeAttribute('required');
-        dom.tempZipCode.removeAttribute('required');
-        dom.tempCity.removeAttribute('required');
+function initTempAddressToggle() {
+    if (!dom.hasTempAddress) return;
+
+    dom.hasTempAddress.addEventListener('change', (e) => {
+        const wrapper = document.getElementById('tempAddressWrapper');
+        if (e.target.checked) {
+            if (dom.tempAddressSection) dom.tempAddressSection.classList.add('expanded');
+            if (wrapper) wrapper.classList.add('active');
+            if (dom.tempAddress) dom.tempAddress.setAttribute('required', 'true');
+            if (dom.tempZipCode) dom.tempZipCode.setAttribute('required', 'true');
+            if (dom.tempCity) dom.tempCity.setAttribute('required', 'true');
+        } else {
+            if (dom.tempAddressSection) dom.tempAddressSection.classList.remove('expanded');
+            if (wrapper) wrapper.classList.remove('active');
+            if (dom.tempAddress) dom.tempAddress.removeAttribute('required');
+            if (dom.tempZipCode) dom.tempZipCode.removeAttribute('required');
+            if (dom.tempCity) dom.tempCity.removeAttribute('required');
+        }
+    });
+
+    const tempToggleHeader = document.getElementById('tempToggleHeader');
+    if (tempToggleHeader) {
+        tempToggleHeader.addEventListener('click', (e) => {
+            if (dom.btnTempInfo && dom.btnTempInfo.contains(e.target)) return;
+            if (e.target.closest('.custom-checkbox')) return;
+            if (dom.hasTempAddress) dom.hasTempAddress.click();
+        });
     }
-});
 
-// Clic sur toute la ligne = coche la case (sauf si clic sur le bouton info ou sur le label lui-même)
-document.querySelector('#tempToggleHeader').addEventListener('click', (e) => {
-    if (!dom.btnTempInfo.contains(e.target) && !e.target.closest('.custom-checkbox')) {
-        dom.hasTempAddress.click();
+    if (dom.btnTempInfo) {
+        dom.btnTempInfo.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (dom.tempTooltip) {
+                const isHidden = dom.tempTooltip.style.display === 'none';
+                dom.tempTooltip.style.display = isHidden ? 'block' : 'none';
+            }
+        });
     }
-});
+}
 
-// Tooltip Toggle on Info Button Click
-dom.btnTempInfo.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isHidden = dom.tempTooltip.style.display === 'none';
-    dom.tempTooltip.style.display = isHidden ? 'block' : 'none';
-});
-
-// Close tooltip when clicking anywhere else
+// Close tooltip when clicking anywhere else (document-level, bound once)
 document.addEventListener('click', (e) => {
-    if (!dom.btnTempInfo.contains(e.target) && !dom.tempTooltip.contains(e.target)) {
-        dom.tempTooltip.style.display = 'none';
+    if (dom.btnTempInfo && dom.tempTooltip) {
+        if (!dom.btnTempInfo.contains(e.target) && !dom.tempTooltip.contains(e.target)) {
+            dom.tempTooltip.style.display = 'none';
+        }
     }
 });
+
+initTempAddressToggle();
 
 // ============================================================================
 // 5. Form Submission & Mailto Generation
@@ -1905,20 +1949,24 @@ function setPhone2Visible(visible) {
     if (lblToggle) lblToggle.textContent = visible ? (t.phone2ToggleRemove || 'Remove 2nd phone') : (t.phone2Toggle || 'Add a 2nd phone number');
 }
 
-if (dom.btnTogglePhone2) {
-    dom.btnTogglePhone2.addEventListener('click', (e) => {
-        if (!e.target.closest('.custom-checkbox')) {
-            dom.hasPhone2.click();
-        }
-    });
+function initPhone2Toggle() {
+    if (dom.btnTogglePhone2) {
+        dom.btnTogglePhone2.addEventListener('click', (e) => {
+            if (!e.target.closest('.custom-checkbox')) {
+                if (dom.hasPhone2) dom.hasPhone2.click();
+            }
+        });
+    }
+
+    if (dom.hasPhone2) {
+        dom.hasPhone2.addEventListener('change', (e) => {
+            setPhone2Visible(e.target.checked);
+            debouncedSendToAdvisor();
+        });
+    }
 }
 
-if (dom.hasPhone2) {
-    dom.hasPhone2.addEventListener('change', (e) => {
-        setPhone2Visible(e.target.checked);
-        debouncedSendToAdvisor();
-    });
-}
+initPhone2Toggle();
 
 // Modal controls
 if (dom.btnOpenAdvisorModal) {
