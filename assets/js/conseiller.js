@@ -160,7 +160,9 @@ const state = {
     qrCodeInstance: null,
     currentData: {},
     mapDebounceTimer: null,
-    tempMapDebounceTimer: null
+    tempMapDebounceTimer: null,
+    summaryConfirmed: false,
+    summaryCountdownTimer: null
 };
 
 // ============================================================================
@@ -751,6 +753,11 @@ function showDisconnectedView() {
 // 8. Data Handling
 // ============================================================================
 function handleIncomingData(data) {
+    if (data && data.type === 'summary-confirmed') {
+        state.summaryConfirmed = true;
+        return;
+    }
+
     const cleanData = sanitizeIncomingData(data);
     if (!Object.keys(cleanData).length) return;
 
@@ -882,11 +889,48 @@ function highlightField(fieldId) {
 // ============================================================================
 // 9. Disconnection Handling
 // ============================================================================
+const SUMMARY_PERSIST_MS = 5 * 60 * 1000; // 5 minutes
+
+function startSummaryCountdown() {
+    const banner = document.getElementById('summaryCountdownBanner');
+    const valueEl = document.getElementById('summaryCountdownValue');
+    if (!banner || !valueEl) return;
+
+    let remaining = SUMMARY_PERSIST_MS;
+    banner.style.display = 'flex';
+
+    function tick() {
+        remaining -= 1000;
+        if (remaining <= 0) {
+            endSummaryCountdown();
+            showDisconnectedView();
+            return;
+        }
+        const m = Math.floor(remaining / 60000);
+        const s = Math.floor((remaining % 60000) / 1000);
+        valueEl.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+    }
+
+    tick();
+    state.summaryCountdownTimer = setInterval(tick, 1000);
+}
+
+function endSummaryCountdown() {
+    if (state.summaryCountdownTimer) {
+        clearInterval(state.summaryCountdownTimer);
+        state.summaryCountdownTimer = null;
+    }
+    const banner = document.getElementById('summaryCountdownBanner');
+    if (banner) banner.style.display = 'none';
+    state.summaryConfirmed = false;
+}
+
 function handleDisconnection() {
     state.connection = null;
 
     if (state.isManualDisconnect) {
         state.isManualDisconnect = false;
+        endSummaryCountdown();
         clearDisplayedData();
         // Destroy the old peer so the previous code becomes unreachable,
         // then spin up a new peer with a fresh session code.
@@ -896,6 +940,11 @@ function handleDisconnection() {
         }
         showSetupView();
         initializePeer();
+        return;
+    }
+
+    if (state.summaryConfirmed) {
+        startSummaryCountdown();
         return;
     }
 
@@ -974,13 +1023,14 @@ function clearSessionData() {
 }
 
 function restartSession() {
+    endSummaryCountdown();
     // Clean up existing peer
     if (state.peer) {
         state.peer.destroy();
     }
     state.connection = null;
     clearDisplayedData();
-    
+
     // Show setup and reinitialize
     showSetupView();
     initializePeer();
@@ -1377,6 +1427,40 @@ document.querySelectorAll('.btn-copy[data-field]').forEach(btn => {
         }
     });
 });
+
+// Suggestion modal
+const btnSuggest = document.getElementById('btnSuggestImprovement');
+const suggestionOverlay = document.getElementById('suggestionModalOverlay');
+const suggestionModal = document.getElementById('suggestionModal');
+const suggestionText = document.getElementById('suggestionText');
+
+function openSuggestionModal() {
+    if (suggestionOverlay) suggestionOverlay.style.display = 'block';
+    if (suggestionModal) suggestionModal.style.display = 'block';
+    if (suggestionText) { suggestionText.value = ''; suggestionText.focus(); }
+}
+
+function closeSuggestionModal() {
+    if (suggestionOverlay) suggestionOverlay.style.display = 'none';
+    if (suggestionModal) suggestionModal.style.display = 'none';
+}
+
+if (btnSuggest) btnSuggest.addEventListener('click', openSuggestionModal);
+if (suggestionOverlay) suggestionOverlay.addEventListener('click', closeSuggestionModal);
+const cancelBtn = document.getElementById('suggestionModalCancel');
+if (cancelBtn) cancelBtn.addEventListener('click', closeSuggestionModal);
+const sendBtn = document.getElementById('suggestionModalSend');
+if (sendBtn) {
+    sendBtn.addEventListener('click', () => {
+        const msg = suggestionText ? suggestionText.value.trim() : '';
+        if (!msg) return;
+        const agencyName = window._okmAgencyId || 'unknown';
+        const subject = encodeURIComponent(`[MobilityOS] Suggestion — ${agencyName}`);
+        const body = encodeURIComponent(msg);
+        window.open(`mailto:guilhem.normand@icloud.com?subject=${subject}&body=${body}`, '_blank');
+        closeSuggestionModal();
+    });
+}
 
 // New session / Restart buttons
 dom.btnLinkStatus.addEventListener('click', disconnectCurrentClient);

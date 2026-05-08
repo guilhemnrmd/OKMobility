@@ -1795,6 +1795,30 @@ input::placeholder {
     justify-content: flex-start;
 }
 
+.summary-countdown-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: rgba(var(--color-accent-rgb), 0.12);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.25);
+    border-radius: var(--radius-md);
+    font-size: 0.88rem;
+    color: var(--color-text-secondary);
+    animation: fadeIn var(--transition-base) forwards;
+}
+
+.summary-countdown-banner i {
+    color: var(--color-accent);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.summary-countdown-banner strong {
+    color: var(--color-accent);
+    font-variant-numeric: tabular-nums;
+}
+
 .setup-subtitle {
     font-size: 0.95rem;
     color: var(--color-text-secondary);
@@ -3183,5 +3207,11 @@ button, .btn-primary, .btn-secondary {
         max-height: 80vh;
         overflow: auto;
         border-radius: 20px 20px 0 0;
+        animation: modalSlideUp var(--transition-spring) forwards;
     }
+}
+
+@keyframes modalSlideUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
