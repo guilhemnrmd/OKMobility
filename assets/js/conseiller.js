@@ -233,9 +233,7 @@ const dom = {
     rowTempZipCode: document.getElementById('rowTempZipCode'),
     rowTempCity: document.getElementById('rowTempCity'),
     rowPhone2: document.getElementById('rowPhone2'),
-    rowPhone2Number: document.getElementById('rowPhone2Number'),
-    aiSetup: document.getElementById('aiSetup'),
-    aiLiveData: document.getElementById('aiLiveData')
+    rowPhone2Number: document.getElementById('rowPhone2Number')
 };
 
 const languageNames = {
@@ -691,7 +689,6 @@ function updateStatus(status, message) {
             if (dom.statusText) {
                 dom.statusText.textContent = 'Esperando cliente...';
             }
-            updateAiMicroCopy('setup', 'waiting');
             break;
         case 'connecting':
             if (indicator) {
@@ -703,7 +700,6 @@ function updateStatus(status, message) {
             if (dom.btnLinkStatus) {
                 dom.btnLinkStatus.classList.add('connecting');
             }
-            updateAiMicroCopy('setup', 'connecting');
             break;
         case 'connected':
             if (indicator) {
@@ -715,7 +711,6 @@ function updateStatus(status, message) {
             if (dom.btnLinkStatus) {
                 dom.btnLinkStatus.classList.add('connected');
             }
-            updateAiMicroCopy('liveData', 'connected');
             break;
         case 'error':
             if (indicator) {
@@ -724,55 +719,7 @@ function updateStatus(status, message) {
             if (dom.statusText) {
                 dom.statusText.textContent = message || 'Error de conexión';
             }
-            updateAiMicroCopy('setup', 'error');
             break;
-    }
-}
-
-function updateAiMicroCopy(view, status) {
-    const copies = {
-        en: {
-            setup: {
-                waiting: 'Ready for a new client connection',
-                connecting: 'Establishing secure peer-to-peer link...',
-                error: 'Connection issue detected. Retrying...'
-            },
-            liveData: {
-                connected: 'Synchronizing client data in real-time',
-                receiving: 'Processing incoming data securely'
-            }
-        },
-        es: {
-            setup: {
-                waiting: 'Listo para conectar un nuevo cliente',
-                connecting: 'Estableciendo conexión segura punto a punto...',
-                error: 'Problema de conexión detectado. Reintentando...'
-            },
-            liveData: {
-                connected: 'Sincronizando datos del cliente en tiempo real',
-                receiving: 'Procesando datos recibidos de forma segura'
-            }
-        },
-        fr: {
-            setup: {
-                waiting: 'Prêt pour une nouvelle connexion client',
-                connecting: 'Établissement du lien sécurisé pair-à-pair...',
-                error: 'Problème de connexion détecté. Tentative de reconnexion...'
-            },
-            liveData: {
-                connected: 'Synchronisation des données client en temps réel',
-                receiving: 'Traitement sécurisé des données entrantes'
-            }
-        }
-    };
-
-    const lang = state.lang || 'es';
-    const dict = copies[lang] || copies['en'];
-    const text = dict[view]?.[status];
-
-    if (text) {
-        if (view === 'setup' && dom.aiSetup) dom.aiSetup.textContent = text;
-        if (view === 'liveData' && dom.aiLiveData) dom.aiLiveData.textContent = text;
     }
 }
 
@@ -919,11 +866,6 @@ function handleIncomingData(data) {
     if (cleanData.email !== undefined) {
         dom.valEmail.textContent = cleanData.email || '-';
         highlightField('valEmail');
-    }
-
-    if (Object.keys(cleanData).length > 0) {
-        updateAiMicroCopy('liveData', 'receiving');
-        setTimeout(() => updateAiMicroCopy('liveData', 'connected'), 2000);
     }
 }
 
