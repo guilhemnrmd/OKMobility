@@ -878,7 +878,7 @@
             legalModal.style.display = 'none';
         });
 
-        function init() {
+        async function init() {
             try {
                 const res = await fetch('/api/auth/session');
                 const data = await res.json();
