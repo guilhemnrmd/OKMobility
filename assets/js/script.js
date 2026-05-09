@@ -408,6 +408,11 @@ function reinitDomRefs() {
 
 function reinitFormBindings() {
     reinitDomRefs();
+    // If the country/dial-code data was already fetched, repopulate the new
+    // selects rendered by renderDynamicFields (otherwise wait for the live fetch).
+    if (state.globalCountriesData?.length && (dom.country || dom.countryCode)) {
+        applyCountriesData(state.globalCountriesData);
+    }
     attachRealTimeListeners();
     initAddressAutocomplete();
     initSearchableSelects();
@@ -536,6 +541,8 @@ function renderDynamicFields(fields) {
                 const cityId  = isFirst ? 'city'     : `${field.id}_city`;
                 const lblId   = isFirst ? 'lblAddress' : `lbl_${field.id}_addr`;
                 const wrapId  = isFirst ? 'wrap_address' : `wrap_${field.id}`;
+                // Country is shown by default; agency can disable it via dashboard
+                const showCountry = field.requireCountry !== false && isFirst;
 
                 const addrLabel       = field.labels?.[state.lang] || field.label || t.address || 'Address';
                 const zipLabel        = t.zipCode  || 'Postal Code';
@@ -588,17 +595,81 @@ function renderDynamicFields(fields) {
                 parentElement.appendChild(addressWrap);
                 parentElement.appendChild(row);
 
+                // Optional country combobox (only for the first/canonical address_block)
+                if (showCountry) {
+                    const countryWrap = document.createElement('div');
+                    countryWrap.className = 'input-wrapper';
+                    countryWrap.id = 'wrap_country';
+                    countryWrap.innerHTML = `
+                        <label for="country" id="lblCountry">${t.country || 'Country'}</label>
+                        <div class="cs-wrap" id="countryWrap">
+                            <span class="cs-face" id="countryDisplay">🇫🇷 France</span>
+                            <input class="cs-search" type="text" autocomplete="off" spellcheck="false" aria-label="${t.country || 'Country'}">
+                            <i class='bx bx-chevron-down cs-arrow'></i>
+                            <ul class="cs-list" role="listbox"></ul>
+                            <select id="country" name="country" class="cs-hidden" tabindex="-1" aria-hidden="true">
+                                <option value="FR" selected>🇫🇷 France</option>
+                            </select>
+                        </div>
+                    `;
+                    parentElement.appendChild(countryWrap);
+                }
+
                 setTimeout(() => {
                     const inputEl = document.getElementById(addrId);
                     const listEl  = document.getElementById(suggId);
                     const zipEl   = document.getElementById(zipId);
                     const cityEl  = document.getElementById(cityId);
                     const overflowEl = inputEl?.closest('.temp-address-content-inner');
-                    // Pass dom.country so country is auto-detected from address selection
+                    const countryEl = showCountry ? document.getElementById('country') : null;
                     if (window.bindAddressField && inputEl && listEl) {
-                        window.bindAddressField(inputEl, listEl, zipEl, cityEl, isFirst ? dom.country : null, overflowEl);
+                        window.bindAddressField(inputEl, listEl, zipEl, cityEl, countryEl, overflowEl);
                     }
                 }, 0);
+
+            // ── Phone field — compound block (dial code + number) ─────
+            } else if (field.type === 'tel') {
+                const t = i18n[state.lang] || i18n['en'];
+                // Use canonical IDs for the first phone field so existing
+                // dial-code population & auto-sync logic works unchanged.
+                const isFirstPhone = !document.getElementById('phone');
+                const codeId   = isFirstPhone ? 'countryCode' : `${field.id}_code`;
+                const phoneId  = isFirstPhone ? 'phone'       : field.id;
+                const codeWrapId = isFirstPhone ? 'countryCodeWrap' : `${field.id}_codeWrap`;
+                const codeDisplayId = isFirstPhone ? 'countryCodeDisplay' : `${field.id}_codeDisplay`;
+                const lblPhoneId = isFirstPhone ? 'lblPhone' : `lbl_${phoneId}`;
+                const lblCodeId  = isFirstPhone ? 'lblPhoneCode' : `lbl_${codeId}`;
+                const wrapId     = isFirstPhone ? 'wrap_phone_group' : `wrap_${field.id}`;
+
+                const phoneLabel = field.labels?.[state.lang] || field.label || t.phone || 'Phone';
+                const codeLabel  = t.phoneCode || 'Calling code';
+                const phonePlaceholder = t.phonePlaceholder || '6 12 34 56 78';
+
+                const row = document.createElement('div');
+                row.className = 'form-group-row';
+                row.id = wrapId;
+                row.innerHTML = `
+                    <div class="input-wrapper zip-wrapper" id="wrap_${codeId}">
+                        <label for="${codeId}" id="${lblCodeId}">${codeLabel}</label>
+                        <div class="phone-country-box cs-wrap" id="${codeWrapId}">
+                            <span class="cs-face" id="${codeDisplayId}">🇫🇷 +33</span>
+                            <input class="cs-search" type="text" autocomplete="off" spellcheck="false" aria-label="${codeLabel}">
+                            <i class='bx bx-chevron-down cs-arrow'></i>
+                            <ul class="cs-list" role="listbox"></ul>
+                            <select id="${codeId}" name="${codeId}" class="cs-hidden" tabindex="-1" aria-hidden="true">
+                                <option value="+33" selected>🇫🇷 France (+33)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="input-wrapper city-wrapper" id="wrap_${phoneId}">
+                        <label for="${phoneId}" id="${lblPhoneId}">${phoneLabel}</label>
+                        <div class="input-with-icon">
+                            <i class='bx ${field.icon || 'bx-phone'}'></i>
+                            <input type="tel" id="${phoneId}" name="${phoneId}" pattern="^[0-9\\s]+$" placeholder="${phonePlaceholder}"${field.required ? ' required' : ''}>
+                        </div>
+                    </div>
+                `;
+                parentElement.appendChild(row);
 
             // ── Standard Field ─────────────────────────────────────────
             } else {
@@ -619,7 +690,7 @@ function renderDynamicFields(fields) {
                 icon.className = `bx ${iconClass}`;
 
                 const input = document.createElement('input');
-                input.type = field.type === 'tel' ? 'tel' : (field.type || 'text');
+                input.type = (field.type || 'text');
                 input.id   = field.id;
                 input.name = field.id;
                 input.placeholder = field.placeholder || '';
@@ -969,7 +1040,7 @@ dom.form.addEventListener('submit', (e) => {
     }
 
     const formData = new FormData(dom.form);
-    const addr = formData.get('address');
+    const addr = formData.get('address') || '-';
     const selectedCountryOption = dom.country ? dom.country.options[dom.country.selectedIndex] : null;
     const countryLabel = selectedCountryOption
         ? (selectedCountryOption.dataset.countryName || selectedCountryOption.textContent || '')
@@ -1004,8 +1075,9 @@ dom.form.addEventListener('submit', (e) => {
         </div>
     `;
 
-    // Add Temporary Address Block if checked
-    if (dom.hasTempAddress.checked) {
+    // Add Temporary Address Block if checked (static form only — dynamic forms
+    // may omit the temp address group entirely, in which case dom.hasTempAddress is null)
+    if (dom.hasTempAddress?.checked) {
         summaryHTML += `
             <div class="summary-row" style="margin-top: 15px; padding-top: 15px;">
                 <span class="summary-label" style="color: var(--color-accent);"><i class='bx bx-map-pin'></i> ${t.tempAddress || 'Adresse temporaire'}</span>
@@ -1185,6 +1257,24 @@ const COUNTRY_DIAL_FALLBACK = [
     shortLabelHtml: `${getFlagHtml(c.cca2)} ${c.code}`
 }));
 
+// Cascade priority for default dial code:
+//   1) navigator.language region (e.g. 'fr-CA' → 'CA')
+//   2) caller-provided UI language (handled by renderCountryCodeSelect)
+//   3) the country selected in the address autocomplete (handled via change event)
+function detectDeviceCountry() {
+    try {
+        const langs = [...(navigator.languages || []), navigator.language].filter(Boolean);
+        for (const tag of langs) {
+            const parts = tag.split('-');
+            if (parts.length >= 2) {
+                const region = parts[parts.length - 1].toUpperCase();
+                if (/^[A-Z]{2}$/.test(region)) return region;
+            }
+        }
+    } catch (_) {}
+    return null;
+}
+
 function applyCountriesData(countries) {
     state.globalCountriesData = countries;
 
@@ -1307,6 +1397,7 @@ function syncPhoneCodeWithSelectedCountry() {
 function renderCountryCodeSelect(langCode) {
     if (!state.globalCountriesData || state.globalCountriesData.length === 0) return;
     const select = dom.countryCode;
+    if (!select) return; // tel field absent in current dynamic form
     const currentSelection = state.phoneSelectedManually ? select.value : null;
     const localeForDisplay = i18n[langCode] ? langCode : 'en';
     let displayNames = null;
@@ -1328,6 +1419,16 @@ function renderCountryCodeSelect(langCode) {
         case 'de': priorityCca2 = ['DE', 'AT', 'CH', 'LU', 'LI']; break;
         case 'nl': priorityCca2 = ['NL', 'BE', 'SR', 'AW', 'CW']; break;
         default: priorityCca2 = ['ES'];
+    }
+
+    // Cascade #1: device-language region overrides language-priority order
+    // (e.g. a French speaker on a fr-CA device gets +1/Canada at the top)
+    const deviceCca2 = detectDeviceCountry();
+    if (deviceCca2 && !priorityCca2.includes(deviceCca2)) {
+        priorityCca2 = [deviceCca2, ...priorityCca2];
+    } else if (deviceCca2) {
+        // Move it to the front
+        priorityCca2 = [deviceCca2, ...priorityCca2.filter(c => c !== deviceCca2)];
     }
     
     const countriesCopy = [...state.globalCountriesData];
@@ -1392,6 +1493,8 @@ function renderCountryCodeSelect(langCode) {
 
 function renderCountryNameSelect(langCode) {
     if (!state.globalCountriesData || state.globalCountriesData.length === 0 || !dom.country) return;
+    // Country combobox can be omitted by the agency (requireCountry=false)
+    if (!dom.country.parentElement) return;
 
     const select = dom.country;
     const currentSelection = state.countrySelectedManually ? select.value : null;

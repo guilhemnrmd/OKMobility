@@ -448,6 +448,41 @@ body.dashboard-page {
     text-overflow: ellipsis;
 }
 
+.agency-edit-input {
+    width: 100%;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 3px 6px;
+    color: var(--text-primary);
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+}
+.agency-edit-input:hover {
+    border-color: var(--glass-border);
+}
+.agency-edit-input:focus {
+    border-color: var(--color-accent);
+    background: rgba(0,0,0,0.04);
+}
+html:not(.theme-light) .agency-edit-input:focus {
+    background: rgba(255,255,255,0.04);
+}
+.agency-edit-input.saved {
+    border-color: #6ed476;
+}
+.agency-edit-input[data-field="name"] {
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-bottom: 1px;
+}
+.agency-edit-input[data-field="address"] {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-bottom: 2px;
+}
+
 .agency-status-badge {
     font-size: 0.68rem;
     font-weight: 500;

@@ -591,13 +591,14 @@
                     fieldEl.style.borderRadius = '0 var(--radius-md) var(--radius-md) 0';
                 }
 
+                const isAddressBlock = field.type === 'address_block';
                 fieldEl.innerHTML = `
                     <div class="drag-handle" title="Glisser pour réordonner"><i class='bx bx-grid-vertical'></i></div>
                     <div class="field-icon-wrap"><i class='bx ${field.icon}'></i></div>
                     <div class="field-info">
                         <input type="text" class="field-input-inline" value="${escHtml(field.label)}"
                             data-idx="${index}" ${isChild ? `data-parent="${parentIndex}"` : ''}>
-                        <span class="field-subtitle">${isGroup ? 'Groupe déroulant (Conteneur)' : 'Champ du formulaire'}</span>
+                        <span class="field-subtitle">${isGroup ? 'Groupe déroulant (Conteneur)' : (isAddressBlock ? 'Bloc adresse' : 'Champ du formulaire')}</span>
                         <div class="translations-panel" id="${transId}" style="display:none;">
                             <div class="translations-grid">
                                 ${LANGS.map(lang => `
@@ -612,6 +613,12 @@
                         </div>
                     </div>
                     <div class="field-actions">
+                        ${isAddressBlock ? `
+                        <label class="field-req-label" title="Demander le pays au client">
+                            <input type="checkbox" class="field-country-check"
+                                data-idx="${index}" ${isChild ? `data-parent="${parentIndex}"` : ''}
+                                ${field.requireCountry !== false ? 'checked' : ''}> Pays
+                        </label>` : ''}
                         ${!isGroup ? `
                         <label class="field-req-label">
                             <input type="checkbox" class="field-req-check"
@@ -636,6 +643,11 @@
                 // ── Required toggle ──────────────────────────────
                 fieldEl.querySelector('.field-req-check')?.addEventListener('change', (e) => {
                     getTarget(index, parentIndex).required = e.target.checked;
+                });
+
+                // ── Country toggle (address_block only) ──────────
+                fieldEl.querySelector('.field-country-check')?.addEventListener('change', (e) => {
+                    getTarget(index, parentIndex).requireCountry = e.target.checked;
                 });
 
                 // ── Translation inputs ───────────────────────────
@@ -765,7 +777,8 @@
                 card.innerHTML = `
                     <div class="agency-icon"><i class='bx bx-buildings'></i></div>
                     <div class="agency-info">
-                        <div class="agency-name">${escHtml(agency.name)}</div>
+                        <input type="text" class="agency-name agency-edit-input" data-field="name" data-id="${agency.id}" value="${escHtml(agency.name)}" placeholder="Nom de l'agence">
+                        <input type="text" class="agency-address agency-edit-input" data-field="address" data-id="${agency.id}" value="${escHtml(agency.address || '')}" placeholder="Adresse (utilisée pour centrer la carte)">
                         <div class="agency-url">/retailer/?agency=${agency.id}</div>
                     </div>
                     <span class="agency-status-badge">Essai</span>
@@ -782,6 +795,44 @@
                         </button>
                     </div>`;
                 list.appendChild(card);
+            });
+
+            // Inline edit: persist on blur (or Enter) when value changed.
+            list.querySelectorAll('.agency-edit-input').forEach(input => {
+                const original = input.value;
+                input.dataset.original = original;
+                const commit = async () => {
+                    if (input.value === input.dataset.original) return;
+                    const id = input.dataset.id;
+                    const field = input.dataset.field;
+                    const value = input.value.trim();
+                    try {
+                        const res = await fetch('/api/dashboard/agencies', {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id, [field]: value })
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                            const ag = currentUser.agencies.find(a => a.id === id);
+                            if (ag) ag[field] = value;
+                            input.dataset.original = value;
+                            input.classList.add('saved');
+                            setTimeout(() => input.classList.remove('saved'), 1200);
+                        } else {
+                            alert(data.error || 'Erreur.');
+                            input.value = input.dataset.original;
+                        }
+                    } catch {
+                        alert('Erreur de connexion.');
+                        input.value = input.dataset.original;
+                    }
+                };
+                input.addEventListener('blur', commit);
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+                    if (e.key === 'Escape') { input.value = input.dataset.original; input.blur(); }
+                });
             });
 
             list.querySelectorAll('.btn-agency-action[data-url]').forEach(btn => {

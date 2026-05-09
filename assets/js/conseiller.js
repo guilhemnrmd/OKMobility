@@ -357,6 +357,9 @@ function setRemoteLanguage(langCode, syncClient = true) {
         try { updateRetailerLabels(langCode); } catch (_) {}
     }
 
+    // Re-paint static UI chrome (titles, subtitles, buttons, status text)
+    paintRetailerChrome(langCode);
+
     if (syncClient) {
         sendLanguageToClient();
     }
@@ -368,7 +371,7 @@ function guardLanguageSelectorInteraction(event) {
     }
 
     event.preventDefault();
-    showSellerActionError('No hay conexión establecida. No se puede cambiar el idioma del cliente.');
+    showSellerActionError((I18N_RETAILER[state.lang] || I18N_RETAILER.es).errNoConnLanguage);
 
     if (dom.langSelect) {
         dom.langSelect.blur();
@@ -681,44 +684,25 @@ function updateStatus(status, message) {
         dom.btnLinkStatus.classList.remove('connecting', 'connected');
     }
     
+    const t = I18N_RETAILER[state.lang] || I18N_RETAILER.es;
     switch (status) {
         case 'waiting':
-            if (indicator) {
-                indicator.classList.add('waiting');
-            }
-            if (dom.statusText) {
-                dom.statusText.textContent = 'Esperando cliente...';
-            }
+            if (indicator) indicator.classList.add('waiting');
+            if (dom.statusText) dom.statusText.textContent = t.statusWaiting;
             break;
         case 'connecting':
-            if (indicator) {
-                indicator.classList.add('connecting');
-            }
-            if (dom.statusText) {
-                dom.statusText.textContent = 'Conectando cliente...';
-            }
-            if (dom.btnLinkStatus) {
-                dom.btnLinkStatus.classList.add('connecting');
-            }
+            if (indicator) indicator.classList.add('connecting');
+            if (dom.statusText) dom.statusText.textContent = t.statusConnecting;
+            if (dom.btnLinkStatus) dom.btnLinkStatus.classList.add('connecting');
             break;
         case 'connected':
-            if (indicator) {
-                indicator.classList.add('connected');
-            }
-            if (dom.statusText) {
-                dom.statusText.textContent = 'Cliente conectado';
-            }
-            if (dom.btnLinkStatus) {
-                dom.btnLinkStatus.classList.add('connected');
-            }
+            if (indicator) indicator.classList.add('connected');
+            if (dom.statusText) dom.statusText.textContent = t.statusConnected;
+            if (dom.btnLinkStatus) dom.btnLinkStatus.classList.add('connected');
             break;
         case 'error':
-            if (indicator) {
-                indicator.classList.add('error');
-            }
-            if (dom.statusText) {
-                dom.statusText.textContent = message || 'Error de conexión';
-            }
+            if (indicator) indicator.classList.add('error');
+            if (dom.statusText) dom.statusText.textContent = message || t.statusError;
             break;
     }
 }
@@ -758,19 +742,134 @@ const DEFAULT_RETAILER_FIELDS = [
     { id:'email',         type:'email',         icon:'bx-envelope', labels:{ fr:'E-mail',    en:'E-mail',    es:'E-mail',      it:'E-mail',      pt:'E-mail',     de:'E-Mail',    nl:'E-mail'   } }
 ];
 
-// i18n strings used for sub-labels of address blocks (postal code / city / map)
+// i18n strings for the retailer (sub-labels of address blocks + UI chrome)
 const I18N_RETAILER = {
-    fr: { zipCode:'Code postal', city:'Ville',    country:'Pays',    map:'Carte' },
-    en: { zipCode:'Postal code', city:'City',     country:'Country', map:'Map' },
-    es: { zipCode:'CP',          city:'Ciudad',   country:'País',    map:'Mapa' },
-    it: { zipCode:'CAP',         city:'Città',    country:'Paese',   map:'Mappa' },
-    pt: { zipCode:'CEP',         city:'Cidade',   country:'País',    map:'Mapa' },
-    de: { zipCode:'PLZ',         city:'Stadt',    country:'Land',    map:'Karte' },
-    nl: { zipCode:'Postcode',    city:'Stad',     country:'Land',    map:'Kaart' }
+    fr: {
+        zipCode:'Code postal', city:'Ville', country:'Pays', map:'Carte',
+        titleSetup:'Session de récupération', setupSubtitle:'Le client doit scanner ce QR code ou saisir le code manuellement',
+        codeLabel:'Code de session', qrHint:'Scanner pour se connecter',
+        titleLiveData:'Données du client', titleDisconnected:'Client déconnecté',
+        disconnectedSubtitle:'La session est terminée. Cliquez sur le bouton pour démarrer une nouvelle session.',
+        btnRestart:'Nouvelle session', btnCopyAll:'Tout copier',
+        statusWaiting:'En attente du client…', statusConnecting:'Connexion en cours…',
+        statusConnected:'Client connecté', statusError:'Erreur de connexion',
+        errNoConnDisconnect:'Aucune connexion établie. Impossible de couper la connexion.',
+        errNoConnLanguage:'Aucune connexion établie. Impossible de changer la langue du client.',
+        gdprText:'OK MOBILITY GROUP, S.L.U. est responsable du traitement des données personnelles, conformément au Règlement (UE) 2016/679 (RGPD) et à la loi LOPDG.',
+        advisorLegal:'Usage interne autorisé exclusivement. Aucune donnée client n\'est stockée sur des serveurs externes.'
+    },
+    en: {
+        zipCode:'Postal code', city:'City', country:'Country', map:'Map',
+        titleSetup:'Pickup session', setupSubtitle:'The client must scan this QR code or enter the code manually',
+        codeLabel:'Session code', qrHint:'Scan to connect',
+        titleLiveData:'Client data', titleDisconnected:'Client disconnected',
+        disconnectedSubtitle:'The session has ended. Press the button to start a new session.',
+        btnRestart:'New session', btnCopyAll:'Copy all',
+        statusWaiting:'Waiting for client…', statusConnecting:'Connecting client…',
+        statusConnected:'Client connected', statusError:'Connection error',
+        errNoConnDisconnect:'No connection established. Cannot disconnect.',
+        errNoConnLanguage:'No connection established. Cannot change client language.',
+        gdprText:'OK MOBILITY GROUP, S.L.U. is the data controller. Data is processed pursuant to Regulation (EU) 2016/679 (GDPR) and the LOPDG.',
+        advisorLegal:'Authorised internal use only. No client data is stored on external servers.'
+    },
+    es: {
+        zipCode:'CP', city:'Ciudad', country:'País', map:'Mapa',
+        titleSetup:'Sesión de recogida', setupSubtitle:'El cliente debe escanear este código QR o introducir el código manualmente',
+        codeLabel:'Código de sesión', qrHint:'Escanear para conectar',
+        titleLiveData:'Datos del cliente', titleDisconnected:'Cliente desconectado',
+        disconnectedSubtitle:'La sesión ha terminado. Pulse el botón para iniciar una nueva sesión.',
+        btnRestart:'Nueva sesión', btnCopyAll:'Copiar todo',
+        statusWaiting:'Esperando cliente…', statusConnecting:'Conectando cliente…',
+        statusConnected:'Cliente conectado', statusError:'Error de conexión',
+        errNoConnDisconnect:'No hay conexión establecida. No se puede cortar la conexión.',
+        errNoConnLanguage:'No hay conexión establecida. No se puede cambiar el idioma del cliente.',
+        gdprText:'OK MOBILITY GROUP, S.L.U. es el Responsable del tratamiento de los datos personales conforme al Reglamento (UE) 2016/679 (RGPD) y la LOPDG.',
+        advisorLegal:'Uso interno autorizado exclusivamente. No se almacena ninguna información del cliente en servidores externos.'
+    },
+    it: {
+        zipCode:'CAP', city:'Città', country:'Paese', map:'Mappa',
+        titleSetup:'Sessione di ritiro', setupSubtitle:'Il cliente deve scansionare questo QR code o inserire il codice manualmente',
+        codeLabel:'Codice di sessione', qrHint:'Scansiona per connetterti',
+        titleLiveData:'Dati del cliente', titleDisconnected:'Cliente disconnesso',
+        disconnectedSubtitle:'La sessione è terminata. Premi il pulsante per avviarne una nuova.',
+        btnRestart:'Nuova sessione', btnCopyAll:'Copia tutto',
+        statusWaiting:'In attesa del cliente…', statusConnecting:'Connessione cliente…',
+        statusConnected:'Cliente connesso', statusError:'Errore di connessione',
+        errNoConnDisconnect:'Nessuna connessione attiva. Impossibile disconnettersi.',
+        errNoConnLanguage:'Nessuna connessione attiva. Impossibile cambiare la lingua del cliente.',
+        gdprText:'OK MOBILITY GROUP, S.L.U. è il Titolare del trattamento dei dati ai sensi del Regolamento (UE) 2016/679 (GDPR) e LOPDG.',
+        advisorLegal:'Uso interno autorizzato esclusivamente. Nessun dato cliente viene memorizzato su server esterni.'
+    },
+    pt: {
+        zipCode:'CEP', city:'Cidade', country:'País', map:'Mapa',
+        titleSetup:'Sessão de recolha', setupSubtitle:'O cliente deve digitalizar este QR code ou inserir o código manualmente',
+        codeLabel:'Código de sessão', qrHint:'Digitalizar para ligar',
+        titleLiveData:'Dados do cliente', titleDisconnected:'Cliente desconectado',
+        disconnectedSubtitle:'A sessão terminou. Pressione o botão para iniciar uma nova sessão.',
+        btnRestart:'Nova sessão', btnCopyAll:'Copiar tudo',
+        statusWaiting:'A aguardar o cliente…', statusConnecting:'A conectar o cliente…',
+        statusConnected:'Cliente ligado', statusError:'Erro de ligação',
+        errNoConnDisconnect:'Nenhuma ligação estabelecida. Impossível desligar.',
+        errNoConnLanguage:'Nenhuma ligação estabelecida. Impossível mudar o idioma do cliente.',
+        gdprText:'OK MOBILITY GROUP, S.L.U. é o Responsável pelo tratamento dos dados nos termos do Regulamento (UE) 2016/679 (RGPD) e LOPDG.',
+        advisorLegal:'Uso interno autorizado exclusivamente. Nenhum dado do cliente é armazenado em servidores externos.'
+    },
+    de: {
+        zipCode:'PLZ', city:'Stadt', country:'Land', map:'Karte',
+        titleSetup:'Abholsitzung', setupSubtitle:'Der Kunde muss diesen QR-Code scannen oder den Code manuell eingeben',
+        codeLabel:'Sitzungscode', qrHint:'Scannen zum Verbinden',
+        titleLiveData:'Kundendaten', titleDisconnected:'Kunde getrennt',
+        disconnectedSubtitle:'Die Sitzung ist beendet. Klicken Sie auf die Schaltfläche, um eine neue zu starten.',
+        btnRestart:'Neue Sitzung', btnCopyAll:'Alles kopieren',
+        statusWaiting:'Warten auf Kunden…', statusConnecting:'Verbindung mit Kunde…',
+        statusConnected:'Kunde verbunden', statusError:'Verbindungsfehler',
+        errNoConnDisconnect:'Keine Verbindung. Trennen nicht möglich.',
+        errNoConnLanguage:'Keine Verbindung. Sprachwechsel nicht möglich.',
+        gdprText:'OK MOBILITY GROUP, S.L.U. ist der Verantwortliche im Sinne der DSGVO (EU 2016/679) und LOPDG.',
+        advisorLegal:'Ausschließlich autorisierter interner Gebrauch. Keine Kundendaten werden auf externen Servern gespeichert.'
+    },
+    nl: {
+        zipCode:'Postcode', city:'Stad', country:'Land', map:'Kaart',
+        titleSetup:'Ophaalsessie', setupSubtitle:'De klant moet deze QR-code scannen of de code handmatig invoeren',
+        codeLabel:'Sessiecode', qrHint:'Scan om te verbinden',
+        titleLiveData:'Klantgegevens', titleDisconnected:'Klant verbroken',
+        disconnectedSubtitle:'De sessie is beëindigd. Druk op de knop om een nieuwe sessie te starten.',
+        btnRestart:'Nieuwe sessie', btnCopyAll:'Alles kopiëren',
+        statusWaiting:'Wachten op klant…', statusConnecting:'Verbinding maken…',
+        statusConnected:'Klant verbonden', statusError:'Verbindingsfout',
+        errNoConnDisconnect:'Geen verbinding. Verbreken niet mogelijk.',
+        errNoConnLanguage:'Geen verbinding. Taal wijzigen niet mogelijk.',
+        gdprText:'OK MOBILITY GROUP, S.L.U. is verwerkingsverantwoordelijke conform Verordening (EU) 2016/679 (AVG) en LOPDG.',
+        advisorLegal:'Uitsluitend geautoriseerd intern gebruik. Geen klantgegevens worden op externe servers opgeslagen.'
+    }
 };
 
 function lstr(lang, key) {
     return (I18N_RETAILER[lang] || I18N_RETAILER.es)[key] || key;
+}
+
+function paintRetailerChrome(lang) {
+    const t = I18N_RETAILER[lang] || I18N_RETAILER.es;
+    const map = {
+        titleSetup: 'titleSetup',
+        setupSubtitle: 'setupSubtitle',
+        codeLabel: 'codeLabel',
+        qrHint: 'qrHint',
+        titleLiveData: 'titleLiveData',
+        titleDisconnected: 'titleDisconnected',
+        disconnectedSubtitle: 'disconnectedSubtitle',
+        txtBtnRestart: 'btnRestart',
+        txtBtnCopyAll: 'btnCopyAll',
+        advisorLegalText: 'advisorLegal'
+    };
+    Object.entries(map).forEach(([id, key]) => {
+        const el = document.getElementById(id);
+        if (el && t[key]) el.textContent = t[key];
+    });
+    // GDPR disclaimer (one in setup view, one in disconnected view, etc.)
+    document.querySelectorAll('.legal-text-gdpr').forEach(el => {
+        if (t.gdprText) el.textContent = t.gdprText;
+    });
 }
 
 function fieldLabel(field, lang) {
@@ -849,7 +948,8 @@ function renderRetailerFields(fields, lang) {
             const target = parentGroupId ? groupRegistry[parentGroupId].innerEl : dom.dataFieldsContainer;
             target.appendChild(rowAddr); target.appendChild(rowZip); target.appendChild(rowCity);
 
-            if (ctryKey) {
+            // Country row: only if the agency has enabled it for this address_block (default: enabled)
+            if (ctryKey && field.requireCountry !== false) {
                 const rowCtry = makeRow({ key: ctryKey, label: lstr(lang, 'country') });
                 attachCopy(rowCtry);
                 registerField(ctryKey, rowCtry, field, { parentGroupId });
@@ -970,7 +1070,7 @@ function updateRetailerLabels(lang) {
 
             const zipKey  = addrKey === 'address' ? 'zipCode' : `${field.id}_zip`;
             const cityKey = addrKey === 'address' ? 'city'    : `${field.id}_city`;
-            const ctryKey = addrKey === 'address' ? 'country' : null;
+            const ctryKey = (addrKey === 'address' && field.requireCountry !== false) ? 'country' : null;
             if (fieldRegistry[zipKey])  fieldRegistry[zipKey].labelEl.textContent  = lstr(lang, 'zipCode');
             if (fieldRegistry[cityKey]) fieldRegistry[cityKey].labelEl.textContent = lstr(lang, 'city');
             if (ctryKey && fieldRegistry[ctryKey]) fieldRegistry[ctryKey].labelEl.textContent = lstr(lang, 'country');
@@ -1139,7 +1239,7 @@ function handleDisconnection() {
 
 function disconnectCurrentClient() {
     if (!hasActiveClientConnection()) {
-        showSellerActionError('No hay conexión establecida. No se puede cortar la conexión.');
+        showSellerActionError((I18N_RETAILER[state.lang] || I18N_RETAILER.es).errNoConnDisconnect);
         return;
     }
 
@@ -1505,7 +1605,7 @@ dom.langSelect.addEventListener('change', (e) => {
         if (dom.langSelect) {
             dom.langSelect.value = state.lang;
         }
-        showSellerActionError('No hay conexión establecida. No se puede cambiar el idioma del cliente.');
+        showSellerActionError((I18N_RETAILER[state.lang] || I18N_RETAILER.es).errNoConnLanguage);
         return;
     }
 
@@ -1586,6 +1686,8 @@ if (typeof window.runLicenseGate === 'function') {
             const formSettings = window.OKM_FORM_SETTINGS || cached?.formSettings || {};
             window.OKM_FORM_SETTINGS = formSettings;
             renderRetailerFields(formSettings.fields, state.lang);
+            paintRetailerChrome(state.lang);
+            updateStatus('waiting'); // refresh status text in agency language
 
             initializePeer();
         })

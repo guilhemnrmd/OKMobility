@@ -55,6 +55,48 @@ export async function onRequest(context) {
         }), { headers: { 'Content-Type': 'application/json' } });
     }
 
+    if (request.method === 'PATCH') {
+        let body;
+        try { body = await request.json(); } catch { return jsonError('Corps invalide', 400); }
+
+        const { id, name, address, language } = body;
+        if (!id) return jsonError("ID d'agence requis", 400);
+
+        const agencies = account.agencies || [];
+        const idx = agencies.findIndex(a => a.id === id);
+        if (idx === -1) return jsonError('Agence introuvable', 404);
+
+        // Update the account-side mirror
+        if (typeof name === 'string' && name.trim()) {
+            agencies[idx].name = name.trim().slice(0, 120);
+        }
+        if (typeof address === 'string') {
+            agencies[idx].address = address.trim().slice(0, 240);
+        }
+        if (typeof language === 'string' && /^[a-z]{2}$/.test(language)) {
+            agencies[idx].language = language;
+        }
+        account.agencies = agencies;
+
+        // Mirror to the license entry so check-license returns the new values
+        const licenseRaw = await env.OKM_LICENSES.get(`agency:${id}`);
+        if (!licenseRaw) return jsonError('Licence introuvable', 404);
+        const license = JSON.parse(licenseRaw);
+        if (typeof name === 'string' && name.trim()) license.agencyName = name.trim().slice(0, 120);
+        if (typeof address === 'string') license.agencyAddress = address.trim().slice(0, 240) || null;
+        if (typeof language === 'string' && /^[a-z]{2}$/.test(language)) license.agencyLanguage = language;
+        license.licenseVersion = (license.licenseVersion || 1) + 1; // bust retailer's cache
+
+        await Promise.all([
+            env.OKM_ACCOUNTS.put(`account:${session.email}`, JSON.stringify(account)),
+            env.OKM_LICENSES.put(`agency:${id}`, JSON.stringify(license)),
+        ]);
+
+        return new Response(JSON.stringify({ success: true, agency: agencies[idx] }), {
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
+
     if (request.method === 'DELETE') {
         const url = new URL(request.url);
         const agencyId = url.searchParams.get('id');
