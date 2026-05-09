@@ -469,8 +469,39 @@ body.dashboard-page {
 html:not(.theme-light) .agency-edit-input:focus {
     background: rgba(255,255,255,0.04);
 }
-.agency-edit-input.saved {
+.agency-edit-input.saved,
+.agency-edit-select.saved {
     border-color: #6ed476;
+}
+
+.agency-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2px;
+    flex-wrap: wrap;
+}
+
+.agency-edit-select {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    padding: 2px 6px;
+    font-size: 0.72rem;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+}
+.agency-edit-select:hover {
+    border-color: var(--color-accent);
+}
+.agency-edit-select:focus {
+    border-color: var(--color-accent);
+    background: rgba(0,0,0,0.04);
+}
+html:not(.theme-light) .agency-edit-select:focus {
+    background: rgba(255,255,255,0.04);
 }
 .agency-edit-input[data-field="name"] {
     font-weight: 500;

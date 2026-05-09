@@ -73,8 +73,8 @@ export async function onRequest(context) {
         if (typeof address === 'string') {
             agencies[idx].address = address.trim().slice(0, 240);
         }
-        if (typeof language === 'string' && /^[a-z]{2}$/.test(language)) {
-            agencies[idx].language = language;
+        if (typeof language === 'string' && (language === '' || /^[a-z]{2}$/.test(language))) {
+            agencies[idx].language = language || null;
         }
         account.agencies = agencies;
 
@@ -84,7 +84,9 @@ export async function onRequest(context) {
         const license = JSON.parse(licenseRaw);
         if (typeof name === 'string' && name.trim()) license.agencyName = name.trim().slice(0, 120);
         if (typeof address === 'string') license.agencyAddress = address.trim().slice(0, 240) || null;
-        if (typeof language === 'string' && /^[a-z]{2}$/.test(language)) license.agencyLanguage = language;
+        if (typeof language === 'string' && (language === '' || /^[a-z]{2}$/.test(language))) {
+            license.agencyLanguage = language || null;
+        }
         license.licenseVersion = (license.licenseVersion || 1) + 1; // bust retailer's cache
 
         await Promise.all([

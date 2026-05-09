@@ -774,12 +774,28 @@
                 const url = `${origin}/retailer/?agency=${agency.id}`;
                 const card = document.createElement('div');
                 card.className = 'agency-card';
+                const langOpts = [
+                    ['',   '🌐 Auto (langue navigateur)'],
+                    ['fr', '🇫🇷 Français'],
+                    ['en', '🇬🇧 English'],
+                    ['es', '🇪🇸 Español'],
+                    ['it', '🇮🇹 Italiano'],
+                    ['pt', '🇵🇹 Português'],
+                    ['de', '🇩🇪 Deutsch'],
+                    ['nl', '🇳🇱 Nederlands']
+                ].map(([v, l]) => `<option value="${v}"${(agency.language || '') === v ? ' selected' : ''}>${l}</option>`).join('');
+
                 card.innerHTML = `
                     <div class="agency-icon"><i class='bx bx-buildings'></i></div>
                     <div class="agency-info">
                         <input type="text" class="agency-name agency-edit-input" data-field="name" data-id="${agency.id}" value="${escHtml(agency.name)}" placeholder="Nom de l'agence">
                         <input type="text" class="agency-address agency-edit-input" data-field="address" data-id="${agency.id}" value="${escHtml(agency.address || '')}" placeholder="Adresse (utilisée pour centrer la carte)">
-                        <div class="agency-url">/retailer/?agency=${agency.id}</div>
+                        <div class="agency-meta-row">
+                            <select class="agency-edit-select" data-field="language" data-id="${agency.id}" title="Langue de l'interface vendeur">
+                                ${langOpts}
+                            </select>
+                            <span class="agency-url">/retailer/?agency=${agency.id}</span>
+                        </div>
                     </div>
                     <span class="agency-status-badge">Essai</span>
                     <div class="agency-actions">
@@ -795,6 +811,31 @@
                         </button>
                     </div>`;
                 list.appendChild(card);
+            });
+
+            // Language select: persist on change.
+            list.querySelectorAll('.agency-edit-select').forEach(sel => {
+                sel.addEventListener('change', async () => {
+                    const id = sel.dataset.id;
+                    const field = sel.dataset.field;
+                    const value = sel.value; // empty string = auto
+                    try {
+                        const res = await fetch('/api/dashboard/agencies', {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id, [field]: value })
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                            const ag = currentUser.agencies.find(a => a.id === id);
+                            if (ag) ag[field] = value;
+                            sel.classList.add('saved');
+                            setTimeout(() => sel.classList.remove('saved'), 1200);
+                        } else {
+                            alert(data.error || 'Erreur.');
+                        }
+                    } catch { alert('Erreur de connexion.'); }
+                });
             });
 
             // Inline edit: persist on blur (or Enter) when value changed.
