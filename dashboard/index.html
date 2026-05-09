@@ -1136,8 +1136,6 @@
             formFields.forEach((f, i) => renderField(f, i, formFields, null));
         }
 
-        }
-
         window.toggleTransPanel = function(id) {
             const el = document.getElementById(id);
             if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
@@ -1409,12 +1407,8 @@
             const spin = document.getElementById('btnSaveCustomSpinner');
             btn.disabled = true; txt.textContent = 'Enregistrement…'; spin.style.display = 'inline-block';
 
-            // Collect per-language legal text from the editor
-            const legalText = {};
-            document.querySelectorAll('#legalTextEditor textarea[data-lang]').forEach(ta => {
-                const v = ta.value.trim();
-                if (v) legalText[ta.dataset.lang] = v;
-            });
+            // Legal text is already updated in currentUser.formSettings via the modal
+            const legalText = currentUser.formSettings?.legalText || {};
 
             const formSettings = {
                 ...currentUser.formSettings, // Keep existing fields
