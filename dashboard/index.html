@@ -344,6 +344,91 @@
             opacity: 1;
             padding-top: 0;
         }
+
+        /* ── Segmented Control (Apple Style) ────────────────────────── */
+        .segmented-control {
+            display: flex;
+            background: rgba(0,0,0,0.05);
+            padding: 2px;
+            border-radius: 10px;
+            gap: 2px;
+            border: 1px solid var(--color-border);
+        }
+        .theme-dark .segmented-control {
+            background: rgba(255,255,255,0.05);
+        }
+        .segment-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            background: transparent;
+            color: var(--color-text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .segment-btn i { font-size: 1.1rem; }
+        .segment-btn:hover {
+            color: var(--color-text-primary);
+        }
+        .segment-btn.active {
+            background: #ffffff;
+            color: var(--color-accent);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .theme-dark .segment-btn.active {
+            background: rgba(255,255,255,0.15);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+
+        /* ── Compact Add Bar ────────────────────────────────────────── */
+        .compact-add-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 6px;
+            background: rgba(var(--color-accent-rgb), 0.02);
+            border: 1px dashed var(--color-border);
+            border-radius: 12px;
+        }
+        .btn-add-mini {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+            background: var(--color-panel-bg);
+            color: var(--color-text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1.1rem;
+        }
+        .btn-add-mini:hover {
+            background: var(--color-accent);
+            color: white;
+            border-color: var(--color-accent);
+            transform: translateY(-1px);
+        }
+        .btn-add-mini i { pointer-events: none; }
+        .add-mini-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            margin-left: 4px;
+            margin-right: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
     </style>
 </head>
 <body class="dashboard-page">
@@ -528,14 +613,21 @@
                         <div class="appearance-grid">
                             <div class="input-wrapper">
                                 <label>Thème par défaut</label>
-                                <div class="input-with-icon">
-                                    <i class='bx bx-moon'></i>
-                                    <select id="formTheme">
-                                        <option value="auto">Automatique (suit le système)</option>
-                                        <option value="dark">Sombre</option>
-                                        <option value="light">Clair</option>
-                                    </select>
+                                <div class="segmented-control" id="themeSegmentedControl">
+                                    <button type="button" class="segment-btn" data-value="auto">
+                                        <i class='bx bx-devices'></i>
+                                        <span>Auto</span>
+                                    </button>
+                                    <button type="button" class="segment-btn" data-value="light">
+                                        <i class='bx bx-sun'></i>
+                                        <span>Clair</span>
+                                    </button>
+                                    <button type="button" class="segment-btn" data-value="dark">
+                                        <i class='bx bx-moon'></i>
+                                        <span>Sombre</span>
+                                    </button>
                                 </div>
+                                <input type="hidden" id="formTheme" value="auto">
                             </div>
 
                             <div class="input-wrapper">
@@ -717,7 +809,11 @@
         function renderCustomizationTab() {
             const s = currentUser.formSettings || {};
             if (s.language) document.getElementById('formLanguage').value = s.language;
-            document.getElementById('formTheme').value = s.theme || 'auto';
+            
+            const theme = s.theme || 'auto';
+            document.getElementById('formTheme').value = theme;
+            updateThemeSegmentedControl(theme);
+
             if (s.logoUrl) document.getElementById('formLogo').value = s.logoUrl;
             if (s.blob1) document.getElementById('formBlob1').value = s.blob1;
             if (s.blob2) document.getElementById('formBlob2').value = s.blob2;
@@ -728,6 +824,20 @@
                 : JSON.parse(JSON.stringify(DEFAULT_FIELDS));
             renderFieldsList();
         }
+
+        function updateThemeSegmentedControl(val) {
+            document.querySelectorAll('#themeSegmentedControl .segment-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.value === val);
+            });
+        }
+
+        document.querySelectorAll('#themeSegmentedControl .segment-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const val = btn.dataset.value;
+                document.getElementById('formTheme').value = val;
+                updateThemeSegmentedControl(val);
+            });
+        });
 
         // ── Drag state ───────────────────────────────────────────
         let dragSrc = null; // { index, parentIndex }
@@ -886,16 +996,20 @@
                     const addWrap = document.createElement('div');
                     addWrap.style.cssText = 'margin-left:40px;margin-bottom:16px;';
                     addWrap.innerHTML = `
-                        <div class="input-with-icon" style="max-width:260px;display:inline-flex;">
-                            <i class='bx bx-plus' style="left:1rem;color:var(--color-accent);"></i>
-                            <select style="padding-left:2.5rem;color:var(--color-accent);font-weight:500;cursor:pointer;border-color:rgba(var(--color-accent-rgb),0.3);"
-                                onchange="if(this.value){addFieldToGroup(${index},this.value);this.value='';}">
-                                <option value="">Ajouter un champ au groupe…</option>
-                                <option value="text">Texte court</option>
-                                <option value="email">E-mail</option>
-                                <option value="tel">Téléphone</option>
-                                <option value="address_block">Bloc Adresse complet</option>
-                            </select>
+                        <div class="compact-add-bar">
+                            <span class="add-mini-label">Ajouter :</span>
+                            <button type="button" class="btn-add-mini" title="Texte court" onclick="addFieldToGroup(${index},'text')">
+                                <i class='bx bx-text'></i>
+                            </button>
+                            <button type="button" class="btn-add-mini" title="E-mail" onclick="addFieldToGroup(${index},'email')">
+                                <i class='bx bx-envelope'></i>
+                            </button>
+                            <button type="button" class="btn-add-mini" title="Téléphone" onclick="addFieldToGroup(${index},'tel')">
+                                <i class='bx bx-phone'></i>
+                            </button>
+                            <button type="button" class="btn-add-mini" title="Bloc adresse" onclick="addFieldToGroup(${index},'address_block')">
+                                <i class='bx bx-map-pin'></i>
+                            </button>
                         </div>`;
                     container.appendChild(addWrap);
                 }
