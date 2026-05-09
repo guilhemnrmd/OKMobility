@@ -263,6 +263,87 @@
             border-color: var(--color-accent);
             box-shadow: 0 0 0 2px rgba(32,84,234,0.12);
         }
+
+        /* ── Appearance & Theme Improvements ───────────────────────── */
+        .appearance-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        @media (max-width: 640px) {
+            .appearance-grid { grid-template-columns: 1fr; gap: 1rem; }
+        }
+        .color-picker-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.25rem;
+            margin-top: 0.75rem;
+            padding: 1rem;
+            background: rgba(var(--color-accent-rgb), 0.03);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+        }
+        .color-pick-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--color-panel-bg);
+            padding: 6px 12px 6px 6px;
+            border-radius: 999px;
+            border: 1px solid var(--color-border);
+            transition: all 0.2s ease;
+        }
+        .color-pick-item:hover {
+            border-color: var(--color-accent);
+            transform: translateY(-1px);
+        }
+        .color-pick-item input[type="color"] {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            background: none;
+            padding: 0;
+            overflow: hidden;
+        }
+        .color-pick-item input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        .color-pick-item input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
+        .color-pick-item span {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--color-text-primary);
+        }
+        .legal-text-editor {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .legal-text-row {
+            display: flex;
+            align-items: stretch;
+            gap: 12px;
+            background: rgba(0,0,0,0.015);
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid var(--color-border);
+        }
+        .theme-dark .legal-text-row { background: rgba(255,255,255,0.02); }
+        .legal-text-lang {
+            min-width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--color-accent);
+            color: white;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            opacity: 1;
+            padding-top: 0;
+        }
     </style>
 </head>
 <body class="dashboard-page">
@@ -309,7 +390,7 @@
             <div class="trial-banner" id="trialBanner" style="display:none">
                 <i class='bx bx-time-five'></i>
                 <span id="trialBannerText">Votre période d'essai se termine dans <strong>30 jours</strong></span>
-                <a href="mailto:contact@mobilityos.com" class="btn-upgrade">Passer à Pro</a>
+                <a href="mailto:guilhem.normand@icloud.com" class="btn-upgrade">Passer à Pro</a>
             </div>
 
             <!-- ── Profil ────────────────────────────────────── -->
@@ -444,39 +525,55 @@
                     <h3 class="card-title">Apparence & Thème</h3>
                     <form id="appearanceForm" novalidate>
 
-                        <div class="input-wrapper" style="margin-top: 1.5rem; margin-bottom: 0.5rem;">
-                            <label>Thème par défaut</label>
-                            <div class="input-with-icon">
-                                <i class='bx bx-moon'></i>
-                                <select id="formTheme">
-                                    <option value="auto">Automatique (suit le système)</option>
-                                    <option value="dark">Sombre</option>
-                                    <option value="light">Clair</option>
-                                </select>
+                        <div class="appearance-grid">
+                            <div class="input-wrapper">
+                                <label>Thème par défaut</label>
+                                <div class="input-with-icon">
+                                    <i class='bx bx-moon'></i>
+                                    <select id="formTheme">
+                                        <option value="auto">Automatique (suit le système)</option>
+                                        <option value="dark">Sombre</option>
+                                        <option value="light">Clair</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="input-wrapper">
+                                <label>Logo personnalisé (URL)</label>
+                                <div class="input-with-icon">
+                                    <i class='bx bx-image'></i>
+                                    <input type="url" id="formLogo" placeholder="https://votresite.com/logo.png">
+                                </div>
                             </div>
                         </div>
 
-                        <div class="input-wrapper" style="margin-bottom: 0.5rem;">
-                            <label>Logo personnalisé (URL)</label>
-                            <div class="input-with-icon">
-                                <i class='bx bx-image'></i>
-                                <input type="url" id="formLogo" placeholder="https://votresite.com/logo.png">
-                            </div>
-                        </div>
-
-                        <div class="input-wrapper" style="margin-bottom: 0.5rem;">
+                        <div class="input-wrapper" style="margin-top: 1rem;">
                             <label>Couleurs des fonds animés (Blobs)</label>
-                            <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
-                                <input type="color" id="formBlob1" value="#2054EA" title="Couleur 1" style="width: 44px; height: 44px; border: none; border-radius: 8px; cursor: pointer; padding: 0; background: none;">
-                                <input type="color" id="formBlob2" value="#05DBF3" title="Couleur 2" style="width: 44px; height: 44px; border: none; border-radius: 8px; cursor: pointer; padding: 0; background: none;">
-                                <input type="color" id="formBlob3" value="#4F46E5" title="Couleur 3" style="width: 44px; height: 44px; border: none; border-radius: 8px; cursor: pointer; padding: 0; background: none;">
+                            <div class="color-picker-row">
+                                <div class="color-pick-item">
+                                    <input type="color" id="formBlob1" value="#2054EA" title="Couleur 1">
+                                    <span>Accent 1</span>
+                                </div>
+                                <div class="color-pick-item">
+                                    <input type="color" id="formBlob2" value="#05DBF3" title="Couleur 2">
+                                    <span>Accent 2</span>
+                                </div>
+                                <div class="color-pick-item">
+                                    <input type="color" id="formBlob3" value="#4F46E5" title="Couleur 3">
+                                    <span>Ambiance</span>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="input-wrapper" style="margin-bottom: 0.5rem;">
-                            <label>Mention légale (pied de page) — par langue</label>
+                        <div class="input-wrapper" style="margin-top: 1.5rem;">
+                            <label style="display: flex; align-items: center; gap: 8px;">
+                                <i class='bx bx-file-blank' style="color: var(--color-accent);"></i>
+                                Mentions légales (pied de page)
+                            </label>
+                            <p style="font-size: 0.78rem; color: var(--color-text-secondary); margin-bottom: 0.75rem; opacity: 0.7;">
+                                Personnalisez le texte affiché en bas du formulaire pour chaque langue.
+                            </p>
                             <div id="legalTextEditor" class="legal-text-editor"></div>
-                            <small style="opacity:0.6;font-size:0.78rem;">Laissez vide pour conserver la mention par défaut.</small>
                         </div>
 
                         <div id="appearanceAlert" class="inline-alert"></div>
@@ -499,9 +596,9 @@
 
                 <div class="dash-card">
                     <div class="contact-grid">
-                        <a href="mailto:contact@mobilityos.com" class="contact-card">
+                        <a href="mailto:guilhem.normand@icloud.com" class="contact-card">
                             <i class='bx bx-envelope'></i>
-                            <span>contact@mobilityos.com</span>
+                            <span>guilhem.normand@icloud.com</span>
                         </a>
                     </div>
                     <div class="plan-info-card" id="planInfoCard">
@@ -1019,7 +1116,7 @@
             document.getElementById('planBadge').textContent = u.plan === 'trial' ? 'Essai' : 'Pro';
 
             document.getElementById('planDetail').innerHTML = u.plan === 'trial'
-                ? `Votre période d'essai se termine le <strong>${dateStr}</strong> (dans ${days} jour${days !== 1 ? 's' : ''}).<br>Pour continuer après cette date, <a href="mailto:contact@mobilityos.com">contactez-nous</a>.`
+                ? `Votre période d'essai se termine le <strong>${dateStr}</strong> (dans ${days} jour${days !== 1 ? 's' : ''}).<br>Pour continuer après cette date, <a href="mailto:guilhem.normand@icloud.com">contactez-nous</a>.`
                 : `Abonnement actif. Merci de votre confiance.`;
         }
 
