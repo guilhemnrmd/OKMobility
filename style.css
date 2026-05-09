@@ -2252,6 +2252,71 @@ input::placeholder {
     overflow: visible;
 }
 
+/* ─── Dynamic data groups (toggle_group from form builder) ──────────────── */
+.data-group-wrap {
+    display: flex;
+    flex-direction: column;
+    margin-top: var(--spacing-sm);
+}
+.data-group-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: rgba(0,0,0,0.025);
+    border-radius: var(--radius-sm, 8px);
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    user-select: none;
+}
+html:not(.theme-light) .data-group-header {
+    background: rgba(255,255,255,0.04);
+}
+.data-group-icon {
+    display: inline-flex;
+    width: 28px;
+    height: 28px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(32,84,234,0.12);
+    color: var(--color-accent);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+.data-group-label {
+    flex: 1;
+    color: var(--color-text-primary);
+}
+.data-group-state {
+    opacity: 0.4;
+    transition: transform 0.3s, opacity 0.3s;
+}
+.data-group-wrap.active .data-group-state {
+    opacity: 0.8;
+    transform: rotate(180deg);
+}
+.data-group-sliding {
+    display: grid;
+    grid-template-rows: 0fr;
+    overflow: hidden;
+    opacity: 0;
+    transition:
+        grid-template-rows 0.45s cubic-bezier(0.25, 1, 0.5, 1),
+        opacity 0.35s ease;
+}
+.data-group-sliding.expanded {
+    grid-template-rows: 1fr;
+    opacity: 1;
+}
+.data-group-inner {
+    min-height: 0;
+}
+.data-group-sliding.expanded .data-group-inner {
+    overflow: visible;
+}
+
 /* ─── Maps column slide-in animation ─────────────────────────────────────── */
 .live-col-maps {
     /* hidden by default until a map is ready — vertical collapse on mobile */
@@ -2270,13 +2335,11 @@ input::placeholder {
 }
 
 /* Map panels hidden until .map-visible is added */
-#addressMapWrapper,
-#tempAddressMapWrapper {
+.map-col-panel {
     display: none;
 }
 
-#addressMapWrapper.map-visible,
-#tempAddressMapWrapper.map-visible {
+.map-col-panel.map-visible {
     display: block;
     animation: liveDataSlideUp 0.4s cubic-bezier(0.25, 1, 0.5, 1) both;
 }

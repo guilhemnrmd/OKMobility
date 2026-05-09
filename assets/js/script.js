@@ -512,6 +512,7 @@ function renderDynamicFields(fields) {
                     innerDiv.querySelectorAll('input, select').forEach(inp => {
                         if (inp.dataset.req === 'true') inp.required = active;
                     });
+                    if (typeof debouncedSendToAdvisor === 'function') debouncedSendToAdvisor();
                 });
 
                 // Click on header row toggles checkbox (same as static toggles)
@@ -1796,12 +1797,27 @@ function buildAdvisorPayload() {
         email: clampText(dom.email?.value || '', 120)
     };
 
-    // Collect custom fields
+    // Collect every dynamically-rendered input by its ID (custom_*, dynamic
+    // address blocks with prefixed IDs, etc.) so the retailer can match them
+    // against its own dynamic field registry.
     const container = document.getElementById('dynamicFormFields');
     if (container) {
-        const customInputs = container.querySelectorAll('input[id^="custom_"]');
-        customInputs.forEach(input => {
-            basePayload[input.id] = clampText(input.value || '', 200);
+        container.querySelectorAll('input[id], select[id]').forEach(el => {
+            const id = el.id;
+            if (!id) return;
+            // Skip the main static fields already in basePayload
+            if (['address','zipCode','city','tempAddress','tempZipCode','tempCity',
+                 'phone','phone2','countryCode','countryCode2','country','email'].includes(id)) return;
+            // Skip toggle-group checkboxes (handled separately below)
+            if (id.startsWith('chk_')) return;
+            basePayload[id] = clampText(el.value || '', 200);
+        });
+
+        // Toggle group visibility flags — the retailer mirrors these to expand/collapse
+        // the corresponding sections.
+        container.querySelectorAll('input[type="checkbox"][id^="chk_"]').forEach(cb => {
+            const groupId = cb.id.slice(4); // strip "chk_"
+            basePayload[`_visible_${groupId}`] = !!cb.checked;
         });
     }
 
@@ -1882,21 +1898,25 @@ function attachRealTimeListeners() {
     if (dom.country) {
         dom.country.addEventListener('change', debouncedSendToAdvisor);
     }
-    
+
+    // Listen on every dynamically-rendered input/select inside #dynamicFormFields
+    // so custom_* / address_block_*_addr / etc. trigger sync to the advisor.
+    const dynamicContainer = document.getElementById('dynamicFormFields');
+    if (dynamicContainer) {
+        dynamicContainer.querySelectorAll('input, select').forEach(el => {
+            // Skip the well-known static inputs that are already wired above
+            if (['address','zipCode','city','tempAddress','tempZipCode','tempCity',
+                 'phone','phone2','countryCode','countryCode2','country','email',
+                 'hasTempAddress','hasPhone2'].includes(el.id)) return;
+            const evt = (el.tagName === 'SELECT' || el.type === 'checkbox') ? 'change' : 'input';
+            el.addEventListener(evt, debouncedSendToAdvisor);
+        });
+    }
+
     // And temp address checkbox
     if (dom.hasTempAddress) {
         dom.hasTempAddress.addEventListener('change', () => {
             setTimeout(sendFormDataToAdvisor, 100);
-        });
-    }
-
-    // Listen for custom fields input via event delegation
-    const dynamicContainer = document.getElementById('dynamicFormFields');
-    if (dynamicContainer) {
-        dynamicContainer.addEventListener('input', (e) => {
-            if (e.target.id && e.target.id.startsWith('custom_')) {
-                debouncedSendToAdvisor();
-            }
         });
     }
 }

@@ -200,41 +200,19 @@ const dom = {
     titleDisconnected: document.getElementById('titleDisconnected'),
     disconnectedSubtitle: document.getElementById('disconnectedSubtitle'),
     txtBtnRestart: document.getElementById('txtBtnRestart'),
-    // Data values
-    lblDataAddress: document.getElementById('lblDataAddress'),
-    valAddress: document.getElementById('valAddress'),
-    lblDataCountry: document.getElementById('lblDataCountry'),
-    valCountry: document.getElementById('valCountry'),
-    lblDataZipCode: document.getElementById('lblDataZipCode'),
-    valZipCode: document.getElementById('valZipCode'),
-    lblDataCity: document.getElementById('lblDataCity'),
-    valCity: document.getElementById('valCity'),
-    lblDataTempAddress: document.getElementById('lblDataTempAddress'),
-    valTempAddress: document.getElementById('valTempAddress'),
-    lblDataTempZipCode: document.getElementById('lblDataTempZipCode'),
-    valTempZipCode: document.getElementById('valTempZipCode'),
-    lblDataTempCity: document.getElementById('lblDataTempCity'),
-    valTempCity: document.getElementById('valTempCity'),
-    lblDataPhoneCode: document.getElementById('lblDataPhoneCode'),
-    valPhoneCode: document.getElementById('valPhoneCode'),
-    lblDataPhone: document.getElementById('lblDataPhone'),
-    valPhone: document.getElementById('valPhone'),
-    phoneWarning: document.getElementById('phoneWarning'),
-    // Second phone
-    lblDataPhone2Code: document.getElementById('lblDataPhone2Code'),
-    valPhone2Code: document.getElementById('valPhone2Code'),
-    lblDataPhone2: document.getElementById('lblDataPhone2'),
-    valPhone2: document.getElementById('valPhone2'),
-    phone2Warning: document.getElementById('phone2Warning'),
-    lblDataEmail: document.getElementById('lblDataEmail'),
-    valEmail: document.getElementById('valEmail'),
-    // Rows (for showing/hiding temp address)
-    rowTempAddress: document.getElementById('rowTempAddress'),
-    rowTempZipCode: document.getElementById('rowTempZipCode'),
-    rowTempCity: document.getElementById('rowTempCity'),
-    rowPhone2: document.getElementById('rowPhone2'),
-    rowPhone2Number: document.getElementById('rowPhone2Number')
+    // Dynamic data containers (populated by renderRetailerFields)
+    dataFieldsContainer: document.getElementById('dataFieldsContainer'),
+    mapsContainer: document.getElementById('mapsContainer')
 };
+
+// ── Dynamic registries (populated by renderRetailerFields) ───────────
+// fieldRegistry[key] = { row, valueEl, labelEl, warningEl, fieldDef, parentGroupId? }
+// groupRegistry[groupId] = { wrap, slidingSec, headerEl, labelEl, childKeys: [], visible: false }
+// mapRegistry[addrKey]  = { wrapper, mapEl, labelEl, expandBtn, mapInstance, marker, addrKey, zipKey, cityKey, color, debounceTimer }
+const fieldRegistry = {};
+const groupRegistry = {};
+const mapRegistry   = {};
+let renderedLang = 'es';
 
 const languageNames = {
     en: 'English',
@@ -295,6 +273,12 @@ function sanitizeText(value, maxLength) {
     return value.trim().slice(0, maxLength);
 }
 
+// Keys that match this regex are accepted as dynamic free-form field values,
+// in addition to the well-known canonical keys defined in incomingDataLimits.
+// custom_*, address_block_*_addr/zip/city, plus any single-token field id used
+// by the form builder.
+const DYNAMIC_KEY_RE = /^[a-zA-Z][a-zA-Z0-9_]{0,63}$/;
+
 function sanitizeIncomingData(data) {
     if (!data || typeof data !== 'object' || Array.isArray(data)) {
         return {};
@@ -310,9 +294,20 @@ function sanitizeIncomingData(data) {
         clean.hasTempAddress = Boolean(data.hasTempAddress);
     }
 
+    // Canonical fields (with strict per-key max length)
     Object.keys(incomingDataLimits).forEach((key) => {
         if (key in data) {
             clean[key] = sanitizeText(data[key], incomingDataLimits[key]);
+        }
+    });
+
+    // Dynamic toggle-group visibility flags: _visible_<groupId> or chk_<groupId>
+    Object.keys(data).forEach(key => {
+        if (key.startsWith('_visible_') || key.startsWith('chk_')) {
+            clean[key] = Boolean(data[key]);
+        } else if (typeof data[key] === 'string' && !(key in incomingDataLimits) && DYNAMIC_KEY_RE.test(key) && key !== 'language') {
+            // Free-form dynamic field value — generic 200-char clamp
+            clean[key] = sanitizeText(data[key], 200);
         }
     });
 
@@ -355,6 +350,11 @@ function setRemoteLanguage(langCode, syncClient = true) {
     }
     if (dom.langDisplay) {
         dom.langDisplay.textContent = languageNames[langCode] || langCode;
+    }
+
+    // Re-paint dynamic field labels (only if the renderer has already run)
+    if (Object.keys(fieldRegistry).length > 0 && typeof updateRetailerLabels === 'function') {
+        try { updateRetailerLabels(langCode); } catch (_) {}
     }
 
     if (syncClient) {
@@ -748,20 +748,263 @@ function showDisconnectedView() {
 }
 
 // ============================================================================
-// 8. Data Handling
+// 8. Dynamic Field Rendering (driven by formSettings.fields)
+// ============================================================================
+
+// Sane defaults if formSettings is empty (matches dashboard DEFAULT_FIELDS).
+const DEFAULT_RETAILER_FIELDS = [
+    { id:'address_block', type:'address_block', icon:'bx-map',      labels:{ fr:'Adresse',   en:'Address',   es:'Dirección',   it:'Indirizzo',   pt:'Endereço',   de:'Adresse',   nl:'Adres'    } },
+    { id:'phone',         type:'tel',           icon:'bx-phone',    labels:{ fr:'Téléphone', en:'Phone',     es:'Teléfono',    it:'Telefono',    pt:'Telefone',   de:'Telefon',   nl:'Telefoon' } },
+    { id:'email',         type:'email',         icon:'bx-envelope', labels:{ fr:'E-mail',    en:'E-mail',    es:'E-mail',      it:'E-mail',      pt:'E-mail',     de:'E-Mail',    nl:'E-mail'   } }
+];
+
+// i18n strings used for sub-labels of address blocks (postal code / city / map)
+const I18N_RETAILER = {
+    fr: { zipCode:'Code postal', city:'Ville',    country:'Pays',    map:'Carte' },
+    en: { zipCode:'Postal code', city:'City',     country:'Country', map:'Map' },
+    es: { zipCode:'CP',          city:'Ciudad',   country:'País',    map:'Mapa' },
+    it: { zipCode:'CAP',         city:'Città',    country:'Paese',   map:'Mappa' },
+    pt: { zipCode:'CEP',         city:'Cidade',   country:'País',    map:'Mapa' },
+    de: { zipCode:'PLZ',         city:'Stadt',    country:'Land',    map:'Karte' },
+    nl: { zipCode:'Postcode',    city:'Stad',     country:'Land',    map:'Kaart' }
+};
+
+function lstr(lang, key) {
+    return (I18N_RETAILER[lang] || I18N_RETAILER.es)[key] || key;
+}
+
+function fieldLabel(field, lang) {
+    return field.labels?.[lang] || field.label || field.id;
+}
+
+function makeRow({ key, label, icon, isPhone = false }) {
+    const row = document.createElement('div');
+    row.className = 'data-row';
+    row.id = `row_${key}`;
+    row.innerHTML = `
+        <div class="data-info">
+            <span class="data-label" data-key="${key}">${icon ? `<i class='bx ${icon}'></i> ` : ''}${label}</span>
+            <span class="data-value" id="val_${key}">-</span>
+            ${isPhone ? `<span class="phone-warning" id="warn_${key}" style="display:none;" title="Formato de número inválido"><i class='bx bx-error-circle'></i></span>` : ''}
+        </div>
+        <button class="btn-copy" data-field="${key}" title="Copiar"><i class='bx bx-copy'></i></button>
+    `;
+    return row;
+}
+
+function attachCopy(row) {
+    const btn = row.querySelector('.btn-copy');
+    btn.addEventListener('click', () => {
+        const val = row.querySelector('.data-value').textContent;
+        if (val && val !== '-') copyToClipboard(val, btn);
+    });
+}
+
+function registerField(key, row, fieldDef, options = {}) {
+    fieldRegistry[key] = {
+        row,
+        valueEl: row.querySelector('.data-value'),
+        labelEl: row.querySelector('.data-label'),
+        warningEl: row.querySelector('.phone-warning'),
+        fieldDef,
+        ...options
+    };
+}
+
+function renderRetailerFields(fields, lang) {
+    // Wipe registries + DOM containers
+    Object.keys(fieldRegistry).forEach(k => delete fieldRegistry[k]);
+    Object.keys(groupRegistry).forEach(k => delete groupRegistry[k]);
+    Object.keys(mapRegistry).forEach(k => {
+        const m = mapRegistry[k];
+        if (m.mapInstance) m.mapInstance.remove();
+        delete mapRegistry[k];
+    });
+    if (dom.dataFieldsContainer) dom.dataFieldsContainer.innerHTML = '';
+    if (dom.mapsContainer) dom.mapsContainer.innerHTML = '';
+
+    const list = (Array.isArray(fields) && fields.length) ? fields : DEFAULT_RETAILER_FIELDS;
+    let firstAddressBlockSeen = false;
+
+    function renderOne(field, parentGroupId = null) {
+        // ── Address block → 3 rows + dedicated map panel ──────────────
+        if (field.type === 'address_block') {
+            const isFirst = !firstAddressBlockSeen;
+            firstAddressBlockSeen = true;
+            const addrKey  = isFirst ? 'address'  : `${field.id}_addr`;
+            const zipKey   = isFirst ? 'zipCode'  : `${field.id}_zip`;
+            const cityKey  = isFirst ? 'city'     : `${field.id}_city`;
+            const ctryKey  = isFirst ? 'country'  : null;
+
+            const blockHeader = fieldLabel(field, lang);
+            const rowAddr = makeRow({ key: addrKey, label: blockHeader, icon: field.icon || 'bx-map' });
+            const rowZip  = makeRow({ key: zipKey,  label: lstr(lang, 'zipCode') });
+            const rowCity = makeRow({ key: cityKey, label: lstr(lang, 'city') });
+
+            attachCopy(rowAddr); attachCopy(rowZip); attachCopy(rowCity);
+            registerField(addrKey, rowAddr, field, { parentGroupId, isAddressKey: true });
+            registerField(zipKey,  rowZip,  field, { parentGroupId });
+            registerField(cityKey, rowCity, field, { parentGroupId });
+
+            const target = parentGroupId ? groupRegistry[parentGroupId].innerEl : dom.dataFieldsContainer;
+            target.appendChild(rowAddr); target.appendChild(rowZip); target.appendChild(rowCity);
+
+            if (ctryKey) {
+                const rowCtry = makeRow({ key: ctryKey, label: lstr(lang, 'country') });
+                attachCopy(rowCtry);
+                registerField(ctryKey, rowCtry, field, { parentGroupId });
+                target.appendChild(rowCtry);
+            }
+
+            // Map panel for this address block
+            const mapColor = isFirst ? '#3B82F6' : '#8B5CF6';
+            const mapWrap = document.createElement('div');
+            mapWrap.className = 'glass-panel map-col-panel';
+            mapWrap.id = `mapWrapper_${addrKey}`;
+            mapWrap.innerHTML = `
+                <div class="map-col-header">
+                    <i class='bx ${field.icon || 'bx-map-alt'}'></i>
+                    <span class="map-section-label">${blockHeader}</span>
+                </div>
+                <div class="address-map-wrapper temp-standalone-map">
+                    <div id="map_${addrKey}" class="address-map-container"></div>
+                    <div class="address-map-overlay">
+                        <i class='bx ${field.icon || 'bx-map-alt'}'></i>
+                        <span class="address-map-overlay-text" id="mapLbl_${addrKey}"></span>
+                        <button class="address-map-expand-btn" data-map-key="${addrKey}" aria-label="Agrandir la carte">
+                            <i class='bx bx-fullscreen'></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            if (dom.mapsContainer) dom.mapsContainer.appendChild(mapWrap);
+
+            mapRegistry[addrKey] = {
+                wrapper: mapWrap,
+                mapEl: mapWrap.querySelector(`#map_${addrKey}`),
+                labelEl: mapWrap.querySelector(`#mapLbl_${addrKey}`),
+                sectionLabelEl: mapWrap.querySelector('.map-section-label'),
+                fieldDef: field,
+                expandBtn: mapWrap.querySelector('.address-map-expand-btn'),
+                mapInstance: null,
+                marker: null,
+                addrKey, zipKey, cityKey, ctryKey,
+                color: mapColor,
+                debounceTimer: null
+            };
+
+            mapRegistry[addrKey].expandBtn.addEventListener('click', e => {
+                e.stopPropagation();
+                openMapLightbox(addrKey);
+            });
+
+        // ── Toggle group → header + collapsible inner area ────────────
+        } else if (field.type === 'toggle_group') {
+            const wrap = document.createElement('div');
+            wrap.className = 'data-group-wrap';
+            wrap.id = `group_${field.id}`;
+
+            const header = document.createElement('div');
+            header.className = 'data-group-header';
+            header.innerHTML = `
+                <span class="data-group-icon"><i class='bx ${field.icon || 'bx-list-plus'}'></i></span>
+                <span class="data-group-label" data-key="${field.id}">${fieldLabel(field, lang)}</span>
+                <span class="data-group-state"><i class='bx bx-chevron-down'></i></span>
+            `;
+            const slidingSec = document.createElement('div');
+            slidingSec.className = 'data-group-sliding';
+            const innerEl = document.createElement('div');
+            innerEl.className = 'data-group-inner';
+            slidingSec.appendChild(innerEl);
+            wrap.appendChild(header);
+            wrap.appendChild(slidingSec);
+
+            const target = parentGroupId ? groupRegistry[parentGroupId].innerEl : dom.dataFieldsContainer;
+            target.appendChild(wrap);
+
+            groupRegistry[field.id] = {
+                wrap, header, slidingSec, innerEl,
+                labelEl: header.querySelector('.data-group-label'),
+                fieldDef: field,
+                visible: false,
+                childKeys: []
+            };
+
+            (field.children || []).forEach(child => renderOne(child, field.id));
+
+        // ── Standard scalar field ─────────────────────────────────────
+        } else {
+            const isPhone = field.type === 'tel';
+            const row = makeRow({
+                key: field.id,
+                label: fieldLabel(field, lang),
+                icon: field.icon || (isPhone ? 'bx-phone' : (field.type === 'email' ? 'bx-envelope' : ''))
+            , isPhone });
+            attachCopy(row);
+            registerField(field.id, row, field, { parentGroupId, isPhone });
+            const target = parentGroupId ? groupRegistry[parentGroupId].innerEl : dom.dataFieldsContainer;
+            target.appendChild(row);
+            if (parentGroupId) groupRegistry[parentGroupId].childKeys.push(field.id);
+        }
+    }
+
+    list.forEach(f => renderOne(f, null));
+    renderedLang = lang;
+    updateMapsColumnVisibility();
+}
+
+function updateRetailerLabels(lang) {
+    // Re-paint labels without rebuilding the structure.
+    const fields = (Array.isArray(window.OKM_FORM_SETTINGS?.fields) && window.OKM_FORM_SETTINGS.fields.length)
+        ? window.OKM_FORM_SETTINGS.fields
+        : DEFAULT_RETAILER_FIELDS;
+
+    function walk(field) {
+        if (field.type === 'address_block') {
+            // Find the addr key in fieldRegistry: try canonical first, then prefixed.
+            const candidates = ['address', `${field.id}_addr`];
+            const addrKey = candidates.find(k => fieldRegistry[k]);
+            if (!addrKey) return;
+            const r = fieldRegistry[addrKey];
+            if (r.labelEl) r.labelEl.innerHTML = `<i class='bx ${field.icon || 'bx-map'}'></i> ${fieldLabel(field, lang)}`;
+
+            const zipKey  = addrKey === 'address' ? 'zipCode' : `${field.id}_zip`;
+            const cityKey = addrKey === 'address' ? 'city'    : `${field.id}_city`;
+            const ctryKey = addrKey === 'address' ? 'country' : null;
+            if (fieldRegistry[zipKey])  fieldRegistry[zipKey].labelEl.textContent  = lstr(lang, 'zipCode');
+            if (fieldRegistry[cityKey]) fieldRegistry[cityKey].labelEl.textContent = lstr(lang, 'city');
+            if (ctryKey && fieldRegistry[ctryKey]) fieldRegistry[ctryKey].labelEl.textContent = lstr(lang, 'country');
+
+            const m = mapRegistry[addrKey];
+            if (m?.sectionLabelEl) m.sectionLabelEl.textContent = fieldLabel(field, lang);
+        } else if (field.type === 'toggle_group') {
+            const g = groupRegistry[field.id];
+            if (g?.labelEl) g.labelEl.textContent = fieldLabel(field, lang);
+            (field.children || []).forEach(walk);
+        } else {
+            const r = fieldRegistry[field.id];
+            if (r?.labelEl) {
+                const ic = field.icon ? `<i class='bx ${field.icon}'></i> ` : '';
+                r.labelEl.innerHTML = `${ic}${fieldLabel(field, lang)}`;
+            }
+        }
+    }
+    fields.forEach(walk);
+    renderedLang = lang;
+}
+
+// ============================================================================
+// 8b. Incoming Data Handling
 // ============================================================================
 function handleIncomingData(data) {
     const cleanData = sanitizeIncomingData(data);
     if (!Object.keys(cleanData).length) return;
 
+    // Compatibility: accept legacy combined `phone` value (no separate dial code)
     if ((cleanData.phoneCode === undefined || cleanData.phoneNumber === undefined) && cleanData.phone) {
         const parsed = splitPhoneParts(cleanData.phone);
-        if (cleanData.phoneCode === undefined && parsed.phoneCode) {
-            cleanData.phoneCode = parsed.phoneCode;
-        }
-        if (cleanData.phoneNumber === undefined && parsed.phoneNumber) {
-            cleanData.phoneNumber = parsed.phoneNumber;
-        }
+        if (cleanData.phoneCode === undefined && parsed.phoneCode) cleanData.phoneCode = parsed.phoneCode;
+        if (cleanData.phoneNumber === undefined && parsed.phoneNumber) cleanData.phoneNumber = parsed.phoneNumber;
     }
 
     state.currentData = { ...state.currentData, ...cleanData };
@@ -769,165 +1012,106 @@ function handleIncomingData(data) {
     if (cleanData.language && languageNames[cleanData.language]) {
         setRemoteLanguage(cleanData.language, false);
     }
-    
-    // Update displayed values
-    // Trigger map refresh when relevant address fields change (separate timers per map)
-    const mainAddrFields = ['address', 'country', 'zipCode', 'city'];
-    const tempAddrFields = ['tempAddress', 'tempZipCode', 'tempCity', 'hasTempAddress'];
-    if (mainAddrFields.some(k => cleanData[k] !== undefined)) {
-        scheduleMainMapRefresh();
-    }
-    if (tempAddrFields.some(k => cleanData[k] !== undefined)) {
-        scheduleTempMapRefresh();
-    }
 
-    if (cleanData.address !== undefined) {
-        dom.valAddress.textContent = cleanData.address || '-';
-        highlightField('valAddress');
-    }
-
-    if (cleanData.country !== undefined) {
-        dom.valCountry.textContent = cleanData.country || '-';
-        highlightField('valCountry');
-    }
-
-    if (cleanData.zipCode !== undefined) {
-        dom.valZipCode.textContent = cleanData.zipCode || '-';
-        highlightField('valZipCode');
-    }
-
-    if (cleanData.city !== undefined) {
-        dom.valCity.textContent = cleanData.city || '-';
-        highlightField('valCity');
-    }
-    
-    // Handle temporary address visibility with expand animation
-    if (cleanData.hasTempAddress !== undefined) {
-        const show = cleanData.hasTempAddress;
-        [dom.rowTempAddress, dom.rowTempZipCode, dom.rowTempCity].forEach(el => {
-            if (show) {
-                el.classList.add('row-expanded');
-            } else {
-                el.classList.remove('row-expanded');
-            }
-        });
-    }
-
-    if (cleanData.tempAddress !== undefined) {
-        dom.valTempAddress.textContent = cleanData.tempAddress || '-';
-        highlightField('valTempAddress');
-    }
-
-    if (cleanData.tempZipCode !== undefined) {
-        dom.valTempZipCode.textContent = cleanData.tempZipCode || '-';
-        highlightField('valTempZipCode');
-    }
-
-    if (cleanData.tempCity !== undefined) {
-        dom.valTempCity.textContent = cleanData.tempCity || '-';
-        highlightField('valTempCity');
-    }
-    
-    if (cleanData.phoneCode !== undefined) {
-        dom.valPhoneCode.textContent = cleanData.phoneCode || '-';
-        highlightField('valPhoneCode');
-    }
-
-    if (cleanData.phoneNumber !== undefined) {
-        dom.valPhone.textContent = cleanData.phoneNumber || '-';
-        highlightField('valPhone');
-        const dialCode = state.currentData.phoneCode || '';
-        updatePhoneWarning(dom.phoneWarning, dialCode, cleanData.phoneNumber);
-    }
-
-    if (cleanData.phoneCode !== undefined && cleanData.phoneNumber === undefined) {
-        // dial code changed — re-evaluate warning with existing number
-        const number = state.currentData.phoneNumber || '';
-        updatePhoneWarning(dom.phoneWarning, cleanData.phoneCode, number);
-    }
-
-    if (cleanData.phone2Code !== undefined || cleanData.phone2Number !== undefined) {
-        const hasPhone2 = (cleanData.phone2Code || state.currentData.phone2Code || '') || (cleanData.phone2Number || state.currentData.phone2Number || '');
-        if (dom.rowPhone2) dom.rowPhone2.classList.toggle('row-expanded', !!hasPhone2);
-        if (dom.rowPhone2Number) dom.rowPhone2Number.classList.toggle('row-expanded', !!hasPhone2);
-        if (cleanData.phone2Code !== undefined) {
-            dom.valPhone2Code.textContent = cleanData.phone2Code || '-';
-            highlightField('valPhone2Code');
+    // ── Toggle group visibility flags ── client sends `_visible_<groupId>` or
+    //    legacy `hasTempAddress`/`chk_<id>`.
+    Object.keys(cleanData).forEach(k => {
+        let groupId = null;
+        if (k === 'hasTempAddress') groupId = findGroupForLegacyTemp();
+        else if (k.startsWith('_visible_')) groupId = k.slice(9);
+        else if (k.startsWith('chk_'))      groupId = k.slice(4);
+        if (groupId && groupRegistry[groupId]) {
+            setGroupVisible(groupId, !!cleanData[k]);
         }
-        if (cleanData.phone2Number !== undefined) {
-            dom.valPhone2.textContent = cleanData.phone2Number || '-';
-            highlightField('valPhone2');
+    });
+
+    // ── Update each known field by key ─────────────────────────────
+    Object.keys(cleanData).forEach(key => {
+        if (key === 'language' || key === 'hasTempAddress' || key.startsWith('_visible_') || key.startsWith('chk_')) return;
+
+        // Phone (combined) — split & route to phoneCode/phoneNumber
+        if (key === 'phone' && (cleanData.phoneCode !== undefined || cleanData.phoneNumber !== undefined)) return;
+
+        // Try direct match first
+        let reg = fieldRegistry[key];
+
+        // If no registered field but key looks like a custom_* one, register a new row
+        if (!reg && key.startsWith('custom_')) {
+            reg = registerAdHocCustomField(key, cleanData.language || renderedLang);
         }
-        const dial2 = cleanData.phone2Code ?? state.currentData.phone2Code ?? '';
-        const num2 = cleanData.phone2Number ?? state.currentData.phone2Number ?? '';
-        updatePhoneWarning(dom.phone2Warning, dial2, num2);
-    }
+        if (!reg) return;
 
-    if (cleanData.email !== undefined) {
-        dom.valEmail.textContent = cleanData.email || '-';
-        highlightField('valEmail');
-    }
+        const value = cleanData[key];
+        reg.valueEl.textContent = (value === '' || value === null || value === undefined) ? '-' : value;
+        flashHighlight(reg.valueEl);
 
-    // Handle custom fields (keys starting with 'custom_')
-    const customContainer = document.getElementById('customFieldsContainer');
-    if (customContainer) {
-        // Build a flat lookup of field labels from formSettings (configured via dashboard)
-        const fieldLabelLookup = {};
-        const formFields = window.OKM_FORM_SETTINGS?.fields || [];
-        const lang = cleanData.language || 'es';
-        function indexFields(arr) {
-            arr.forEach(f => {
-                if (f.id) fieldLabelLookup[f.id] = (f.labels?.[lang]) || f.label || f.id;
-                if (f.children?.length) indexFields(f.children);
-            });
+        // Phone validation warning
+        if (reg.isPhone && reg.warningEl) {
+            updatePhoneWarning(reg.warningEl, '', value);
         }
-        indexFields(formFields);
+        // phoneCode → re-evaluate phone warning
+        if (key === 'phoneCode') {
+            const phoneReg = fieldRegistry['phoneNumber'] || fieldRegistry['phone'];
+            if (phoneReg?.warningEl) {
+                const num = state.currentData.phoneNumber || state.currentData.phone || '';
+                updatePhoneWarning(phoneReg.warningEl, value || '', num);
+            }
+        }
+        if (key === 'phoneNumber' && reg.warningEl) {
+            updatePhoneWarning(reg.warningEl, state.currentData.phoneCode || '', value);
+        }
+    });
 
-        Object.keys(cleanData).forEach(key => {
-            if (!key.startsWith('custom_')) return;
-            const value = cleanData[key] || '-';
-            const label = fieldLabelLookup[key] || key.replace('custom_', '').replace(/_/g, ' ');
-            let row = document.getElementById('row_' + key);
-            if (!row) {
-                row = document.createElement('div');
-                row.className = 'data-row';
-                row.id = 'row_' + key;
-                row.innerHTML = `
-                    <div class="data-info">
-                        <span class="data-label">${label}</span>
-                        <span class="data-value" id="val_${key}">-</span>
-                    </div>
-                    <button class="btn-copy" data-field="${key}" title="Copiar">
-                        <i class='bx bx-copy'></i>
-                    </button>
-                `;
-                customContainer.appendChild(row);
-                row.querySelector('.btn-copy').addEventListener('click', (e) => {
-                    const val = row.querySelector('.data-value').textContent;
-                    copyToClipboard(val, e.currentTarget);
-                });
-            } else {
-                // Update label in case language changed
-                const labelEl = row.querySelector('.data-label');
-                if (labelEl) labelEl.textContent = label;
-            }
-            const valEl = document.getElementById('val_' + key);
-            if (valEl) {
-                valEl.textContent = value;
-                highlightField('val_' + key);
-            }
-        });
-    }
+    // ── Refresh maps for each address_block whose fields changed ──
+    Object.keys(mapRegistry).forEach(addrKey => {
+        const m = mapRegistry[addrKey];
+        const watched = [m.addrKey, m.zipKey, m.cityKey, m.ctryKey].filter(Boolean);
+        if (watched.some(k => cleanData[k] !== undefined)) scheduleMapRefresh(addrKey);
+    });
+}
+
+function findGroupForLegacyTemp() {
+    // Best-effort: legacy clients send hasTempAddress for any "temporary address" group.
+    // We pick the first toggle_group containing an address_block child.
+    const ids = Object.keys(groupRegistry);
+    return ids.find(id => {
+        const f = groupRegistry[id].fieldDef;
+        return (f.children || []).some(c => c.type === 'address_block');
+    }) || null;
+}
+
+function setGroupVisible(groupId, visible) {
+    const g = groupRegistry[groupId];
+    if (!g || g.visible === visible) return;
+    g.visible = visible;
+    g.slidingSec.classList.toggle('expanded', visible);
+    g.wrap.classList.toggle('active', visible);
+}
+
+function registerAdHocCustomField(key, lang) {
+    // Look up a label from formSettings if available; otherwise prettify the key.
+    const formFields = window.OKM_FORM_SETTINGS?.fields || [];
+    let foundDef = null;
+    function walk(arr) { arr.forEach(f => { if (f.id === key) foundDef = f; if (f.children) walk(f.children); }); }
+    walk(formFields);
+    const label = foundDef ? fieldLabel(foundDef, lang) : key.replace('custom_', '').replace(/_/g, ' ');
+    const icon  = foundDef?.icon || 'bx-edit-alt';
+    const row = makeRow({ key, label, icon, isPhone: foundDef?.type === 'tel' });
+    attachCopy(row);
+    registerField(key, row, foundDef || { id: key, type: 'text' });
+    if (dom.dataFieldsContainer) dom.dataFieldsContainer.appendChild(row);
+    return fieldRegistry[key];
+}
+
+function flashHighlight(el) {
+    if (!el) return;
+    el.classList.remove('highlight');
+    void el.offsetWidth;
+    el.classList.add('highlight');
 }
 
 function highlightField(fieldId) {
-    const el = document.getElementById(fieldId);
-    if (el) {
-        el.classList.remove('highlight');
-        // Trigger reflow to restart animation
-        void el.offsetWidth;
-        el.classList.add('highlight');
-    }
+    flashHighlight(document.getElementById(fieldId));
 }
 
 // ============================================================================
@@ -976,30 +1160,18 @@ function disconnectCurrentClient() {
 
 function clearDisplayedData() {
     state.currentData = {};
-    dom.valAddress.textContent = '-';
-    dom.valCountry.textContent = '-';
-    dom.valZipCode.textContent = '-';
-    dom.valCity.textContent = '-';
-    dom.valTempAddress.textContent  = '-';
-    dom.valTempZipCode.textContent  = '-';
-    dom.valTempCity.textContent     = '-';
-    dom.valPhoneCode.textContent = '-';
-    dom.valPhone.textContent = '-';
-    if (dom.phoneWarning) dom.phoneWarning.style.display = 'none';
-    if (dom.valPhone2Code) dom.valPhone2Code.textContent = '-';
-    if (dom.valPhone2) dom.valPhone2.textContent = '-';
-    if (dom.phone2Warning) dom.phone2Warning.style.display = 'none';
-    dom.valEmail.textContent = '-';
-    dom.rowTempAddress.classList.remove('row-expanded');
-    dom.rowTempZipCode.classList.remove('row-expanded');
-    dom.rowTempCity.classList.remove('row-expanded');
-    if (dom.rowPhone2) dom.rowPhone2.classList.remove('row-expanded');
-    if (dom.rowPhone2Number) dom.rowPhone2Number.classList.remove('row-expanded');
-    // Clear custom fields
-    const customContainer = document.getElementById('customFieldsContainer');
-    if (customContainer) customContainer.innerHTML = '';
-    hideAddressMap();
-    hideTempAddressMap();
+
+    // Reset every registered value cell
+    Object.values(fieldRegistry).forEach(reg => {
+        if (reg.valueEl) reg.valueEl.textContent = '-';
+        if (reg.warningEl) reg.warningEl.style.display = 'none';
+    });
+
+    // Collapse all toggle groups
+    Object.keys(groupRegistry).forEach(id => setGroupVisible(id, false));
+
+    // Hide every map and remove markers
+    Object.keys(mapRegistry).forEach(addrKey => hideMap(addrKey));
 }
 
 function clearSessionData() {
@@ -1041,19 +1213,14 @@ function restartSession() {
 }
 
 // ============================================================================
-// 10. Address Map (MapLibre GL + JawgMaps vector tiles + Places geocoding)
+// 10. Address Maps (MapLibre GL — one instance per address_block)
 // ============================================================================
-let mapInstance = null;
-let mainMarker  = null;
-let agencyCenter = null;       // [lon, lat] — geocoded from agencyAddress after license gate
-let mapHasClientAddress = false; // true once the map has flown to a real client address
-
-let tempMapInstance = null;
-let tempMapMarker   = null;
+let agencyCenter = null;        // [lon, lat] — geocoded from agencyAddress after license gate
+const mapHasClientAddr = {};    // addrKey → boolean (true once the map has flown to a real client address)
 
 function preloadMapTiles(center) {
     const token = window.BRAND?.maps?.jawgToken ?? '';
-    if (!token || mapInstance) return; // skip if map already created
+    if (!token) return;
 
     const div = document.createElement('div');
     div.style.cssText = 'position:fixed;left:-9999px;top:0;width:400px;height:280px;pointer-events:none;';
@@ -1075,59 +1242,23 @@ function preloadMapTiles(center) {
     });
 }
 
-function ensureMap() {
-    if (mapInstance) return;
+function ensureMapInstance(addrKey) {
+    const m = mapRegistry[addrKey];
+    if (!m || m.mapInstance) return;
     const token = window.BRAND?.maps?.jawgToken ?? '';
-    mapInstance = new maplibregl.Map({
-        container: 'addressMap',
+    m.mapInstance = new maplibregl.Map({
+        container: m.mapEl,
         style: `https://api.jawg.io/styles/jawg-streets.json?access-token=${token}`,
         zoom: 13,
-        center: agencyCenter ?? [2.3522, 48.8566],  // Agency location or Paris fallback
-        scrollZoom: false,
-        attributionControl: true,
-        trackResize: false
-    });
-    const container = document.getElementById('addressMap');
-    const ro = new ResizeObserver(() => {
-        if (container.offsetWidth > 0 && container.offsetHeight > 0) {
-            mapInstance.resize();
-        }
-    });
-    ro.observe(container);
-}
-
-function ensureTempMap() {
-    if (tempMapInstance) return;
-    const token = window.BRAND?.maps?.jawgToken ?? '';
-    tempMapInstance = new maplibregl.Map({
-        container: 'tempAddressMap',
-        style: `https://api.jawg.io/styles/jawg-streets.json?access-token=${token}`,
-        zoom: 15,
         center: agencyCenter ?? [2.3522, 48.8566],
         scrollZoom: false,
         attributionControl: true,
         trackResize: false
     });
-    const container = document.getElementById('tempAddressMap');
     const ro = new ResizeObserver(() => {
-        if (container.offsetWidth > 0 && container.offsetHeight > 0) {
-            tempMapInstance.resize();
-        }
+        if (m.mapEl.offsetWidth > 0 && m.mapEl.offsetHeight > 0) m.mapInstance.resize();
     });
-    ro.observe(container);
-}
-
-function applyView(center, bounds) {
-    function doView() {
-        mapInstance.stop(); // cancel any ongoing animation
-        if (bounds) {
-            mapInstance.fitBounds(bounds, { padding: 60, maxZoom: 16 });
-        } else {
-            mapInstance.flyTo({ center, zoom: 15 });
-        }
-    }
-    if (mapInstance.loaded()) { doView(); }
-    else { mapInstance.once('load', doView); }
+    ro.observe(m.mapEl);
 }
 
 async function geocode(query) {
@@ -1145,130 +1276,104 @@ async function geocode(query) {
     } catch (_) { return null; }
 }
 
-function buildMainQuery(data) {
-    return [data.address, data.zipCode, data.city, data.country].filter(Boolean).join(', ');
+function buildMapQuery(addrKey) {
+    const m = mapRegistry[addrKey];
+    if (!m) return '';
+    const data = state.currentData;
+    return [
+        data[m.addrKey], data[m.zipKey], data[m.cityKey], m.ctryKey ? data[m.ctryKey] : null
+    ].filter(Boolean).join(', ');
 }
 
-function buildTempQuery(data) {
-    return [data.tempAddress, data.tempZipCode, data.tempCity].filter(Boolean).join(', ');
-}
-
-async function refreshMainMap() {
-    const data  = state.currentData;
-    const query = buildMainQuery(data);
-
-    if (!query || !data.address) { hideAddressMap(); return; }
-
-    const coords = await geocode(query);
-    if (!coords) { hideAddressMap(); return; }
-
-    showAddressMap();
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    ensureMap();
-    mapHasClientAddress = true;
-
-    const labelEl = document.getElementById('addressMapLabel');
-    if (labelEl) {
-        labelEl.textContent = [data.address, data.zipCode, data.city].filter(Boolean).join(', ');
-    }
-
-    if (mainMarker) { mainMarker.remove(); mainMarker = null; }
-    mainMarker = new maplibregl.Marker({ color: '#3B82F6' })
-        .setLngLat([coords.lon, coords.lat])
-        .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(
-            `<strong>${data.address || ''}</strong><br>${[data.zipCode, data.city, data.country].filter(Boolean).join(', ')}`
-        ))
-        .addTo(mapInstance);
-
-    applyView([coords.lon, coords.lat]);
-}
-
-async function refreshTempMap() {
+async function refreshMap(addrKey) {
+    const m = mapRegistry[addrKey];
+    if (!m) return;
     const data = state.currentData;
 
-    if (!data.hasTempAddress || !data.tempAddress) { hideTempAddressMap(); return; }
+    // If the parent toggle group is collapsed, hide the map
+    const parent = m.fieldDef ? findGroupContainingField(m.fieldDef) : null;
+    if (parent && !groupRegistry[parent]?.visible) { hideMap(addrKey); return; }
 
-    const tcoords = await geocode(buildTempQuery(data));
-    if (!tcoords) { hideTempAddressMap(); return; }
+    const addrVal = data[m.addrKey];
+    if (!addrVal) { hideMap(addrKey); return; }
+    const query = buildMapQuery(addrKey);
+    if (!query) { hideMap(addrKey); return; }
 
-    showTempAddressMap();
+    const coords = await geocode(query);
+    if (!coords) { hideMap(addrKey); return; }
+
+    showMap(addrKey);
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    ensureTempMap();
+    ensureMapInstance(addrKey);
+    mapHasClientAddr[addrKey] = true;
 
-    const tempLabelEl = document.getElementById('tempAddressMapLabel');
-    if (tempLabelEl) {
-        tempLabelEl.textContent = [data.tempAddress, data.tempZipCode, data.tempCity].filter(Boolean).join(', ');
+    if (m.labelEl) {
+        m.labelEl.textContent = [data[m.addrKey], data[m.zipKey], data[m.cityKey]].filter(Boolean).join(', ');
     }
 
-    if (tempMapMarker) { tempMapMarker.remove(); tempMapMarker = null; }
-    tempMapMarker = new maplibregl.Marker({ color: '#8B5CF6' })
-        .setLngLat([tcoords.lon, tcoords.lat])
+    if (m.marker) { m.marker.remove(); m.marker = null; }
+    m.marker = new maplibregl.Marker({ color: m.color })
+        .setLngLat([coords.lon, coords.lat])
         .setPopup(new maplibregl.Popup({ offset: 25 }).setHTML(
-            `<strong>${data.tempAddress}</strong><br>${[data.tempZipCode, data.tempCity].filter(Boolean).join(', ')}`
+            `<strong>${addrVal}</strong><br>${[data[m.zipKey], data[m.cityKey], m.ctryKey ? data[m.ctryKey] : ''].filter(Boolean).join(', ')}`
         ))
-        .addTo(tempMapInstance);
+        .addTo(m.mapInstance);
 
-    function doTempView() {
-        tempMapInstance.stop();
-        tempMapInstance.flyTo({ center: [tcoords.lon, tcoords.lat], zoom: 15 });
+    function doView() {
+        m.mapInstance.stop();
+        m.mapInstance.flyTo({ center: [coords.lon, coords.lat], zoom: 15 });
     }
-    if (tempMapInstance.loaded()) { doTempView(); }
-    else { tempMapInstance.once('load', doTempView); }
+    if (m.mapInstance.loaded()) doView(); else m.mapInstance.once('load', doView);
+}
+
+function findGroupContainingField(fieldDef) {
+    return Object.keys(groupRegistry).find(id =>
+        (groupRegistry[id].fieldDef.children || []).some(c => c === fieldDef || c.id === fieldDef.id)
+    );
+}
+
+function showMap(addrKey) {
+    const m = mapRegistry[addrKey];
+    if (!m) return;
+    m.wrapper.classList.add('map-visible');
+    updateMapsColumnVisibility();
+}
+
+function hideMap(addrKey) {
+    const m = mapRegistry[addrKey];
+    if (!m) return;
+    m.wrapper.classList.remove('map-visible');
+    if (m.marker) { m.marker.remove(); m.marker = null; }
+    mapHasClientAddr[addrKey] = false;
+    updateMapsColumnVisibility();
 }
 
 function updateMapsColumnVisibility() {
-    const col = document.querySelector('.live-col-maps');
+    const col = dom.mapsContainer;
     if (!col) return;
-    const mainVisible = document.getElementById('addressMapWrapper')?.classList.contains('map-visible');
-    const tempVisible = document.getElementById('tempAddressMapWrapper')?.classList.contains('map-visible');
-    col.classList.toggle('has-map', !!(mainVisible || tempVisible));
+    const anyVisible = Object.keys(mapRegistry).some(k => mapRegistry[k].wrapper.classList.contains('map-visible'));
+    col.classList.toggle('has-map', anyVisible);
 }
 
-function showAddressMap() {
-    const w = document.getElementById('addressMapWrapper');
-    if (w) { w.classList.add('map-visible'); updateMapsColumnVisibility(); }
+function scheduleMapRefresh(addrKey) {
+    const m = mapRegistry[addrKey];
+    if (!m) return;
+    clearTimeout(m.debounceTimer);
+    m.debounceTimer = setTimeout(() => refreshMap(addrKey), 900);
 }
 
-function hideAddressMap() {
-    const w = document.getElementById('addressMapWrapper');
-    if (w) { w.classList.remove('map-visible'); updateMapsColumnVisibility(); }
-    if (mainMarker) { mainMarker.remove(); mainMarker = null; }
-    mapHasClientAddress = false;
-}
-
-function showTempAddressMap() {
-    const w = document.getElementById('tempAddressMapWrapper');
-    if (w) { w.classList.add('map-visible'); updateMapsColumnVisibility(); }
-}
-
-function hideTempAddressMap() {
-    const w = document.getElementById('tempAddressMapWrapper');
-    if (w) { w.classList.remove('map-visible'); updateMapsColumnVisibility(); }
-    if (tempMapMarker) { tempMapMarker.remove(); tempMapMarker = null; }
-}
-
-function scheduleMainMapRefresh() {
-    clearTimeout(state.mapDebounceTimer);
-    state.mapDebounceTimer = setTimeout(refreshMainMap, 900);
-}
-
-function scheduleTempMapRefresh() {
-    clearTimeout(state.tempMapDebounceTimer);
-    state.tempMapDebounceTimer = setTimeout(refreshTempMap, 900);
-}
-
-// ── Map lightbox ──────────────────────────────────────────────────
+// ── Map lightbox (shared, opens a clone of any map) ────────────────
 let mapLightboxInstance = null;
 
-function openMapLightbox(sourceMap, markerColor, labelElId) {
-    if (!dom.mapLightbox || !sourceMap) return;
+function openMapLightbox(addrKey) {
+    const m = mapRegistry[addrKey];
+    if (!dom.mapLightbox || !m?.mapInstance) return;
     const token  = window.BRAND?.maps?.jawgToken ?? '';
-    const center = sourceMap.getCenter();
-    const zoom   = sourceMap.getZoom();
+    const center = m.mapInstance.getCenter();
+    const zoom   = m.mapInstance.getZoom();
 
-    const src = document.getElementById(labelElId ?? 'addressMapLabel');
     const dst = document.getElementById('mapLightboxLabel');
-    if (src && dst) dst.textContent = src.textContent;
+    if (dst && m.labelEl) dst.textContent = m.labelEl.textContent;
 
     dom.mapLightbox.classList.add('is-open');
     dom.mapLightbox.setAttribute('aria-hidden', 'false');
@@ -1282,10 +1387,9 @@ function openMapLightbox(sourceMap, markerColor, labelElId) {
         scrollZoom: true
     });
 
-    const marker = markerColor === '#8B5CF6' ? tempMapMarker : mainMarker;
-    if (marker) {
-        new maplibregl.Marker({ color: markerColor ?? '#3B82F6' })
-            .setLngLat(marker.getLngLat())
+    if (m.marker) {
+        new maplibregl.Marker({ color: m.color })
+            .setLngLat(m.marker.getLngLat())
             .addTo(mapLightboxInstance);
     }
 }
@@ -1318,45 +1422,22 @@ function copyToClipboard(text, buttonEl) {
     });
 }
 
-function copyFieldValue(field) {
-    const values = {
-        address: dom.valAddress.textContent,
-        country: dom.valCountry.textContent,
-        zipCode: dom.valZipCode.textContent,
-        city: dom.valCity.textContent,
-        tempAddress: dom.valTempAddress.textContent,
-        tempZipCode: dom.valTempZipCode.textContent,
-        tempCity:    dom.valTempCity.textContent,
-        phoneCode: dom.valPhoneCode.textContent,
-        phoneNumber: dom.valPhone.textContent,
-        phone2Code: dom.valPhone2Code?.textContent || '',
-        phone2Number: dom.valPhone2?.textContent || '',
-        email: dom.valEmail.textContent
-    };
-    return values[field] || '';
-}
-
 function copyAllData() {
-    const data = state.currentData;
-    let text = '';
-    
-    if (data.address) text += `Dirección: ${data.address}\n`;
-    if (data.country) text += `País: ${data.country}\n`;
-    if (data.zipCode) text += `CP: ${data.zipCode}\n`;
-    if (data.city) text += `Ciudad: ${data.city}\n`;
-    
-    if (data.hasTempAddress) {
-        if (data.tempAddress) text += `Dirección temporal: ${data.tempAddress}\n`;
-        if (data.tempZipCode) text += `CP (temp): ${data.tempZipCode}\n`;
-        if (data.tempCity)    text += `Ciudad (temp): ${data.tempCity}\n`;
-    }
-    
-    if (data.phoneCode) text += `Prefijo telefónico: ${data.phoneCode}\n`;
-    if (data.phoneNumber) text += `Teléfono: ${data.phoneNumber}\n`;
-    if (data.phone2Number) text += `2º Teléfono: ${data.phone2Code ? data.phone2Code + ' ' : ''}${data.phone2Number}\n`;
-    if (data.email) text += `E-mail: ${data.email}\n`;
-    
-    return text.trim();
+    // Walk the DOM in displayed order so the export reflects the configured layout.
+    if (!dom.dataFieldsContainer) return '';
+    const lines = [];
+    dom.dataFieldsContainer.querySelectorAll('.data-row').forEach(row => {
+        const labelEl = row.querySelector('.data-label');
+        const valueEl = row.querySelector('.data-value');
+        if (!labelEl || !valueEl) return;
+        // Skip rows inside collapsed groups
+        const groupWrap = row.closest('.data-group-wrap');
+        if (groupWrap && !groupWrap.classList.contains('active')) return;
+        const value = valueEl.textContent.trim();
+        if (!value || value === '-') return;
+        lines.push(`${labelEl.textContent.trim().replace(/\s+/g, ' ')}: ${value}`);
+    });
+    return lines.join('\n');
 }
 
 // ============================================================================
@@ -1387,20 +1468,7 @@ if (dom.qrLightboxFrame) {
     dom.qrLightboxFrame.addEventListener('click', closeQrLightbox);
 }
 
-if (dom.addressMapExpandBtn) {
-    dom.addressMapExpandBtn.addEventListener('click', e => {
-        e.stopPropagation();
-        openMapLightbox(mapInstance, '#3B82F6', 'addressMapLabel');
-    });
-}
-
-const tempAddressMapExpandBtn = document.getElementById('tempAddressMapExpandBtn');
-if (tempAddressMapExpandBtn) {
-    tempAddressMapExpandBtn.addEventListener('click', e => {
-        e.stopPropagation();
-        openMapLightbox(tempMapInstance, '#8B5CF6', 'tempAddressMapLabel');
-    });
-}
+// Map lightbox close handlers (the open handlers are wired per-map row at render time)
 if (dom.mapLightbox) {
     dom.mapLightbox.querySelector('.map-lightbox-backdrop')?.addEventListener('click', closeMapLightbox);
 }
@@ -1418,18 +1486,7 @@ document.addEventListener('keydown', (event) => {
 // Copy all data
 dom.btnCopyAll.addEventListener('click', () => {
     const allData = copyAllData();
-    copyToClipboard(allData, dom.btnCopyAll);
-});
-
-// Individual copy buttons
-document.querySelectorAll('.btn-copy[data-field]').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const field = btn.dataset.field;
-        const value = copyFieldValue(field);
-        if (value && value !== '-') {
-            copyToClipboard(value, btn);
-        }
-    });
+    if (allData) copyToClipboard(allData, dom.btnCopyAll);
 });
 
 // New session / Restart buttons
@@ -1499,10 +1556,13 @@ if (typeof window.runLicenseGate === 'function') {
                             agencyCenter = [coords.lon, coords.lat];
                             try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(agencyCenter)); } catch (_) {}
                             preloadMapTiles(agencyCenter);
-                            // If the map is open but no client address has been shown yet, re-center on agency
-                            if (mapInstance && !mapHasClientAddress) {
-                                mapInstance.jumpTo({ center: agencyCenter });
-                            }
+                            // For each registered map that hasn't shown a client address yet, recenter on agency
+                            Object.keys(mapRegistry).forEach(addrKey => {
+                                const m = mapRegistry[addrKey];
+                                if (m.mapInstance && !mapHasClientAddr[addrKey]) {
+                                    m.mapInstance.jumpTo({ center: agencyCenter });
+                                }
+                            });
                         }
                     });
                 }
@@ -1522,6 +1582,11 @@ if (typeof window.runLicenseGate === 'function') {
             }
             // ─────────────────────────────────────────────────────────────────
 
+            // ── Render the data-display column from formSettings ────────────
+            const formSettings = window.OKM_FORM_SETTINGS || cached?.formSettings || {};
+            window.OKM_FORM_SETTINGS = formSettings;
+            renderRetailerFields(formSettings.fields, state.lang);
+
             initializePeer();
         })
         .catch(reason => {
@@ -1530,5 +1595,6 @@ if (typeof window.runLicenseGate === 'function') {
         });
 } else {
     // Fallback — gate script not loaded (should not happen in prod)
+    renderRetailerFields(window.OKM_FORM_SETTINGS?.fields, state.lang);
     initializePeer();
 }
