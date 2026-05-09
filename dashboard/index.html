@@ -204,6 +204,65 @@
         .theme-dark .translations-panel {
             background: rgba(255,255,255,0.025);
         }
+        .notes-panel {
+            margin-top: 6px;
+        }
+        .notes-panel-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--color-accent);
+            margin-bottom: 6px;
+            opacity: 0.85;
+        }
+        textarea.trans-input.notes-input {
+            resize: vertical;
+            min-height: 32px;
+            font-family: inherit;
+        }
+        .legal-text-editor {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .legal-text-row {
+            display: flex;
+            align-items: stretch;
+            gap: 8px;
+        }
+        .legal-text-lang {
+            display: inline-flex;
+            align-items: flex-start;
+            justify-content: center;
+            min-width: 32px;
+            padding-top: 8px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--color-accent);
+            opacity: 0.7;
+        }
+        .legal-text-row textarea {
+            flex: 1;
+            resize: vertical;
+            min-height: 36px;
+            padding: 6px 10px;
+            background: var(--color-panel-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-family: inherit;
+            color: var(--color-text-primary);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .legal-text-row textarea:focus {
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 2px rgba(32,84,234,0.12);
+        }
     </style>
 </head>
 <body class="dashboard-page">
@@ -414,6 +473,12 @@
                             </div>
                         </div>
 
+                        <div class="input-wrapper" style="margin-bottom: 0.5rem;">
+                            <label>Mention légale (pied de page) — par langue</label>
+                            <div id="legalTextEditor" class="legal-text-editor"></div>
+                            <small style="opacity:0.6;font-size:0.78rem;">Laissez vide pour conserver la mention par défaut.</small>
+                        </div>
+
                         <div id="appearanceAlert" class="inline-alert"></div>
                         <div class="form-actions" style="margin-top: 1rem; justify-content: flex-end;">
                             <button type="button" class="btn-primary" id="btnSaveCustom" style="width: auto;">
@@ -560,6 +625,7 @@
             if (s.blob1) document.getElementById('formBlob1').value = s.blob1;
             if (s.blob2) document.getElementById('formBlob2').value = s.blob2;
             if (s.blob3) document.getElementById('formBlob3').value = s.blob3;
+            renderLegalTextEditor(s.legalText || {});
             formFields = Array.isArray(s.fields) && s.fields.length > 0
                 ? JSON.parse(JSON.stringify(s.fields))
                 : JSON.parse(JSON.stringify(DEFAULT_FIELDS));
@@ -611,6 +677,20 @@
                                 `).join('')}
                             </div>
                         </div>
+                        ${isGroup ? `
+                        <div class="translations-panel notes-panel" id="${transId}_notes" style="display:none;">
+                            <div class="notes-panel-title">Note d'information (icône ⓘ)</div>
+                            <div class="translations-grid">
+                                ${LANGS.map(lang => `
+                                    <label class="trans-label">
+                                        <span class="trans-lang">${LANG_NAMES[lang]}</span>
+                                        <textarea class="trans-input notes-input" data-lang="${lang}"
+                                            placeholder="Laissez vide pour masquer l'icône"
+                                            rows="2">${escHtml((field.notes || {})[lang] || '')}</textarea>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>` : ''}
                     </div>
                     <div class="field-actions">
                         ${isAddressBlock ? `
@@ -628,6 +708,10 @@
                         <button type="button" class="btn-icon" title="Traductions" onclick="toggleTransPanel('${transId}')">
                             <i class='bx bx-globe'></i>
                         </button>
+                        ${isGroup ? `
+                        <button type="button" class="btn-icon" title="Note ⓘ" onclick="toggleTransPanel('${transId}_notes')">
+                            <i class='bx bx-info-circle'></i>
+                        </button>` : ''}
                         <button type="button" class="btn-icon danger"
                             onclick="removeField(${index}, ${parentIndex !== null ? parentIndex : 'null'})"
                             title="Supprimer"><i class='bx bx-trash'></i></button>
@@ -651,11 +735,20 @@
                 });
 
                 // ── Translation inputs ───────────────────────────
-                fieldEl.querySelectorAll('.trans-input').forEach(inp => {
+                fieldEl.querySelectorAll('.trans-input:not(.notes-input)').forEach(inp => {
                     inp.addEventListener('input', (e) => {
                         const t = getTarget(index, parentIndex);
                         if (!t.labels) t.labels = {};
                         t.labels[e.target.dataset.lang] = e.target.value;
+                    });
+                });
+
+                // ── Notes inputs (toggle_group only) ─────────────
+                fieldEl.querySelectorAll('.notes-input').forEach(inp => {
+                    inp.addEventListener('input', (e) => {
+                        const t = getTarget(index, parentIndex);
+                        if (!t.notes) t.notes = {};
+                        t.notes[e.target.dataset.lang] = e.target.value;
                     });
                 });
 
@@ -712,6 +805,17 @@
             }
 
             formFields.forEach((f, i) => renderField(f, i, formFields, null));
+        }
+
+        function renderLegalTextEditor(legalText) {
+            const container = document.getElementById('legalTextEditor');
+            if (!container) return;
+            container.innerHTML = LANGS.map(lang => `
+                <div class="legal-text-row">
+                    <span class="legal-text-lang">${LANG_NAMES[lang]}</span>
+                    <textarea data-lang="${lang}" rows="2" placeholder="Mention légale (${LANG_NAMES[lang]})">${escHtml(legalText[lang] || '')}</textarea>
+                </div>
+            `).join('');
         }
 
         window.toggleTransPanel = function(id) {
@@ -985,6 +1089,13 @@
             const spin = document.getElementById('btnSaveCustomSpinner');
             btn.disabled = true; txt.textContent = 'Enregistrement…'; spin.style.display = 'inline-block';
 
+            // Collect per-language legal text from the editor
+            const legalText = {};
+            document.querySelectorAll('#legalTextEditor textarea[data-lang]').forEach(ta => {
+                const v = ta.value.trim();
+                if (v) legalText[ta.dataset.lang] = v;
+            });
+
             const formSettings = {
                 ...currentUser.formSettings, // Keep existing fields
                 language: document.getElementById('formLanguage').value,
@@ -993,6 +1104,7 @@
                 blob1: document.getElementById('formBlob1').value,
                 blob2: document.getElementById('formBlob2').value,
                 blob3: document.getElementById('formBlob3').value,
+                legalText,
                 fields: formFields
             };
 

@@ -1685,6 +1685,16 @@ if (typeof window.runLicenseGate === 'function') {
             // ── Render the data-display column from formSettings ────────────
             const formSettings = window.OKM_FORM_SETTINGS || cached?.formSettings || {};
             window.OKM_FORM_SETTINGS = formSettings;
+
+            // Custom legal text per language (overrides default GDPR notice)
+            if (formSettings.legalText && typeof formSettings.legalText === 'object') {
+                for (const [lang, text] of Object.entries(formSettings.legalText)) {
+                    if (I18N_RETAILER[lang] && typeof text === 'string' && text.trim()) {
+                        I18N_RETAILER[lang].gdprText = text;
+                    }
+                }
+            }
+
             renderRetailerFields(formSettings.fields, state.lang);
             paintRetailerChrome(state.lang);
             updateStatus('waiting'); // refresh status text in agency language

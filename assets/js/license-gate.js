@@ -448,16 +448,25 @@ window.runLicenseGate = async function () {
     // Apply theme (light / dark / auto) — same logic as on the client page.
     (function applyTheme() {
         const html = document.documentElement;
-        const theme = window.OKM_FORM_SETTINGS.theme || 'auto';
+        const s = window.OKM_FORM_SETTINGS;
+        const theme = s.theme || 'auto';
         html.classList.remove('theme-light', 'theme-dark');
         if (theme === 'light') html.classList.add('theme-light');
         if (theme === 'dark')  html.classList.add('theme-dark');
 
         // Custom blob colors (ambient background) if configured
-        const s = window.OKM_FORM_SETTINGS;
         if (s.blob1) html.style.setProperty('--blob-1', s.blob1);
         if (s.blob2) html.style.setProperty('--blob-2', s.blob2);
         if (s.blob3) html.style.setProperty('--blob-3', s.blob3);
+
+        // Custom logo (parity with client page)
+        if (s.logoUrl) {
+            const logoPicture = document.querySelector('.logo .logo-picture');
+            const logoContainer = document.querySelector('.logo');
+            if (logoPicture && logoContainer) {
+                logoContainer.innerHTML = `<img src="${s.logoUrl}" alt="Logo" class="logo-img logo-img-brand" style="max-height:40px;border-radius:4px;">`;
+            }
+        }
     })();
 
     // Keep agency display name in retailer header and storage for QR propagation.

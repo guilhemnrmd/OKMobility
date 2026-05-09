@@ -497,7 +497,41 @@ function renderDynamicFields(fields) {
                 labelWrap.appendChild(spanCheck);
                 labelWrap.appendChild(spanText);
                 headerDiv.appendChild(labelWrap);
+
+                // Optional info note (i) tooltip — translatable via field.notes[lang]
+                const noteText = field.notes?.[state.lang] || (field.notes ? Object.values(field.notes).find(Boolean) : '') || '';
+                const infoBtn = document.createElement('button');
+                infoBtn.type = 'button';
+                infoBtn.className = 'info-btn';
+                infoBtn.id = `btnInfo_${field.id}`;
+                infoBtn.title = noteText;
+                infoBtn.setAttribute('aria-label', 'Information');
+                infoBtn.innerHTML = `<i class='bx bx-info-circle'></i>`;
+                infoBtn.style.display = noteText ? '' : 'none';
+                headerDiv.appendChild(infoBtn);
+
                 toggleDiv.appendChild(headerDiv);
+
+                // Tooltip element (hidden by default)
+                const tipDiv = document.createElement('div');
+                tipDiv.className = 'info-tooltip glass-panel';
+                tipDiv.style.display = 'none';
+                const tipP = document.createElement('p');
+                tipP.id = `tip_${field.id}`;
+                tipP.textContent = noteText;
+                tipDiv.appendChild(tipP);
+                toggleDiv.appendChild(tipDiv);
+
+                infoBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    tipDiv.style.display = (tipDiv.style.display === 'none') ? 'block' : 'none';
+                });
+                document.addEventListener('click', (e) => {
+                    if (!infoBtn.contains(e.target) && !tipDiv.contains(e.target)) {
+                        tipDiv.style.display = 'none';
+                    }
+                });
+
                 groupWrap.appendChild(toggleDiv);
 
                 const slidingSec = document.createElement('div');
@@ -764,9 +798,22 @@ async function hydrateAgencyBrandingFromUrl() {
                 applyLanguage(s.language);
             }
 
+            // Custom legal text per language (overrides built-in i18n.legalText)
+            if (s.legalText && typeof s.legalText === 'object') {
+                for (const [lang, text] of Object.entries(s.legalText)) {
+                    if (i18n[lang] && typeof text === 'string' && text.trim()) {
+                        i18n[lang].legalText = text;
+                    }
+                }
+                // Repaint legal-text nodes immediately
+                const t = i18n[state.lang];
+                if (t) document.querySelectorAll('.legal-text').forEach(el => { el.textContent = t.legalText; });
+            }
+
             // Champs dynamiques personnalisés — seulement si l'agence a configuré des champs custom
             // Sinon le HTML statique par défaut reste intact
             if (Array.isArray(s.fields) && s.fields.length > 0) {
+                state.activeFields = s.fields;
                 renderDynamicFields(s.fields);
                 reinitFormBindings();
             }
@@ -897,6 +944,55 @@ function applyLanguage(langCode) {
         syncPhone2CodeToPhone1();
         syncPhoneCodeWithSelectedCountry();
     }
+
+    // Re-paint per-field labels for agency-defined custom fields
+    if (state.activeFields?.length) {
+        updateDynamicFieldLabels(state.activeFields, langCode);
+    }
+}
+
+// Re-paint dashboard-set field labels (and toggle group notes) on lang change.
+// Walks state.activeFields; updates DOM in place — does not rebuild the form.
+function updateDynamicFieldLabels(fields, lang) {
+    function walk(field) {
+        const labelText = field.labels?.[lang] || field.label;
+
+        if (field.type === 'toggle_group') {
+            // Header label is the <span> next to the checkmark in `.custom-checkbox`
+            const cb = document.getElementById(`chk_${field.id}`);
+            const txtSpan = cb?.parentElement?.querySelector('span:not(.checkmark)');
+            if (txtSpan && labelText) txtSpan.textContent = labelText;
+
+            // Translatable info note (i tooltip) — see field.notes[lang]
+            const noteText = field.notes?.[lang] || field.notes?.[Object.keys(field.notes || {})[0]] || '';
+            const tipEl = document.getElementById(`tip_${field.id}`);
+            const btnEl = document.getElementById(`btnInfo_${field.id}`);
+            if (tipEl) tipEl.textContent = noteText;
+            if (btnEl) {
+                btnEl.title = noteText;
+                btnEl.style.display = noteText ? '' : 'none';
+            }
+            (field.children || []).forEach(walk);
+
+        } else if (field.type === 'address_block') {
+            const isCanonical = !!document.getElementById(`lblAddress`) && (field.id === 'address_block' || !document.getElementById(`lbl_${field.id}_addr`));
+            const lblId = isCanonical ? 'lblAddress' : `lbl_${field.id}_addr`;
+            const lblEl = document.getElementById(lblId);
+            if (lblEl && labelText) lblEl.textContent = labelText;
+
+        } else {
+            const wrapEl = document.getElementById(`wrap_${field.id}`);
+            const lblEl = wrapEl?.querySelector('label');
+            if (lblEl && labelText) lblEl.textContent = labelText;
+            // Phone block: dynamic IDs like wrap_phone_group
+            if (field.type === 'tel') {
+                const phoneId = !document.getElementById('phone') ? field.id : 'phone';
+                const phoneLbl = document.getElementById(`lbl${phoneId === 'phone' ? 'Phone' : '_'+phoneId}`);
+                if (phoneLbl && labelText) phoneLbl.textContent = labelText;
+            }
+        }
+    }
+    fields.forEach(walk);
 }
 
 dom.langSelect.addEventListener('change', (e) => {
