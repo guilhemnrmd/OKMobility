@@ -1245,9 +1245,15 @@
             dashLang = lang;
             dashT = DASHBOARD_I18N[lang] || DASHBOARD_I18N['fr'];
             document.documentElement.lang = lang;
+            // Text-only translations
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (dashT[key] && typeof dashT[key] === 'string') el.textContent = dashT[key];
+            });
+            // HTML translations (e.g. modal descriptions with <strong> tags)
+            document.querySelectorAll('[data-i18n-html]').forEach(el => {
+                const key = el.getAttribute('data-i18n-html');
+                if (dashT[key] && typeof dashT[key] === 'string') el.innerHTML = dashT[key];
             });
         }
 
