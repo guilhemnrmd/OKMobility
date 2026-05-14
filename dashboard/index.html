@@ -472,9 +472,137 @@
             text-transform: uppercase;
             letter-spacing: 0.02em;
         }
+        /* ── Danger Zone ───────────────────────────────────── */
+        .danger-zone-card {
+            margin-top: 1.5rem;
+            border: 1.5px solid rgba(255, 59, 48, 0.25);
+            border-radius: var(--radius-lg, 16px);
+            padding: 1.5rem;
+            background: rgba(255, 59, 48, 0.03);
+        }
+        .danger-zone-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 59, 48, 0.15);
+        }
+        .danger-zone-icon {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            background: rgba(255, 59, 48, 0.1);
+            color: #FF3B30;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; flex-shrink: 0;
+        }
+        .danger-zone-header h3 { font-size:1rem; font-weight:600; color:#FF3B30; margin-bottom:2px; }
+        .danger-zone-header p  { font-size:0.82rem; color:var(--color-text-secondary); margin:0; }
+        .danger-zone-action {
+            display: flex; align-items: center;
+            justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+        }
+        .danger-zone-action strong { display:block; font-size:0.9rem; color:var(--color-text-primary); margin-bottom:2px; }
+        .danger-zone-action p { font-size:0.82rem; color:var(--color-text-secondary); margin:0; max-width:340px; }
+        .btn-danger {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(255,59,48,0.08); color: #FF3B30;
+            border: 1.5px solid rgba(255,59,48,0.3); border-radius: 10px;
+            padding: 10px 18px; font-size:0.88rem; font-weight:600;
+            font-family: inherit; cursor: pointer; white-space:nowrap;
+            flex-shrink: 0; transition: all 0.2s ease;
+        }
+        .btn-danger:hover {
+            background: #FF3B30; color: #fff; border-color: #FF3B30;
+            box-shadow: 0 4px 16px rgba(255,59,48,0.3); transform: translateY(-1px);
+        }
+        /* ── Delete Modal ───────────────────────────────────── */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000; padding: 1.5rem;
+            animation: fadeInOverlay 0.2s ease;
+        }
+        @keyframes fadeInOverlay { from{opacity:0} to{opacity:1} }
+        .modal-box {
+            background: var(--color-panel-bg,#fff);
+            border-radius: 20px; padding: 2rem; width:100%; max-width:440px;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.18);
+            animation: slideUpModal 0.3s cubic-bezier(0.16,1,0.3,1);
+        }
+        @keyframes slideUpModal {
+            from{opacity:0;transform:translateY(24px) scale(0.97)}
+            to  {opacity:1;transform:translateY(0) scale(1)}
+        }
+        .danger-modal { border: 1.5px solid rgba(255,59,48,0.2); }
+        .modal-danger-icon {
+            width:52px; height:52px; background:rgba(255,59,48,0.1);
+            border-radius:14px; display:flex; align-items:center; justify-content:center;
+            font-size:1.7rem; color:#FF3B30; margin-bottom:1rem;
+        }
+        .modal-title { font-size:1.2rem; font-weight:700; color:var(--color-text-primary); margin-bottom:0.5rem; }
+        .modal-desc  { font-size:0.88rem; color:var(--color-text-secondary); line-height:1.55; margin-bottom:1.25rem; }
+        .modal-desc strong { color:#FF3B30; font-weight:600; }
+        .modal-confirm-field { display:flex; flex-direction:column; gap:6px; margin-bottom:1rem; }
+        .modal-confirm-field label {
+            font-size:0.8rem; font-weight:600; color:var(--color-text-secondary);
+            text-transform:uppercase; letter-spacing:0.04em;
+        }
+        .modal-input {
+            width:100%; padding:12px 14px; border-radius:10px;
+            border:1.5px solid var(--color-border);
+            background:var(--color-bg-secondary,rgba(0,0,0,0.04));
+            color:var(--color-text-primary); font-family:inherit; font-size:0.92rem;
+            outline:none; transition:border-color 0.2s;
+        }
+        .modal-input:focus { border-color:#FF3B30; }
+        .modal-alert {
+            padding:8px 12px; border-radius:8px; font-size:0.82rem;
+            background:rgba(255,59,48,0.08); color:#FF3B30;
+            border:1px solid rgba(255,59,48,0.2); margin-bottom:1rem;
+        }
+        .modal-actions { display:flex; gap:10px; justify-content:flex-end; }
+        .btn-modal-cancel {
+            padding:10px 18px; border-radius:10px;
+            border:1px solid var(--color-border); background:transparent;
+            color:var(--color-text-secondary); font-size:0.88rem;
+            font-weight:500; font-family:inherit; cursor:pointer; transition:all 0.2s;
+        }
+        .btn-modal-cancel:hover { background:var(--color-bg-secondary,rgba(0,0,0,0.04)); color:var(--color-text-primary); }
+        .btn-modal-danger {
+            display:inline-flex; align-items:center; gap:8px;
+            padding:10px 18px; border-radius:10px; border:none;
+            background:#FF3B30; color:#fff; font-size:0.88rem;
+            font-weight:600; font-family:inherit; cursor:pointer; transition:all 0.2s;
+        }
+        .btn-modal-danger:hover:not(:disabled) { background:#d63029; box-shadow:0 4px 16px rgba(255,59,48,0.3); }
+        .btn-modal-danger:disabled { opacity:0.45; cursor:not-allowed; }
     </style>
 </head>
 <body class="dashboard-page">
+
+    <!-- ── Delete Account Modal ───────────────────────────────────── -->
+    <div class="modal-overlay" id="deleteAccountModal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+        <div class="modal-box danger-modal">
+            <div class="modal-danger-icon"><i class='bx bx-trash'></i></div>
+            <h2 class="modal-title" id="deleteModalTitle" data-i18n="deleteModalTitle">Supprimer votre compte ?</h2>
+            <p class="modal-desc" data-i18n-html="deleteModalDesc">Cette action est <strong>irréversible</strong>. Votre compte, vos agences et toutes vos données seront supprimés définitivement.</p>
+            <div class="modal-confirm-field">
+                <label for="deleteConfirmEmail" data-i18n="deleteConfirmLabel">Saisissez votre adresse email pour confirmer :</label>
+                <input type="email" id="deleteConfirmEmail" class="modal-input" autocomplete="off" spellcheck="false">
+            </div>
+            <div id="deleteModalAlert" class="modal-alert" style="display:none"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn-modal-cancel" id="btnDeleteCancel" data-i18n="btnCancel">Annuler</button>
+                <button type="button" class="btn-modal-danger" id="btnDeleteConfirm" disabled>
+                    <span id="btnDeleteConfirmText" data-i18n="btnDeleteConfirm">Supprimer définitivement</span>
+                    <i class='bx bx-loader-alt btn-spinner' id="btnDeleteSpinner" style="display:none"></i>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <div class="dashboard-wrapper">
 
@@ -590,6 +718,27 @@
                             </button>
                         </div>
                     </form>
+                </div>
+
+                <!-- ── Danger Zone ───────────────────────────────────── -->
+                <div class="danger-zone-card">
+                    <div class="danger-zone-header">
+                        <div class="danger-zone-icon"><i class='bx bx-error-alt'></i></div>
+                        <div>
+                            <h3 data-i18n="dangerZoneTitle">Zone de danger</h3>
+                            <p data-i18n="dangerZoneSubtitle">Ces actions sont irréversibles. Procédez avec précaution.</p>
+                        </div>
+                    </div>
+                    <div class="danger-zone-action">
+                        <div>
+                            <strong data-i18n="deleteAccountTitle">Supprimer le compte</strong>
+                            <p data-i18n="deleteAccountDesc">Supprime définitivement votre compte, vos agences et toutes vos données.</p>
+                        </div>
+                        <button type="button" class="btn-danger" id="btnDeleteAccount">
+                            <i class='bx bx-trash'></i>
+                            <span data-i18n="btnDeleteAccount">Supprimer mon compte</span>
+                        </button>
+                    </div>
                 </div>
             </section>
 
@@ -854,7 +1003,16 @@
                 btnEditLegal:'Modifier les mentions légales par langue',
                 btnSaveAll:'Enregistrer tous les paramètres', btnSavingAll:'Enregistrement…',
                 customSaved:'Paramètres enregistrés.',
-                contactTitle:'Contact & support', contactSubtitle:'Besoin d\'aide ou souhaitez passer à une offre Pro ?',
+                contactTitle:'Contact & support', contactSubtitle:"Besoin d'aide ou souhaitez passer à une offre Pro ?",
+                dangerZoneTitle:'Zone de danger', dangerZoneSubtitle:'Ces actions sont irréversibles. Procédez avec précaution.',
+                deleteAccountTitle:'Supprimer le compte', deleteAccountDesc:'Supprime définitivement votre compte, vos agences et toutes vos données.',
+                btnDeleteAccount:'Supprimer mon compte',
+                deleteModalTitle:'Supprimer votre compte ?',
+                deleteModalDesc:'Cette action est <strong>irréversible</strong>. Votre compte, vos agences et toutes vos données seront supprimés définitivement.',
+                deleteConfirmLabel:'Saisissez votre adresse email pour confirmer :',
+                btnDeleteConfirm:'Supprimer définitivement', btnDeleting:'Suppression…',
+                deleteSuccess:'Compte supprimé. Redirection…',
+                deleteErrorMatch:'L\'adresse email ne correspond pas.', deleteErrorConn:'Erreur de connexion.',
             },
             en: {
                 navProfile:'Profile', navAgencies:'Agencies', navCustom:'Customization', navContact:'Contact',
@@ -883,6 +1041,15 @@
                 btnSaveAll:'Save all settings', btnSavingAll:'Saving…',
                 customSaved:'Settings saved.',
                 contactTitle:'Contact & support', contactSubtitle:'Need help or want to upgrade to Pro?',
+                dangerZoneTitle:'Danger zone', dangerZoneSubtitle:'These actions are irreversible. Proceed with caution.',
+                deleteAccountTitle:'Delete account', deleteAccountDesc:'Permanently deletes your account, agencies and all your data.',
+                btnDeleteAccount:'Delete my account',
+                deleteModalTitle:'Delete your account?',
+                deleteModalDesc:'This action is <strong>irreversible</strong>. Your account, agencies and all your data will be permanently deleted.',
+                deleteConfirmLabel:'Enter your email address to confirm:',
+                btnDeleteConfirm:'Delete permanently', btnDeleting:'Deleting…',
+                deleteSuccess:'Account deleted. Redirecting…',
+                deleteErrorMatch:'The email address does not match.', deleteErrorConn:'Connection error.',
             },
             es: {
                 navProfile:'Perfil', navAgencies:'Agencias', navCustom:'Personalización', navContact:'Contacto',
@@ -911,6 +1078,15 @@
                 btnSaveAll:'Guardar toda la configuración', btnSavingAll:'Guardando…',
                 customSaved:'Configuración guardada.',
                 contactTitle:'Contacto y soporte', contactSubtitle:'¿Necesitas ayuda o quieres pasarte a Pro?',
+                dangerZoneTitle:'Zona de peligro', dangerZoneSubtitle:'Estas acciones son irreversibles. Procéda con precaución.',
+                deleteAccountTitle:'Eliminar cuenta', deleteAccountDesc:'Elimina permanentemente tu cuenta, agencias y todos tus datos.',
+                btnDeleteAccount:'Eliminar mi cuenta',
+                deleteModalTitle:'¿Eliminar tu cuenta?',
+                deleteModalDesc:'Esta acción es <strong>irreversible</strong>. Tu cuenta, agencias y todos tus datos serán eliminados permanentemente.',
+                deleteConfirmLabel:'Introduce tu dirección de email para confirmar:',
+                btnDeleteConfirm:'Eliminar definitivamente', btnDeleting:'Eliminando…',
+                deleteSuccess:'Cuenta eliminada. Redirigiendo…',
+                deleteErrorMatch:'La dirección de email no coincide.', deleteErrorConn:'Error de conexión.',
             },
             it: {
                 navProfile:'Profilo', navAgencies:'Agenzie', navCustom:'Personalizzazione', navContact:'Contatto',
@@ -939,6 +1115,15 @@
                 btnSaveAll:'Salva tutte le impostazioni', btnSavingAll:'Salvataggio…',
                 customSaved:'Impostazioni salvate.',
                 contactTitle:'Contatto e supporto', contactSubtitle:'Hai bisogno di aiuto o vuoi passare a Pro?',
+                dangerZoneTitle:'Zona di pericolo', dangerZoneSubtitle:'Queste azioni sono irreversibili. Procedere con cautela.',
+                deleteAccountTitle:'Elimina account', deleteAccountDesc:'Elimina permanentemente il tuo account, le agenzie e tutti i dati.',
+                btnDeleteAccount:'Elimina il mio account',
+                deleteModalTitle:'Eliminare il tuo account?',
+                deleteModalDesc:'Questa azione è <strong>irreversibile</strong>. Il tuo account, le agenzie e tutti i dati verranno eliminati definitivamente.',
+                deleteConfirmLabel:'Inserisci il tuo indirizzo email per confermare:',
+                btnDeleteConfirm:'Elimina definitivamente', btnDeleting:'Eliminazione…',
+                deleteSuccess:'Account eliminato. Reindirizzamento…',
+                deleteErrorMatch:"L'indirizzo email non corrisponde.", deleteErrorConn:'Errore di connessione.',
             },
             pt: {
                 navProfile:'Perfil', navAgencies:'Agências', navCustom:'Personalização', navContact:'Contacto',
@@ -967,6 +1152,15 @@
                 btnSaveAll:'Guardar todas as definições', btnSavingAll:'A guardar…',
                 customSaved:'Definições guardadas.',
                 contactTitle:'Contacto e suporte', contactSubtitle:'Precisa de ajuda ou quer fazer upgrade para Pro?',
+                dangerZoneTitle:'Zona de perigo', dangerZoneSubtitle:'Estas ações são irreversíveis. Proceda com cuidado.',
+                deleteAccountTitle:'Eliminar conta', deleteAccountDesc:'Elimina permanentemente a sua conta, agências e todos os dados.',
+                btnDeleteAccount:'Eliminar a minha conta',
+                deleteModalTitle:'Eliminar a sua conta?',
+                deleteModalDesc:'Esta ação é <strong>irreversível</strong>. A sua conta, agências e todos os dados serão eliminados permanentemente.',
+                deleteConfirmLabel:'Introduza o seu endereço de email para confirmar:',
+                btnDeleteConfirm:'Eliminar definitivamente', btnDeleting:'A eliminar…',
+                deleteSuccess:'Conta eliminada. A redirecionar…',
+                deleteErrorMatch:'O endereço de email não corresponde.', deleteErrorConn:'Erro de ligação.',
             },
             de: {
                 navProfile:'Profil', navAgencies:'Agenturen', navCustom:'Anpassung', navContact:'Kontakt',
@@ -995,6 +1189,15 @@
                 btnSaveAll:'Alle Einstellungen speichern', btnSavingAll:'Speichern…',
                 customSaved:'Einstellungen gespeichert.',
                 contactTitle:'Kontakt & Support', contactSubtitle:'Brauchen Sie Hilfe oder möchten Sie auf Pro upgraden?',
+                dangerZoneTitle:'Gefahrenzone', dangerZoneSubtitle:'Diese Aktionen sind unumkehrbar. Gehen Sie vorsichtig vor.',
+                deleteAccountTitle:'Konto löschen', deleteAccountDesc:'Löscht Ihr Konto, Ihre Agenturen und alle Ihre Daten dauerhaft.',
+                btnDeleteAccount:'Mein Konto löschen',
+                deleteModalTitle:'Ihr Konto löschen?',
+                deleteModalDesc:'Diese Aktion ist <strong>unumkehrbar</strong>. Ihr Konto, Agenturen und alle Daten werden dauerhaft gelöscht.',
+                deleteConfirmLabel:'Geben Sie Ihre E-Mail-Adresse zur Bestätigung ein:',
+                btnDeleteConfirm:'Dauerhaft löschen', btnDeleting:'Löschen…',
+                deleteSuccess:'Konto gelöscht. Weiterleitung…',
+                deleteErrorMatch:'Die E-Mail-Adresse stimmt nicht überein.', deleteErrorConn:'Verbindungsfehler.',
             },
             nl: {
                 navProfile:'Profiel', navAgencies:'Bureaus', navCustom:'Aanpassing', navContact:'Contact',
@@ -1023,6 +1226,15 @@
                 btnSaveAll:'Alle instellingen opslaan', btnSavingAll:'Opslaan…',
                 customSaved:'Instellingen opgeslagen.',
                 contactTitle:'Contact & ondersteuning', contactSubtitle:'Hulp nodig of wilt u upgraden naar Pro?',
+                dangerZoneTitle:'Gevarenzone', dangerZoneSubtitle:'Deze acties zijn onomkeerbaar. Ga voorzichtig te werk.',
+                deleteAccountTitle:'Account verwijderen', deleteAccountDesc:'Verwijdert permanent uw account, bureaus en alle gegevens.',
+                btnDeleteAccount:'Mijn account verwijderen',
+                deleteModalTitle:'Uw account verwijderen?',
+                deleteModalDesc:'Deze actie is <strong>onomkeerbaar</strong>. Uw account, bureaus en alle gegevens worden permanent verwijderd.',
+                deleteConfirmLabel:'Voer uw e-mailadres in ter bevestiging:',
+                btnDeleteConfirm:'Definitief verwijderen', btnDeleting:'Verwijderen…',
+                deleteSuccess:'Account verwijderd. Omleiden…',
+                deleteErrorMatch:'Het e-mailadres komt niet overeen.', deleteErrorConn:'Verbindingsfout.',
             },
         };
 
@@ -1598,6 +1810,73 @@
             await fetch('/api/auth/logout', { method: 'POST' });
             window.location.href = '/login/';
         });
+
+        // ── Delete Account ────────────────────────────────────
+        (() => {
+            const modal        = document.getElementById('deleteAccountModal');
+            const inputEmail   = document.getElementById('deleteConfirmEmail');
+            const btnConfirm   = document.getElementById('btnDeleteConfirm');
+            const btnConfirmTxt= document.getElementById('btnDeleteConfirmText');
+            const btnSpinner   = document.getElementById('btnDeleteSpinner');
+            const alertBox     = document.getElementById('deleteModalAlert');
+
+            // Open modal
+            document.getElementById('btnDeleteAccount').addEventListener('click', () => {
+                inputEmail.value = '';
+                btnConfirm.disabled = true;
+                alertBox.style.display = 'none';
+                modal.style.display = 'flex';
+                setTimeout(() => inputEmail.focus(), 100);
+            });
+
+            // Close modal
+            const closeModal = () => { modal.style.display = 'none'; };
+            document.getElementById('btnDeleteCancel').addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.style.display !== 'none') closeModal(); });
+
+            // Enable confirm button only when email matches
+            inputEmail.addEventListener('input', () => {
+                const matches = inputEmail.value.trim().toLowerCase() === (currentUser?.email || '').toLowerCase();
+                btnConfirm.disabled = !matches;
+            });
+
+            // Submit delete
+            btnConfirm.addEventListener('click', async () => {
+                btnConfirm.disabled = true;
+                btnConfirmTxt.textContent = dashT.btnDeleting || 'Suppression…';
+                btnSpinner.style.display = 'inline-block';
+                alertBox.style.display = 'none';
+                try {
+                    const res = await fetch('/api/dashboard/delete-account', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ confirmEmail: inputEmail.value.trim().toLowerCase() }),
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        alertBox.textContent = dashT.deleteSuccess || 'Compte supprimé.';
+                        alertBox.style.background = 'rgba(76,175,80,0.08)';
+                        alertBox.style.color = '#6ed476';
+                        alertBox.style.borderColor = 'rgba(76,175,80,0.2)';
+                        alertBox.style.display = 'block';
+                        setTimeout(() => { window.location.href = '/signup/'; }, 1500);
+                    } else {
+                        alertBox.textContent = data.error || dashT.deleteErrorConn;
+                        alertBox.style.display = 'block';
+                        btnConfirm.disabled = false;
+                        btnConfirmTxt.textContent = dashT.btnDeleteConfirm;
+                        btnSpinner.style.display = 'none';
+                    }
+                } catch {
+                    alertBox.textContent = dashT.deleteErrorConn;
+                    alertBox.style.display = 'block';
+                    btnConfirm.disabled = false;
+                    btnConfirmTxt.textContent = dashT.btnDeleteConfirm;
+                    btnSpinner.style.display = 'none';
+                }
+            });
+        })();
 
         // ── Profile form ──────────────────────────────────────
         document.getElementById('profileForm').addEventListener('submit', async (e) => {
