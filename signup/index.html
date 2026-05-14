@@ -10,36 +10,48 @@
     <link rel="stylesheet" href="/b2b.css">
     <link rel="stylesheet" href="/auth/auth.css">
     <style>
-        /* Language selector pill */
-        .lang-switcher {
+        /* Lang selector — same component as retailer/client pages, adapted for auth nav */
+        .auth-lang-selector {
+            position: relative;
             display: flex;
             align-items: center;
-            gap: 6px;
-            flex-wrap: wrap;
-            margin-bottom: 1.5rem;
-        }
-        .lang-btn {
-            padding: 5px 12px;
-            border-radius: 999px;
-            border: 1.5px solid var(--glass-border, rgba(255,255,255,0.15));
-            background: transparent;
-            color: var(--text-secondary, #6b7280);
-            font-size: 0.78rem;
-            font-weight: 600;
+            gap: 7px;
+            background: rgba(255,255,255,0.07);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 8px 14px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.13);
+            transition: background 0.2s ease, border-color 0.2s ease;
             cursor: pointer;
-            transition: all 0.2s ease;
-            letter-spacing: 0.02em;
+            user-select: none;
         }
-        .lang-btn:hover {
-            border-color: rgba(32,84,234,0.4);
-            color: #2054EA;
-            background: rgba(32,84,234,0.06);
+        .auth-lang-selector:hover {
+            background: rgba(255,255,255,0.12);
+            border-color: rgba(255,255,255,0.22);
         }
-        .lang-btn.active {
-            background: #2054EA;
-            border-color: #2054EA;
-            color: #fff;
-            box-shadow: 0 2px 8px rgba(32,84,234,0.3);
+        .auth-lang-selector i {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            pointer-events: none;
+        }
+        .auth-lang-selector #langDisplay {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            pointer-events: none;
+        }
+        .auth-lang-selector select {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            border-radius: 50px;
+            background: transparent;
+            border: none;
+            font-family: inherit;
         }
     </style>
 </head>
@@ -48,7 +60,21 @@
     <header class="b2b-nav auth-nav">
         <div class="nav-brand"><a href="/">MobilityOS</a></div>
         <div class="nav-controls">
-            <a href="/login/" class="nav-link" data-i18n="navLogin">Se connecter</a>
+            <!-- Language selector — same globe component as retailer/client pages -->
+            <div class="auth-lang-selector" role="group" aria-label="Interface language">
+                <i class='bx bx-globe'></i>
+                <span id="langDisplay">Français</span>
+                <select id="languageSelect" aria-label="Select language">
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="en">🇬🇧 English</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="it">🇮🇹 Italiano</option>
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="nl">🇳🇱 Nederlands</option>
+                </select>
+            </div>
+            <a href="/login/" class="nav-link" id="navLoginLink" data-i18n="navLogin">Se connecter</a>
         </div>
     </header>
 
@@ -62,17 +88,6 @@
 
             <h1 class="auth-title" data-i18n="signupTitle">Créez votre compte.</h1>
             <p class="auth-subtitle" data-i18n="signupSubtitle">Bienvenue sur MobilityOS. Activez votre licence d'essai en quelques secondes.</p>
-
-            <!-- Language Switcher -->
-            <div class="lang-switcher" id="langSwitcher" role="group" aria-label="Interface language">
-                <button class="lang-btn" data-lang="fr">🇫🇷 FR</button>
-                <button class="lang-btn" data-lang="en">🇬🇧 EN</button>
-                <button class="lang-btn" data-lang="es">🇪🇸 ES</button>
-                <button class="lang-btn" data-lang="it">🇮🇹 IT</button>
-                <button class="lang-btn" data-lang="pt">🇵🇹 PT</button>
-                <button class="lang-btn" data-lang="de">🇩🇪 DE</button>
-                <button class="lang-btn" data-lang="nl">🇳🇱 NL</button>
-            </div>
 
             <div id="alertBanner" class="alert"></div>
 
@@ -315,8 +330,13 @@
             }
         };
 
+        const LANG_NAMES = { fr:'Français', en:'English', es:'Español', it:'Italiano', pt:'Português', de:'Deutsch', nl:'Nederlands' };
+
         let currentLang = 'fr';
         let currentDict = i18n.fr;
+
+        const langSelect  = document.getElementById('languageSelect');
+        const langDisplay = document.getElementById('langDisplay');
 
         const updateLanguage = (lang) => {
             currentLang = lang;
@@ -332,17 +352,16 @@
             }
             document.documentElement.lang = lang;
             document.getElementById('inputUiLanguage').value = lang;
-            localStorage.setItem('signupLang', lang);  // signup-specific key, not shared with client page
-            // Update active button
-            document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.lang === lang);
-            });
+            localStorage.setItem('signupLang', lang);
+            // Sync the nav selector display
+            if (langDisplay) langDisplay.textContent = LANG_NAMES[lang] || lang;
+            if (langSelect) langSelect.value = lang;
         };
 
-        // Language switcher buttons
-        document.querySelectorAll('.lang-btn').forEach(btn => {
-            btn.addEventListener('click', () => updateLanguage(btn.dataset.lang));
-        });
+        // Native select in the nav bar drives the language
+        if (langSelect) {
+            langSelect.addEventListener('change', () => updateLanguage(langSelect.value));
+        }
 
         // Auto-detect language: Storage > Browser > Default(en)
         const supportedLangs = ['fr','en','es','it','pt','de','nl'];
