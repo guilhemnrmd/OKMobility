@@ -9,6 +9,39 @@
     <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
     <link rel="stylesheet" href="/b2b.css">
     <link rel="stylesheet" href="/auth/auth.css">
+    <style>
+        /* Language selector pill */
+        .lang-switcher {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        .lang-btn {
+            padding: 5px 12px;
+            border-radius: 999px;
+            border: 1.5px solid var(--glass-border, rgba(255,255,255,0.15));
+            background: transparent;
+            color: var(--text-secondary, #6b7280);
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            letter-spacing: 0.02em;
+        }
+        .lang-btn:hover {
+            border-color: rgba(32,84,234,0.4);
+            color: #2054EA;
+            background: rgba(32,84,234,0.06);
+        }
+        .lang-btn.active {
+            background: #2054EA;
+            border-color: #2054EA;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(32,84,234,0.3);
+        }
+    </style>
 </head>
 <body>
 
@@ -29,6 +62,17 @@
 
             <h1 class="auth-title" data-i18n="signupTitle">Créez votre compte.</h1>
             <p class="auth-subtitle" data-i18n="signupSubtitle">Bienvenue sur MobilityOS. Activez votre licence d'essai en quelques secondes.</p>
+
+            <!-- Language Switcher -->
+            <div class="lang-switcher" id="langSwitcher" role="group" aria-label="Interface language">
+                <button class="lang-btn" data-lang="fr">🇫🇷 FR</button>
+                <button class="lang-btn" data-lang="en">🇬🇧 EN</button>
+                <button class="lang-btn" data-lang="es">🇪🇸 ES</button>
+                <button class="lang-btn" data-lang="it">🇮🇹 IT</button>
+                <button class="lang-btn" data-lang="pt">🇵🇹 PT</button>
+                <button class="lang-btn" data-lang="de">🇩🇪 DE</button>
+                <button class="lang-btn" data-lang="nl">🇳🇱 NL</button>
+            </div>
 
             <div id="alertBanner" class="alert"></div>
 
@@ -60,6 +104,18 @@
                         <i class='bx bx-building field-icon'></i>
                     </div>
                 </div>
+
+                <div class="field">
+                    <label class="field-label" for="inputAddress" data-i18n="lblAddress">Adresse de l'agence</label>
+                    <div class="field-input-wrap">
+                        <input type="text" id="inputAddress" name="address" class="field-input"
+                               placeholder="12 Rue de la Paix, 75001 Paris" autocomplete="street-address">
+                        <i class='bx bx-map-pin field-icon'></i>
+                    </div>
+                </div>
+
+                <!-- Hidden field — value set programmatically from lang switcher -->
+                <input type="hidden" id="inputUiLanguage" name="uiLanguage" value="fr">
 
                 <div class="terms-row">
                     <input type="checkbox" id="inputTerms" required>
@@ -97,6 +153,8 @@
                 lblName: "Nom complet",
                 lblEmailPro: "Email professionnel",
                 lblCompany: "Nom de votre agence",
+                lblAddress: "Adresse de l'agence",
+                placeholderAddress: "12 Rue de la Paix, 75001 Paris",
                 termsText: "J'accepte les",
                 termsLink: "conditions d'utilisation",
                 termsAnd: "et la",
@@ -105,7 +163,7 @@
                 btnSending: "Envoi…",
                 footerHasAccount: "Déjà un compte ?",
                 footerLogin: "Se connecter",
-                alertEmpty: "Veuillez remplir tous les champs.",
+                alertEmpty: "Veuillez remplir tous les champs obligatoires.",
                 alertTerms: "Veuillez accepter les conditions d'utilisation.",
                 alertSuccess: "Lien de vérification envoyé !",
                 alertError: "Une erreur est survenue.",
@@ -119,6 +177,8 @@
                 lblName: "Full name",
                 lblEmailPro: "Business email",
                 lblCompany: "Your agency name",
+                lblAddress: "Agency address",
+                placeholderAddress: "12 High Street, London W1A 1AA",
                 termsText: "I accept the",
                 termsLink: "terms of service",
                 termsAnd: "and the",
@@ -127,7 +187,7 @@
                 btnSending: "Sending…",
                 footerHasAccount: "Already have an account?",
                 footerLogin: "Sign in",
-                alertEmpty: "Please fill in all fields.",
+                alertEmpty: "Please fill in all required fields.",
                 alertTerms: "Please accept the terms of use.",
                 alertSuccess: "Verification link sent!",
                 alertError: "An error occurred.",
@@ -141,6 +201,8 @@
                 lblName: "Nombre completo",
                 lblEmailPro: "Email profesional",
                 lblCompany: "Nombre de tu agencia",
+                lblAddress: "Dirección de la agencia",
+                placeholderAddress: "Calle Mayor 12, 28013 Madrid",
                 termsText: "Acepto los",
                 termsLink: "términos de uso",
                 termsAnd: "y la",
@@ -149,7 +211,7 @@
                 btnSending: "Enviando…",
                 footerHasAccount: "¿Ya tienes una cuenta?",
                 footerLogin: "Iniciar sesión",
-                alertEmpty: "Por favor, complete todos los campos.",
+                alertEmpty: "Por favor, complete todos los campos obligatorios.",
                 alertTerms: "Por favor, acepte los términos de uso.",
                 alertSuccess: "¡Enlace de verificación enviado!",
                 alertError: "Ocurrió un error.",
@@ -163,6 +225,8 @@
                 lblName: "Nome completo",
                 lblEmailPro: "Email professionale",
                 lblCompany: "Nome della tua agenzia",
+                lblAddress: "Indirizzo dell'agenzia",
+                placeholderAddress: "Via Roma 12, 00100 Roma",
                 termsText: "Accetto i",
                 termsLink: "termini di utilizzo",
                 termsAnd: "e la",
@@ -171,7 +235,7 @@
                 btnSending: "Invio in corso…",
                 footerHasAccount: "Hai già un account?",
                 footerLogin: "Accedi",
-                alertEmpty: "Si prega di compilare tutti i campi.",
+                alertEmpty: "Si prega di compilare tutti i campi obbligatori.",
                 alertTerms: "Si prega di accettare i termini di utilizzo.",
                 alertSuccess: "Link di verifica inviato!",
                 alertError: "Si è verificato un errore.",
@@ -185,6 +249,8 @@
                 lblName: "Nome completo",
                 lblEmailPro: "Email profissional",
                 lblCompany: "Nome da sua agência",
+                lblAddress: "Morada da agência",
+                placeholderAddress: "Rua do Comércio 12, 1100-150 Lisboa",
                 termsText: "Aceito os",
                 termsLink: "termos de utilização",
                 termsAnd: "e a",
@@ -193,7 +259,7 @@
                 btnSending: "A enviar…",
                 footerHasAccount: "Já tem uma conta?",
                 footerLogin: "Entrar",
-                alertEmpty: "Por favor, preencha todos os campos.",
+                alertEmpty: "Por favor, preencha todos os campos obrigatórios.",
                 alertTerms: "Por favor, aceite os termos de utilização.",
                 alertSuccess: "Link de verificação enviado!",
                 alertError: "Ocorreu um erro.",
@@ -207,6 +273,8 @@
                 lblName: "Vollständiger Name",
                 lblEmailPro: "Geschäftliche E-Mail",
                 lblCompany: "Name Ihrer Agentur",
+                lblAddress: "Adresse der Agentur",
+                placeholderAddress: "Hauptstraße 12, 10115 Berlin",
                 termsText: "Ich akzeptiere die",
                 termsLink: "Nutzungsbedingungen",
                 termsAnd: "und die",
@@ -215,7 +283,7 @@
                 btnSending: "Senden…",
                 footerHasAccount: "Bereits ein Konto?",
                 footerLogin: "Anmelden",
-                alertEmpty: "Bitte füllen Sie alle Felder aus.",
+                alertEmpty: "Bitte füllen Sie alle Pflichtfelder aus.",
                 alertTerms: "Bitte akzeptieren Sie die Nutzungsbedingungen.",
                 alertSuccess: "Verifizierungslink gesendet!",
                 alertError: "Ein Fehler ist aufgetreten.",
@@ -229,6 +297,8 @@
                 lblName: "Volledige naam",
                 lblEmailPro: "Zakelijk e-mailadres",
                 lblCompany: "Naam van uw bureau",
+                lblAddress: "Adres van het bureau",
+                placeholderAddress: "Hoofdstraat 12, 1000 AA Amsterdam",
                 termsText: "Ik accepteer de",
                 termsLink: "gebruiksvoorwaarden",
                 termsAnd: "en het",
@@ -237,7 +307,7 @@
                 btnSending: "Verzenden…",
                 footerHasAccount: "Heeft u al een account?",
                 footerLogin: "Inloggen",
-                alertEmpty: "Vul alle velden in.",
+                alertEmpty: "Vul alle verplichte velden in.",
                 alertTerms: "Accepteer de gebruiksvoorwaarden.",
                 alertSuccess: "Verificatielink verzonden!",
                 alertError: "Er is een fout opgetreden.",
@@ -245,24 +315,39 @@
             }
         };
 
-        let currentDict = i18n.en;
+        let currentLang = 'fr';
+        let currentDict = i18n.fr;
 
         const updateLanguage = (lang) => {
+            currentLang = lang;
             currentDict = i18n[lang] || i18n['en'];
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                if (currentDict[key]) {
-                    el.textContent = currentDict[key];
-                }
+                if (currentDict[key]) el.textContent = currentDict[key];
             });
+            // Update address placeholder specifically
+            const addrInput = document.getElementById('inputAddress');
+            if (addrInput && currentDict.placeholderAddress) {
+                addrInput.placeholder = currentDict.placeholderAddress;
+            }
             document.documentElement.lang = lang;
-            localStorage.setItem('userLanguage', lang);
+            document.getElementById('inputUiLanguage').value = lang;
+            localStorage.setItem('signupLang', lang);  // signup-specific key, not shared with client page
+            // Update active button
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
         };
 
-        // Auto-detect language: Storage > Browser > Default(fr)
+        // Language switcher buttons
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => updateLanguage(btn.dataset.lang));
+        });
+
+        // Auto-detect language: Storage > Browser > Default(en)
         const supportedLangs = ['fr','en','es','it','pt','de','nl'];
-        const storedLang = localStorage.getItem('userLanguage');
-        const browserLang = (navigator.language || 'fr').slice(0, 2).toLowerCase();
+        const storedLang = localStorage.getItem('signupLang');      // signup-specific key
+        const browserLang = (navigator.language || 'en').slice(0, 2).toLowerCase();
         const initialLang = storedLang || (supportedLangs.includes(browserLang) ? browserLang : 'en');
         updateLanguage(initialLang);
 
@@ -282,10 +367,12 @@
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const name = document.getElementById('inputName').value.trim();
-            const email = document.getElementById('inputEmail').value.trim();
+            const name    = document.getElementById('inputName').value.trim();
+            const email   = document.getElementById('inputEmail').value.trim();
             const company = document.getElementById('inputCompany').value.trim();
-            const terms = document.getElementById('inputTerms').checked;
+            const address = document.getElementById('inputAddress').value.trim();
+            const uiLanguage = document.getElementById('inputUiLanguage').value;
+            const terms   = document.getElementById('inputTerms').checked;
 
             if (!name || !email || !company) {
                 showAlert(currentDict.alertEmpty, 'error');
@@ -303,7 +390,7 @@
                 const res = await fetch('/api/signup', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, company }),
+                    body: JSON.stringify({ name, email, company, address, uiLanguage }),
                 });
                 const data = await res.json();
                 if (res.ok) {

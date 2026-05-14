@@ -487,16 +487,16 @@
 
             <nav class="sidebar-nav" role="navigation">
                 <button class="nav-item active" data-tab="profile">
-                    <i class='bx bx-user'></i><span>Profil</span>
+                    <i class='bx bx-user'></i><span data-i18n="navProfile">Profil</span>
                 </button>
                 <button class="nav-item" data-tab="agencies">
-                    <i class='bx bx-buildings'></i><span>Agences</span>
+                    <i class='bx bx-buildings'></i><span data-i18n="navAgencies">Agences</span>
                 </button>
                 <button class="nav-item" data-tab="customization">
-                    <i class='bx bx-palette'></i><span>Personnalisation</span>
+                    <i class='bx bx-palette'></i><span data-i18n="navCustom">Personnalisation</span>
                 </button>
                 <button class="nav-item" data-tab="contact">
-                    <i class='bx bx-headphone'></i><span>Contact</span>
+                    <i class='bx bx-headphone'></i><span data-i18n="navContact">Contact</span>
                 </button>
             </nav>
 
@@ -524,46 +524,68 @@
             <!-- ── Profil ────────────────────────────────────── -->
             <section class="tab-content active" id="tab-profile">
                 <div class="tab-header">
-                    <h2>Informations personnelles</h2>
-                    <p>Gérez les informations de votre compte.</p>
+                    <h2 data-i18n="profileTitle">Informations personnelles</h2>
+                    <p data-i18n="profileSubtitle">Gérez les informations de votre compte.</p>
                 </div>
 
                 <div class="dash-card">
                     <form id="profileForm" novalidate>
                         <div class="form-grid">
                             <div class="input-wrapper">
-                                <label for="profileName">Nom complet</label>
+                                <label for="profileName" data-i18n="lblName">Nom complet</label>
                                 <div class="input-with-icon">
                                     <i class='bx bx-user'></i>
                                     <input type="text" id="profileName" placeholder="Jean Dupont" autocomplete="name">
                                 </div>
                             </div>
                             <div class="input-wrapper">
-                                <label for="profileEmail">Adresse email</label>
+                                <label for="profileEmail" data-i18n="lblEmail">Adresse email</label>
                                 <div class="input-with-icon">
                                     <i class='bx bx-envelope'></i>
                                     <input type="email" id="profileEmail" disabled>
                                 </div>
                             </div>
                             <div class="input-wrapper">
-                                <label for="profileCompany">Nom de l'entreprise</label>
+                                <label for="profileCompany" data-i18n="lblCompany">Nom de l'entreprise</label>
                                 <div class="input-with-icon">
                                     <i class='bx bx-building'></i>
                                     <input type="text" id="profileCompany" placeholder="Mon Agence" autocomplete="organization">
                                 </div>
                             </div>
                             <div class="input-wrapper">
-                                <label for="profilePhone">Téléphone</label>
+                                <label for="profilePhone" data-i18n="lblPhone">Téléphone</label>
                                 <div class="input-with-icon">
                                     <i class='bx bx-phone'></i>
                                     <input type="tel" id="profilePhone" placeholder="+33 6 12 34 56 78" autocomplete="tel">
+                                </div>
+                            </div>
+                            <div class="input-wrapper" style="grid-column: 1 / -1;">
+                                <label for="profileAddress" data-i18n="lblAddress">Adresse de l'agence</label>
+                                <div class="input-with-icon">
+                                    <i class='bx bx-map-pin'></i>
+                                    <input type="text" id="profileAddress" placeholder="12 Rue de la Paix, 75001 Paris" autocomplete="street-address">
+                                </div>
+                            </div>
+                            <div class="input-wrapper" style="grid-column: 1 / -1;">
+                                <label for="profileUiLanguage" data-i18n="lblUiLang">Langue de l'interface</label>
+                                <div class="input-with-icon">
+                                    <i class='bx bx-globe'></i>
+                                    <select id="profileUiLanguage">
+                                        <option value="fr">🇫🇷 Français</option>
+                                        <option value="en">🇬🇧 English</option>
+                                        <option value="es">🇪🇸 Español</option>
+                                        <option value="it">🇮🇹 Italiano</option>
+                                        <option value="pt">🇵🇹 Português</option>
+                                        <option value="de">🇩🇪 Deutsch</option>
+                                        <option value="nl">🇳🇱 Nederlands</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
                         <div id="profileAlert" class="inline-alert"></div>
                         <div class="form-actions" style="margin-top: 1rem; justify-content: flex-end;">
                             <button type="submit" class="btn-primary" id="btnSaveProfile" style="width: auto;">
-                                <span id="btnSaveProfileText">Enregistrer</span>
+                                <span id="btnSaveProfileText" data-i18n="btnSave">Enregistrer</span>
                                 <i class='bx bx-loader-alt btn-spinner' id="btnSaveProfileSpinner" style="display:none"></i>
                             </button>
                         </div>
@@ -804,6 +826,219 @@
     </div>
 
     <script>
+        // ── Dashboard i18n ────────────────────────────────────────
+        const DASHBOARD_I18N = {
+            fr: {
+                navProfile:'Profil', navAgencies:'Agences', navCustom:'Personnalisation', navContact:'Contact',
+                profileTitle:'Informations personnelles', profileSubtitle:'Gérez les informations de votre compte.',
+                lblName:'Nom complet', lblEmail:'Adresse email', lblCompany:"Nom de l'entreprise",
+                lblPhone:'Téléphone', lblAddress:"Adresse de l'agence", lblUiLang:"Langue de l'interface",
+                btnSave:'Enregistrer', btnSaving:'Enregistrement…',
+                planTrial:'Essai gratuit', planPro:'Pro', badgeTrial:'Essai',
+                trialDays: d => `Votre période d'essai se termine dans <strong>${d} jour${d!==1?'s':''}</strong>`,
+                btnUpgrade:'Passer à Pro',
+                alertSaved:'Informations enregistrées.', alertError:'Erreur.', alertConn:'Erreur de connexion.',
+                noAgency:"Aucune agence configurée.",
+                addAgency:'Ajouter une agence',
+                newAgencyTitle:'Nouvelle agence', lblAgencyName:"Nom de l'agence",
+                btnCancel:'Annuler', btnCreate:'Créer', btnCreating:'Création…',
+                previewBtn:'Prévisualiser mon formulaire',
+                customTitle:'Personnalisation du formulaire', customSubtitle:'Adaptez le formulaire client à votre agence.',
+                cardBasic:'Paramètres de base', lblFormLang:'Langue par défaut du formulaire',
+                cardFields:'Champs du formulaire (Form Builder)',
+                cardTheme:'Apparence & Thème', lblTheme:'Thème par défaut',
+                themeAuto:'Auto', themeLight:'Clair', themeDark:'Sombre',
+                lblLogo:'Logo personnalisé (URL)', lblBlobs:'Couleurs des fonds animés (Blobs)',
+                lblLegal:'Mentions légales (pied de page)',
+                legalDesc:'Personnalisez le texte affiché en bas du formulaire pour chaque langue.',
+                btnEditLegal:'Modifier les mentions légales par langue',
+                btnSaveAll:'Enregistrer tous les paramètres', btnSavingAll:'Enregistrement…',
+                customSaved:'Paramètres enregistrés.',
+                contactTitle:'Contact & support', contactSubtitle:'Besoin d\'aide ou souhaitez passer à une offre Pro ?',
+            },
+            en: {
+                navProfile:'Profile', navAgencies:'Agencies', navCustom:'Customization', navContact:'Contact',
+                profileTitle:'Personal information', profileSubtitle:'Manage your account details.',
+                lblName:'Full name', lblEmail:'Email address', lblCompany:'Company name',
+                lblPhone:'Phone', lblAddress:'Agency address', lblUiLang:'Interface language',
+                btnSave:'Save', btnSaving:'Saving…',
+                planTrial:'Free trial', planPro:'Pro', badgeTrial:'Trial',
+                trialDays: d => `Your trial ends in <strong>${d} day${d!==1?'s':''}</strong>`,
+                btnUpgrade:'Upgrade to Pro',
+                alertSaved:'Information saved.', alertError:'Error.', alertConn:'Connection error.',
+                noAgency:'No agency configured.',
+                addAgency:'Add an agency',
+                newAgencyTitle:'New agency', lblAgencyName:'Agency name',
+                btnCancel:'Cancel', btnCreate:'Create', btnCreating:'Creating…',
+                previewBtn:'Preview my form',
+                customTitle:'Form customization', customSubtitle:'Tailor the client form to your agency.',
+                cardBasic:'Basic settings', lblFormLang:'Default form language',
+                cardFields:'Form fields (Form Builder)',
+                cardTheme:'Appearance & Theme', lblTheme:'Default theme',
+                themeAuto:'Auto', themeLight:'Light', themeDark:'Dark',
+                lblLogo:'Custom logo (URL)', lblBlobs:'Animated background colors (Blobs)',
+                lblLegal:'Legal notices (footer)',
+                legalDesc:'Customize the text shown at the bottom of the form for each language.',
+                btnEditLegal:'Edit legal notices by language',
+                btnSaveAll:'Save all settings', btnSavingAll:'Saving…',
+                customSaved:'Settings saved.',
+                contactTitle:'Contact & support', contactSubtitle:'Need help or want to upgrade to Pro?',
+            },
+            es: {
+                navProfile:'Perfil', navAgencies:'Agencias', navCustom:'Personalización', navContact:'Contacto',
+                profileTitle:'Información personal', profileSubtitle:'Gestiona los datos de tu cuenta.',
+                lblName:'Nombre completo', lblEmail:'Dirección de email', lblCompany:'Nombre de la empresa',
+                lblPhone:'Teléfono', lblAddress:'Dirección de la agencia', lblUiLang:'Idioma de la interfaz',
+                btnSave:'Guardar', btnSaving:'Guardando…',
+                planTrial:'Prueba gratuita', planPro:'Pro', badgeTrial:'Prueba',
+                trialDays: d => `Tu prueba termina en <strong>${d} día${d!==1?'s':''}</strong>`,
+                btnUpgrade:'Actualizar a Pro',
+                alertSaved:'Información guardada.', alertError:'Error.', alertConn:'Error de conexión.',
+                noAgency:'Ninguna agencia configurada.',
+                addAgency:'Añadir una agencia',
+                newAgencyTitle:'Nueva agencia', lblAgencyName:'Nombre de la agencia',
+                btnCancel:'Cancelar', btnCreate:'Crear', btnCreating:'Creando…',
+                previewBtn:'Vista previa del formulario',
+                customTitle:'Personalización del formulario', customSubtitle:'Adapta el formulario cliente a tu agencia.',
+                cardBasic:'Configuración básica', lblFormLang:'Idioma predeterminado del formulario',
+                cardFields:'Campos del formulario (Form Builder)',
+                cardTheme:'Apariencia y tema', lblTheme:'Tema predeterminado',
+                themeAuto:'Auto', themeLight:'Claro', themeDark:'Oscuro',
+                lblLogo:'Logo personalizado (URL)', lblBlobs:'Colores de fondo animado (Blobs)',
+                lblLegal:'Avisos legales (pie de página)',
+                legalDesc:'Personaliza el texto que aparece al final del formulario para cada idioma.',
+                btnEditLegal:'Editar avisos legales por idioma',
+                btnSaveAll:'Guardar toda la configuración', btnSavingAll:'Guardando…',
+                customSaved:'Configuración guardada.',
+                contactTitle:'Contacto y soporte', contactSubtitle:'¿Necesitas ayuda o quieres pasarte a Pro?',
+            },
+            it: {
+                navProfile:'Profilo', navAgencies:'Agenzie', navCustom:'Personalizzazione', navContact:'Contatto',
+                profileTitle:'Informazioni personali', profileSubtitle:'Gestisci i dati del tuo account.',
+                lblName:'Nome completo', lblEmail:'Indirizzo email', lblCompany:"Nome dell'azienda",
+                lblPhone:'Telefono', lblAddress:"Indirizzo dell'agenzia", lblUiLang:"Lingua dell'interfaccia",
+                btnSave:'Salva', btnSaving:'Salvataggio…',
+                planTrial:'Prova gratuita', planPro:'Pro', badgeTrial:'Prova',
+                trialDays: d => `La tua prova termina tra <strong>${d} giorno${d!==1?'i':''}</strong>`,
+                btnUpgrade:'Passa a Pro',
+                alertSaved:'Informazioni salvate.', alertError:'Errore.', alertConn:'Errore di connessione.',
+                noAgency:'Nessuna agenzia configurata.',
+                addAgency:"Aggiungi un'agenzia",
+                newAgencyTitle:'Nuova agenzia', lblAgencyName:"Nome dell'agenzia",
+                btnCancel:'Annulla', btnCreate:'Crea', btnCreating:'Creazione…',
+                previewBtn:'Anteprima del modulo',
+                customTitle:'Personalizzazione del modulo', customSubtitle:"Adatta il modulo cliente alla tua agenzia.",
+                cardBasic:'Impostazioni di base', lblFormLang:'Lingua predefinita del modulo',
+                cardFields:'Campi del modulo (Form Builder)',
+                cardTheme:'Aspetto e tema', lblTheme:'Tema predefinito',
+                themeAuto:'Auto', themeLight:'Chiaro', themeDark:'Scuro',
+                lblLogo:'Logo personalizzato (URL)', lblBlobs:'Colori sfondo animato (Blobs)',
+                lblLegal:'Note legali (piè di pagina)',
+                legalDesc:'Personalizza il testo visualizzato in fondo al modulo per ogni lingua.',
+                btnEditLegal:'Modifica note legali per lingua',
+                btnSaveAll:'Salva tutte le impostazioni', btnSavingAll:'Salvataggio…',
+                customSaved:'Impostazioni salvate.',
+                contactTitle:'Contatto e supporto', contactSubtitle:'Hai bisogno di aiuto o vuoi passare a Pro?',
+            },
+            pt: {
+                navProfile:'Perfil', navAgencies:'Agências', navCustom:'Personalização', navContact:'Contacto',
+                profileTitle:'Informação pessoal', profileSubtitle:'Gira os dados da sua conta.',
+                lblName:'Nome completo', lblEmail:'Endereço de email', lblCompany:'Nome da empresa',
+                lblPhone:'Telefone', lblAddress:'Morada da agência', lblUiLang:'Idioma da interface',
+                btnSave:'Guardar', btnSaving:'A guardar…',
+                planTrial:'Teste gratuito', planPro:'Pro', badgeTrial:'Teste',
+                trialDays: d => `O seu teste termina em <strong>${d} dia${d!==1?'s':''}</strong>`,
+                btnUpgrade:'Upgrade para Pro',
+                alertSaved:'Informação guardada.', alertError:'Erro.', alertConn:'Erro de ligação.',
+                noAgency:'Nenhuma agência configurada.',
+                addAgency:'Adicionar uma agência',
+                newAgencyTitle:'Nova agência', lblAgencyName:'Nome da agência',
+                btnCancel:'Cancelar', btnCreate:'Criar', btnCreating:'A criar…',
+                previewBtn:'Pré-visualizar o formulário',
+                customTitle:'Personalização do formulário', customSubtitle:'Adapte o formulário cliente à sua agência.',
+                cardBasic:'Definições básicas', lblFormLang:'Idioma padrão do formulário',
+                cardFields:'Campos do formulário (Form Builder)',
+                cardTheme:'Aparência e tema', lblTheme:'Tema padrão',
+                themeAuto:'Auto', themeLight:'Claro', themeDark:'Escuro',
+                lblLogo:'Logo personalizado (URL)', lblBlobs:'Cores de fundo animado (Blobs)',
+                lblLegal:'Avisos legais (rodapé)',
+                legalDesc:'Personalize o texto exibido no fundo do formulário para cada idioma.',
+                btnEditLegal:'Editar avisos legais por idioma',
+                btnSaveAll:'Guardar todas as definições', btnSavingAll:'A guardar…',
+                customSaved:'Definições guardadas.',
+                contactTitle:'Contacto e suporte', contactSubtitle:'Precisa de ajuda ou quer fazer upgrade para Pro?',
+            },
+            de: {
+                navProfile:'Profil', navAgencies:'Agenturen', navCustom:'Anpassung', navContact:'Kontakt',
+                profileTitle:'Persönliche Informationen', profileSubtitle:'Verwalten Sie Ihre Kontodaten.',
+                lblName:'Vollständiger Name', lblEmail:'E-Mail-Adresse', lblCompany:'Unternehmensname',
+                lblPhone:'Telefon', lblAddress:'Adresse der Agentur', lblUiLang:'Sprache der Benutzeroberfläche',
+                btnSave:'Speichern', btnSaving:'Speichern…',
+                planTrial:'Kostenlose Testversion', planPro:'Pro', badgeTrial:'Test',
+                trialDays: d => `Ihre Testversion endet in <strong>${d} Tag${d!==1?'en':''}</strong>`,
+                btnUpgrade:'Auf Pro upgraden',
+                alertSaved:'Informationen gespeichert.', alertError:'Fehler.', alertConn:'Verbindungsfehler.',
+                noAgency:'Keine Agentur konfiguriert.',
+                addAgency:'Agentur hinzufügen',
+                newAgencyTitle:'Neue Agentur', lblAgencyName:'Name der Agentur',
+                btnCancel:'Abbrechen', btnCreate:'Erstellen', btnCreating:'Erstellen…',
+                previewBtn:'Mein Formular in der Vorschau anzeigen',
+                customTitle:'Formularanpassung', customSubtitle:'Passen Sie das Kundenformular an Ihre Agentur an.',
+                cardBasic:'Grundeinstellungen', lblFormLang:'Standardsprache des Formulars',
+                cardFields:'Formularfelder (Form Builder)',
+                cardTheme:'Erscheinungsbild & Thema', lblTheme:'Standardthema',
+                themeAuto:'Auto', themeLight:'Hell', themeDark:'Dunkel',
+                lblLogo:'Benutzerdefiniertes Logo (URL)', lblBlobs:'Animierte Hintergrundfarben (Blobs)',
+                lblLegal:'Rechtliche Hinweise (Fußzeile)',
+                legalDesc:'Passen Sie den Text am Ende des Formulars für jede Sprache an.',
+                btnEditLegal:'Rechtliche Hinweise pro Sprache bearbeiten',
+                btnSaveAll:'Alle Einstellungen speichern', btnSavingAll:'Speichern…',
+                customSaved:'Einstellungen gespeichert.',
+                contactTitle:'Kontakt & Support', contactSubtitle:'Brauchen Sie Hilfe oder möchten Sie auf Pro upgraden?',
+            },
+            nl: {
+                navProfile:'Profiel', navAgencies:'Bureaus', navCustom:'Aanpassing', navContact:'Contact',
+                profileTitle:'Persoonlijke informatie', profileSubtitle:'Beheer uw accountgegevens.',
+                lblName:'Volledige naam', lblEmail:'E-mailadres', lblCompany:'Bedrijfsnaam',
+                lblPhone:'Telefoon', lblAddress:'Adres van het bureau', lblUiLang:'Taal van de interface',
+                btnSave:'Opslaan', btnSaving:'Opslaan…',
+                planTrial:'Gratis proefperiode', planPro:'Pro', badgeTrial:'Proef',
+                trialDays: d => `Uw proefperiode eindigt over <strong>${d} dag${d!==1?'en':''}</strong>`,
+                btnUpgrade:'Upgraden naar Pro',
+                alertSaved:'Informatie opgeslagen.', alertError:'Fout.', alertConn:'Verbindingsfout.',
+                noAgency:'Geen bureau geconfigureerd.',
+                addAgency:'Bureau toevoegen',
+                newAgencyTitle:'Nieuw bureau', lblAgencyName:'Naam van het bureau',
+                btnCancel:'Annuleren', btnCreate:'Aanmaken', btnCreating:'Aanmaken…',
+                previewBtn:'Mijn formulier voorvertonen',
+                customTitle:'Formulieraanpassing', customSubtitle:'Pas het klantformulier aan uw bureau aan.',
+                cardBasic:'Basisinstellingen', lblFormLang:'Standaardtaal van het formulier',
+                cardFields:'Formuliervelden (Form Builder)',
+                cardTheme:'Uiterlijk & thema', lblTheme:'Standaardthema',
+                themeAuto:'Auto', themeLight:'Licht', themeDark:'Donker',
+                lblLogo:'Aangepast logo (URL)', lblBlobs:'Geanimeerde achtergrondkleuren (Blobs)',
+                lblLegal:'Juridische vermeldingen (voettekst)',
+                legalDesc:'Pas de tekst aan die onderaan het formulier voor elke taal wordt weergegeven.',
+                btnEditLegal:'Juridische vermeldingen per taal bewerken',
+                btnSaveAll:'Alle instellingen opslaan', btnSavingAll:'Opslaan…',
+                customSaved:'Instellingen opgeslagen.',
+                contactTitle:'Contact & ondersteuning', contactSubtitle:'Hulp nodig of wilt u upgraden naar Pro?',
+            },
+        };
+
+        let dashLang = 'fr';
+        let dashT = DASHBOARD_I18N.fr;
+
+        function applyDashI18n(lang) {
+            dashLang = lang;
+            dashT = DASHBOARD_I18N[lang] || DASHBOARD_I18N['fr'];
+            document.documentElement.lang = lang;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dashT[key] && typeof dashT[key] === 'string') el.textContent = dashT[key];
+            });
+        }
+
         let currentUser = null;
         let formFields = [];
 
@@ -887,6 +1122,10 @@
                     return;
                 }
                 currentUser = data.user;
+                // Apply vendor's UI language first
+                const supportedLangs = ['fr','en','es','it','pt','de','nl'];
+                const lang = supportedLangs.includes(currentUser.uiLanguage) ? currentUser.uiLanguage : 'fr';
+                applyDashI18n(lang);
                 renderUser();
                 renderTrialBanner();
                 renderProfileTab();
@@ -916,10 +1155,13 @@
 
         function renderProfileTab() {
             const u = currentUser;
-            document.getElementById('profileName').value = u.name || '';
-            document.getElementById('profileEmail').value = u.email || '';
+            document.getElementById('profileName').value    = u.name    || '';
+            document.getElementById('profileEmail').value   = u.email   || '';
             document.getElementById('profileCompany').value = u.company || '';
-            document.getElementById('profilePhone').value = u.phone || '';
+            document.getElementById('profilePhone').value   = u.phone   || '';
+            document.getElementById('profileAddress').value = u.address || '';
+            const uiLangSelect = document.getElementById('profileUiLanguage');
+            if (uiLangSelect) uiLangSelect.value = u.uiLanguage || 'fr';
         }
 
         function renderCustomizationTab() {
@@ -1360,34 +1602,45 @@
         // ── Profile form ──────────────────────────────────────
         document.getElementById('profileForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('btnSaveProfile');
-            const txt = document.getElementById('btnSaveProfileText');
+            const btn  = document.getElementById('btnSaveProfile');
+            const txt  = document.getElementById('btnSaveProfileText');
             const spin = document.getElementById('btnSaveProfileSpinner');
-            btn.disabled = true; txt.textContent = 'Enregistrement…'; spin.style.display = 'inline-block';
+            btn.disabled = true;
+            txt.textContent = dashT.btnSaving;
+            spin.style.display = 'inline-block';
+            const newLang = document.getElementById('profileUiLanguage').value;
             try {
                 const res = await fetch('/api/dashboard/profile', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        name: document.getElementById('profileName').value,
-                        company: document.getElementById('profileCompany').value,
-                        phone: document.getElementById('profilePhone').value,
+                        name:        document.getElementById('profileName').value,
+                        company:     document.getElementById('profileCompany').value,
+                        phone:       document.getElementById('profilePhone').value,
+                        address:     document.getElementById('profileAddress').value,
+                        uiLanguage:  newLang,
                     }),
                 });
                 const data = await res.json();
                 if (res.ok) {
-                    currentUser.name = document.getElementById('profileName').value;
-                    currentUser.company = document.getElementById('profileCompany').value;
-                    currentUser.phone = document.getElementById('profilePhone').value;
+                    currentUser.name       = document.getElementById('profileName').value;
+                    currentUser.company    = document.getElementById('profileCompany').value;
+                    currentUser.phone      = document.getElementById('profilePhone').value;
+                    currentUser.address    = document.getElementById('profileAddress').value;
+                    currentUser.uiLanguage = newLang;
+                    // Re-apply i18n if language changed
+                    applyDashI18n(newLang);
                     renderUser();
-                    showInline('profileAlert', 'Informations enregistrées.', 'success');
+                    showInline('profileAlert', dashT.alertSaved, 'success');
                 } else {
-                    showInline('profileAlert', data.error || 'Erreur.', 'error');
+                    showInline('profileAlert', data.error || dashT.alertError, 'error');
                 }
             } catch {
-                showInline('profileAlert', 'Erreur de connexion.', 'error');
+                showInline('profileAlert', dashT.alertConn, 'error');
             } finally {
-                btn.disabled = false; txt.textContent = 'Enregistrer'; spin.style.display = 'none';
+                btn.disabled = false;
+                txt.textContent = dashT.btnSave;
+                spin.style.display = 'none';
             }
         });
 

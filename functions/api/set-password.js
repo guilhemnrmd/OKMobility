@@ -24,6 +24,9 @@ export async function onRequestPost(context) {
     }
 
     const pending = JSON.parse(pendingRaw);
+
+    const supportedLangs = ['fr', 'en', 'es', 'it', 'pt', 'de', 'nl'];
+    const uiLanguage = supportedLangs.includes(pending.uiLanguage) ? pending.uiLanguage : 'fr';
     if (new Date(pending.expiresAt) < new Date()) {
         await env.OKM_ACCOUNTS.delete(`pending:${token}`);
         return jsonError('Lien expiré. Veuillez recommencer l\'inscription.', 400);
@@ -54,16 +57,18 @@ export async function onRequestPost(context) {
         email: pending.email,
         name: pending.name,
         company: pending.company,
+        address: pending.address || '',
         phone: '',
+        uiLanguage,
         passwordHash: hash,
         salt,
         emailVerified: true,
         createdAt: now,
         trialEndsAt,
         plan: 'trial',
-        agencies: [{ id: agencyId, name: pending.company, createdAt: now }],
+        agencies: [{ id: agencyId, name: pending.company, address: pending.address || '', createdAt: now }],
         formSettings: {
-            language: 'fr',
+            language: uiLanguage,
             showTempAddress: true,
             showSecondPhone: true,
         },

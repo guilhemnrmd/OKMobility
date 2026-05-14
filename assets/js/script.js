@@ -792,11 +792,25 @@ async function hydrateAgencyBrandingFromUrl() {
                 }
             }
             
-            // Langue par défaut
-            if (s.language && dom.langSelect) {
-                dom.langSelect.value = s.language;
-                applyLanguage(s.language);
+            // ── Langue : logique navigateur-first, agencyLanguage en fallback ──
+            //
+            // L'utilisateur peut avoir :
+            //  A) choisi manuellement une langue (localStorage) → ne jamais écraser
+            //  B) une langue navigateur reconnue → ne pas écraser
+            //  C) aucune langue reconnue → utiliser la langue de l'agence comme fallback
+            //
+            // formSettings.language sert de fallback de dernier recours si le
+            // navigateur n'est pas reconnu ET qu'aucune agencyLanguage n'est dispo.
+            const agencyLangFromSettings = s.language && SUPPORTED_LANGS.includes(s.language) ? s.language : null;
+
+            if (!state._langSetByUser && !state._langBrowserDetected) {
+                // Neither localStorage nor a supported browser lang → use agency fallback
+                const fallbackLang = agencyLangFromSettings || 'en';
+                state.lang = fallbackLang;
+                if (dom.langSelect) dom.langSelect.value = fallbackLang;
+                applyLanguage(fallbackLang);
             }
+            // In all other cases, keep the already-applied language (browser or localStorage)
 
             // Custom legal text per language (overrides built-in i18n.legalText)
             if (s.legalText && typeof s.legalText === 'object') {
@@ -996,6 +1010,7 @@ function updateDynamicFieldLabels(fields, lang) {
 }
 
 dom.langSelect.addEventListener('change', (e) => {
+    state._langSetByUser = true; // user made an explicit choice — never override with agency lang
     applyLanguage(e.target.value);
     if (state.advisorConnected) {
         sendFormDataToAdvisor();
@@ -1258,22 +1273,42 @@ dom.btnEdit.addEventListener('click', () => {
 // 6. Init
 // ============================================================================
 
-// Detect Browser Language
+// ── Language priority for the CLIENT page ────────────────────────────────────
+// 1. localStorage (user previously picked a language manually)
+// 2. Browser language (navigator.language) — if supported
+// 3. Agency language (agencyLanguage from check-license) — injected after async fetch
+// 4. Ultimate fallback: 'en'
+//
+// The retailer page (conseiller.js) has its own logic: it forces the agency
+// language with no browser-language detection.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const SUPPORTED_LANGS = ['fr', 'en', 'es', 'it', 'pt', 'de', 'nl'];
+
 function detectUserLanguage() {
     if (navigator.language) {
         const browserLang = navigator.language.split('-')[0].toLowerCase();
-        // Check if we support this exact language (fr, en, es, it, pt, de, nl)
-        if (i18n[browserLang]) {
+        if (SUPPORTED_LANGS.includes(browserLang)) {
             return browserLang;
         }
     }
-    // Ultimate fallback if language is unsupported or undetected
-    return 'es'; 
+    return null; // no supported browser language — defer to agency fallback
 }
 
-state.lang = localStorage.getItem('userLanguage') || detectUserLanguage();
-dom.langSelect.value = state.lang; // Sync UI Select box
+// Was the language set explicitly by the user (localStorage) or by the browser?
+const _storedLang   = localStorage.getItem('userLanguage');
+const _browserLang  = detectUserLanguage();
+
+// Apply what we know synchronously (storage > browser)
+state.lang = _storedLang || _browserLang || 'en';
+dom.langSelect.value = state.lang;
 applyLanguage(state.lang);
+
+// Store whether the language was chosen automatically (no user interaction yet)
+// so we know if we're allowed to override it with the agency fallback
+state._langSetByUser = Boolean(_storedLang);
+state._langBrowserDetected = Boolean(_browserLang);
+
 hydrateAgencyBrandingFromUrl();
 
 // ============================================================================

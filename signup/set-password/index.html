@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="robots" content="noindex, nofollow">
-    <title>Choisissez un mot de passe — MobilityOS</title>
+    <title>Set your password — MobilityOS</title>
     <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
     <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
     <link rel="stylesheet" href="/b2b.css">
@@ -19,21 +19,21 @@
     <main class="auth-page">
         <section class="auth-card">
 
-            <h1 class="auth-title">Choisissez un mot de passe.</h1>
-            <p class="auth-subtitle">Dernière étape pour activer votre compte d'essai.</p>
+            <h1 class="auth-title" id="pageTitle">Choisissez un mot de passe.</h1>
+            <p class="auth-subtitle" id="pageSubtitle">Dernière étape pour activer votre compte d'essai.</p>
 
             <div id="alertBanner" class="alert"></div>
 
             <form id="setPasswordForm" class="auth-form" novalidate>
 
                 <div class="field">
-                    <label class="field-label" for="inputPassword">Mot de passe</label>
+                    <label class="field-label" for="inputPassword" id="lblPassword">Mot de passe</label>
                     <div class="field-input-wrap">
                         <input type="password" id="inputPassword" class="field-input"
-                               placeholder="Au moins 8 caractères" autocomplete="new-password" required
+                               placeholder="••••••••" autocomplete="new-password" required
                                style="padding-right: 3rem;">
                         <i class='bx bx-lock-alt field-icon'></i>
-                        <button type="button" class="btn-toggle-pwd" id="btnTogglePwd" aria-label="Afficher">
+                        <button type="button" class="btn-toggle-pwd" id="btnTogglePwd" aria-label="Show">
                             <i class='bx bx-show' id="eyeIcon"></i>
                         </button>
                     </div>
@@ -44,19 +44,19 @@
                 </div>
 
                 <div class="field">
-                    <label class="field-label" for="inputConfirm">Confirmer</label>
+                    <label class="field-label" for="inputConfirm" id="lblConfirm">Confirmer</label>
                     <div class="field-input-wrap">
                         <input type="password" id="inputConfirm" class="field-input"
-                               placeholder="Répétez votre mot de passe" autocomplete="new-password" required>
+                               placeholder="••••••••" autocomplete="new-password" required>
                         <i class='bx bx-lock field-icon'></i>
                     </div>
                 </div>
 
                 <ul class="requirements" id="requirementsList">
-                    <li id="req-length"><i class='bx bx-circle'></i> Au moins 8 caractères</li>
-                    <li id="req-upper"><i class='bx bx-circle'></i> Une lettre majuscule</li>
-                    <li id="req-number"><i class='bx bx-circle'></i> Un chiffre</li>
-                    <li id="req-match"><i class='bx bx-circle'></i> Les mots de passe correspondent</li>
+                    <li id="req-length"><i class='bx bx-circle'></i> <span id="reqLengthTxt">Au moins 8 caractères</span></li>
+                    <li id="req-upper"><i class='bx bx-circle'></i> <span id="reqUpperTxt">Une lettre majuscule</span></li>
+                    <li id="req-number"><i class='bx bx-circle'></i> <span id="reqNumberTxt">Un chiffre</span></li>
+                    <li id="req-match"><i class='bx bx-circle'></i> <span id="reqMatchTxt">Les mots de passe correspondent</span></li>
                 </ul>
 
                 <button type="submit" id="btnSubmit" class="btn-submit">
@@ -70,27 +70,170 @@
     </main>
 
     <script>
+        // ── i18n for the set-password page ───────────────────────────────────
+        const SP_I18N = {
+            fr: {
+                title: 'Choisissez un mot de passe.',
+                subtitle: 'Dernière étape pour activer votre compte d\'essai.',
+                lblPassword: 'Mot de passe',
+                lblConfirm: 'Confirmer',
+                reqLength: 'Au moins 8 caractères',
+                reqUpper: 'Une lettre majuscule',
+                reqNumber: 'Un chiffre',
+                reqMatch: 'Les mots de passe correspondent',
+                btnCreate: 'Créer mon compte',
+                btnCreating: 'Création…',
+                errMin: 'Le mot de passe doit contenir au moins 8 caractères.',
+                errMatch: 'Les mots de passe ne correspondent pas.',
+                errConn: 'Erreur de connexion. Veuillez réessayer.',
+                strength: ['Très faible', 'Faible', 'Moyen', 'Fort', 'Très fort'],
+            },
+            en: {
+                title: 'Choose a password.',
+                subtitle: 'Last step to activate your trial account.',
+                lblPassword: 'Password',
+                lblConfirm: 'Confirm',
+                reqLength: 'At least 8 characters',
+                reqUpper: 'One uppercase letter',
+                reqNumber: 'One number',
+                reqMatch: 'Passwords match',
+                btnCreate: 'Create my account',
+                btnCreating: 'Creating…',
+                errMin: 'Password must be at least 8 characters.',
+                errMatch: 'Passwords do not match.',
+                errConn: 'Connection error. Please try again.',
+                strength: ['Very weak', 'Weak', 'Fair', 'Strong', 'Very strong'],
+            },
+            es: {
+                title: 'Elige una contraseña.',
+                subtitle: 'Último paso para activar tu cuenta de prueba.',
+                lblPassword: 'Contraseña',
+                lblConfirm: 'Confirmar',
+                reqLength: 'Mínimo 8 caracteres',
+                reqUpper: 'Una letra mayúscula',
+                reqNumber: 'Un número',
+                reqMatch: 'Las contraseñas coinciden',
+                btnCreate: 'Crear mi cuenta',
+                btnCreating: 'Creando…',
+                errMin: 'La contraseña debe tener al menos 8 caracteres.',
+                errMatch: 'Las contraseñas no coinciden.',
+                errConn: 'Error de conexión. Inténtalo de nuevo.',
+                strength: ['Muy débil', 'Débil', 'Regular', 'Fuerte', 'Muy fuerte'],
+            },
+            it: {
+                title: 'Scegli una password.',
+                subtitle: 'Ultimo passaggio per attivare il tuo account di prova.',
+                lblPassword: 'Password',
+                lblConfirm: 'Conferma',
+                reqLength: 'Almeno 8 caratteri',
+                reqUpper: 'Una lettera maiuscola',
+                reqNumber: 'Un numero',
+                reqMatch: 'Le password corrispondono',
+                btnCreate: 'Crea il mio account',
+                btnCreating: 'Creazione…',
+                errMin: 'La password deve contenere almeno 8 caratteri.',
+                errMatch: 'Le password non corrispondono.',
+                errConn: 'Errore di connessione. Riprova.',
+                strength: ['Molto debole', 'Debole', 'Discreta', 'Forte', 'Molto forte'],
+            },
+            pt: {
+                title: 'Escolha uma palavra-passe.',
+                subtitle: 'Último passo para ativar a sua conta de teste.',
+                lblPassword: 'Palavra-passe',
+                lblConfirm: 'Confirmar',
+                reqLength: 'Pelo menos 8 caracteres',
+                reqUpper: 'Uma letra maiúscula',
+                reqNumber: 'Um número',
+                reqMatch: 'As palavras-passe coincidem',
+                btnCreate: 'Criar a minha conta',
+                btnCreating: 'A criar…',
+                errMin: 'A palavra-passe deve ter pelo menos 8 caracteres.',
+                errMatch: 'As palavras-passe não coincidem.',
+                errConn: 'Erro de ligação. Tente novamente.',
+                strength: ['Muito fraca', 'Fraca', 'Razoável', 'Forte', 'Muito forte'],
+            },
+            de: {
+                title: 'Passwort wählen.',
+                subtitle: 'Letzter Schritt zur Aktivierung Ihres Testkontos.',
+                lblPassword: 'Passwort',
+                lblConfirm: 'Bestätigen',
+                reqLength: 'Mindestens 8 Zeichen',
+                reqUpper: 'Ein Großbuchstabe',
+                reqNumber: 'Eine Zahl',
+                reqMatch: 'Passwörter stimmen überein',
+                btnCreate: 'Mein Konto erstellen',
+                btnCreating: 'Erstellen…',
+                errMin: 'Das Passwort muss mindestens 8 Zeichen haben.',
+                errMatch: 'Die Passwörter stimmen nicht überein.',
+                errConn: 'Verbindungsfehler. Bitte erneut versuchen.',
+                strength: ['Sehr schwach', 'Schwach', 'Mittel', 'Stark', 'Sehr stark'],
+            },
+            nl: {
+                title: 'Kies een wachtwoord.',
+                subtitle: 'Laatste stap om uw proefaccount te activeren.',
+                lblPassword: 'Wachtwoord',
+                lblConfirm: 'Bevestigen',
+                reqLength: 'Minimaal 8 tekens',
+                reqUpper: 'Een hoofdletter',
+                reqNumber: 'Een cijfer',
+                reqMatch: 'Wachtwoorden komen overeen',
+                btnCreate: 'Mijn account aanmaken',
+                btnCreating: 'Aanmaken…',
+                errMin: 'Het wachtwoord moet minimaal 8 tekens bevatten.',
+                errMatch: 'De wachtwoorden komen niet overeen.',
+                errConn: 'Verbindingsfout. Probeer opnieuw.',
+                strength: ['Zeer zwak', 'Zwak', 'Redelijk', 'Sterk', 'Zeer sterk'],
+            },
+        };
+
+        // Resolve language: signupLang (set on signup page) > browser > 'en'
+        const supportedLangs = ['fr','en','es','it','pt','de','nl'];
+        const signupLang = localStorage.getItem('signupLang');
+        const browserLang = (navigator.language || 'en').slice(0, 2).toLowerCase();
+        const lang = (signupLang && supportedLangs.includes(signupLang))
+            ? signupLang
+            : (supportedLangs.includes(browserLang) ? browserLang : 'en');
+
+        const t = SP_I18N[lang] || SP_I18N.en;
+
+        // Apply translations
+        document.documentElement.lang = lang;
+        document.getElementById('pageTitle').textContent     = t.title;
+        document.getElementById('pageSubtitle').textContent  = t.subtitle;
+        document.getElementById('lblPassword').textContent   = t.lblPassword;
+        document.getElementById('lblConfirm').textContent    = t.lblConfirm;
+        document.getElementById('reqLengthTxt').textContent  = t.reqLength;
+        document.getElementById('reqUpperTxt').textContent   = t.reqUpper;
+        document.getElementById('reqNumberTxt').textContent  = t.reqNumber;
+        document.getElementById('reqMatchTxt').textContent   = t.reqMatch;
+        document.getElementById('btnText').textContent       = t.btnCreate;
+        document.title = `${t.title.replace('.', '')} — MobilityOS`;
+
+        // ── Token check ──────────────────────────────────────────────────────
         const params = new URLSearchParams(window.location.search);
         const token = params.get('token');
         if (!token) window.location.href = '/signup/?error=invalid_token';
 
-        const pwdInput = document.getElementById('inputPassword');
-        const confirmInput = document.getElementById('inputConfirm');
-        const eyeIcon = document.getElementById('eyeIcon');
+        // ── DOM refs ─────────────────────────────────────────────────────────
+        const pwdInput      = document.getElementById('inputPassword');
+        const confirmInput  = document.getElementById('inputConfirm');
+        const eyeIcon       = document.getElementById('eyeIcon');
         const strengthWrapper = document.getElementById('strengthWrapper');
-        const strengthFill = document.getElementById('strengthFill');
+        const strengthFill  = document.getElementById('strengthFill');
         const strengthLabel = document.getElementById('strengthLabel');
-        const btnSubmit = document.getElementById('btnSubmit');
-        const btnText = document.getElementById('btnText');
-        const btnSpinner = document.getElementById('btnSpinner');
-        const alertBanner = document.getElementById('alertBanner');
+        const btnSubmit     = document.getElementById('btnSubmit');
+        const btnText       = document.getElementById('btnText');
+        const btnSpinner    = document.getElementById('btnSpinner');
+        const alertBanner   = document.getElementById('alertBanner');
 
+        // ── Toggle visibility ─────────────────────────────────────────────────
         document.getElementById('btnTogglePwd').addEventListener('click', () => {
             const hidden = pwdInput.type === 'password';
             pwdInput.type = hidden ? 'text' : 'password';
             eyeIcon.className = hidden ? 'bx bx-hide' : 'bx bx-show';
         });
 
+        // ── Strength meter ────────────────────────────────────────────────────
         pwdInput.addEventListener('input', () => {
             const v = pwdInput.value;
             strengthWrapper.style.display = v ? 'block' : 'none';
@@ -114,36 +257,25 @@
         }
         function updateStrength(pwd) {
             let score = 0;
-            if (pwd.length >= 8) score++;
+            if (pwd.length >= 8)  score++;
             if (pwd.length >= 12) score++;
             if (/[A-Z]/.test(pwd)) score++;
             if (/[0-9]/.test(pwd)) score++;
             if (/[^A-Za-z0-9]/.test(pwd)) score++;
-            const levels = [
-                { pct: 20, color: '#ff5050', label: 'Très faible' },
-                { pct: 40, color: '#ff9500', label: 'Faible' },
-                { pct: 60, color: '#ffcc00', label: 'Moyen' },
-                { pct: 80, color: '#6ed476', label: 'Fort' },
-                { pct: 100, color: '#ffffff', label: 'Très fort' },
-            ];
-            const lvl = levels[Math.min(score, 4)];
-            strengthFill.style.width = lvl.pct + '%';
-            strengthFill.style.background = lvl.color;
-            strengthLabel.textContent = lvl.label;
+            const colors = ['#ff5050', '#ff9500', '#ffcc00', '#6ed476', '#ffffff'];
+            const idx = Math.min(score, 4);
+            strengthFill.style.width = ((idx + 1) * 20) + '%';
+            strengthFill.style.background = colors[idx];
+            strengthLabel.textContent = t.strength[idx];
         }
 
+        // ── Submit ────────────────────────────────────────────────────────────
         document.getElementById('setPasswordForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const password = pwdInput.value;
-            const confirm = confirmInput.value;
-            if (password.length < 8) {
-                showAlert('Le mot de passe doit contenir au moins 8 caractères.', 'error');
-                return;
-            }
-            if (password !== confirm) {
-                showAlert('Les mots de passe ne correspondent pas.', 'error');
-                return;
-            }
+            const confirm  = confirmInput.value;
+            if (password.length < 8) { showAlert(t.errMin, 'error'); return; }
+            if (password !== confirm) { showAlert(t.errMatch, 'error'); return; }
 
             setLoading(true);
             hideAlert();
@@ -155,12 +287,14 @@
                 });
                 const data = await res.json();
                 if (res.ok) {
+                    // Clean up signup-specific storage before entering dashboard
+                    localStorage.removeItem('signupLang');
                     window.location.href = '/dashboard/';
                 } else {
-                    showAlert(data.error || 'Une erreur est survenue.', 'error');
+                    showAlert(data.error || t.errMin, 'error');
                 }
             } catch {
-                showAlert('Erreur de connexion. Veuillez réessayer.', 'error');
+                showAlert(t.errConn, 'error');
             } finally {
                 setLoading(false);
             }
@@ -168,7 +302,7 @@
 
         function setLoading(on) {
             btnSubmit.disabled = on;
-            btnText.textContent = on ? 'Création…' : 'Créer mon compte';
+            btnText.textContent = on ? t.btnCreating : t.btnCreate;
             btnSpinner.style.display = on ? 'inline-block' : 'none';
         }
         function showAlert(msg, type) {

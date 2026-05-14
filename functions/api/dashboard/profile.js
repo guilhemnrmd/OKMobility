@@ -17,7 +17,9 @@ export async function onRequest(context) {
             email: account.email,
             name: account.name,
             company: account.company,
+            address: account.address || '',
             phone: account.phone || '',
+            uiLanguage: account.uiLanguage || 'fr',
             plan: account.plan,
             trialEndsAt: account.trialEndsAt,
             createdAt: account.createdAt,
@@ -36,6 +38,11 @@ export async function onRequest(context) {
         if (body.name?.trim()) account.name = body.name.trim();
         if (body.company?.trim()) account.company = body.company.trim();
         if (body.phone !== undefined) account.phone = (body.phone || '').trim();
+        if (body.address !== undefined) account.address = (body.address || '').trim();
+        const supportedLangs = ['fr', 'en', 'es', 'it', 'pt', 'de', 'nl'];
+        if (body.uiLanguage && supportedLangs.includes(body.uiLanguage)) {
+            account.uiLanguage = body.uiLanguage;
+        }
         if (body.formSettings && typeof body.formSettings === 'object') {
             account.formSettings = { ...account.formSettings, ...body.formSettings };
         }
