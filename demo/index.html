@@ -10,8 +10,8 @@
 :root {
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-display: 'Outfit', 'Inter', sans-serif;
-    --accent: #2054EA;
-    --accent-end: #05C4E8;
+    --accent: #ffffff;
+    --accent-end: #888888;
     --text: #17181D;
     --text-sec: #5B6070;
     --glass-bg: rgba(245,249,255,0.74);
@@ -22,9 +22,9 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
 
 .ambient-background{position:fixed;inset:-8vh -8vw;z-index:-1;overflow:hidden;pointer-events:none}
 .blob{position:absolute;filter:blur(80px);opacity:.55;border-radius:50%;animation:float 20s infinite ease-in-out}
-.blob-1{top:-10%;left:-10%;width:50vw;height:50vw;background:#2054EA}
-.blob-2{bottom:-10%;right:-10%;width:60vw;height:60vw;background:#05DBF3;animation-delay:-5s}
-.blob-3{top:40%;left:40%;width:40vw;height:40vw;background:#4F46E5;animation-delay:-10s}
+.blob-1{top:-10%;left:-10%;width:50vw;height:50vw;background:#333333}
+.blob-2{bottom:-10%;right:-10%;width:60vw;height:60vw;background:#1a1a1a;animation-delay:-5s}
+.blob-3{top:40%;left:40%;width:40vw;height:40vw;background:#222222;animation-delay:-10s}
 @keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-50px) scale(1.1)}66%{transform:translate(-20px,20px) scale(.9)}}
 
 .demo-stage{display:flex;align-items:center;gap:48px;z-index:10;transform:scale(.85)}
@@ -64,8 +64,8 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
 .app-screen{position:absolute;inset:55px 0 0;background:#17181D;z-index:10;opacity:0;transform:scale(.95);transition:all .4s cubic-bezier(.16,1,.3,1);overflow:hidden;}
 .app-screen.active{opacity:1;transform:scale(1)}
 /* Mini blobs for phone screen */
-.app-screen::before{content:'';position:absolute;top:-10%;left:-20%;width:150px;height:150px;background:#2054EA;filter:blur(40px);border-radius:50%;opacity:0.4;z-index:-1;}
-.app-screen::after{content:'';position:absolute;bottom:-10%;right:-20%;width:180px;height:180px;background:#05DBF3;filter:blur(40px);border-radius:50%;opacity:0.3;z-index:-1;}
+.app-screen::before{content:'';position:absolute;top:-10%;left:-20%;width:150px;height:150px;background:#333333;filter:blur(40px);border-radius:50%;opacity:0.4;z-index:-1;}
+.app-screen::after{content:'';position:absolute;bottom:-10%;right:-20%;width:180px;height:180px;background:#1a1a1a;filter:blur(40px);border-radius:50%;opacity:0.3;z-index:-1;}
 .app-header{background:rgba(28,28,30,0.6);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.1);padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
 .app-header .brand{display:flex;align-items:center;gap:6px}
 .app-header .logo-c{width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,var(--accent),var(--accent-end));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff}
@@ -163,8 +163,8 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
             <div class="safari-banner" id="safariBanner">
                 <div class="sf-icon">M</div>
                 <div class="sf-text">
-                    <div class="sf-domain">okmobility.pages.dev</div>
-                    <div class="sf-title">OK Mobility · Check-In</div>
+                    <div class="sf-domain">mobilityos.app</div>
+                    <div class="sf-title">MobilityOS · Check-In</div>
                 </div>
                 <button class="sf-open">Ouvrir</button>
             </div>
@@ -196,10 +196,10 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
 
     <!-- LAPTOP -->
     <div class="laptop">
-        <div class="laptop-bar"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span class="url">okmobility.pages.dev/retailer</span></div>
+        <div class="laptop-bar"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span class="url">mobilityos.app/retailer</span></div>
         <div class="laptop-screen">
             <div class="lp-header">
-                <div class="lp-brand"><div class="logo-c">M</div><span>OK Mobility · Palma Centro</span></div>
+                <div class="lp-brand"><div class="logo-c">M</div><span>MobilityOS · Paris Center</span></div>
                 <div class="lp-controls"><button class="ctrl-btn"><i class='bx bx-globe'></i></button><button class="ctrl-btn"><i class='bx bx-link'></i></button><button class="ctrl-btn"><i class='bx bx-rotate-left'></i></button></div>
             </div>
             <div class="lp-title">Sesión de recogida</div>
