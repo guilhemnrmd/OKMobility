@@ -34,10 +34,12 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
 .phone::before{content:'';position:absolute;top:14px;left:50%;transform:translateX(-50%);width:90px;height:22px;background:#17181D;border-radius:14px;z-index:20}
 .phone-inner{height:100%;padding:55px 0 0;overflow:hidden;position:relative}
 
-/* iOS Camera screen */
-.ios-camera{position:absolute;inset:55px 0 0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:15;transition:opacity .4s ease}
-.ios-camera.hidden{opacity:0;pointer-events:none}
-.viewfinder{width:160px;height:160px;position:relative}
+/* iOS Camera */
+.ios-camera{position:absolute;inset:0;background:#000;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all .5s ease;overflow:hidden}
+.camera-bg{position:absolute;inset:-20px;background:linear-gradient(rgba(0,0,0,0.3),rgba(0,0,0,0.4)),url('/assets/images/camera-bg.png') center/cover;z-index:-1;animation:camFocus 4s ease-in-out infinite alternate}
+@keyframes camFocus{0%{transform:scale(1) translate(0,0);filter:blur(2px)}100%{transform:scale(1.05) translate(-4px,4px);filter:blur(0px)}}
+.ios-camera.hide{opacity:0;pointer-events:none;transform:scale(1.05)}
+.viewfinder{position:relative;width:180px;height:180px;border-radius:12px;margin-bottom:60px}
 .vf-corner{position:absolute;width:28px;height:28px;border:3px solid #fff}
 .vf-tl{top:0;left:0;border-right:none;border-bottom:none;border-radius:4px 0 0 0}
 .vf-tr{top:0;right:0;border-left:none;border-bottom:none;border-radius:0 4px 0 0}
@@ -150,6 +152,7 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
     <div class="phone"><div class="phone-inner">
         <!-- iOS Camera -->
         <div class="ios-camera" id="iosCam">
+            <div class="camera-bg"></div>
             <div class="viewfinder">
                 <div class="vf-corner vf-tl"></div><div class="vf-corner vf-tr"></div>
                 <div class="vf-corner vf-bl"></div><div class="vf-corner vf-br"></div>
