@@ -18,7 +18,7 @@
     --r-xl: 28px; --r-lg: 22px; --r-md: 13px;
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-body{font-family:var(--font-sans);background:#fff;color:var(--text);height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;-webkit-font-smoothing:antialiased;position:relative}
+body{font-family:var(--font-sans);background:transparent;color:var(--text);height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;-webkit-font-smoothing:antialiased;position:relative}
 
 .ambient-background{position:fixed;inset:-8vh -8vw;z-index:-1;overflow:hidden;pointer-events:none}
 .blob{position:absolute;filter:blur(80px);opacity:.55;border-radius:50%;animation:float 20s infinite ease-in-out}
@@ -137,14 +137,12 @@ body{font-family:var(--font-sans);background:#fff;color:var(--text);height:100vh
 .data-row .copy-btn{width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.04);border:none;display:flex;align-items:center;justify-content:center;color:var(--text-sec);font-size:11px;flex-shrink:0}
 
 .watermark{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);font-size:11px;color:rgba(0,0,0,.15);font-weight:500;letter-spacing:.5px;z-index:10}
-
-@media(max-width:900px){.demo-stage{flex-direction:column;gap:24px;transform:scale(.7)}.flow-connector{flex-direction:row}}
 </style>
 </head>
 <body>
 <div class="ambient-background"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
 
-<div class="demo-stage">
+<div class="demo-stage" id="demoStage">
     <!-- PHONE -->
     <div class="phone"><div class="phone-inner">
         <!-- iOS Camera -->
@@ -225,6 +223,20 @@ body{font-family:var(--font-sans);background:#fff;color:var(--text);height:100vh
 <div class="watermark">MobilityOS — Digital Check-In</div>
 
 <script>
+// Dynamic scaler
+function fitStage() {
+    const stage = document.getElementById('demoStage');
+    const width = 860;  /* 280 + 48 + 80 + 48 + 440 approx base width */
+    const height = 620;
+    const padding = 40;
+    const scaleX = (window.innerWidth - padding) / width;
+    const scaleY = (window.innerHeight - padding) / height;
+    const scale = Math.min(scaleX, scaleY, 1);
+    stage.style.transform = `scale(${scale})`;
+}
+window.addEventListener('resize', fitStage);
+fitStage();
+
 const fields = [
     {field:'f1',input:'ib1',text:'t1',row:'ar1',val:'av1',value:'15 Rue de Rivoli'},
     {field:'f2',input:'ib2',text:'t2',row:'ar2',val:'av2',value:'75001'},
