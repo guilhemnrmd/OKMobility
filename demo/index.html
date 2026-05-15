@@ -272,7 +272,7 @@ async function runDemo(){
     const cam=document.getElementById('iosCam'), banner=document.getElementById('safariBanner'),
           app=document.getElementById('appScreen'), qr=document.getElementById('lpQr'),
           rows=document.getElementById('dataRows');
-    cam.classList.remove('hidden');banner.classList.remove('show');
+    cam.classList.remove('hide');banner.classList.remove('show');
     app.classList.remove('active');qr.classList.remove('hidden');
     rows.classList.remove('visible');timerEl.classList.remove('active');
     document.getElementById('lpSubtitle').textContent='El cliente debe escanear este código QR';
@@ -294,7 +294,7 @@ async function runDemo(){
     await sleep(1500);
 
     // Step 3: Transition to Safari (app opens)
-    cam.classList.add('hidden');
+    cam.classList.add('hide');
     app.classList.add('active');
     // Laptop: QR disappears, connection established
     document.getElementById('flowConn').classList.add('active');
