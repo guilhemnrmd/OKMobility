@@ -97,49 +97,49 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
 .flow-timer.active{opacity:1}
 
 /* ─── LAPTOP ─── */
-.laptop{width:440px;background:var(--glass-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:.5px solid rgba(255,255,255,.28);border-radius:var(--r-xl);overflow:hidden;box-shadow:0 24px 64px rgba(31,38,135,.13),inset 0 1px 0 rgba(255,255,255,.82)}
-.laptop-bar{height:32px;background:rgba(255,255,255,.5);border-bottom:1px solid rgba(0,0,0,.06);display:flex;align-items:center;padding:0 12px;gap:6px}
+.laptop{width:440px;background:#17181D;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:.5px solid rgba(255,255,255,.1);border-radius:var(--r-xl);overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.6)}
+.laptop-bar{height:32px;background:#111;border-bottom:1px solid #222;display:flex;align-items:center;padding:0 12px;gap:6px}
 .laptop-bar .dot{width:10px;height:10px;border-radius:50%}
 .laptop-bar .dot:nth-child(1){background:#ff5f57}.laptop-bar .dot:nth-child(2){background:#ffbd2e}.laptop-bar .dot:nth-child(3){background:#28c840}
-.laptop-bar .url{margin-left:14px;font-size:10px;color:var(--text-sec);background:rgba(0,0,0,.04);padding:3px 12px;border-radius:6px}
-.laptop-screen{padding:18px;min-height:380px}
+.laptop-bar .url{margin-left:14px;font-size:10px;color:#8c8e96;background:#000;padding:3px 12px;border-radius:6px}
+.laptop-screen{padding:18px;min-height:380px;background:rgba(28,28,30,0.6)}
 .lp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
 .lp-brand{display:flex;align-items:center;gap:7px}
 .lp-brand .logo-c{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--accent),var(--accent-end));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
 .lp-brand span{font-size:9px;font-weight:500;color:var(--text-sec);text-transform:uppercase;letter-spacing:.04em}
 .lp-controls{display:flex;gap:6px}
-.lp-controls .ctrl-btn{width:28px;height:28px;border-radius:8px;background:rgba(0,0,0,.04);border:none;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text-sec)}
-.lp-title{font-family:var(--font-display);font-size:19px;font-weight:700;background:linear-gradient(125deg,var(--accent),var(--accent-end));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.lp-controls .ctrl-btn{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text-sec)}
+.lp-title{font-family:var(--font-display);font-size:19px;font-weight:700;background:linear-gradient(125deg,#fff,#aaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
 .lp-subtitle{font-size:10px;color:var(--text-sec);margin-bottom:12px}
 
 /* Session code */
-.session-code{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.6);border:.5px solid rgba(255,255,255,.3);border-radius:var(--r-md);padding:8px 12px;margin-bottom:10px}
+.session-code{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.03);border:.5px solid rgba(255,255,255,.1);border-radius:var(--r-md);padding:8px 12px;margin-bottom:10px}
 .session-code .sc-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-sec)}
-.session-code .sc-value{font-family:'SF Mono','Fira Code',monospace;font-size:16px;font-weight:700;letter-spacing:2px;color:var(--text)}
-.session-code .sc-copy{width:24px;height:24px;border-radius:6px;background:rgba(0,0,0,.04);border:none;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-sec);margin-left:auto}
+.session-code .sc-value{font-family:'SF Mono','Fira Code',monospace;font-size:16px;font-weight:700;letter-spacing:2px;color:#fff}
+.session-code .sc-copy{width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,.05);border:none;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-sec);margin-left:auto}
 
 /* QR area */
-.lp-qr{display:flex;flex-direction:column;align-items:center;padding:16px;background:rgba(255,255,255,.5);border:.5px solid rgba(255,255,255,.3);border-radius:var(--r-lg);margin-bottom:12px;opacity:1;transition:all .5s ease}
+.lp-qr{display:flex;flex-direction:column;align-items:center;padding:16px;background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.15);border-radius:var(--r-lg);margin-bottom:12px;opacity:1;transition:all .5s ease}
 .lp-qr.hidden{opacity:0;height:0;padding:0;margin:0;overflow:hidden}
-.lp-qr-box{width:100px;height:100px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
-.lp-qr-box i{font-size:48px;color:var(--accent);opacity:.6}
+.lp-qr-box{width:100px;height:100px;background:#111;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.lp-qr-box i{font-size:48px;color:#fff;opacity:.6}
 .lp-qr-hint{font-size:9px;color:var(--text-sec);font-weight:500}
 
 /* Status pill */
-.status-pill{display:inline-flex;align-items:center;gap:5px;background:rgba(52,199,89,.1);border:1px solid rgba(52,199,89,.2);border-radius:20px;padding:4px 10px;font-size:10px;font-weight:600;color:#34C759;margin-bottom:10px;opacity:0}
+.status-pill{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:4px 10px;font-size:10px;font-weight:600;color:#fff;margin-bottom:10px;opacity:0}
 .status-pill.visible{opacity:1;transition:opacity .5s}
 .status-dot{width:5px;height:5px;border-radius:50%;background:#34C759;animation:sPulse 1.5s ease infinite}
 @keyframes sPulse{0%,100%{opacity:1}50%{opacity:.3}}
 
 /* Data rows */
 .data-rows{opacity:0;transition:opacity .4s}.data-rows.visible{opacity:1}
-.data-row{display:flex;justify-content:space-between;align-items:center;padding:8px 11px;background:rgba(255,255,255,.7);border:.5px solid rgba(255,255,255,.3);border-radius:var(--r-md);margin-bottom:6px;box-shadow:0 2px 8px rgba(0,0,0,.03);opacity:0;transform:translateX(10px)}
+.data-row{display:flex;justify-content:space-between;align-items:center;padding:8px 11px;background:rgba(255,255,255,.03);border:.5px solid rgba(255,255,255,.1);border-radius:var(--r-md);margin-bottom:6px;opacity:0;transform:translateX(10px)}
 .data-row.visible{opacity:1;transform:translateX(0);transition:all .5s cubic-bezier(.16,1,.3,1)}
 .data-row .label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-sec)}
-.data-row .value{font-size:12px;font-weight:500;color:var(--text);text-align:right}
+.data-row .value{font-size:12px;font-weight:500;color:#fff;text-align:right}
 .data-row .value.flash{animation:flashV .4s ease}
-@keyframes flashV{from{color:var(--accent);transform:translateY(-3px);opacity:.7}to{color:var(--text);transform:translateY(0);opacity:1}}
-.data-row .copy-btn{width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.04);border:none;display:flex;align-items:center;justify-content:center;color:var(--text-sec);font-size:11px;flex-shrink:0}
+@keyframes flashV{from{color:#fff;transform:translateY(-3px);opacity:.7}to{color:#fff;transform:translateY(0);opacity:1}}
+.data-row .copy-btn{width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.05);border:none;display:flex;align-items:center;justify-content:center;color:var(--text-sec);font-size:11px;flex-shrink:0}
 
 .watermark{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);font-size:11px;color:rgba(0,0,0,.15);font-weight:500;letter-spacing:.5px;z-index:10}
 </style>
@@ -159,29 +159,29 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
                 <div class="vf-qr"><i class='bx bx-qr'></i></div>
                 <div class="scan-beam"></div>
             </div>
-            <div class="cam-label">Appareil photo</div>
+            <div class="cam-label" id="i18n-cam">Appareil photo</div>
             <div class="safari-banner" id="safariBanner">
                 <div class="sf-icon">M</div>
                 <div class="sf-text">
-                    <div class="sf-domain">mobilityos.app</div>
-                    <div class="sf-title">MobilityOS · Check-In</div>
+                    <div class="sf-domain" id="i18n-sfDomain">mobilityos.app</div>
+                    <div class="sf-title" id="i18n-sfTitle">MobilityOS · Check-In</div>
                 </div>
-                <button class="sf-open">Ouvrir</button>
+                <button class="sf-open" id="i18n-sfOpen">Ouvrir</button>
             </div>
         </div>
 
         <!-- Client App -->
         <div class="app-screen" id="appScreen">
             <div class="app-header">
-                <div class="brand"><div class="logo-c">M</div><span class="slogan">The Global Mobility Platform</span></div>
-                <div class="lang-pill"><i class='bx bx-globe'></i> FR</div>
+                <div class="brand"><div class="logo-c">M</div><span class="slogan" id="i18n-appSlogan">The Global Mobility Platform</span></div>
+                <div class="lang-pill" id="i18n-lang"><i class='bx bx-globe'></i> FR</div>
             </div>
-            <div class="app-title">Vos informations</div>
+            <div class="app-title" id="i18n-appTitle">Vos informations</div>
             <div class="app-form">
-                <div class="app-field" id="f1"><label>Adresse de résidence</label><div class="input-box" id="ib1"><i class='bx bx-map'></i><span id="t1"></span></div></div>
-                <div class="app-field" id="f2"><label>Code Postal</label><div class="input-box" id="ib2"><i class='bx bx-hash'></i><span id="t2"></span></div></div>
-                <div class="app-field" id="f3"><label>Téléphone</label><div class="input-box" id="ib3"><i class='bx bx-phone'></i><span id="t3"></span></div></div>
-                <div class="app-field" id="f4"><label>E-mail</label><div class="input-box" id="ib4"><i class='bx bx-envelope'></i><span id="t4"></span></div></div>
+                <div class="app-field" id="f1"><label id="i18n-f1">Adresse de résidence</label><div class="input-box" id="ib1"><i class='bx bx-map'></i><span id="t1"></span></div></div>
+                <div class="app-field" id="f2"><label id="i18n-f2">Code Postal</label><div class="input-box" id="ib2"><i class='bx bx-hash'></i><span id="t2"></span></div></div>
+                <div class="app-field" id="f3"><label id="i18n-f3">Téléphone</label><div class="input-box" id="ib3"><i class='bx bx-phone'></i><span id="t3"></span></div></div>
+                <div class="app-field" id="f4"><label id="i18n-f4">E-mail</label><div class="input-box" id="ib4"><i class='bx bx-envelope'></i><span id="t4"></span></div></div>
             </div>
         </div>
     </div></div>
@@ -190,7 +190,7 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
     <div class="flow-connector" id="flowConn">
         <div class="flow-lock">🔒</div>
         <div class="flow-dots"><div class="flow-dot pulse"></div><div class="flow-dot pulse"></div><div class="flow-dot pulse"></div></div>
-        <div class="flow-label">WebRTC P2P</div>
+        <div class="flow-label" id="i18n-flow">WebRTC P2P</div>
         <div class="flow-timer" id="timer">0.0s</div>
     </div>
 
@@ -199,29 +199,29 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
         <div class="laptop-bar"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span class="url">mobilityos.app/retailer</span></div>
         <div class="laptop-screen">
             <div class="lp-header">
-                <div class="lp-brand"><div class="logo-c">M</div><span>MobilityOS · Paris Center</span></div>
+                <div class="lp-brand"><div class="logo-c">M</div><span id="i18n-lpBrand">MobilityOS · Paris Center</span></div>
                 <div class="lp-controls"><button class="ctrl-btn"><i class='bx bx-globe'></i></button><button class="ctrl-btn"><i class='bx bx-link'></i></button><button class="ctrl-btn"><i class='bx bx-rotate-left'></i></button></div>
             </div>
-            <div class="lp-title">Sesión de recogida</div>
+            <div class="lp-title" id="i18n-lpTitle">Sesión de recogida</div>
             <div class="lp-subtitle" id="lpSubtitle">El cliente debe escanear este código QR</div>
 
             <div class="session-code" id="sessionCode">
-                <span class="sc-label">Código</span>
+                <span class="sc-label" id="i18n-scLabel">Código</span>
                 <span class="sc-value" id="scValue">A7K-3M2</span>
                 <button class="sc-copy"><i class='bx bx-copy'></i></button>
             </div>
 
             <div class="lp-qr" id="lpQr">
                 <div class="lp-qr-box"><i class='bx bx-qr-scan'></i></div>
-                <div class="lp-qr-hint">Escanear para conectar</div>
+                <div class="lp-qr-hint" id="i18n-qrHint">Escanear para conectar</div>
             </div>
 
-            <div class="status-pill" id="statusPill"><div class="status-dot"></div>Conectado — Sesión activa</div>
+            <div class="status-pill" id="statusPill"><div class="status-dot"></div><span id="i18n-statusPillText">Conectado — Sesión activa</span></div>
             <div class="data-rows" id="dataRows">
-                <div class="data-row" id="ar1"><span class="label">Dirección</span><span class="value" id="av1">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
-                <div class="data-row" id="ar2"><span class="label">Código Postal</span><span class="value" id="av2">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
-                <div class="data-row" id="ar3"><span class="label">Teléfono</span><span class="value" id="av3">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
-                <div class="data-row" id="ar4"><span class="label">E-mail</span><span class="value" id="av4">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
+                <div class="data-row" id="ar1"><span class="label" id="i18n-r1">Dirección</span><span class="value" id="av1">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
+                <div class="data-row" id="ar2"><span class="label" id="i18n-r2">Código Postal</span><span class="value" id="av2">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
+                <div class="data-row" id="ar3"><span class="label" id="i18n-r3">Teléfono</span><span class="value" id="av3">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
+                <div class="data-row" id="ar4"><span class="label" id="i18n-r4">E-mail</span><span class="value" id="av4">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
             </div>
         </div>
     </div>
@@ -267,6 +267,7 @@ async function typeText(tEl,iEl,text,aVal,aRow,spd=45){
     aVal.textContent=text;cur.remove();iEl.classList.remove('typing');await sleep(200);
 }
 
+window.currentLpSubtitle = 'El cliente debe escanear este código QR';
 async function runDemo(){
     // Reset
     const cam=document.getElementById('iosCam'), banner=document.getElementById('safariBanner'),
@@ -275,7 +276,7 @@ async function runDemo(){
     cam.classList.remove('hide');banner.classList.remove('show');
     app.classList.remove('active');qr.classList.remove('hidden');
     rows.classList.remove('visible');timerEl.classList.remove('active');
-    document.getElementById('lpSubtitle').textContent='El cliente debe escanear este código QR';
+    document.getElementById('lpSubtitle').textContent = window.currentLpSubtitle;
     fields.forEach(d=>{
         document.getElementById(d.field).classList.remove('visible');
         document.getElementById(d.input).classList.remove('typing');
@@ -300,7 +301,7 @@ async function runDemo(){
     document.getElementById('flowConn').classList.add('active');
     await sleep(400);
     qr.classList.add('hidden');
-    document.getElementById('lpSubtitle').textContent='Datos del cliente';
+    document.getElementById('lpSubtitle').textContent = window.currentLpDatos || 'Datos del cliente';
     document.getElementById('statusPill').classList.add('visible');
     rows.classList.add('visible');
     await sleep(300);
@@ -317,6 +318,62 @@ async function runDemo(){
     runDemo();
 }
 runDemo();
+
+const demoI18n = {
+    fr: {
+        camLabel: "Appareil photo", sfDomain: "mobilityos.app", sfTitle: "MobilityOS · Check-In", sfOpen: "Ouvrir",
+        appSlogan: "The Global Mobility Platform", appTitle: "Vos informations", f1: "Adresse de résidence", f2: "Code Postal", f3: "Téléphone", f4: "E-mail",
+        flow: "WebRTC P2P", lpBrand: "MobilityOS · Paris Center", lpTitle: "Session de récupération", lpSubtitle: "Le client doit scanner ce code QR", lpDatos: "Données du client",
+        scLabel: "Code", qrHint: "Scanner pour connecter", statusPill: "Connecté — Session active", r1: "Adresse", r2: "Code Postal", r3: "Téléphone", r4: "E-mail"
+    },
+    en: {
+        camLabel: "Camera", sfDomain: "mobilityos.app", sfTitle: "MobilityOS · Check-In", sfOpen: "Open",
+        appSlogan: "The Global Mobility Platform", appTitle: "Your Information", f1: "Home Address", f2: "Postal Code", f3: "Phone Number", f4: "Email",
+        flow: "WebRTC P2P", lpBrand: "MobilityOS · Paris Center", lpTitle: "Pickup Session", lpSubtitle: "The client must scan this QR code", lpDatos: "Client Data",
+        scLabel: "Code", qrHint: "Scan to connect", statusPill: "Connected — Active session", r1: "Address", r2: "Postal Code", r3: "Phone", r4: "Email"
+    },
+    es: {
+        camLabel: "Cámara", sfDomain: "mobilityos.app", sfTitle: "MobilityOS · Check-In", sfOpen: "Abrir",
+        appSlogan: "The Global Mobility Platform", appTitle: "Tu Información", f1: "Dirección", f2: "Código Postal", f3: "Teléfono", f4: "E-mail",
+        flow: "WebRTC P2P", lpBrand: "MobilityOS · Paris Center", lpTitle: "Sesión de recogida", lpSubtitle: "El cliente debe escanear este código QR", lpDatos: "Datos del cliente",
+        scLabel: "Código", qrHint: "Escanear para conectar", statusPill: "Conectado — Sesión activa", r1: "Dirección", r2: "Código Postal", r3: "Teléfono", r4: "E-mail"
+    }
+};
+
+window.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'setLanguage') {
+        const lang = event.data.lang;
+        const dict = demoI18n[lang] || demoI18n['en'];
+        document.getElementById('i18n-cam').textContent = dict.camLabel;
+        document.getElementById('i18n-sfDomain').textContent = dict.sfDomain;
+        document.getElementById('i18n-sfTitle').textContent = dict.sfTitle;
+        document.getElementById('i18n-sfOpen').textContent = dict.sfOpen;
+        document.getElementById('i18n-appSlogan').textContent = dict.appSlogan;
+        document.getElementById('i18n-appTitle').textContent = dict.appTitle;
+        document.getElementById('i18n-f1').textContent = dict.f1;
+        document.getElementById('i18n-f2').textContent = dict.f2;
+        document.getElementById('i18n-f3').textContent = dict.f3;
+        document.getElementById('i18n-f4').textContent = dict.f4;
+        document.getElementById('i18n-flow').textContent = dict.flow;
+        document.getElementById('i18n-lpBrand').textContent = dict.lpBrand;
+        document.getElementById('i18n-lpTitle').textContent = dict.lpTitle;
+        window.currentLpSubtitle = dict.lpSubtitle;
+        window.currentLpDatos = dict.lpDatos;
+        if(document.getElementById('lpQr').classList.contains('hidden')){
+            document.getElementById('lpSubtitle').textContent = dict.lpDatos;
+        } else {
+            document.getElementById('lpSubtitle').textContent = dict.lpSubtitle;
+        }
+        document.getElementById('i18n-scLabel').textContent = dict.scLabel;
+        document.getElementById('i18n-qrHint').textContent = dict.qrHint;
+        document.getElementById('i18n-statusPillText').textContent = dict.statusPill;
+        document.getElementById('i18n-r1').textContent = dict.r1;
+        document.getElementById('i18n-r2').textContent = dict.r2;
+        document.getElementById('i18n-r3').textContent = dict.r3;
+        document.getElementById('i18n-r4').textContent = dict.r4;
+        document.getElementById('i18n-lang').innerHTML = `<i class='bx bx-globe'></i> ${lang.toUpperCase()}`;
+    }
+});
 </script>
 </body>
 </html>

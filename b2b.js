@@ -500,6 +500,12 @@
             });
             document.documentElement.lang = lang;
             localStorage.setItem('userLanguage', lang);
+            
+            // Sync with Demo iframe if it exists
+            const demoIframe = document.getElementById('demoIframe');
+            if (demoIframe && demoIframe.contentWindow) {
+                demoIframe.contentWindow.postMessage({ type: 'setLanguage', lang: lang }, '*');
+            }
         };
 
         const langSelect = document.getElementById('languageSelect');
