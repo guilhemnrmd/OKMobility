@@ -36,7 +36,7 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
 
 /* iOS Camera */
 .ios-camera{position:absolute;inset:0;background:#000;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all .5s ease;overflow:hidden}
-.camera-bg{position:absolute;inset:-20px;background:linear-gradient(rgba(0,0,0,0.3),rgba(0,0,0,0.4)),url('/assets/images/camera-bg.png') center/cover;z-index:-1;animation:camFocus 4s ease-in-out infinite alternate}
+.camera-bg{position:absolute;inset:-20px;background:linear-gradient(rgba(0,0,0,0.3),rgba(0,0,0,0.4)),url('../assets/images/camera-bg.png') center/cover;z-index:-1;animation:camFocus 4s ease-in-out infinite alternate}
 @keyframes camFocus{0%{transform:scale(1) translate(0,0);filter:blur(2px)}100%{transform:scale(1.05) translate(-4px,4px);filter:blur(0px)}}
 .ios-camera.hide{opacity:0;pointer-events:none;transform:scale(1.05)}
 .viewfinder{position:relative;width:180px;height:180px;border-radius:12px;margin-bottom:60px}
