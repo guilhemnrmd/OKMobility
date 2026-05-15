@@ -96,8 +96,13 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
 .flow-timer{font-family:'SF Mono','Fira Code',monospace;font-size:22px;font-weight:700;background:linear-gradient(125deg,var(--accent),var(--accent-end));-webkit-background-clip:text;-webkit-text-fill-color:transparent;opacity:0;transition:opacity .4s}
 .flow-timer.active{opacity:1}
 
+/* Add liquid glass status indicator */
+.status-indicator { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); box-shadow: inset 0 1px 2px rgba(0,0,0,0.5); transition: all 0.5s ease; }
+.status-indicator.connected { background: #34C759; border-color: #34C759; box-shadow: 0 0 10px rgba(52,199,89,0.5), inset 0 1px 2px rgba(255,255,255,0.5); }
+
 /* ─── LAPTOP ─── */
-.laptop{width:440px;background:#17181D;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:.5px solid rgba(255,255,255,.1);border-radius:var(--r-xl);overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.6)}
+.laptop{width:440px;background:#17181D;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:.5px solid rgba(255,255,255,.1);border-radius:var(--r-xl);overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.6); transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1)}
+.laptop.expanded { width: 680px; }
 .laptop-bar{height:32px;background:#111;border-bottom:1px solid #222;display:flex;align-items:center;padding:0 12px;gap:6px}
 .laptop-bar .dot{width:10px;height:10px;border-radius:50%}
 .laptop-bar .dot:nth-child(1){background:#ff5f57}.laptop-bar .dot:nth-child(2){background:#ffbd2e}.laptop-bar .dot:nth-child(3){background:#28c840}
@@ -113,28 +118,29 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
 .lp-subtitle{font-size:10px;color:var(--text-sec);margin-bottom:12px}
 
 /* Session code */
-.session-code{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.03);border:.5px solid rgba(255,255,255,.1);border-radius:var(--r-md);padding:8px 12px;margin-bottom:10px}
+.session-code{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.03);border:.5px solid rgba(255,255,255,.1);border-radius:var(--r-md);padding:8px 12px;margin-bottom:10px; transition:all .5s ease}
+.session-code.hidden{opacity:0;height:0;padding:0;margin:0;overflow:hidden;border:none}
 .session-code .sc-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-sec)}
 .session-code .sc-value{font-family:'SF Mono','Fira Code',monospace;font-size:16px;font-weight:700;letter-spacing:2px;color:#fff}
 .session-code .sc-copy{width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,.05);border:none;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-sec);margin-left:auto}
 
 /* QR area */
 .lp-qr{display:flex;flex-direction:column;align-items:center;padding:16px;background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.15);border-radius:var(--r-lg);margin-bottom:12px;opacity:1;transition:all .5s ease}
-.lp-qr.hidden{opacity:0;height:0;padding:0;margin:0;overflow:hidden}
-.lp-qr-box{width:100px;height:100px;background:#111;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.lp-qr.hidden{opacity:0;height:0;padding:0;margin:0;overflow:hidden;border:none}
+.lp-qr-box{width:100px;height:100px;background:#111;border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,.3)}
 .lp-qr-box i{font-size:48px;color:#fff;opacity:.6}
-.lp-qr-hint{font-size:9px;color:var(--text-sec);font-weight:500}
 
-/* Status pill */
-.status-pill{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:4px 10px;font-size:10px;font-weight:600;color:#fff;margin-bottom:10px;opacity:0}
-.status-pill.visible{opacity:1;transition:opacity .5s}
-.status-dot{width:5px;height:5px;border-radius:50%;background:#34C759;animation:sPulse 1.5s ease infinite}
-@keyframes sPulse{0%,100%{opacity:1}50%{opacity:.3}}
+/* Live Data Columns */
+.live-columns{display:flex;gap:16px;opacity:0;transform:translateY(10px);transition:all .5s cubic-bezier(.16,1,.3,1)}
+.live-columns.visible{opacity:1;transform:translateY(0)}
+.live-col-data{flex:1;display:flex;flex-direction:column;gap:6px}
+.live-col-map{width:0;opacity:0;border-radius:var(--r-md);background:url('../assets/images/dark-map.png') center/cover;position:relative;transition:width .7s cubic-bezier(.16,1,.3,1), opacity .5s;border:.5px solid rgba(255,255,255,.1)}
+.laptop.expanded .live-col-map{width:220px;opacity:1}
+.map-overlay{position:absolute;bottom:8px;left:8px;right:8px;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);border-radius:8px;padding:6px 10px;display:flex;align-items:center;gap:6px;font-size:9px;color:#fff;font-weight:500;border:1px solid rgba(255,255,255,.1)}
 
 /* Data rows */
-.data-rows{opacity:0;transition:opacity .4s}.data-rows.visible{opacity:1}
-.data-row{display:flex;justify-content:space-between;align-items:center;padding:8px 11px;background:rgba(255,255,255,.03);border:.5px solid rgba(255,255,255,.1);border-radius:var(--r-md);margin-bottom:6px;opacity:0;transform:translateX(10px)}
-.data-row.visible{opacity:1;transform:translateX(0);transition:all .5s cubic-bezier(.16,1,.3,1)}
+.data-row{display:flex;justify-content:space-between;align-items:center;padding:8px 11px;background:rgba(255,255,255,.03);border:.5px solid rgba(255,255,255,.1);border-radius:var(--r-md);opacity:0;transform:translateX(10px)}
+.live-columns.visible .data-row{opacity:1;transform:translateX(0);transition:all .5s cubic-bezier(.16,1,.3,1)}
 .data-row .label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-sec)}
 .data-row .value{font-size:12px;font-weight:500;color:#fff;text-align:right}
 .data-row .value.flash{animation:flashV .4s ease}
@@ -174,7 +180,10 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
         <div class="app-screen" id="appScreen">
             <div class="app-header">
                 <div class="brand"><div class="logo-c">M</div><span class="slogan" id="i18n-appSlogan">The Global Mobility Platform</span></div>
-                <div class="lang-pill" id="i18n-lang"><i class='bx bx-globe'></i> FR</div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <div class="status-indicator" id="phoneStatus"></div>
+                    <div class="lang-pill" id="i18n-lang"><i class='bx bx-globe'></i> FR</div>
+                </div>
             </div>
             <div class="app-title" id="i18n-appTitle">Vos informations</div>
             <div class="app-form">
@@ -200,7 +209,10 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
         <div class="laptop-screen">
             <div class="lp-header">
                 <div class="lp-brand"><div class="logo-c">M</div><span id="i18n-lpBrand">MobilityOS · Paris Center</span></div>
-                <div class="lp-controls"><button class="ctrl-btn"><i class='bx bx-globe'></i></button><button class="ctrl-btn"><i class='bx bx-link'></i></button><button class="ctrl-btn"><i class='bx bx-rotate-left'></i></button></div>
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div class="status-indicator" id="laptopStatus"></div>
+                    <div class="lp-controls"><button class="ctrl-btn"><i class='bx bx-globe'></i></button><button class="ctrl-btn"><i class='bx bx-link'></i></button><button class="ctrl-btn"><i class='bx bx-rotate-left'></i></button></div>
+                </div>
             </div>
             <div class="lp-title" id="i18n-lpTitle">Sesión de recogida</div>
             <div class="lp-subtitle" id="lpSubtitle">El cliente debe escanear este código QR</div>
@@ -213,15 +225,20 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
 
             <div class="lp-qr" id="lpQr">
                 <div class="lp-qr-box"><i class='bx bx-qr-scan'></i></div>
-                <div class="lp-qr-hint" id="i18n-qrHint">Escanear para conectar</div>
             </div>
 
-            <div class="status-pill" id="statusPill"><div class="status-dot"></div><span id="i18n-statusPillText">Conectado — Sesión activa</span></div>
-            <div class="data-rows" id="dataRows">
-                <div class="data-row" id="ar1"><span class="label" id="i18n-r1">Dirección</span><span class="value" id="av1">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
-                <div class="data-row" id="ar2"><span class="label" id="i18n-r2">Código Postal</span><span class="value" id="av2">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
-                <div class="data-row" id="ar3"><span class="label" id="i18n-r3">Teléfono</span><span class="value" id="av3">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
-                <div class="data-row" id="ar4"><span class="label" id="i18n-r4">E-mail</span><span class="value" id="av4">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
+            <div class="live-columns" id="liveCols">
+                <div class="live-col-data" id="dataRows">
+                    <div class="data-row" id="ar1"><span class="label" id="i18n-r1">Dirección</span><span class="value" id="av1">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
+                    <div class="data-row" id="ar2"><span class="label" id="i18n-r2">Código Postal</span><span class="value" id="av2">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
+                    <div class="data-row" id="ar3"><span class="label" id="i18n-r3">Teléfono</span><span class="value" id="av3">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
+                    <div class="data-row" id="ar4"><span class="label" id="i18n-r4">E-mail</span><span class="value" id="av4">—</span><div class="copy-btn"><i class='bx bx-copy'></i></div></div>
+                </div>
+                <div class="live-col-map">
+                    <div class="map-overlay">
+                        <i class='bx bx-map-alt'></i> <span id="i18n-mapOverlay">Ubicación en vivo</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -267,16 +284,21 @@ async function typeText(tEl,iEl,text,aVal,aRow,spd=45){
     aVal.textContent=text;cur.remove();iEl.classList.remove('typing');await sleep(200);
 }
 
-window.currentLpSubtitle = 'El cliente debe escanear este código QR';
+window.currentLpDatos = 'Datos del cliente';
+window.currentMapOverlay = 'Ubicación en vivo';
 async function runDemo(){
     // Reset
     const cam=document.getElementById('iosCam'), banner=document.getElementById('safariBanner'),
           app=document.getElementById('appScreen'), qr=document.getElementById('lpQr'),
-          rows=document.getElementById('dataRows');
+          rows=document.getElementById('liveCols');
     cam.classList.remove('hide');banner.classList.remove('show');
     app.classList.remove('active');qr.classList.remove('hidden');
     rows.classList.remove('visible');timerEl.classList.remove('active');
-    document.getElementById('lpSubtitle').textContent = window.currentLpSubtitle;
+    document.getElementById('sessionCode').classList.remove('hidden');
+    document.querySelector('.laptop').classList.remove('expanded');
+    document.getElementById('phoneStatus').classList.remove('connected');
+    document.getElementById('laptopStatus').classList.remove('connected');
+    document.getElementById('lpSubtitle').textContent = window.currentLpSubtitle || 'El cliente debe escanear este código QR';
     fields.forEach(d=>{
         document.getElementById(d.field).classList.remove('visible');
         document.getElementById(d.input).classList.remove('typing');
@@ -301,8 +323,11 @@ async function runDemo(){
     document.getElementById('flowConn').classList.add('active');
     await sleep(400);
     qr.classList.add('hidden');
+    document.getElementById('sessionCode').classList.add('hidden');
     document.getElementById('lpSubtitle').textContent = window.currentLpDatos || 'Datos del cliente';
-    document.getElementById('statusPill').classList.add('visible');
+    document.getElementById('phoneStatus').classList.add('connected');
+    document.getElementById('laptopStatus').classList.add('connected');
+    document.querySelector('.laptop').classList.add('expanded');
     rows.classList.add('visible');
     await sleep(300);
 
@@ -323,20 +348,20 @@ const demoI18n = {
     fr: {
         camLabel: "Appareil photo", sfDomain: "mobilityos.app", sfTitle: "MobilityOS · Check-In", sfOpen: "Ouvrir",
         appSlogan: "The Global Mobility Platform", appTitle: "Vos informations", f1: "Adresse de résidence", f2: "Code Postal", f3: "Téléphone", f4: "E-mail",
-        flow: "WebRTC P2P", lpBrand: "MobilityOS · Paris Center", lpTitle: "Session de récupération", lpSubtitle: "Le client doit scanner ce code QR", lpDatos: "Données du client",
-        scLabel: "Code", qrHint: "Scanner pour connecter", statusPill: "Connecté — Session active", r1: "Adresse", r2: "Code Postal", r3: "Téléphone", r4: "E-mail"
+        flow: "WebRTC P2P", lpBrand: "MobilityOS · Paris Center", lpTitle: "Session de récupération", lpSubtitle: "Le client doit scanner ce code QR", lpDatos: "Données du client", mapOverlay: "Position en direct",
+        scLabel: "Code", r1: "Adresse", r2: "Code Postal", r3: "Téléphone", r4: "E-mail"
     },
     en: {
         camLabel: "Camera", sfDomain: "mobilityos.app", sfTitle: "MobilityOS · Check-In", sfOpen: "Open",
         appSlogan: "The Global Mobility Platform", appTitle: "Your Information", f1: "Home Address", f2: "Postal Code", f3: "Phone Number", f4: "Email",
-        flow: "WebRTC P2P", lpBrand: "MobilityOS · Paris Center", lpTitle: "Pickup Session", lpSubtitle: "The client must scan this QR code", lpDatos: "Client Data",
-        scLabel: "Code", qrHint: "Scan to connect", statusPill: "Connected — Active session", r1: "Address", r2: "Postal Code", r3: "Phone", r4: "Email"
+        flow: "WebRTC P2P", lpBrand: "MobilityOS · Paris Center", lpTitle: "Pickup Session", lpSubtitle: "The client must scan this QR code", lpDatos: "Client Data", mapOverlay: "Live location",
+        scLabel: "Code", r1: "Address", r2: "Postal Code", r3: "Phone", r4: "Email"
     },
     es: {
         camLabel: "Cámara", sfDomain: "mobilityos.app", sfTitle: "MobilityOS · Check-In", sfOpen: "Abrir",
         appSlogan: "The Global Mobility Platform", appTitle: "Tu Información", f1: "Dirección", f2: "Código Postal", f3: "Teléfono", f4: "E-mail",
-        flow: "WebRTC P2P", lpBrand: "MobilityOS · Paris Center", lpTitle: "Sesión de recogida", lpSubtitle: "El cliente debe escanear este código QR", lpDatos: "Datos del cliente",
-        scLabel: "Código", qrHint: "Escanear para conectar", statusPill: "Conectado — Sesión activa", r1: "Dirección", r2: "Código Postal", r3: "Teléfono", r4: "E-mail"
+        flow: "WebRTC P2P", lpBrand: "MobilityOS · Paris Center", lpTitle: "Sesión de recogida", lpSubtitle: "El cliente debe escanear este código QR", lpDatos: "Datos del cliente", mapOverlay: "Ubicación en vivo",
+        scLabel: "Código", r1: "Dirección", r2: "Código Postal", r3: "Teléfono", r4: "E-mail"
     }
 };
 
@@ -359,14 +384,14 @@ window.addEventListener('message', (event) => {
         document.getElementById('i18n-lpTitle').textContent = dict.lpTitle;
         window.currentLpSubtitle = dict.lpSubtitle;
         window.currentLpDatos = dict.lpDatos;
+        window.currentMapOverlay = dict.mapOverlay;
+        document.getElementById('i18n-mapOverlay').textContent = dict.mapOverlay;
         if(document.getElementById('lpQr').classList.contains('hidden')){
             document.getElementById('lpSubtitle').textContent = dict.lpDatos;
         } else {
             document.getElementById('lpSubtitle').textContent = dict.lpSubtitle;
         }
         document.getElementById('i18n-scLabel').textContent = dict.scLabel;
-        document.getElementById('i18n-qrHint').textContent = dict.qrHint;
-        document.getElementById('i18n-statusPillText').textContent = dict.statusPill;
         document.getElementById('i18n-r1').textContent = dict.r1;
         document.getElementById('i18n-r2').textContent = dict.r2;
         document.getElementById('i18n-r3').textContent = dict.r3;
