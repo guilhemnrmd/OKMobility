@@ -654,6 +654,7 @@
                 <div class="tab-header">
                     <h2 data-i18n="profileTitle">Informations personnelles</h2>
                     <p data-i18n="profileSubtitle">Gérez les informations de votre compte.</p>
+                    <p class="ai-subtitle" id="profileAiSubtitle"></p>
                 </div>
 
                 <div class="dash-card">
@@ -747,6 +748,7 @@
                 <div class="tab-header">
                     <h2>Mes agences</h2>
                     <p>Gérez vos agences et leurs liens d'accès conseiller.</p>
+                    <p class="ai-subtitle" id="agenciesAiSubtitle"></p>
                 </div>
 
                 <div id="agencyList"></div>
@@ -763,6 +765,7 @@
                     <div>
                         <h2>Personnalisation du formulaire</h2>
                         <p>Adaptez le formulaire client à votre agence.</p>
+                        <p class="ai-subtitle" id="customizationAiSubtitle"></p>
                     </div>
                     <button type="button" id="btnPreviewClient" class="btn-secondary" style="display: inline-flex; align-items: center; gap: 0.5rem;">
                         <i class='bx bx-show'></i>
@@ -901,6 +904,7 @@
                 <div class="tab-header">
                     <h2>Contact & support</h2>
                     <p>Besoin d'aide ou souhaitez passer à une offre Pro ?</p>
+                    <p class="ai-subtitle" id="contactAiSubtitle"></p>
                 </div>
 
                 <div class="dash-card">
@@ -1264,13 +1268,40 @@
         const DEFAULT_FIELDS = [
             {
                 id: "address_block", label: "Adresse",
-                labels: { fr: "Adresse", en: "Address", es: "Dirección", it: "Indirizzo", pt: "Endereço", de: "Adresse", nl: "Adres" },
-                type: "address_block", icon: "bx-map", required: true, system: false
+                labels: { fr: "Adresse de résidence", en: "Home Address", es: "Dirección de residencia", it: "Indirizzo di residenza", pt: "Morada", de: "Wohnanschrift", nl: "Woonadres" },
+                type: "address_block", icon: "bx-map", required: true, system: false,
+                requireCountry: true
+            },
+            {
+                id: "temp_address_group", label: "Adresse temporaire",
+                labels: { fr: "J'ai une adresse temporaire locale", en: "I have a local temporary address", es: "Tengo una dirección temporal local", it: "Ho un indirizzo temporaneo locale", pt: "Tenho um endereço temporário local", de: "Ich habe eine lokale temporäre Adresse", nl: "Ik heb een tijdelijk lokaal adres" },
+                notes: { fr: "Renseignez cette adresse si vous séjournez temporairement à un autre endroit (ex: Hôtel, Airbnb) pendant la durée de votre location.", en: "Fill in this address if you are temporarily staying at another location (e.g., Hotel, Airbnb) during your rental period.", es: "Rellene esta dirección si se aloja temporalmente en otro lugar (ej. Hotel, Airbnb) durante su alquiler." },
+                type: "toggle_group", icon: "bx-list-plus", system: false,
+                children: [
+                    {
+                        id: "temp_address_block", label: "Adresse temporaire",
+                        labels: { fr: "Adresse temporaire", en: "Temporary Address", es: "Dirección temporal", it: "Indirizzo temporaneo", pt: "Endereço temporário", de: "Temporäre Adresse", nl: "Tijdelijk adres" },
+                        type: "address_block", icon: "bx-map-pin", required: true, system: false,
+                        requireCountry: false
+                    }
+                ]
             },
             {
                 id: "phone", label: "Téléphone",
-                labels: { fr: "Téléphone", en: "Phone", es: "Teléfono", it: "Telefono", pt: "Telefone", de: "Telefon", nl: "Telefoon" },
+                labels: { fr: "Téléphone Mobile", en: "Mobile Telephone Number", es: "Teléfono Móvil", it: "Telefono Cellulare", pt: "Telemóvel", de: "Handynummer", nl: "Mobiel telefoonnummer" },
                 type: "tel", icon: "bx-phone", required: true, system: false
+            },
+            {
+                id: "phone2_group", label: "2e téléphone",
+                labels: { fr: "Ajouter un 2e téléphone", en: "Add a 2nd phone number", es: "Añadir 2º teléfono", it: "Aggiungi 2° telefono", pt: "Adicionar 2º telefone", de: "2. Telefonnummer hinzufügen", nl: "2e telefoonnummer toevoegen" },
+                type: "toggle_group", icon: "bx-list-plus", system: false,
+                children: [
+                    {
+                        id: "phone2", label: "2e téléphone (optionnel)",
+                        labels: { fr: "2e téléphone (optionnel)", en: "2nd phone (optional)", es: "2º teléfono (opcional)", it: "2° telefono (opzionale)", pt: "2º telefone (opcional)", de: "2. Telefon (optional)", nl: "2e telefoonnummer (optioneel)" },
+                        type: "tel", icon: "bx-phone", required: true, system: false
+                    }
+                ]
             },
             {
                 id: "email", label: "E-mail",
@@ -1286,7 +1317,9 @@
         const legalModal = document.getElementById('editLegalModal');
         let tempLegalText = {};
 
-        document.getElementById('btnEditLegal').addEventListener('click', () => {
+        document.getElementById('btnEditLegal').addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             tempLegalText = { ...(currentUser.formSettings?.legalText || {}) };
             renderLegalModalEditor();
             legalModal.style.display = 'flex';
@@ -1350,8 +1383,122 @@
                 renderCustomizationTab();
                 renderAgencies();
                 renderContactTab();
+                updateDashboardAiSubtitles();
             } catch {
                 window.location.href = '/login/';
+            }
+        }
+
+        function updateDashboardAiSubtitles() {
+            const u = currentUser;
+            if (!u) return;
+
+            const lang = u.uiLanguage || 'fr';
+            
+            // Text mappings per language
+            const texts = {
+                fr: {
+                    profileTrial: (d) => `Profil personnel. Votre essai gratuit expire dans ${d} jour${d !== 1 ? 's' : ''}.`,
+                    profilePro: "Profil personnel. Compte professionnel actif.",
+                    agenciesEmpty: "Aucune agence. Ajoutez votre première agence ci-dessous.",
+                    agenciesCount: (c) => `${c} agence${c !== 1 ? 's' : ''} active${c !== 1 ? 's' : ''} configurée${c !== 1 ? 's' : ''}.`,
+                    customFields: (c) => `Formulaire client actif avec ${c} champ${c !== 1 ? 's' : ''} configuré${c !== 1 ? 's' : ''}.`,
+                    contactSupport: "Support technique réactif sous 24h."
+                },
+                en: {
+                    profileTrial: (d) => `Personal profile. Your free trial expires in ${d} day${d !== 1 ? 's' : ''}.`,
+                    profilePro: "Personal profile. Active professional account.",
+                    agenciesEmpty: "No agencies. Add your first agency below.",
+                    agenciesCount: (c) => `${c} active agenc${c !== 1 ? 'ies' : 'y'} configured.`,
+                    customFields: (c) => `Client form active with ${c} field${c !== 1 ? 's' : ''} configured.`,
+                    contactSupport: "Responsive technical support within 24h."
+                },
+                es: {
+                    profileTrial: (d) => `Perfil personal. Su prueba gratuita expira en ${d} día${d !== 1 ? 's' : ''}.`,
+                    profilePro: "Perfil personal. Cuenta profesional activa.",
+                    agenciesEmpty: "Ninguna agencia. Añada su primera agencia a continuación.",
+                    agenciesCount: (c) => `${c} agencia${c !== 1 ? 's' : ''} activa${c !== 1 ? 's' : ''} configurada${c !== 1 ? 's' : ''}.`,
+                    customFields: (c) => `Formulario de cliente activo con ${c} campo${c !== 1 ? 's' : ''} configurado${c !== 1 ? 's' : ''}.`,
+                    contactSupport: "Soporte técnico receptivo en 24h."
+                },
+                it: {
+                    profileTrial: (d) => `Profilo personale. La tua prova gratuita scade tra ${d} giorn${d !== 1 ? 'i' : 'o'}.`,
+                    profilePro: "Profilo personale. Account professionale attivo.",
+                    agenciesEmpty: "Nessuna agenzia. Aggiungi la tua prima agenzia qui sotto.",
+                    agenciesCount: (c) => `${c} agenzi${c !== 1 ? 'e' : 'a'} attiv${c !== 1 ? 'e' : 'a'} configurat${c !== 1 ? 'e' : 'a'}.`,
+                    customFields: (c) => `Modulo cliente attivo con ${c} camp${c !== 1 ? 'i' : 'o'} configurat${c !== 1 ? 'i' : 'o'}.`,
+                    contactSupport: "Supporto tecnico reattivo entro 24 ore."
+                },
+                pt: {
+                    profileTrial: (d) => `Perfil pessoal. O seu teste gratuito expira em ${d} dia${d !== 1 ? 's' : ''}.`,
+                    profilePro: "Perfil pessoal. Conta profissional activa.",
+                    agenciesEmpty: "Nenhuma agência. Adicione a sua primeira agência abaixo.",
+                    agenciesCount: (c) => `${c} agência${c !== 1 ? 's' : ''} activa${c !== 1 ? 's' : ''} configurada${c !== 1 ? 's' : ''}.`,
+                    customFields: (c) => `Formulário de cliente activo com ${c} campo${c !== 1 ? 's' : ''} configurado${c !== 1 ? 's' : ''}.`,
+                    contactSupport: "Suporte técnico responsivo em 24h."
+                },
+                de: {
+                    profileTrial: (d) => `Persönliches Profil. Ihre kostenlose Testversion läuft in ${d} Tag${d !== 1 ? 'en' : ''} ab.`,
+                    profilePro: "Persönliches Profil. Aktives professionelles Konto.",
+                    agenciesEmpty: "Keine Agenturen. Fügen Sie unten Ihre erste Agentur hinzu.",
+                    agenciesCount: (c) => `${c} aktive Agentur${c !== 1 ? 'en' : ''} konfiguriert.`,
+                    customFields: (c) => `Kundenformular aktiv mit ${c} konfigurierte${c !== 1 ? 'n' : 'm'} Feld${c !== 1 ? 'ern' : ''}.`,
+                    contactSupport: "Reaktionsschneller technischer Support innerhalb von 24 Stunden."
+                },
+                nl: {
+                    profileTrial: (d) => `Persoonlijk profiel. Uw gratis proefperiode verloopt over ${d} dag${d !== 1 ? 'en' : ''}.`,
+                    profilePro: "Persoonlijk profiel. Actief professioneel account.",
+                    agenciesEmpty: "Geen agentschappen. Voeg hieronder uw eerste agentschap toe.",
+                    agenciesCount: (c) => `${c} actief agentschap${c !== 1 ? 'pen' : ''} geconfigureerd.`,
+                    customFields: (c) => `Klantformulier actief met ${c} geconfigureerd${c !== 1 ? 'e' : ''} veld${c !== 1 ? 'en' : ''}.`,
+                    contactSupport: "Responsieve technische ondersteuning binnen 24 uur."
+                }
+            };
+
+            const t = texts[lang] || texts.fr;
+
+            // 1. Profile Subtitle
+            const profileSubtitleEl = document.getElementById('profileAiSubtitle');
+            if (profileSubtitleEl) {
+                const endsAt = new Date(u.trialEndsAt);
+                const days = Math.max(0, Math.ceil((endsAt - new Date()) / 86400000));
+                const planText = u.plan === 'trial' ? t.profileTrial(days) : t.profilePro;
+                profileSubtitleEl.innerHTML = `<i class='bx bx-sparkles'></i><span>${planText}</span>`;
+                // Re-trigger animation
+                profileSubtitleEl.style.animation = 'none';
+                profileSubtitleEl.offsetHeight; /* trigger reflow */
+                profileSubtitleEl.style.animation = '';
+            }
+
+            // 2. Agencies Subtitle
+            const agenciesSubtitleEl = document.getElementById('agenciesAiSubtitle');
+            if (agenciesSubtitleEl) {
+                const agencies = u.agencies || [];
+                const agencyText = agencies.length === 0 ? t.agenciesEmpty : t.agenciesCount(agencies.length);
+                agenciesSubtitleEl.innerHTML = `<i class='bx bx-sparkles'></i><span>${agencyText}</span>`;
+                agenciesSubtitleEl.style.animation = 'none';
+                agenciesSubtitleEl.offsetHeight; /* trigger reflow */
+                agenciesSubtitleEl.style.animation = '';
+            }
+
+            // 3. Customization Subtitle
+            const customSubtitleEl = document.getElementById('customizationAiSubtitle');
+            if (customSubtitleEl) {
+                const fieldsCount = (formFields || []).length;
+                const customText = t.customFields(fieldsCount);
+                customSubtitleEl.innerHTML = `<i class='bx bx-sparkles'></i><span>${customText}</span>`;
+                customSubtitleEl.style.animation = 'none';
+                customSubtitleEl.offsetHeight; /* trigger reflow */
+                customSubtitleEl.style.animation = '';
+            }
+
+            // 4. Contact Subtitle
+            const contactSubtitleEl = document.getElementById('contactAiSubtitle');
+            if (contactSubtitleEl) {
+                contactSubtitleEl.innerHTML = `<i class='bx bx-sparkles'></i><span>${t.contactSupport}</span>`;
+                contactSubtitleEl.style.animation = 'none';
+                contactSubtitleEl.offsetHeight; /* trigger reflow */
+                contactSubtitleEl.style.animation = '';
             }
         }
 
@@ -1594,6 +1741,7 @@
             }
 
             formFields.forEach((f, i) => renderField(f, i, formFields, null));
+            updateDashboardAiSubtitles();
         }
 
         window.toggleTransPanel = function(id) {
@@ -1785,6 +1933,7 @@
                     } catch { alert('Erreur de connexion.'); }
                 });
             });
+            updateDashboardAiSubtitles();
         }
 
         function renderContactTab() {
@@ -1808,6 +1957,7 @@
                 document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
                 btn.classList.add('active');
                 document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+                updateDashboardAiSubtitles();
             });
         });
 
@@ -1827,7 +1977,9 @@
             const alertBox     = document.getElementById('deleteModalAlert');
 
             // Open modal
-            document.getElementById('btnDeleteAccount').addEventListener('click', () => {
+            document.getElementById('btnDeleteAccount').addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 inputEmail.value = '';
                 btnConfirm.disabled = true;
                 alertBox.style.display = 'none';
@@ -1981,7 +2133,9 @@
         });
 
         // ── Add agency ────────────────────────────────────────
-        document.getElementById('btnAddAgency').addEventListener('click', () => {
+        document.getElementById('btnAddAgency').addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             document.getElementById('newAgencyName').value = '';
             document.getElementById('agencyModalAlert').className = 'inline-alert';
             document.getElementById('addAgencyModal').style.display = 'flex';

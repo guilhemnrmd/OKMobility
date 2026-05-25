@@ -51,7 +51,7 @@ const i18n = {
       "placeholderEmail": "jean.dupont@email.com",
       "btnGenerate": "Générer mon résumé",
       "btnEdit": "Modifier",
-      "legalText": "{company} est le Responsable du traitement des données à caractère personnel de la personne concernée et l'informe que lesdites données feront l'objet d'un traitement conformément aux dispositions du Règlement (UE) 2016/679 du Parlement européen et du Conseil du 27 avril 2016 (RGPD) et de la Loi Organique 3/2018 du 5 décembre relative à la protection des données personnelles et à la garantie des droits numériques (LOPDGDD).",
+      "legalText": "OK MOBILITY GROUP, S.L.U. est le Responsable du traitement des données à caractère personnel de la personne concernée et l'informe que lesdites données feront l'objet d'un traitement conformément aux dispositions du Règlement (UE) 2016/679 du Parlement européen et du Conseil du 27 avril 2016 (RGPD) et de la Loi Organique 3/2018 du 5 décembre relative à la protection des données personnelles et à la garantie des droits numériques (LOPDGDD).",
     "summaryTitle": "Veuillez présenter ce résumé au conseiller",
     "advisorConnectButton": "Connecter un conseiller",
     "advisorModalTitle": "Connexion conseiller",
@@ -90,7 +90,7 @@ const i18n = {
       "placeholderEmail": "john.doe@email.com",
       "btnGenerate": "Generate my summary",
       "btnEdit": "Edit",
-      "legalText": "{company} acts as Data Controller with respect to the personal data of the Data Subject and hereby informs that such data shall be processed in accordance with the provisions of Regulation (EU) 2016/679 of the European Parliament and of the Council of 27 April 2016 (GDPR) and Organic Law 3/2018 of 5 December on the Protection of Personal Data and Guarantee of Digital Rights (LOPDGDD).",
+      "legalText": "OK MOBILITY GROUP, S.L.U. acts as Data Controller with respect to the personal data of the Data Subject and hereby informs that such data shall be processed in accordance with the provisions of Regulation (EU) 2016/679 of the European Parliament and of the Council of 27 April 2016 (GDPR) and Organic Law 3/2018 of 5 December on the Protection of Personal Data and Guarantee of Digital Rights (LOPDGDD).",
     "summaryTitle": "Please present this summary to the advisor",
     "advisorConnectButton": "Connect an advisor",
     "advisorModalTitle": "Advisor connection",
@@ -129,7 +129,7 @@ const i18n = {
       "placeholderEmail": "juan.perez@email.com",
       "btnGenerate": "Generar mi resumen",
       "btnEdit": "Modificar",
-      "legalText": "{company} es el Responsable del tratamiento de los datos personales del Interesado y le informa de que estos datos se tratarán de conformidad con lo dispuesto en el Reglamento (UE) 2016/679, de 27 de abril (GDPR), y la Ley Orgánica 3/2018, de 5 de diciembre (LOPDG).",
+      "legalText": "OK MOBILITY GROUP, S.L.U. es el Responsable del tratamiento de los datos personales del Interesado y le informa de que estos datos se tratarán de conformidad con lo dispuesto en el Reglamento (UE) 2016/679, de 27 de abril (GDPR), y la Ley Orgánica 3/2018, de 5 de diciembre (LOPDG).",
     "summaryTitle": "Por favor, presente este resumen al asesor",
     "advisorConnectButton": "Conectar asesor",
     "advisorModalTitle": "Conexión con asesor",
@@ -168,7 +168,7 @@ const i18n = {
       "placeholderEmail": "mario.rossi@email.com",
       "btnGenerate": "Genera il mio riepilogo",
       "btnEdit": "Modifica",
-      "legalText": "{company} è il Titolare del trattamento dei dati personali dell'Interessato e lo informa che tali dati saranno trattati in conformità con le disposizioni del Regolamento (UE) 2016/679 del Parlamento europeo e del Consiglio del 27 aprile 2016 (GDPR) e della Legge Organica 3/2018 del 5 dicembre sulla protezione dei dati personali e garanzia dei diritti digitali (LOPDGDD).",
+      "legalText": "OK MOBILITY GROUP, S.L.U. è il Titolare del trattamento dei dati personali dell'Interessato e lo informa che tali dati saranno trattati in conformità con le disposizioni del Regolamento (UE) 2016/679 del Parlamento europeo e del Consiglio del 27 aprile 2016 (GDPR) e della Legge Organica 3/2018 del 5 dicembre sulla protezione dei dati personali e garanzia dei diritti digitali (LOPDGDD).",
     "summaryTitle": "Si prega di presentare questo riepilogo al consulente",
     "advisorConnectButton": "Collega un consulente",
     "advisorModalTitle": "Connessione consulente",
@@ -207,7 +207,7 @@ const i18n = {
       "placeholderEmail": "joao.silva@email.com",
       "btnGenerate": "Gerar o meu resumo",
       "btnEdit": "Editar",
-      "legalText": "A {company} é a Responsável pelo tratamento dos dados pessoais do Titular dos dados e informa que os referidos dados serão tratados em conformidade com o disposto no Regulamento (UE) 2016/679 do Parlamento Europeu e do Conselho, de 27 de abril de 2016 (RGPD), e na Lei Orgânica n.º 3/2018, de 5 de dezembro, relativa à Proteção de Dados Pessoais e à Garantia dos Direitos Digitais (LOPDGDD).",
+      "legalText": "A OK MOBILITY GROUP, S.L.U. é a Responsável pelo tratamento dos dados pessoais do Titular dos dados e informa que os referidos dados serão tratados em conformidade com o disposto no Regulamento (UE) 2016/679 do Parlamento Europeu e do Conselho, de 27 de abril de 2016 (RGPD), e na Lei Orgânica n.º 3/2018, de 5 de dezembro, relativa à Proteção de Dados Pessoais e à Garantia dos Direitos Digitais (LOPDGDD).",
     "summaryTitle": "Por favor, apresente este resumo ao consultor",
     "advisorConnectButton": "Conectar consultor",
     "advisorModalTitle": "Conexão com consultor",
@@ -246,7 +246,7 @@ const i18n = {
       "placeholderEmail": "max.mustermann@email.com",
       "btnGenerate": "Meine Zusammenfassung erstellen",
       "btnEdit": "Bearbeiten",
-      "legalText": "{company} ist der Verantwortliche im Sinne des Datenschutzrechts für die Verarbeitung der personenbezogenen Daten der betroffenen Person und teilt mit, dass diese Daten gemäß den Bestimmungen der Verordnung (EU) 2016/679 des Europäischen Parlaments und des Rates vom 27. April 2016 (DSGVO) sowie des Organgesetzes 3/2018 vom 5. Dezember über den Schutz personenbezogener Daten und die Gewährleistung digitaler Rechte (LOPDGDD) verarbeitet werden.",
+      "legalText": "OK MOBILITY GROUP, S.L.U. ist der Verantwortliche im Sinne des Datenschutzrechts für die Verarbeitung der personenbezogenen Daten der betroffenen Person und teilt mit, dass diese Daten gemäß den Bestimmungen der Verordnung (EU) 2016/679 des Europäischen Parlaments und des Rates vom 27. April 2016 (DSGVO) sowie des Organgesetzes 3/2018 vom 5. Dezember über den Schutz personenbezogener Daten und die Gewährleistung digitaler Rechte (LOPDGDD) verarbeitet werden.",
     "summaryTitle": "Bitte legen Sie diese Zusammenfassung dem Berater vor",
     "advisorConnectButton": "Berater verbinden",
     "advisorModalTitle": "Beraterverbindung",
@@ -285,7 +285,7 @@ const i18n = {
             "placeholderEmail": "jan.jansen@email.com",
             "btnGenerate": "Mijn overzicht genereren",
             "btnEdit": "Bewerken",
-            "legalText": "{company} is de verwerkingsverantwoordelijke voor de persoonsgegevens van de betrokkene en informeert dat deze gegevens worden verwerkt in overeenstemming met Verordening (EU) 2016/679 van het Europees Parlement en de Raad van 27 april 2016 (AVG) en Organieke Wet 3/2018 van 5 december inzake de bescherming van persoonsgegevens en de waarborging van digitale rechten (LOPDGDD).",
+            "legalText": "OK MOBILITY GROUP, S.L.U. is de verwerkingsverantwoordelijke voor de persoonsgegevens van de betrokkene en informeert dat deze gegevens worden verwerkt in overeenstemming met Verordening (EU) 2016/679 van het Europees Parlement en de Raad van 27 april 2016 (AVG) en Organieke Wet 3/2018 van 5 december inzake de bescherming van persoonsgegevens en de waarborging van digitale rechten (LOPDGDD).",
             "summaryTitle": "Toon dit overzicht aan de adviseur",
             "advisorConnectButton": "Adviseur verbinden",
             "advisorModalTitle": "Verbinding met adviseur",
@@ -440,83 +440,6 @@ function sanitizeAgencyName(name) {
     return cleaned || null;
 }
 
-function getFormattedLegalText(rawText) {
-    if (!rawText) return '';
-    const company = state.agencyName || window.BRAND?.name || 'MobilityOS';
-    return rawText.replace(/\{company\}/g, company);
-}
-
-function updateAiSubtitle(customStatus = null) {
-    const subtitleEl = document.getElementById('pageSubtitle');
-    if (!subtitleEl) return;
-
-    const lang = state.lang || 'en';
-    const summaryVisible = dom.summaryView && dom.summaryView.style.display !== 'none';
-    const status = customStatus || (state.advisorConnected ? 'connected' : (state.peer && !state.advisorConnected ? 'connecting' : 'default'));
-
-    const texts = {
-        fr: {
-            default: "Saisissez vos données. Vos informations restent privées et sécurisées.",
-            connecting: "Établissement d'une connexion sécurisée avec l'appareil du conseiller...",
-            connected: "Connexion chiffrée de bout en bout active avec le conseiller.",
-            summary: "Vos données sont prêtes. Veuillez les transmettre au conseiller."
-        },
-        en: {
-            default: "Enter your details. Your information remains private and secure.",
-            connecting: "Establishing secure connection with the advisor's device...",
-            connected: "End-to-end encrypted connection is now active with the advisor.",
-            summary: "Your details are ready. Please present them to the advisor."
-        },
-        es: {
-            default: "Introduzca sus datos. Su información permanece privada y segura.",
-            connecting: "Estableciendo conexión segura con el dispositivo del asesor...",
-            connected: "Conexión encriptada de extremo a extremo activa con el asesor.",
-            summary: "Sus datos están listos. Por favor, preséntelos al asesor."
-        },
-        it: {
-            default: "Inserisci i tuoi dati. Le tue informazioni rimangono private e sicure.",
-            connecting: "Stabilendo una connessione sicura con il dispositivo del consulente...",
-            connected: "Connessione crittografata end-to-end attiva con il consulente.",
-            summary: "I tuoi dati sono pronti. Si prega di presentarli al consulente."
-        },
-        pt: {
-            default: "Insira os seus dados. As suas informações permanecem privadas e seguras.",
-            connecting: "Estabelecendo ligação segura com o dispositivo do consultor...",
-            connected: "Ligação encriptada de ponta a ponta activa com o consultor.",
-            summary: "Os seus dados estão prontos. Por favor, apresente-os ao consultor."
-        },
-        de: {
-            default: "Geben Sie Ihre Daten ein. Ihre Informationen bleiben privat und sicher.",
-            connecting: "Sichere Verbindung mit dem Gerät des Beraters wird hergestellt...",
-            connected: "Ende-zu-Ende-verschlüsselte Verbindung mit dem Berater ist aktiv.",
-            summary: "Ihre Daten sind bereit. Bitte legen Sie diese dem Berater vor."
-        },
-        nl: {
-            default: "Voer uw gegevens in. Uw informatie blijft privé en veilig.",
-            connecting: "Bezig met het opzetten van een beveiligde verbinding met het apparaat van de adviseur...",
-            connected: "Eind-tot-eind gecodeerde verbinding met de adviseur is actief.",
-            summary: "Uw gegevens zijn klaar. Toon deze aan de adviseur."
-        }
-    };
-
-    const t = texts[lang] || texts.fr;
-    let text = t.default;
-    if (summaryVisible) {
-        text = t.summary;
-    } else if (status === 'connecting') {
-        text = t.connecting;
-    } else if (status === 'connected') {
-        text = t.connected;
-    }
-
-    subtitleEl.innerHTML = `<i class='bx bx-sparkles'></i><span>${text}</span>`;
-    
-    // Re-trigger reveal animation
-    subtitleEl.style.animation = 'none';
-    subtitleEl.offsetHeight; /* trigger reflow */
-    subtitleEl.style.animation = '';
-}
-
 function setAgencyBranding(agencyName) {
     if (!dom.agencyBrandText) return;
     dom.agencyBrandText.textContent = agencyName || DEFAULT_BRAND_SLOGAN;
@@ -539,7 +462,6 @@ function renderDynamicFields(fields) {
     if (!container) return;
 
     container.innerHTML = '';
-    let fieldIndex = 0;
 
     const iconMap = { text:'bx-text', email:'bx-envelope', tel:'bx-phone', number:'bx-calculator', date:'bx-calendar', url:'bx-link' };
 
@@ -549,8 +471,7 @@ function renderDynamicFields(fields) {
             // ── Toggle Group ───────────────────────────────────────────
             if (field.type === 'toggle_group') {
                 const groupWrap = document.createElement('div');
-                groupWrap.className = 'temp-address-wrapper slide-in-field';
-                groupWrap.style.animationDelay = `${fieldIndex++ * 0.04}s`;
+                groupWrap.className = 'temp-address-wrapper';
 
                 const toggleDiv = document.createElement('div');
                 toggleDiv.className = 'temp-address-toggle';
@@ -664,10 +585,12 @@ function renderDynamicFields(fields) {
                 const zipPlaceholder  = t.placeholderZip    || '75000';
                 const cityPlaceholder = t.placeholderCity   || 'Paris';
 
+                const blockWrap = document.createElement('div');
+                blockWrap.className = 'input-wrapper address-wrapper';
+                blockWrap.id = wrapId;
+
                 const addressWrap = document.createElement('div');
-                addressWrap.className = 'input-wrapper address-wrapper slide-in-field';
-                addressWrap.style.animationDelay = `${fieldIndex++ * 0.04}s`;
-                addressWrap.id = wrapId;
+                addressWrap.className = 'input-wrapper address-wrapper';
                 addressWrap.innerHTML = `
                     <label for="${addrId}" id="${lblId}">${addrLabel}</label>
                     <div class="input-with-icon">
@@ -678,8 +601,7 @@ function renderDynamicFields(fields) {
                 `;
 
                 const row = document.createElement('div');
-                row.className = 'form-group-row slide-in-field';
-                row.style.animationDelay = `${fieldIndex++ * 0.04}s`;
+                row.className = 'form-group-row';
                 row.id = isFirst ? 'wrap_zipCode_city' : '';
 
                 const zipWrap = document.createElement('div');
@@ -710,8 +632,7 @@ function renderDynamicFields(fields) {
                 // Optional country combobox (only for the first/canonical address_block)
                 if (showCountry) {
                     const countryWrap = document.createElement('div');
-                    countryWrap.className = 'input-wrapper slide-in-field';
-                    countryWrap.style.animationDelay = `${fieldIndex++ * 0.04}s`;
+                    countryWrap.className = 'input-wrapper';
                     countryWrap.id = 'wrap_country';
                     countryWrap.innerHTML = `
                         <label for="country" id="lblCountry">${t.country || 'Country'}</label>
@@ -759,8 +680,7 @@ function renderDynamicFields(fields) {
                 const phonePlaceholder = t.phonePlaceholder || '6 12 34 56 78';
 
                 const row = document.createElement('div');
-                row.className = 'form-group-row slide-in-field';
-                row.style.animationDelay = `${fieldIndex++ * 0.04}s`;
+                row.className = 'form-group-row';
                 row.id = wrapId;
                 row.innerHTML = `
                     <div class="input-wrapper zip-wrapper" id="wrap_${codeId}">
@@ -788,8 +708,7 @@ function renderDynamicFields(fields) {
             // ── Standard Field ─────────────────────────────────────────
             } else {
                 const wrapper = document.createElement('div');
-                wrapper.className = 'input-wrapper slide-in-field';
-                wrapper.style.animationDelay = `${fieldIndex++ * 0.04}s`;
+                wrapper.className = 'input-wrapper';
                 wrapper.id = `wrap_${field.id}`;
 
                 const iconClass = field.icon || iconMap[field.type] || 'bx-edit-alt';
@@ -906,7 +825,7 @@ async function hydrateAgencyBrandingFromUrl() {
                 }
                 // Repaint legal-text nodes immediately
                 const t = i18n[state.lang];
-                if (t) document.querySelectorAll('.legal-text').forEach(el => { el.textContent = getFormattedLegalText(t.legalText); });
+                if (t) document.querySelectorAll('.legal-text').forEach(el => { el.textContent = t.legalText; });
             }
 
             // Champs dynamiques personnalisés
@@ -1039,7 +958,7 @@ function applyLanguage(langCode) {
     
     // Legal Texts
     document.querySelectorAll('.legal-text').forEach(el => {
-        el.textContent = getFormattedLegalText(t.legalText);
+        el.textContent = t.legalText;
     });
 
     // Advisor Modal Labels
@@ -1068,7 +987,6 @@ function applyLanguage(langCode) {
     if (state.activeFields?.length) {
         updateDynamicFieldLabels(state.activeFields, langCode);
     }
-    updateAiSubtitle();
 }
 
 // Re-paint dashboard-set field labels (and toggle group notes) on lang change.
@@ -1153,7 +1071,6 @@ function resetClientForm() {
     dom.summaryView.style.display = 'none';
     dom.form.style.display = 'flex';
     document.getElementById('pageTitle').textContent = i18n[state.lang].pageTitle;
-    updateAiSubtitle();
 
     // Reset country to language default
     state.countrySelectedManually = false;
@@ -1367,7 +1284,6 @@ dom.form.addEventListener('submit', (e) => {
     document.getElementById('pageTitle').textContent = i18n[state.lang].summaryTitle;
     dom.form.style.display = 'none';
     dom.summaryView.style.display = 'flex';
-    updateAiSubtitle();
 });
 
 // Edit Button logic
@@ -1375,7 +1291,6 @@ dom.btnEdit.addEventListener('click', () => {
     document.getElementById('pageTitle').textContent = i18n[state.lang].pageTitle;
     dom.summaryView.style.display = 'none';
     dom.form.style.display = 'flex';
-    updateAiSubtitle();
 });
 
 // ============================================================================
@@ -2102,7 +2017,6 @@ function updateClientStatus(status) {
     dom.btnOpenAdvisorModal.classList.remove('connected', 'connecting');
     if (status === 'connecting') dom.btnOpenAdvisorModal.classList.add('connecting');
     if (status === 'connected')  dom.btnOpenAdvisorModal.classList.add('connected');
-    updateAiSubtitle(status);
 }
 
 function clampText(value, maxLength) {

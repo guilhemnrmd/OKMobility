@@ -794,7 +794,7 @@ const I18N_RETAILER = {
         statusConnected:'Client connecté', statusError:'Erreur de connexion',
         errNoConnDisconnect:'Aucune connexion établie. Impossible de couper la connexion.',
         errNoConnLanguage:'Aucune connexion établie. Impossible de changer la langue du client.',
-        gdprText:'{company} est responsable du traitement des données personnelles, conformément au Règlement (UE) 2016/679 (RGPD) et à la loi LOPDG.',
+        gdprText:'OK MOBILITY GROUP, S.L.U. est responsable du traitement des données personnelles, conformément au Règlement (UE) 2016/679 (RGPD) et à la loi LOPDG.',
         advisorLegal:'Usage interne autorisé exclusivement. Aucune donnée client n\'est stockée sur des serveurs externes.'
     },
     en: {
@@ -808,7 +808,7 @@ const I18N_RETAILER = {
         statusConnected:'Client connected', statusError:'Connection error',
         errNoConnDisconnect:'No connection established. Cannot disconnect.',
         errNoConnLanguage:'No connection established. Cannot change client language.',
-        gdprText:'{company} is the data controller. Data is processed pursuant to Regulation (EU) 2016/679 (GDPR) and the LOPDG.',
+        gdprText:'OK MOBILITY GROUP, S.L.U. is the data controller. Data is processed pursuant to Regulation (EU) 2016/679 (GDPR) and the LOPDG.',
         advisorLegal:'Authorised internal use only. No client data is stored on external servers.'
     },
     es: {
@@ -822,7 +822,7 @@ const I18N_RETAILER = {
         statusConnected:'Cliente conectado', statusError:'Error de conexión',
         errNoConnDisconnect:'No hay conexión establecida. No se puede cortar la conexión.',
         errNoConnLanguage:'No hay conexión establecida. No se puede cambiar el idioma del cliente.',
-        gdprText:'{company} es el Responsable del tratamiento de los datos personales conforme al Reglamento (UE) 2016/679 (RGPD) y la LOPDG.',
+        gdprText:'OK MOBILITY GROUP, S.L.U. es el Responsable del tratamiento de los datos personales conforme al Reglamento (UE) 2016/679 (RGPD) y la LOPDG.',
         advisorLegal:'Uso interno autorizado exclusivamente. No se almacena ninguna información del cliente en servidores externos.'
     },
     it: {
@@ -836,7 +836,7 @@ const I18N_RETAILER = {
         statusConnected:'Cliente connesso', statusError:'Errore di connessione',
         errNoConnDisconnect:'Nessuna connessione attiva. Impossibile disconnettersi.',
         errNoConnLanguage:'Nessuna connessione attiva. Impossibile cambiare la lingua del cliente.',
-        gdprText:'{company} è il Titolare del trattamento dei dati ai sensi del Regolamento (UE) 2016/679 (GDPR) e LOPDG.',
+        gdprText:'OK MOBILITY GROUP, S.L.U. è il Titolare del trattamento dei dati ai sensi del Regolamento (UE) 2016/679 (GDPR) e LOPDG.',
         advisorLegal:'Uso interno autorizzato esclusivamente. Nessun dato cliente viene memorizzato su server esterni.'
     },
     pt: {
@@ -850,7 +850,7 @@ const I18N_RETAILER = {
         statusConnected:'Cliente ligado', statusError:'Erro de ligação',
         errNoConnDisconnect:'Nenhuma ligação estabelecida. Impossível desligar.',
         errNoConnLanguage:'Nenhuma ligação estabelecida. Impossível mudar o idioma do cliente.',
-        gdprText:'{company} é o Responsável pelo tratamento dos dados nos termos do Regulamento (UE) 2016/679 (RGPD) e LOPDG.',
+        gdprText:'OK MOBILITY GROUP, S.L.U. é o Responsável pelo tratamento dos dados nos termos do Regulamento (UE) 2016/679 (RGPD) e LOPDG.',
         advisorLegal:'Uso interno autorizado exclusivamente. Nenhum dado do cliente é armazenado em servidores externos.'
     },
     de: {
@@ -864,7 +864,7 @@ const I18N_RETAILER = {
         statusConnected:'Kunde verbunden', statusError:'Verbindungsfehler',
         errNoConnDisconnect:'Keine Verbindung. Trennen nicht möglich.',
         errNoConnLanguage:'Keine Verbindung. Sprachwechsel nicht möglich.',
-        gdprText:'{company} ist der Verantwortliche im Sinne der DSGVO (EU 2016/679) und LOPDG.',
+        gdprText:'OK MOBILITY GROUP, S.L.U. ist der Verantwortliche im Sinne der DSGVO (EU 2016/679) und LOPDG.',
         advisorLegal:'Ausschließlich autorisierter interner Gebrauch. Keine Kundendaten werden auf externen Servern gespeichert.'
     },
     nl: {
@@ -878,19 +878,13 @@ const I18N_RETAILER = {
         statusConnected:'Klant verbonden', statusError:'Verbindingsfout',
         errNoConnDisconnect:'Geen verbinding. Verbreken niet mogelijk.',
         errNoConnLanguage:'Geen verbinding. Taal wijzigen niet mogelijk.',
-        gdprText:'{company} is verwerkingsverantwoordelijke conform Verordening (EU) 2016/679 (AVG) en LOPDG.',
+        gdprText:'OK MOBILITY GROUP, S.L.U. is verwerkingsverantwoordelijke conform Verordening (EU) 2016/679 (AVG) en LOPDG.',
         advisorLegal:'Uitsluitend geautoriseerd intern gebruik. Geen klantgegevens worden op externe servers opgeslagen.'
     }
 };
 
 function lstr(lang, key) {
     return (I18N_RETAILER[lang] || I18N_RETAILER.es)[key] || key;
-}
-
-function getFormattedGdprText(rawText) {
-    if (!rawText) return '';
-    const company = resolveAgencyName() || window.BRAND?.name || 'MobilityOS';
-    return rawText.replace(/\{company\}/g, company);
 }
 
 function paintRetailerChrome(lang) {
@@ -913,7 +907,7 @@ function paintRetailerChrome(lang) {
     });
     // GDPR disclaimer (one in setup view, one in disconnected view, etc.)
     document.querySelectorAll('.legal-text-gdpr').forEach(el => {
-        if (t.gdprText) el.textContent = getFormattedGdprText(t.gdprText);
+        if (t.gdprText) el.textContent = t.gdprText;
     });
 }
 
@@ -969,7 +963,6 @@ function renderRetailerFields(fields, lang) {
 
     const list = (Array.isArray(fields) && fields.length) ? fields : DEFAULT_RETAILER_FIELDS;
     let firstAddressBlockSeen = false;
-    let fieldIndex = 0;
 
     function renderOne(field, parentGroupId = null) {
         // ── Address block → 3 rows + dedicated map panel ──────────────
@@ -986,13 +979,6 @@ function renderRetailerFields(fields, lang) {
             const rowZip  = makeRow({ key: zipKey,  label: lstr(lang, 'zipCode') });
             const rowCity = makeRow({ key: cityKey, label: lstr(lang, 'city') });
 
-            rowAddr.classList.add('slide-in-field');
-            rowAddr.style.animationDelay = `${fieldIndex++ * 0.04}s`;
-            rowZip.classList.add('slide-in-field');
-            rowZip.style.animationDelay = `${fieldIndex++ * 0.04}s`;
-            rowCity.classList.add('slide-in-field');
-            rowCity.style.animationDelay = `${fieldIndex++ * 0.04}s`;
-
             attachCopy(rowAddr); attachCopy(rowZip); attachCopy(rowCity);
             registerField(addrKey, rowAddr, field, { parentGroupId, isAddressKey: true });
             registerField(zipKey,  rowZip,  field, { parentGroupId });
@@ -1004,8 +990,6 @@ function renderRetailerFields(fields, lang) {
             // Country row: only if the agency has enabled it for this address_block (default: enabled)
             if (ctryKey && field.requireCountry !== false) {
                 const rowCtry = makeRow({ key: ctryKey, label: lstr(lang, 'country') });
-                rowCtry.classList.add('slide-in-field');
-                rowCtry.style.animationDelay = `${fieldIndex++ * 0.04}s`;
                 attachCopy(rowCtry);
                 registerField(ctryKey, rowCtry, field, { parentGroupId });
                 target.appendChild(rowCtry);
@@ -1014,8 +998,7 @@ function renderRetailerFields(fields, lang) {
             // Map panel for this address block
             const mapColor = isFirst ? '#3B82F6' : '#8B5CF6';
             const mapWrap = document.createElement('div');
-            mapWrap.className = 'glass-panel map-col-panel slide-in-field';
-            mapWrap.style.animationDelay = `${fieldIndex++ * 0.04}s`;
+            mapWrap.className = 'glass-panel map-col-panel';
             mapWrap.id = `mapWrapper_${addrKey}`;
             mapWrap.innerHTML = `
                 <div class="map-col-header">
@@ -1057,8 +1040,7 @@ function renderRetailerFields(fields, lang) {
         // ── Toggle group → header + collapsible inner area ────────────
         } else if (field.type === 'toggle_group') {
             const wrap = document.createElement('div');
-            wrap.className = 'data-group-wrap slide-in-field';
-            wrap.style.animationDelay = `${fieldIndex++ * 0.04}s`;
+            wrap.className = 'data-group-wrap';
             wrap.id = `group_${field.id}`;
 
             const header = document.createElement('div');
@@ -1097,8 +1079,6 @@ function renderRetailerFields(fields, lang) {
                 label: fieldLabel(field, lang),
                 icon: field.icon || (isPhone ? 'bx-phone' : (field.type === 'email' ? 'bx-envelope' : ''))
             , isPhone });
-            row.classList.add('slide-in-field');
-            row.style.animationDelay = `${fieldIndex++ * 0.04}s`;
             attachCopy(row);
             registerField(field.id, row, field, { parentGroupId, isPhone });
             const target = parentGroupId ? groupRegistry[parentGroupId].innerEl : dom.dataFieldsContainer;

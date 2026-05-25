@@ -461,16 +461,10 @@ window.runLicenseGate = async function () {
 
         // Custom logo (parity with client page)
         const logoContainer = document.querySelector('.logo');
-        const qrBadges = document.querySelectorAll('.qr-center-badge');
         if (s.logoUrl) {
             if (logoContainer) {
                 logoContainer.innerHTML = `<img src="${s.logoUrl}" alt="Logo" class="logo-img logo-img-brand" style="max-height:40px;border-radius:4px;">`;
             }
-            qrBadges.forEach(badge => {
-                const isLightbox = badge.closest('#qrLightboxFrame') !== null;
-                const size = isLightbox ? '60px' : '32px';
-                badge.innerHTML = `<img src="${s.logoUrl}" style="width:${size}; height:${size}; object-fit:contain; border-radius:4px; background:white; padding:2px; box-shadow:0 2px 6px rgba(0,0,0,0.15);">`;
-            });
         } else {
             if (logoContainer) {
                 logoContainer.innerHTML = '';
