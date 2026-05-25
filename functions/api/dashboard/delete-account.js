@@ -30,10 +30,22 @@ export async function onRequest(context) {
         return jsonError('Confirmation email incorrecte', 400);
     }
 
-    // ── Delete: account + all sessions + license entries ──────────────────
+    // ── Delete: license entries + sessions + account ──────────────────
     try {
-        // 1. Remove main account record
-        await env.OKM_ACCOUNTS.delete(`account:${email}`);
+        const account = JSON.parse(accountRaw);
+        const agencies = account.agencies || [];
+
+        // 1. Remove license entries and stats for all agencies of this account
+        if (env.OKM_LICENSES) {
+            for (const agency of agencies) {
+                if (agency.id) {
+                    await Promise.all([
+                        env.OKM_LICENSES.delete(`agency:${agency.id}`).catch(() => {}),
+                        env.OKM_LICENSES.delete(`stats:${agency.id}`).catch(() => {})
+                    ]);
+                }
+            }
+        }
 
         // 2. Remove the current session
         const cookie = request.headers.get('Cookie') || '';
@@ -42,14 +54,8 @@ export async function onRequest(context) {
             await env.OKM_ACCOUNTS.delete(`session:${sessionId}`);
         }
 
-        // 3. Remove license entries for all agencies of this account
-        const account = JSON.parse(accountRaw);
-        const agencies = account.agencies || [];
-        for (const agency of agencies) {
-            if (agency.id) {
-                await env.OKM_LICENSES.delete(`license:${agency.id}`).catch(() => {});
-            }
-        }
+        // 3. Remove main account record (done last so that if any cleanup fails, the account isn't orphaned)
+        await env.OKM_ACCOUNTS.delete(`account:${email}`);
     } catch (err) {
         console.error('[DELETE ACCOUNT] Error:', err?.message || err);
         return jsonError('Erreur lors de la suppression', 500);
