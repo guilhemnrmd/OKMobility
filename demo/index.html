@@ -11,12 +11,12 @@
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-display: 'Outfit', 'Inter', sans-serif;
     --accent: #2054EA;
-    --accent-end: #05DBF3;
-    --text: #ffffff;
-    --text-sec: rgba(255,255,255,0.5);
-    --glass-bg: rgba(255, 255, 255, 0.03);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-highlight: rgba(255, 255, 255, 0.12);
+    --accent-end: #05C4E8;
+    --text: #17181D;
+    --text-sec: #5B6070;
+    --glass-bg: rgba(245, 249, 255, 0.76);
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --glass-highlight: rgba(0, 0, 0, 0.04);
     --r-xl: 28px; 
     --r-lg: 22px; 
     --r-md: 13px;
@@ -27,7 +27,7 @@
 body{font-family:var(--font-sans);background:transparent;color:var(--text);height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;-webkit-font-smoothing:antialiased;position:relative}
 
 .ambient-background{position:fixed;inset:-8vh -8vw;z-index:-1;overflow:hidden;pointer-events:none}
-.blob{position:absolute;filter:blur(80px);opacity:.35;border-radius:50%;animation:float 20s infinite ease-in-out}
+.blob{position:absolute;filter:blur(80px);opacity:0.35;border-radius:50%;animation:float 20s infinite ease-in-out}
 .blob-1{top:-10%;left:-10%;width:50vw;height:50vw;background:#2054EA}
 .blob-2{bottom:-10%;right:-10%;width:60vw;height:60vw;background:#05DBF3;animation-delay:-5s}
 .blob-3{top:40%;left:40%;width:40vw;height:40vw;background:#4F46E5;animation-delay:-10s}
@@ -36,7 +36,7 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
 .demo-stage{display:flex;align-items:center;gap:36px;z-index:10;transform:scale(.85);transition: transform 0.3s ease;}
 
 /* ─── PHONE ─── */
-.phone{width:280px;height:570px;background:#000;border-radius:42px;border:4px solid #333;position:relative;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.6)}
+.phone{width:280px;height:570px;background:#f5f5f7;border-radius:42px;border:4px solid #d1d1d6;position:relative;overflow:hidden;box-shadow:0 24px 64px rgba(31,38,135,.13)}
 .phone::before{content:'';position:absolute;top:14px;left:50%;transform:translateX(-50%);width:90px;height:22px;background:#17181D;border-radius:14px;z-index:20}
 .phone-inner{height:100%;padding:55px 0 0;overflow:hidden;position:relative}
 
@@ -58,36 +58,36 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
 .cam-label{color:rgba(255,255,255,.6);font-size:11px;margin-top:16px;font-weight:500}
 
 /* Safari banner (iOS style) */
-.safari-banner{position:absolute;bottom:0;left:0;right:0;background:rgba(28,28,30,.92);backdrop-filter:blur(16px);border-radius:14px 14px 0 0;padding:12px 16px;display:flex;align-items:center;gap:10px;transform:translateY(100%);transition:transform .4s cubic-bezier(.16,1,.3,1);z-index:22;border-top:0.5px solid rgba(255,255,255,0.1)}
+.safari-banner{position:absolute;bottom:0;left:0;right:0;background:rgba(255,255,255,.94);backdrop-filter:blur(16px);border-radius:14px 14px 0 0;padding:12px 16px;display:flex;align-items:center;gap:10px;transform:translateY(100%);transition:transform .4s cubic-bezier(.16,1,.3,1);z-index:22;border-top:0.5px solid rgba(0,0,0,0.06);box-shadow: 0 -4px 16px rgba(0,0,0,0.05)}
 .safari-banner.show{transform:translateY(0)}
 .safari-banner .sf-icon{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--accent),var(--accent-end));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
 .safari-banner .sf-text{flex:1}
-.safari-banner .sf-domain{font-size:10px;color:rgba(255,255,255,0.4)}
-.safari-banner .sf-title{font-size:11px;font-weight:600;color:#fff}
-.safari-banner .sf-open{background:#fff;color:#000;border:none;border-radius:16px;padding:6px 14px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer}
+.safari-banner .sf-domain{font-size:10px;color:rgba(0,0,0,0.4)}
+.safari-banner .sf-title{font-size:11px;font-weight:600;color:#000}
+.safari-banner .sf-open{background:var(--accent);color:#fff;border:none;border-radius:16px;padding:6px 14px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer}
 
-/* App form (client page - Real Dark Mode Liquid Glass) */
-.app-screen{position:absolute;inset:55px 0 0;background:#17181D;z-index:10;opacity:0;transform:scale(.95);transition:all .4s cubic-bezier(.16,1,.3,1);overflow-y:auto;display:flex;flex-direction:column}
+/* App form (client page - Real Light Mode Liquid Glass) */
+.app-screen{position:absolute;inset:55px 0 0;background:#fff;z-index:10;opacity:0;transform:scale(.95);transition:all .4s cubic-bezier(.16,1,.3,1);overflow-y:auto;display:flex;flex-direction:column}
 .app-screen.active{opacity:1;transform:scale(1)}
 .app-screen::-webkit-scrollbar { width: 3px; }
 .app-screen::-webkit-scrollbar-track { background: transparent; }
-.app-screen::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+.app-screen::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 2px; }
 
-.app-screen::before{content:'';position:absolute;top:-10%;left:-20%;width:150px;height:150px;background:#2054EA;filter:blur(40px);border-radius:50%;opacity:0.25;z-index:-1}
-.app-screen::after{content:'';position:absolute;bottom:-10%;right:-20%;width:180px;height:180px;background:#05DBF3;filter:blur(40px);border-radius:50%;opacity:0.2;z-index:-1}
+.app-screen::before{content:'';position:absolute;top:-10%;left:-20%;width:150px;height:150px;background:var(--accent);filter:blur(40px);border-radius:50%;opacity:0.07;z-index:-1}
+.app-screen::after{content:'';position:absolute;bottom:-10%;right:-20%;width:180px;height:180px;background:var(--accent-end);filter:blur(40px);border-radius:50%;opacity:0.08;z-index:-1}
 
-.app-header{background:rgba(28,28,30,0.6);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.1);padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
+.app-header{background:rgba(255,255,255,0.7);backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,0,0,0.06);padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
 .app-header .brand{display:flex;align-items:center;gap:6px}
 .app-header .logo-c{width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,var(--accent),var(--accent-end));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff}
-.app-header .slogan{font-size:8px;font-weight:500;color:#D0D4DE;text-transform:uppercase;letter-spacing:.04em}
-.app-header .lang-pill{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:3px 9px;font-size:9px;color:#fff;display:flex;align-items:center;gap:4px}
+.app-header .slogan{font-size:8px;font-weight:600;color:var(--text-sec);text-transform:uppercase;letter-spacing:.04em}
+.app-header .lang-pill{background:rgba(0,0,0,0.03);border:1px solid rgba(0,0,0,0.06);border-radius:20px;padding:3px 9px;font-size:9px;color:var(--text);display:flex;align-items:center;gap:4px}
 
-.app-title{padding:14px 16px 2px;font-family:var(--font-display);font-size:18px;font-weight:700;background:linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.6) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.app-title{padding:14px 16px 2px;font-family:var(--font-display);font-size:18px;font-weight:700;background:linear-gradient(135deg, var(--text) 0%, rgba(23,24,29,0.7) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
 /* AI Subtitle with sparkles */
 .ai-subtitle {
     font-size: 8.5px;
-    color: rgba(255, 255, 255, 0.45);
+    color: var(--text-sec);
     display: flex;
     align-items: flex-start;
     gap: 5px;
@@ -97,30 +97,34 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
     line-height: 1.35;
 }
 .ai-subtitle i {
-    color: #05DBF3;
+    color: var(--accent);
     font-size: 11px;
     margin-top: 1px;
     animation: sparkleGlow 2s infinite alternate;
 }
 @keyframes sparkleGlow {
-    0% { transform: scale(0.9); opacity: 0.7; filter: drop-shadow(0 0 1px #05DBF3); }
-    100% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 4px #05DBF3); }
+    0% { transform: scale(0.9); opacity: 0.7; filter: drop-shadow(0 0 1px rgba(32,84,234,0.4)); }
+    100% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 4px rgba(32,84,234,0.4)); }
 }
 
 .app-form{padding:4px 14px;display:flex;flex-direction:column;gap:10px;flex:1}
 .app-field{opacity:0;transform:translateY(8px)}
 .app-field.visible{opacity:1;transform:translateY(0);transition:all .4s cubic-bezier(.16,1,.3,1)}
-.app-field label{display:block;font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:rgba(255,255,255,0.4);margin-bottom:4px;margin-left:4px}
-.app-field .input-box{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:var(--r-md);padding:10px 12px;min-height:38px;font-size:11px;color:#fff;backdrop-filter:blur(8px);transition:all 0.3s ease}
-.app-field .input-box i{color:rgba(255,255,255,0.4);font-size:13px;flex-shrink:0}
-.app-field .input-box.typing{border-color:var(--accent);box-shadow:0 0 0 3px rgba(32,84,234,0.15);background:rgba(255,255,255,0.08)}
-.cursor{display:inline-block;width:2px;height:12px;background:#05C4E8;animation:blink .8s step-end infinite;margin-left:2px;vertical-align:middle}
+.app-field label{display:block;font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-sec);margin-bottom:4px;margin-left:4px}
+.app-field .input-box{display:flex;align-items:center;gap:8px;background:rgba(255, 255, 255, 0.93);border:1px solid rgba(32, 84, 234, 0.09);border-radius:var(--r-md);padding:10px 12px;min-height:38px;font-size:11px;color:var(--text);backdrop-filter:blur(8px);transition:all 0.3s ease;box-shadow: 0 2px 8px rgba(32, 84, 234, 0.04)}
+.app-field .input-box i{color:var(--text-sec);font-size:13px;flex-shrink:0}
+.app-field .input-box.typing {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(32, 84, 234, 0.13), 0 4px 12px rgba(32, 84, 234, 0.07);
+    background: #fff;
+}
+.cursor{display:inline-block;width:2px;height:12px;background:var(--accent);animation:blink .8s step-end infinite;margin-left:2px;vertical-align:middle}
 @keyframes blink{50%{opacity:0}}
 
 /* Temp Address toggle style */
 .app-toggle-wrapper {
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.05);
+    background: rgba(0,0,0,0.01);
+    border: 1px solid rgba(0,0,0,0.04);
     border-radius: var(--r-md);
     padding: 10px;
     margin-bottom: 2px;
@@ -144,8 +148,8 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
     padding-left: 20px;
     cursor: pointer;
     font-size: 8.5px;
-    font-weight: 500;
-    color: #fff;
+    font-weight: 600;
+    color: var(--text-sec);
     user-select: none;
 }
 .custom-checkbox input {
@@ -161,14 +165,14 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
     transform: translateY(-50%);
     height: 12px;
     width: 12px;
-    background-color: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.2);
+    background-color: rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.15);
     border-radius: 3px;
     transition: all 0.2s ease;
 }
 .custom-checkbox input:checked ~ .checkmark {
-    background-color: #34C759;
-    border-color: #34C759;
+    background-color: var(--accent);
+    border-color: var(--accent);
 }
 .checkmark:after {
     content: "";
@@ -190,23 +194,24 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
 .info-btn {
     background: none;
     border: none;
-    color: rgba(255,255,255,0.3);
+    color: var(--text-sec);
     cursor: pointer;
     font-size: 11px;
     padding: 0;
     display: flex;
     align-items: center;
+    opacity: 0.6;
 }
 .info-tooltip {
-    background: rgba(28,28,30,0.92);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.95);
+    border: 1px solid rgba(0,0,0,0.1);
     border-radius: 8px;
     padding: 8px;
     margin-top: 6px;
     font-size: 8px;
-    color: rgba(255,255,255,0.7);
+    color: var(--text-sec);
     line-height: 1.35;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 .temp-address-sliding-section {
     display: grid;
@@ -235,18 +240,18 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
     height: 100%;
     position: absolute;
     inset: 55px 0 0;
-    background: #17181D;
+    background: #fff;
     z-index: 15;
 }
 .summary-card {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.8);
+    border: 1px solid rgba(0,0,0,0.08);
     border-radius: 20px;
     padding: 20px 16px;
     text-align: center;
     width: 100%;
     max-width: 240px;
-    box-shadow: 0 16px 36px rgba(0,0,0,0.3);
+    box-shadow: 0 16px 36px rgba(31,38,135,0.08);
 }
 .summary-card i {
     font-size: 36px;
@@ -256,13 +261,13 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
 .summary-card h3 {
     font-size: 12px;
     font-weight: 600;
-    color: #fff;
+    color: var(--text);
     margin-bottom: 8px;
     line-height: 1.4;
 }
 .summary-card p {
     font-size: 9px;
-    color: rgba(255,255,255,0.5);
+    color: var(--text-sec);
     line-height: 1.4;
     margin-bottom: 0;
 }
@@ -272,69 +277,69 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
 .flow-connector.active{opacity:1}
 .flow-lock{font-size:18px}
 .flow-dots{display:flex;gap:5px}
-.flow-dot{width:6px;height:6px;border-radius:50%;background:#05DBF3;opacity:.3}
+.flow-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:.3}
 .flow-dot.pulse{animation:dotP 1.2s ease-in-out infinite}
 .flow-dot:nth-child(2){animation-delay:.2s}
 .flow-dot:nth-child(3){animation-delay:.4s}
 @keyframes dotP{0%,100%{opacity:.2;transform:scale(.8)}50%{opacity:1;transform:scale(1.3)}}
-.flow-label{font-size:9px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1.5px;font-weight:600}
-.flow-timer{font-family:'SF Mono','Fira Code',monospace;font-size:22px;font-weight:700;background:linear-gradient(125deg,#fff,rgba(255,255,255,0.5));-webkit-background-clip:text;-webkit-text-fill-color:transparent;opacity:0;transition:opacity .4s}
+.flow-label{font-size:9px;color:rgba(0,0,0,0.4);text-transform:uppercase;letter-spacing:1.5px;font-weight:600}
+.flow-timer{font-family:'SF Mono','Fira Code',monospace;font-size:22px;font-weight:700;background:linear-gradient(125deg,var(--text),var(--text-sec));-webkit-background-clip:text;-webkit-text-fill-color:transparent;opacity:0;transition:opacity .4s}
 .flow-timer.active{opacity:1}
 
 /* Status Indicator Dot */
-.status-indicator { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); transition: all 0.5s ease }
-.status-indicator.connected { background: #34C759; border-color: #34C759; box-shadow: 0 0 10px rgba(52,199,89,0.6), inset 0 1px 1px rgba(255,255,255,0.5); animation: statusPulse 2s infinite }
+.status-indicator { width: 8px; height: 8px; border-radius: 50%; background: rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.15); transition: all 0.5s ease }
+.status-indicator.connected { background: #34C759; border-color: #34C759; box-shadow: 0 0 10px rgba(52,199,89,0.5), inset 0 1px 1px rgba(255,255,255,0.5); animation: statusPulse 2s infinite }
 @keyframes statusPulse { 0%, 100% { opacity: 0.8; } 50% { opacity: 1; filter: brightness(1.2); } }
 
 /* ─── LAPTOP ─── */
-.laptop{width:440px;background:#17181D;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:.5px solid rgba(255,255,255,.1);border-radius:var(--r-xl);overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.6);transition:width var(--spring-duration) var(--spring-easing)}
+.laptop{width:440px;background:rgba(255, 255, 255, 0.74);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:.5px solid rgba(255,255,255,.5);border-radius:var(--r-xl);overflow:hidden;box-shadow:0 30px 60px rgba(31,38,135,.1);transition:width var(--spring-duration) var(--spring-easing)}
 .laptop.expanded { width: 680px }
-.laptop-bar{height:32px;background:#111;border-bottom:1px solid #222;display:flex;align-items:center;padding:0 12px;gap:6px}
+.laptop-bar{height:32px;background:#f0f0f3;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;padding:0 12px;gap:6px}
 .laptop-bar .dot{width:10px;height:10px;border-radius:50%}
 .laptop-bar .dot:nth-child(1){background:#ff5f57}.laptop-bar .dot:nth-child(2){background:#ffbd2e}.laptop-bar .dot:nth-child(3){background:#28c840}
-.laptop-bar .url{margin-left:14px;font-size:10px;color:#8c8e96;background:#000;padding:3px 12px;border-radius:6px}
-.laptop-screen{padding:18px;min-height:380px;background:rgba(28,28,30,0.6);display:flex;flex-direction:column;justify-content:space-between}
+.laptop-bar .url{margin-left:14px;font-size:10px;color:var(--text-sec);background:rgba(0,0,0,0.03);border: 0.5px solid rgba(0,0,0,0.05);padding:3px 12px;border-radius:6px}
+.laptop-screen{padding:18px;min-height:380px;background:rgba(245, 249, 255, 0.65);display:flex;flex-direction:column;justify-content:space-between}
 .lp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .lp-brand{display:flex;align-items:center;gap:7px}
 .lp-brand .logo-c{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--accent),var(--accent-end));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
-.lp-brand span{font-size:9px;font-weight:500;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.04em}
+.lp-brand span{font-size:9px;font-weight:600;color:var(--text-sec);text-transform:uppercase;letter-spacing:.04em}
 .lp-controls{display:flex;gap:6px}
-.lp-controls .ctrl-btn{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;font-size:13px;color:rgba(255,255,255,0.4)}
-.lp-title{font-family:var(--font-display);font-size:19px;font-weight:700;background:linear-gradient(125deg,#fff,#aaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
-.lp-subtitle{font-size:10.5px;color:rgba(255,255,255,0.4);margin-bottom:12px}
+.lp-controls .ctrl-btn{width:28px;height:28px;border-radius:8px;background:rgba(0,0,0,.03);border:1px solid rgba(0,0,0,0.03);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text-sec)}
+.lp-title{font-family:var(--font-display);font-size:19px;font-weight:700;background:linear-gradient(125deg,var(--text),#5B6070);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.lp-subtitle{font-size:10.5px;color:var(--text-sec);margin-bottom:12px}
 
 /* Session code */
-.session-code{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.03);border:.5px solid rgba(255,255,255,.1);border-radius:var(--r-md);padding:8px 12px;margin-bottom:10px;transition:all 0.5s ease}
+.session-code{display:flex;align-items:center;gap:10px;background:rgba(255, 255, 255, 0.6);border:.5px solid rgba(0,0,0,.08);border-radius:var(--r-md);padding:8px 12px;margin-bottom:10px;transition:all 0.5s ease;box-shadow: 0 2px 8px rgba(0,0,0,0.02)}
 .session-code.hidden{opacity:0;height:0;padding:0;margin:0;overflow:hidden;border:none}
-.session-code .sc-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,0.4)}
-.session-code .sc-value{font-family:'SF Mono','Fira Code',monospace;font-size:16px;font-weight:700;letter-spacing:2px;color:#fff}
-.session-code .sc-copy{width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,.05);border:none;display:flex;align-items:center;justify-content:center;font-size:11px;color:rgba(255,255,255,0.4);margin-left:auto}
+.session-code .sc-label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-sec)}
+.session-code .sc-value{font-family:'SF Mono','Fira Code',monospace;font-size:16px;font-weight:700;letter-spacing:2px;color:var(--text)}
+.session-code .sc-copy{width:24px;height:24px;border-radius:6px;background:rgba(0,0,0,.03);border:none;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-sec);margin-left:auto}
 
 /* QR area */
-.lp-qr{display:flex;flex-direction:column;align-items:center;padding:16px;background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.15);border-radius:var(--r-lg);margin-bottom:12px;opacity:1;transition:all .5s ease}
+.lp-qr{display:flex;flex-direction:column;align-items:center;padding:16px;background:rgba(255,255,255,.3);border:1px dashed rgba(0,0,0,.12);border-radius:var(--r-lg);margin-bottom:12px;opacity:1;transition:all .5s ease}
 .lp-qr.hidden{opacity:0;height:0;padding:0;margin:0;overflow:hidden;border:none}
-.lp-qr-box{width:100px;height:100px;background:#111;border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,.3)}
-.lp-qr-box i{font-size:48px;color:#fff;opacity:.6}
+.lp-qr-box{width:100px;height:100px;background:#fff;border-radius:12px;border: 1px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(31,38,135,.06)}
+.lp-qr-box i{font-size:48px;color:var(--accent);opacity:.8}
 
 /* Live Data Columns */
 .live-columns{display:flex;gap:16px;opacity:0;transform:translateY(10px);transition:all .5s cubic-bezier(.16,1,.3,1);height:0;overflow:hidden}
 .live-columns.visible{opacity:1;transform:translateY(0);height:auto;overflow:visible}
 .live-col-data{flex:1;display:flex;flex-direction:column;gap:8px}
-.live-col-map{width:0;opacity:0;border-radius:var(--r-md);background:url('../assets/images/dark-map.png') center/cover;position:relative;transition:width var(--spring-duration) var(--spring-easing), opacity .5s;border:.5px solid rgba(255,255,255,.1)}
+.live-col-map{width:0;opacity:0;border-radius:var(--r-md);background:url('../assets/images/dark-map.png') center/cover;position:relative;transition:width var(--spring-duration) var(--spring-easing), opacity .5s;border:.5px solid rgba(0,0,0,.08)}
 .laptop.expanded .live-col-map{width:220px;opacity:1}
-.map-overlay{position:absolute;bottom:8px;left:8px;right:8px;background:rgba(0,0,0,.74);backdrop-filter:blur(8px);border-radius:8px;padding:6px 10px;display:flex;align-items:center;gap:6px;font-size:9px;color:#fff;font-weight:500;border:1px solid rgba(255,255,255,.1)}
+.map-overlay{position:absolute;bottom:8px;left:8px;right:8px;background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);border-radius:8px;padding:6px 10px;display:flex;align-items:center;gap:6px;font-size:9px;color:var(--text);font-weight:600;border:1px solid rgba(0,0,0,.05);box-shadow: 0 4px 12px rgba(0,0,0,0.05)}
 
 /* Data rows */
-.data-row{display:flex;justify-content:space-between;align-items:center;padding:8px 11px;background:rgba(255,255,255,.03);border:.5px solid rgba(255,255,255,.1);border-radius:var(--r-md);opacity:0;transform:translateX(10px);transition:all 0.3s ease}
+.data-row{display:flex;justify-content:space-between;align-items:center;padding:8px 11px;background:rgba(255,255,255,.6);border:.5px solid rgba(0,0,0,.06);border-radius:var(--r-md);opacity:0;transform:translateX(10px);transition:all 0.3s ease;box-shadow: 0 2px 6px rgba(0,0,0,0.01)}
 .live-columns.visible .data-row{opacity:1;transform:translateX(0);transition:all .5s cubic-bezier(.16,1,.3,1)}
-.data-row .label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,0.4)}
-.data-row .value{font-size:11px;font-weight:500;color:#fff;text-align:right;flex:1;margin-left:12px;margin-right:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.data-row .label{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-sec)}
+.data-row .value{font-size:11px;font-weight:500;color:var(--text);text-align:right;flex:1;margin-left:12px;margin-right:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .data-row .value.flash{animation:flashV .4s ease}
-@keyframes flashV{from{color:#05DBF3;transform:translateY(-2px)}to{color:#fff;transform:translateY(0)}}
-.data-row .copy-btn{width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.05);border:none;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.4);font-size:10px;cursor:pointer;transition:all 0.2s}
-.data-row .copy-btn:hover{background:rgba(255,255,255,0.15);color:#fff}
+@keyframes flashV{from{color:var(--accent);transform:translateY(-2px)}to{color:var(--text);transform:translateY(0)}}
+.data-row .copy-btn{width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.03);border:none;display:flex;align-items:center;justify-content:center;color:var(--text-sec);font-size:10px;cursor:pointer;transition:all 0.2s}
+.data-row .copy-btn:hover{background:rgba(0,0,0,0.08);color:var(--text)}
 
-.watermark{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);font-size:11px;color:rgba(255,255,255,.15);font-weight:500;letter-spacing:.5px;z-index:10}
+.watermark{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);font-size:11px;color:rgba(0,0,0,.15);font-weight:500;letter-spacing:.5px;z-index:10}
 </style>
 </head>
 <body>
@@ -390,11 +395,11 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
                 <div class="app-field" id="f1_row_zip_city">
                     <div style="display: flex; gap: 8px;">
                         <div style="flex: 1;">
-                            <label id="i18n-f1_zip" style="display:block; font-size:7.5px; font-weight:700; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:4px; margin-left:4px;">Code Postal</label>
+                            <label id="i18n-f1_zip" style="display:block; font-size:7.5px; font-weight:700; text-transform:uppercase; color:var(--text-sec); margin-bottom:4px; margin-left:4px;">Code Postal</label>
                             <div class="input-box" id="ib1_zip"><i class='bx bx-hash'></i><span id="t1_zip"></span></div>
                         </div>
                         <div style="flex: 1.5;">
-                            <label id="i18n-f1_city" style="display:block; font-size:7.5px; font-weight:700; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:4px; margin-left:4px;">Ville</label>
+                            <label id="i18n-f1_city" style="display:block; font-size:7.5px; font-weight:700; text-transform:uppercase; color:var(--text-sec); margin-bottom:4px; margin-left:4px;">Ville</label>
                             <div class="input-box" id="ib1_city"><i class='bx bx-buildings'></i><span id="t1_city"></span></div>
                         </div>
                     </div>
@@ -426,11 +431,11 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
                             </div>
                             <div style="display: flex; gap: 8px;">
                                 <div style="flex: 1;">
-                                    <label id="i18n-f_temp_zip" style="display:block; font-size:7.5px; font-weight:700; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:4px; margin-left:4px;">Code Postal</label>
+                                    <label id="i18n-f_temp_zip" style="display:block; font-size:7.5px; font-weight:700; text-transform:uppercase; color:var(--text-sec); margin-bottom:4px; margin-left:4px;">Code Postal</label>
                                     <div class="input-box" id="ib_temp_zip"><i class='bx bx-hash'></i><span id="t_temp_zip"></span></div>
                                 </div>
                                 <div style="flex: 1.5;">
-                                    <label id="i18n-f_temp_city" style="display:block; font-size:7.5px; font-weight:700; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:4px; margin-left:4px;">Ville</label>
+                                    <label id="i18n-f_temp_city" style="display:block; font-size:7.5px; font-weight:700; text-transform:uppercase; color:var(--text-sec); margin-bottom:4px; margin-left:4px;">Ville</label>
                                     <div class="input-box" id="ib_temp_city"><i class='bx bx-buildings'></i><span id="t_temp_city"></span></div>
                                 </div>
                             </div>
@@ -443,7 +448,7 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
                     <label id="i18n-f_phone">Téléphone Mobile</label>
                     <div style="display: flex; gap: 8px;">
                         <div style="flex: 0 0 75px; max-width: 75px;">
-                            <div class="input-box" id="ib_phone_code" style="padding: 10px 8px; justify-content: center; gap: 4px;">
+                            <div class="input-box" id="ib_phone_code" style="padding: 10px 8px; justify-content: center; gap: 4px; border-color: rgba(32, 84, 234, 0.09);">
                                 <span id="t_phone_flag">🇫🇷</span><span id="t_phone_code">+33</span>
                             </div>
                         </div>
@@ -461,7 +466,7 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
 
                 <!-- Action Button -->
                 <div class="form-actions" id="f_actions" style="margin-top: 10px; margin-bottom: 12px; opacity: 0; transform: translateY(8px); transition: all 0.4s ease;">
-                    <button type="button" class="btn-primary" id="btnSubmit" style="width:100%; height:38px; border-radius:12px; font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px; border:none; background:#fff; color:#000; transition:all 0.3s ease;">
+                    <button type="button" class="btn-primary" id="btnSubmit" style="width:100%; height:38px; border-radius:12px; font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:6px; border:none; background:var(--accent); color:#fff; cursor:pointer; transition:all 0.3s ease; box-shadow: 0 4px 12px rgba(32,84,234,0.2)">
                         <span id="txtBtnSubmit">Générer mon résumé</span>
                     </button>
                 </div>
@@ -531,7 +536,7 @@ body{font-family:var(--font-sans);background:transparent;color:var(--text);heigh
 
                 <!-- Retailer Copy All button -->
                 <div id="lpActions" style="opacity: 0; transition: opacity 0.5s ease; width: 100%;">
-                    <button class="btn-primary" id="btnCopyAll" type="button" style="width: 100%; height: 32px; border-radius: 8px; font-size: 10px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; border: none; background: #fff; color: #000;">
+                    <button class="btn-primary" id="btnCopyAll" type="button" style="width: 100%; height: 32px; border-radius: 8px; font-size: 10px; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; border: none; background: var(--accent); color: #fff; box-shadow: 0 4px 12px rgba(32,84,234,0.15)">
                         <i class='bx bx-copy-alt'></i><span id="txtBtnCopyAll">Tout copier</span>
                     </button>
                 </div>
@@ -674,7 +679,7 @@ const demoI18n = {
         camLabel: "Fotocamera", sfDomain: "mobilityos.app", sfTitle: "MobilityOS · Check-In", sfOpen: "Apri",
         appSlogan: "The Global Mobility Platform", appTitle: "Le tue informazioni",
         f1: "Indirizzo di residenza", f1_zip: "Codice Postale", f1_city: "Città", f1_country: "Paese",
-        tempToggle: "Ho un indirizzo temporaneo locale", tempTooltip: "Compila questo indirizzo se soggiorni temporaneamente in un altro luogo (es. Hotel, Airbnb) durante il noleggio.",
+        tempToggle: "Ho un indirizzo temporaneo locale", tempTooltip: "Compila questo indirizzo si soggiorni temporaneamente in un altro luogo (es. Hotel, Airbnb) durante il noleggio.",
         f_temp_addr: "Indirizzo temporaneo", f_temp_zip: "Codice Postale", f_temp_city: "Città",
         f_phone: "Telefono Cellulare", f_phone_code: "Prefisso", f_email: "E-mail",
         btnSubmit: "Genera il mio riepilogo", btnSubmitSuccess: "Trasmesso!",
@@ -716,7 +721,7 @@ const demoI18n = {
         scLabel: "Code", r1: "Anschrift", r_temp: "Temp. Anschrift", r2: "Telefon", r3: "E-Mail", btnCopyAll: "Alles kopieren",
         aiSubtitle_default: "Geben Sie Ihre Daten ein. Ihre Informationen bleiben privat und sicher.",
         aiSubtitle_connecting: "Sichere Verbindung wird hergestellt...",
-        aiSubtitle_connected: "Ende-zu-Ende-verschlüsselte Verbindung aktiv.",
+        aiSubtitle_connected: "Ende-zu-Ende-verschlüsselte Verbindung active.",
         aiSubtitle_summary: "Ihre Daten sind bereit. Dem Berater vorgelegt.",
         summaryTitle: "Bitte legen Sie diese Zusammenfassung dem Berater vor",
         summaryDesc: "Ihre Daten wurden in Echtzeit per verschlüsselter P2P-Verbindung übertragen."
@@ -886,8 +891,8 @@ async function runSimulation(token) {
     fActions.style.opacity = '0';
     fActions.style.transform = 'translateY(8px)';
     
-    btnSubmit.style.background = '#fff';
-    btnSubmit.style.color = '#000';
+    btnSubmit.style.background = 'var(--accent)';
+    btnSubmit.style.color = '#fff';
     btnSubmit.innerHTML = `<span id="txtBtnSubmit">${t.btnSubmit}</span>`;
     
     summaryView.style.display = 'none';
@@ -1135,6 +1140,7 @@ async function runSimulation(token) {
     // Click submit
     btnSubmit.style.background = '#34C759';
     btnSubmit.style.color = '#fff';
+    btnSubmit.style.boxShadow = '0 4px 12px rgba(52,199,89,0.2)';
     btnSubmit.innerHTML = `<i class='bx bx-check-circle'></i> <span>${t.btnSubmitSuccess}</span>`;
     await sleep(600);
     if (token.aborted) return;
@@ -1145,7 +1151,7 @@ async function runSimulation(token) {
     
     // Make advisor copy all button glow/flash
     const copyAllBtn = document.getElementById('btnCopyAll');
-    copyAllBtn.style.boxShadow = '0 0 15px rgba(255,255,255,0.4)';
+    copyAllBtn.style.boxShadow = '0 0 15px rgba(32,84,234,0.4)';
     await sleep(1000);
     copyAllBtn.style.boxShadow = '';
 
