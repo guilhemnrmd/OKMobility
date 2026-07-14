@@ -1478,3 +1478,191 @@ if (typeof window.runLicenseGate === 'function') {
     // Fallback — gate script not loaded (should not happen in prod)
     initializePeer();
 }
+
+// ============================================================================
+// 13. World Cup match countdown (retailer header badge)
+//     A live countdown to the next fixture in the list below. When a match
+//     ends the badge rolls over to the following one. Tapping it plays a short
+//     team-coloured "¡Vamos, …!" celebration with a confetti burst.
+// ============================================================================
+(function initWorldCupCountdown() {
+    // Inline-SVG flags (viewBox 3×2) — no CDN/CSP dependency, so they render
+    // everywhere. Add more here if you extend the fixtures below.
+    const FLAGS = {
+        fr:  '<svg viewBox="0 0 3 2" aria-hidden="true"><rect width="3" height="2" fill="#fff"/><rect width="1" height="2" fill="#0055A4"/><rect width="1" height="2" x="2" fill="#EF4135"/></svg>',
+        es:  '<svg viewBox="0 0 3 2" aria-hidden="true"><rect width="3" height="2" fill="#AA151B"/><rect width="3" height="1" y="0.5" fill="#F1BF00"/></svg>',
+        ar:  '<svg viewBox="0 0 3 2" aria-hidden="true"><rect width="3" height="2" fill="#74ACDF"/><rect width="3" height="0.667" y="0.667" fill="#fff"/><circle cx="1.5" cy="1" r="0.24" fill="#F6B40E"/></svg>',
+        eng: '<svg viewBox="0 0 3 2" aria-hidden="true"><rect width="3" height="2" fill="#fff"/><rect x="1.3" width="0.4" height="2" fill="#CE1124"/><rect y="0.8" width="3" height="0.4" fill="#CE1124"/></svg>'
+    };
+
+    // ── Fixtures — edit these for the real schedule ────────────────────────
+    //  kickoff : ISO 8601 with timezone offset (Europe/Madrid = +02:00 in summer)
+    //  flag    : key in the FLAGS table above (fr, es, ar, eng, …)
+    //  cheer   : text shown when the badge is tapped
+    //  grad    : CSS gradient for the celebration pill
+    //  confetti: confetti colours for the burst
+    const WORLD_CUP_MATCHES = [
+        {
+            kickoff: '2026-07-14T21:00:00+02:00', // Hoy · Semifinal
+            home: { name: 'Francia', flag: 'fr' },
+            away: { name: 'España',  flag: 'es' },
+            cheer: '¡Vamos, Francia!',
+            grad: 'linear-gradient(120deg, #0055A4 0%, #2a5bc4 50%, #EF4135 100%)',
+            confetti: ['#0055A4', '#ffffff', '#EF4135', '#2054EA', '#05DBF3']
+        },
+        {
+            kickoff: '2026-07-15T21:00:00+02:00', // Mañana · Semifinal
+            home: { name: 'Argentina',  flag: 'ar' },
+            away: { name: 'Inglaterra', flag: 'eng' },
+            cheer: '¡Vamos, Inglaterra!',
+            grad: 'linear-gradient(120deg, #CE1124 0%, #E03A4C 50%, #CE1124 100%)',
+            confetti: ['#CE1124', '#ffffff', '#CE1124', '#012169', '#05DBF3']
+        },
+        {
+            kickoff: '2026-07-19T21:00:00+02:00', // Final — winners of the two semifinals
+            // Teams unknown until the semifinals are played: show a trophy + "Final".
+            // Once known, add `home`/`away` with flags and remove `label`.
+            label: 'Final',
+            cheer: '¡A por la Copa!',
+            grad: 'linear-gradient(120deg, #C9A227 0%, #F6D365 50%, #C9A227 100%)',
+            confetti: ['#F6D365', '#ffffff', '#C9A227', '#2054EA', '#EF4135']
+        }
+    ];
+    // Minutes to keep showing "EN VIVO" after kickoff before a match is over
+    const LIVE_WINDOW_MIN = 130;
+    // ───────────────────────────────────────────────────────────────────────
+
+    const badge = document.getElementById('wcCountdown');
+    const timeEl = document.getElementById('wcTime');
+    const ballEl = document.getElementById('wcBall');
+    const flagsEl = document.getElementById('wcFlags');
+    const flagHome = document.getElementById('wcFlagHome');
+    const flagAway = document.getElementById('wcFlagAway');
+    const labelEl = document.getElementById('wcLabel');
+    const cheerEl = document.getElementById('wcCheer');
+    if (!badge || !timeEl) return;
+
+    const matches = WORLD_CUP_MATCHES
+        .map((m) => ({ ...m, ts: new Date(m.kickoff).getTime() }))
+        .filter((m) => !Number.isNaN(m.ts))
+        .sort((a, b) => a.ts - b.ts);
+
+    if (!matches.length) {
+        badge.style.display = 'none';
+        return;
+    }
+
+    const pad = (n) => String(n).padStart(2, '0');
+    let activeIdx = -1;
+
+    // The active match is the first one still within its live window; once the
+    // whole schedule is in the past we keep showing the last fixture.
+    function activeMatchIndex() {
+        const now = Date.now();
+        for (let i = 0; i < matches.length; i++) {
+            if (now < matches[i].ts + LIVE_WINDOW_MIN * 60000) return i;
+        }
+        return matches.length - 1;
+    }
+
+    function applyMatch(m) {
+        // A match with `label` (e.g. the final before teams are known) shows a
+        // trophy + label instead of the two flags.
+        const isLabel = !!m.label;
+        if (ballEl) ballEl.className = 'bx ' + (isLabel ? 'bx-trophy' : 'bx-football') + ' wc-ball';
+        if (flagsEl) flagsEl.style.display = isLabel ? 'none' : '';
+        if (labelEl) {
+            labelEl.style.display = isLabel ? '' : 'none';
+            labelEl.textContent = isLabel ? m.label : '';
+        }
+        if (!isLabel) {
+            if (flagHome) flagHome.innerHTML = FLAGS[m.home.flag] || '';
+            if (flagAway) flagAway.innerHTML = FLAGS[m.away.flag] || '';
+        }
+        if (cheerEl) cheerEl.textContent = m.cheer;
+        badge.style.setProperty('--wc-grad', m.grad);
+        const label = isLabel ? m.label : `${m.home.name} – ${m.away.name}`;
+        badge.title = label;
+        badge.setAttribute('aria-label', `Cuenta atrás · ${label}. Pulsa para animar.`);
+    }
+
+    function render() {
+        const idx = activeMatchIndex();
+        if (idx !== activeIdx) {
+            activeIdx = idx;
+            applyMatch(matches[idx]);
+        }
+
+        const m = matches[idx];
+        const diff = m.ts - Date.now();
+
+        if (diff > 0) {
+            const totalSec = Math.floor(diff / 1000);
+            const days = Math.floor(totalSec / 86400);
+            const hours = Math.floor((totalSec % 86400) / 3600);
+            const mins = Math.floor((totalSec % 3600) / 60);
+            const secs = totalSec % 60;
+
+            timeEl.classList.remove('wc-live');
+            if (days >= 1) {
+                timeEl.textContent = `${days}d ${pad(hours)}h`;
+            } else if (hours >= 1) {
+                timeEl.textContent = `${hours}h${pad(mins)}`;
+            } else {
+                timeEl.textContent = `${pad(mins)}:${pad(secs)}`;
+            }
+        } else if (Date.now() < m.ts + LIVE_WINDOW_MIN * 60000) {
+            timeEl.textContent = 'EN VIVO';
+            timeEl.classList.add('wc-live');
+        } else {
+            timeEl.textContent = 'FINAL';
+            timeEl.classList.remove('wc-live');
+        }
+    }
+
+    render();
+    setInterval(render, 1000);
+
+    // ── Celebration on tap ─────────────────────────────────────────────────
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let cheerTimer = null;
+
+    function launchConfetti() {
+        if (reduceMotion) return;
+
+        const rect = badge.getBoundingClientRect();
+        const layer = document.createElement('div');
+        layer.className = 'wc-confetti-layer';
+        layer.style.left = `${rect.left + rect.width / 2}px`;
+        layer.style.top = `${rect.top + rect.height / 2}px`;
+        document.body.appendChild(layer);
+
+        const colors = (matches[activeIdx] && matches[activeIdx].confetti)
+            || ['#0055A4', '#ffffff', '#EF4135', '#2054EA', '#05DBF3'];
+        const pieces = 16;
+        for (let i = 0; i < pieces; i++) {
+            const piece = document.createElement('span');
+            piece.className = 'wc-confetti';
+            const angle = (Math.PI * 2 * i) / pieces + (Math.random() - 0.5) * 0.5;
+            const dist = 42 + Math.random() * 46;
+            piece.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
+            piece.style.setProperty('--dy', `${Math.sin(angle) * dist - 10}px`);
+            piece.style.setProperty('--rot', `${Math.random() * 720 - 360}deg`);
+            piece.style.setProperty('--dur', `${0.75 + Math.random() * 0.4}s`);
+            piece.style.background = colors[i % colors.length];
+            layer.appendChild(piece);
+            requestAnimationFrame(() => piece.classList.add('go'));
+        }
+
+        setTimeout(() => layer.remove(), 1500);
+    }
+
+    badge.addEventListener('click', () => {
+        badge.classList.remove('is-cheering');
+        void badge.offsetWidth; // restart the animation if tapped again
+        badge.classList.add('is-cheering');
+        launchConfetti();
+        clearTimeout(cheerTimer);
+        cheerTimer = setTimeout(() => badge.classList.remove('is-cheering'), 2800);
+    });
+})();

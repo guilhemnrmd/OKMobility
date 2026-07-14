@@ -9,9 +9,7 @@
     <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
     <link href="https://unpkg.com/maplibre-gl@5.7.0/dist/maplibre-gl.css" rel="stylesheet">
     <link href="/assets/boxicons/css/boxicons.min.css?v=1" rel="stylesheet">
-    <!-- Flag icons — SVG sprites, cross-platform flag display -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">
-    <link rel="stylesheet" href="/style.css?v=42">
+    <link rel="stylesheet" href="/style.css?v=47">
     <script src="/assets/js/brand-config.js"></script>
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -37,6 +35,19 @@
                 <span class="brand-slogan" id="retailerAgencyBrandText" data-default-slogan="The Global Mobility Platform">The Global Mobility Platform</span>
             </div>
             <div class="header-controls">
+                <button type="button" id="wcCountdown" class="wc-countdown" title="Francia – España" aria-label="Cuenta atrás del partido Francia – España. Pulsa para animar.">
+                    <span class="wc-face">
+                        <i class='bx bx-football wc-ball' id="wcBall" aria-hidden="true"></i>
+                        <span class="wc-flags" id="wcFlags" aria-hidden="true">
+                            <span class="wc-flag" id="wcFlagHome"></span>
+                            <span class="wc-dash">–</span>
+                            <span class="wc-flag" id="wcFlagAway"></span>
+                        </span>
+                        <span class="wc-label" id="wcLabel" aria-hidden="true" style="display:none;"></span>
+                        <span class="wc-time" id="wcTime">--h--</span>
+                    </span>
+                    <span class="wc-cheer" id="wcCheer" aria-hidden="true">¡Vamos,&nbsp;Francia!</span>
+                </button>
                 <div class="lang-selector">
                     <i class='bx bx-globe'></i>
                     <span id="langDisplay">Español</span>
@@ -379,6 +390,6 @@
     </div>
 
     <script src="/assets/js/license-gate.js?v=6"></script>
-    <script src="/assets/js/conseiller.js?v=22"></script>
+    <script src="/assets/js/conseiller.js?v=27"></script>
 </body>
 </html>
