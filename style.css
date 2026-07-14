@@ -3296,7 +3296,8 @@ button, .btn-primary, .btn-secondary {
 
 .wc-countdown.is-cheering {
     border-color: rgba(255, 255, 255, 0.7);
-    background: linear-gradient(120deg, #0055A4 0%, #2a5bc4 50%, #EF4135 100%);
+    /* --wc-grad is set per-match by JS; falls back to the French tricolour */
+    background: var(--wc-grad, linear-gradient(120deg, #0055A4 0%, #2a5bc4 50%, #EF4135 100%));
     box-shadow: 0 8px 26px rgba(0, 0, 0, 0.22);
     animation: wcCheerPop 0.5s var(--transition-spring);
 }

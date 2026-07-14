@@ -1481,33 +1481,88 @@ if (typeof window.runLicenseGate === 'function') {
 
 // ============================================================================
 // 13. World Cup match countdown (retailer header badge)
-//     A live countdown to the configured kickoff. Tapping the badge plays a
-//     short "¡Vamos, Francia!" tricolour celebration with a confetti burst.
+//     A live countdown to the next fixture in the list below. When a match
+//     ends the badge rolls over to the following one. Tapping it plays a short
+//     team-coloured "¡Vamos, …!" celebration with a confetti burst.
 // ============================================================================
 (function initWorldCupCountdown() {
-    // ── Match configuration — edit these for the real fixture ──────────────
-    const WORLD_CUP_MATCH = {
-        // Kickoff time, ISO 8601 with timezone offset (Europe/Madrid = +02:00 in summer)
-        kickoff: '2026-07-15T21:00:00+02:00',
-        // Minutes to keep showing "EN VIVO" after kickoff before switching to "FINAL"
-        liveWindowMin: 130
-    };
+    // ── Fixtures — edit these for the real schedule ────────────────────────
+    //  kickoff : ISO 8601 with timezone offset (Europe/Madrid = +02:00 in summer)
+    //  flag    : flag-icons class (e.g. fi-fr, fi-es, fi-ar, fi-gb-eng)
+    //  cheer   : text shown when the badge is tapped
+    //  grad    : CSS gradient for the celebration pill
+    //  confetti: confetti colours for the burst
+    const WORLD_CUP_MATCHES = [
+        {
+            kickoff: '2026-07-14T21:00:00+02:00', // Hoy · Semifinal
+            home: { name: 'Francia', flag: 'fi-fr' },
+            away: { name: 'España',  flag: 'fi-es' },
+            cheer: '¡Vamos, Francia!',
+            grad: 'linear-gradient(120deg, #0055A4 0%, #2a5bc4 50%, #EF4135 100%)',
+            confetti: ['#0055A4', '#ffffff', '#EF4135', '#2054EA', '#05DBF3']
+        },
+        {
+            kickoff: '2026-07-15T21:00:00+02:00', // Mañana · Semifinal
+            home: { name: 'Argentina',  flag: 'fi-ar' },
+            away: { name: 'Inglaterra', flag: 'fi-gb-eng' },
+            cheer: '¡Vamos, Argentina!',
+            grad: 'linear-gradient(120deg, #2b6cb0 0%, #4a90d9 50%, #74ACDF 100%)',
+            confetti: ['#74ACDF', '#ffffff', '#F6B40E', '#2054EA', '#4a90d9']
+        }
+    ];
+    // Minutes to keep showing "EN VIVO" after kickoff before a match is over
+    const LIVE_WINDOW_MIN = 130;
     // ───────────────────────────────────────────────────────────────────────
 
     const badge = document.getElementById('wcCountdown');
     const timeEl = document.getElementById('wcTime');
+    const flagHome = document.getElementById('wcFlagHome');
+    const flagAway = document.getElementById('wcFlagAway');
+    const cheerEl = document.getElementById('wcCheer');
     if (!badge || !timeEl) return;
 
-    const kickoff = new Date(WORLD_CUP_MATCH.kickoff).getTime();
-    if (Number.isNaN(kickoff)) {
+    const matches = WORLD_CUP_MATCHES
+        .map((m) => ({ ...m, ts: new Date(m.kickoff).getTime() }))
+        .filter((m) => !Number.isNaN(m.ts))
+        .sort((a, b) => a.ts - b.ts);
+
+    if (!matches.length) {
         badge.style.display = 'none';
         return;
     }
-    const liveEnd = kickoff + WORLD_CUP_MATCH.liveWindowMin * 60000;
+
     const pad = (n) => String(n).padStart(2, '0');
+    let activeIdx = -1;
+
+    // The active match is the first one still within its live window; once the
+    // whole schedule is in the past we keep showing the last fixture.
+    function activeMatchIndex() {
+        const now = Date.now();
+        for (let i = 0; i < matches.length; i++) {
+            if (now < matches[i].ts + LIVE_WINDOW_MIN * 60000) return i;
+        }
+        return matches.length - 1;
+    }
+
+    function applyMatch(m) {
+        if (flagHome) flagHome.className = 'fi ' + m.home.flag;
+        if (flagAway) flagAway.className = 'fi ' + m.away.flag;
+        if (cheerEl) cheerEl.textContent = m.cheer;
+        badge.style.setProperty('--wc-grad', m.grad);
+        const label = `${m.home.name} – ${m.away.name}`;
+        badge.title = label;
+        badge.setAttribute('aria-label', `Cuenta atrás del partido ${label}. Pulsa para animar.`);
+    }
 
     function render() {
-        const diff = kickoff - Date.now();
+        const idx = activeMatchIndex();
+        if (idx !== activeIdx) {
+            activeIdx = idx;
+            applyMatch(matches[idx]);
+        }
+
+        const m = matches[idx];
+        const diff = m.ts - Date.now();
 
         if (diff > 0) {
             const totalSec = Math.floor(diff / 1000);
@@ -1524,7 +1579,7 @@ if (typeof window.runLicenseGate === 'function') {
             } else {
                 timeEl.textContent = `${pad(mins)}:${pad(secs)}`;
             }
-        } else if (Date.now() < liveEnd) {
+        } else if (Date.now() < m.ts + LIVE_WINDOW_MIN * 60000) {
             timeEl.textContent = 'EN VIVO';
             timeEl.classList.add('wc-live');
         } else {
@@ -1550,7 +1605,8 @@ if (typeof window.runLicenseGate === 'function') {
         layer.style.top = `${rect.top + rect.height / 2}px`;
         document.body.appendChild(layer);
 
-        const colors = ['#0055A4', '#ffffff', '#EF4135', '#2054EA', '#05DBF3'];
+        const colors = (matches[activeIdx] && matches[activeIdx].confetti)
+            || ['#0055A4', '#ffffff', '#EF4135', '#2054EA', '#05DBF3'];
         const pieces = 16;
         for (let i = 0; i < pieces; i++) {
             const piece = document.createElement('span');
