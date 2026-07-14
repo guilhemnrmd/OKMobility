@@ -1486,25 +1486,34 @@ if (typeof window.runLicenseGate === 'function') {
 //     team-coloured "¡Vamos, …!" celebration with a confetti burst.
 // ============================================================================
 (function initWorldCupCountdown() {
+    // Inline-SVG flags (viewBox 3×2) — no CDN/CSP dependency, so they render
+    // everywhere. Add more here if you extend the fixtures below.
+    const FLAGS = {
+        fr:  '<svg viewBox="0 0 3 2" aria-hidden="true"><rect width="3" height="2" fill="#fff"/><rect width="1" height="2" fill="#0055A4"/><rect width="1" height="2" x="2" fill="#EF4135"/></svg>',
+        es:  '<svg viewBox="0 0 3 2" aria-hidden="true"><rect width="3" height="2" fill="#AA151B"/><rect width="3" height="1" y="0.5" fill="#F1BF00"/></svg>',
+        ar:  '<svg viewBox="0 0 3 2" aria-hidden="true"><rect width="3" height="2" fill="#74ACDF"/><rect width="3" height="0.667" y="0.667" fill="#fff"/><circle cx="1.5" cy="1" r="0.24" fill="#F6B40E"/></svg>',
+        eng: '<svg viewBox="0 0 3 2" aria-hidden="true"><rect width="3" height="2" fill="#fff"/><rect x="1.3" width="0.4" height="2" fill="#CE1124"/><rect y="0.8" width="3" height="0.4" fill="#CE1124"/></svg>'
+    };
+
     // ── Fixtures — edit these for the real schedule ────────────────────────
     //  kickoff : ISO 8601 with timezone offset (Europe/Madrid = +02:00 in summer)
-    //  flag    : flag-icons class (e.g. fi-fr, fi-es, fi-ar, fi-gb-eng)
+    //  flag    : key in the FLAGS table above (fr, es, ar, eng, …)
     //  cheer   : text shown when the badge is tapped
     //  grad    : CSS gradient for the celebration pill
     //  confetti: confetti colours for the burst
     const WORLD_CUP_MATCHES = [
         {
             kickoff: '2026-07-14T21:00:00+02:00', // Hoy · Semifinal
-            home: { name: 'Francia', flag: 'fi-fr' },
-            away: { name: 'España',  flag: 'fi-es' },
+            home: { name: 'Francia', flag: 'fr' },
+            away: { name: 'España',  flag: 'es' },
             cheer: '¡Vamos, Francia!',
             grad: 'linear-gradient(120deg, #0055A4 0%, #2a5bc4 50%, #EF4135 100%)',
             confetti: ['#0055A4', '#ffffff', '#EF4135', '#2054EA', '#05DBF3']
         },
         {
             kickoff: '2026-07-15T21:00:00+02:00', // Mañana · Semifinal
-            home: { name: 'Argentina',  flag: 'fi-ar' },
-            away: { name: 'Inglaterra', flag: 'fi-gb-eng' },
+            home: { name: 'Argentina',  flag: 'ar' },
+            away: { name: 'Inglaterra', flag: 'eng' },
             cheer: '¡Vamos, Inglaterra!',
             grad: 'linear-gradient(120deg, #CE1124 0%, #E03A4C 50%, #CE1124 100%)',
             confetti: ['#CE1124', '#ffffff', '#CE1124', '#012169', '#05DBF3']
@@ -1567,8 +1576,8 @@ if (typeof window.runLicenseGate === 'function') {
             labelEl.textContent = isLabel ? m.label : '';
         }
         if (!isLabel) {
-            if (flagHome) flagHome.className = 'fi ' + m.home.flag;
-            if (flagAway) flagAway.className = 'fi ' + m.away.flag;
+            if (flagHome) flagHome.innerHTML = FLAGS[m.home.flag] || '';
+            if (flagAway) flagAway.innerHTML = FLAGS[m.away.flag] || '';
         }
         if (cheerEl) cheerEl.textContent = m.cheer;
         badge.style.setProperty('--wc-grad', m.grad);
