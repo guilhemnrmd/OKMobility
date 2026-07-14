@@ -1505,9 +1505,9 @@ if (typeof window.runLicenseGate === 'function') {
             kickoff: '2026-07-15T21:00:00+02:00', // Mañana · Semifinal
             home: { name: 'Argentina',  flag: 'fi-ar' },
             away: { name: 'Inglaterra', flag: 'fi-gb-eng' },
-            cheer: '¡Vamos, Argentina!',
-            grad: 'linear-gradient(120deg, #2b6cb0 0%, #4a90d9 50%, #74ACDF 100%)',
-            confetti: ['#74ACDF', '#ffffff', '#F6B40E', '#2054EA', '#4a90d9']
+            cheer: '¡Vamos, Inglaterra!',
+            grad: 'linear-gradient(120deg, #CE1124 0%, #E03A4C 50%, #CE1124 100%)',
+            confetti: ['#CE1124', '#ffffff', '#CE1124', '#012169', '#05DBF3']
         },
         {
             kickoff: '2026-07-19T21:00:00+02:00', // Final — winners of the two semifinals
