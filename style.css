@@ -3185,3 +3185,242 @@ button, .btn-primary, .btn-secondary {
         border-radius: 20px 20px 0 0;
     }
 }
+
+/* =========================================================================
+   World Cup match countdown badge — retailer header only
+   A glass pill matching .lang-selector; tap it for an "¡Vamos, Francia!"
+   tricolour celebration with a small confetti burst.
+   ========================================================================= */
+.wc-countdown {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto; /* override the global `button { width: 100% }` rule */
+    min-height: 44px;
+    padding: 10px 16px;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 16px rgba(var(--color-accent-rgb), 0.1);
+    color: var(--color-text-primary);
+    font-family: var(--font-family-sans);
+    cursor: pointer;
+    overflow: hidden;
+    flex: 0 0 auto;
+    transition: all var(--transition-smooth);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.wc-countdown:hover {
+    background: rgba(255, 255, 255, 0.75);
+    box-shadow: 0 6px 20px rgba(var(--color-accent-rgb), 0.15);
+    border-color: rgba(255, 255, 255, 0.7);
+    transform: translateY(-1px);
+}
+
+.wc-countdown:active {
+    transform: translateY(0) scale(0.97);
+}
+
+.wc-face {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.wc-ball {
+    font-size: 1.05rem;
+    color: var(--color-accent);
+    line-height: 1;
+    animation: wcBallSpin 7s linear infinite;
+}
+
+.wc-flags {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.wc-flags .fi {
+    width: 1.15em;
+    line-height: 0.86em;
+    border-radius: 2px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+    position: relative;
+    top: -1px;
+}
+
+.wc-dash {
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    opacity: 0.7;
+}
+
+.wc-time {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.01em;
+    min-width: 3.6em;
+    text-align: center;
+}
+
+.wc-time.wc-live {
+    color: #EF4135;
+    animation: wcLivePulse 1.4s ease-in-out infinite;
+}
+
+/* Cheer face — hidden until the badge is tapped.
+   Centred with a transform (not inset:0) so it never widens the pill. */
+.wc-cheer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-family-display);
+    font-weight: 700;
+    font-size: 0.92rem;
+    white-space: nowrap;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.6);
+    pointer-events: none;
+}
+
+.wc-countdown.is-cheering {
+    border-color: rgba(255, 255, 255, 0.7);
+    background: linear-gradient(120deg, #0055A4 0%, #2a5bc4 50%, #EF4135 100%);
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.22);
+    animation: wcCheerPop 0.5s var(--transition-spring);
+}
+
+/* White shine sweep — the "blanc" of the tricolore */
+.wc-countdown.is-cheering::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -35%;
+    width: 35%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.85), transparent);
+    transform: skewX(-18deg);
+    animation: wcShine 1s ease 0.12s;
+}
+
+.wc-countdown.is-cheering .wc-face {
+    opacity: 0;
+    transform: scale(0.6);
+}
+
+.wc-countdown.is-cheering .wc-cheer {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    transition: opacity 0.3s ease 0.05s, transform 0.45s var(--transition-spring) 0.05s;
+}
+
+@keyframes wcBallSpin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes wcLivePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+}
+
+@keyframes wcCheerPop {
+    0% { transform: scale(0.9); }
+    55% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+}
+
+@keyframes wcShine {
+    from { left: -35%; }
+    to { left: 135%; }
+}
+
+/* Confetti burst — appended to <body> so it is not clipped by the pill */
+.wc-confetti-layer {
+    position: fixed;
+    width: 0;
+    height: 0;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+.wc-confetti {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    margin: -4px 0 0 -4px;
+    border-radius: 1px;
+    opacity: 0;
+    will-change: transform, opacity;
+}
+
+.wc-confetti.go {
+    animation: wcConfettiBurst var(--dur, 0.9s) cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+
+@keyframes wcConfettiBurst {
+    0%   { opacity: 1; transform: translate(0, 0) rotate(0) scale(0.3); }
+    70%  { opacity: 1; }
+    100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(1); }
+}
+
+@media (prefers-color-scheme: dark) {
+    .wc-countdown {
+        background: rgba(28, 28, 30, 0.6);
+        border-color: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .wc-countdown:hover {
+        background: rgba(28, 28, 30, 0.8);
+        border-color: rgba(255, 255, 255, 0.25);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+}
+
+@media (max-width: 640px) {
+    .wc-countdown {
+        order: 0;
+        min-height: 40px;
+        padding: 9px 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .wc-countdown {
+        min-height: 40px;
+        padding: 8px 10px;
+    }
+
+    .wc-face { gap: 5px; }
+    .wc-ball,
+    .wc-dash { display: none; }
+
+    .wc-flags { gap: 3px; }
+
+    .wc-time {
+        font-size: 0.8rem;
+        min-width: 3em;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wc-ball,
+    .wc-time.wc-live,
+    .wc-countdown.is-cheering,
+    .wc-countdown.is-cheering::after {
+        animation: none;
+    }
+}

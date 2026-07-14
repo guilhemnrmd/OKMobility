@@ -1478,3 +1478,103 @@ if (typeof window.runLicenseGate === 'function') {
     // Fallback — gate script not loaded (should not happen in prod)
     initializePeer();
 }
+
+// ============================================================================
+// 13. World Cup match countdown (retailer header badge)
+//     A live countdown to the configured kickoff. Tapping the badge plays a
+//     short "¡Vamos, Francia!" tricolour celebration with a confetti burst.
+// ============================================================================
+(function initWorldCupCountdown() {
+    // ── Match configuration — edit these for the real fixture ──────────────
+    const WORLD_CUP_MATCH = {
+        // Kickoff time, ISO 8601 with timezone offset (Europe/Madrid = +02:00 in summer)
+        kickoff: '2026-07-15T21:00:00+02:00',
+        // Minutes to keep showing "EN VIVO" after kickoff before switching to "FINAL"
+        liveWindowMin: 130
+    };
+    // ───────────────────────────────────────────────────────────────────────
+
+    const badge = document.getElementById('wcCountdown');
+    const timeEl = document.getElementById('wcTime');
+    if (!badge || !timeEl) return;
+
+    const kickoff = new Date(WORLD_CUP_MATCH.kickoff).getTime();
+    if (Number.isNaN(kickoff)) {
+        badge.style.display = 'none';
+        return;
+    }
+    const liveEnd = kickoff + WORLD_CUP_MATCH.liveWindowMin * 60000;
+    const pad = (n) => String(n).padStart(2, '0');
+
+    function render() {
+        const diff = kickoff - Date.now();
+
+        if (diff > 0) {
+            const totalSec = Math.floor(diff / 1000);
+            const days = Math.floor(totalSec / 86400);
+            const hours = Math.floor((totalSec % 86400) / 3600);
+            const mins = Math.floor((totalSec % 3600) / 60);
+            const secs = totalSec % 60;
+
+            timeEl.classList.remove('wc-live');
+            if (days >= 1) {
+                timeEl.textContent = `${days}d ${pad(hours)}h`;
+            } else if (hours >= 1) {
+                timeEl.textContent = `${hours}h${pad(mins)}`;
+            } else {
+                timeEl.textContent = `${pad(mins)}:${pad(secs)}`;
+            }
+        } else if (Date.now() < liveEnd) {
+            timeEl.textContent = 'EN VIVO';
+            timeEl.classList.add('wc-live');
+        } else {
+            timeEl.textContent = 'FINAL';
+            timeEl.classList.remove('wc-live');
+        }
+    }
+
+    render();
+    setInterval(render, 1000);
+
+    // ── Celebration on tap ─────────────────────────────────────────────────
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let cheerTimer = null;
+
+    function launchConfetti() {
+        if (reduceMotion) return;
+
+        const rect = badge.getBoundingClientRect();
+        const layer = document.createElement('div');
+        layer.className = 'wc-confetti-layer';
+        layer.style.left = `${rect.left + rect.width / 2}px`;
+        layer.style.top = `${rect.top + rect.height / 2}px`;
+        document.body.appendChild(layer);
+
+        const colors = ['#0055A4', '#ffffff', '#EF4135', '#2054EA', '#05DBF3'];
+        const pieces = 16;
+        for (let i = 0; i < pieces; i++) {
+            const piece = document.createElement('span');
+            piece.className = 'wc-confetti';
+            const angle = (Math.PI * 2 * i) / pieces + (Math.random() - 0.5) * 0.5;
+            const dist = 42 + Math.random() * 46;
+            piece.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
+            piece.style.setProperty('--dy', `${Math.sin(angle) * dist - 10}px`);
+            piece.style.setProperty('--rot', `${Math.random() * 720 - 360}deg`);
+            piece.style.setProperty('--dur', `${0.75 + Math.random() * 0.4}s`);
+            piece.style.background = colors[i % colors.length];
+            layer.appendChild(piece);
+            requestAnimationFrame(() => piece.classList.add('go'));
+        }
+
+        setTimeout(() => layer.remove(), 1500);
+    }
+
+    badge.addEventListener('click', () => {
+        badge.classList.remove('is-cheering');
+        void badge.offsetWidth; // restart the animation if tapped again
+        badge.classList.add('is-cheering');
+        launchConfetti();
+        clearTimeout(cheerTimer);
+        cheerTimer = setTimeout(() => badge.classList.remove('is-cheering'), 2800);
+    });
+})();
