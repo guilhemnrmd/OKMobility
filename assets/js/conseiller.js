@@ -1508,6 +1508,15 @@ if (typeof window.runLicenseGate === 'function') {
             cheer: '¡Vamos, Argentina!',
             grad: 'linear-gradient(120deg, #2b6cb0 0%, #4a90d9 50%, #74ACDF 100%)',
             confetti: ['#74ACDF', '#ffffff', '#F6B40E', '#2054EA', '#4a90d9']
+        },
+        {
+            kickoff: '2026-07-19T21:00:00+02:00', // Final — winners of the two semifinals
+            // Teams unknown until the semifinals are played: show a trophy + "Final".
+            // Once known, add `home`/`away` with flags and remove `label`.
+            label: 'Final',
+            cheer: '¡A por la Copa!',
+            grad: 'linear-gradient(120deg, #C9A227 0%, #F6D365 50%, #C9A227 100%)',
+            confetti: ['#F6D365', '#ffffff', '#C9A227', '#2054EA', '#EF4135']
         }
     ];
     // Minutes to keep showing "EN VIVO" after kickoff before a match is over
@@ -1516,8 +1525,11 @@ if (typeof window.runLicenseGate === 'function') {
 
     const badge = document.getElementById('wcCountdown');
     const timeEl = document.getElementById('wcTime');
+    const ballEl = document.getElementById('wcBall');
+    const flagsEl = document.getElementById('wcFlags');
     const flagHome = document.getElementById('wcFlagHome');
     const flagAway = document.getElementById('wcFlagAway');
+    const labelEl = document.getElementById('wcLabel');
     const cheerEl = document.getElementById('wcCheer');
     if (!badge || !timeEl) return;
 
@@ -1545,13 +1557,24 @@ if (typeof window.runLicenseGate === 'function') {
     }
 
     function applyMatch(m) {
-        if (flagHome) flagHome.className = 'fi ' + m.home.flag;
-        if (flagAway) flagAway.className = 'fi ' + m.away.flag;
+        // A match with `label` (e.g. the final before teams are known) shows a
+        // trophy + label instead of the two flags.
+        const isLabel = !!m.label;
+        if (ballEl) ballEl.className = 'bx ' + (isLabel ? 'bx-trophy' : 'bx-football') + ' wc-ball';
+        if (flagsEl) flagsEl.style.display = isLabel ? 'none' : '';
+        if (labelEl) {
+            labelEl.style.display = isLabel ? '' : 'none';
+            labelEl.textContent = isLabel ? m.label : '';
+        }
+        if (!isLabel) {
+            if (flagHome) flagHome.className = 'fi ' + m.home.flag;
+            if (flagAway) flagAway.className = 'fi ' + m.away.flag;
+        }
         if (cheerEl) cheerEl.textContent = m.cheer;
         badge.style.setProperty('--wc-grad', m.grad);
-        const label = `${m.home.name} – ${m.away.name}`;
+        const label = isLabel ? m.label : `${m.home.name} – ${m.away.name}`;
         badge.title = label;
-        badge.setAttribute('aria-label', `Cuenta atrás del partido ${label}. Pulsa para animar.`);
+        badge.setAttribute('aria-label', `Cuenta atrás · ${label}. Pulsa para animar.`);
     }
 
     function render() {
