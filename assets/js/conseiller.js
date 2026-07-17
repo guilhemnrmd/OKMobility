@@ -1519,13 +1519,12 @@ if (typeof window.runLicenseGate === 'function') {
             confetti: ['#CE1124', '#ffffff', '#CE1124', '#012169', '#05DBF3']
         },
         {
-            kickoff: '2026-07-19T21:00:00+02:00', // Final — winners of the two semifinals
-            // Teams unknown until the semifinals are played: show a trophy + "Final".
-            // Once known, add `home`/`away` with flags and remove `label`.
-            label: 'Final',
-            cheer: '¡A por la Copa!',
-            grad: 'linear-gradient(120deg, #C9A227 0%, #F6D365 50%, #C9A227 100%)',
-            confetti: ['#F6D365', '#ffffff', '#C9A227', '#2054EA', '#EF4135']
+            kickoff: '2026-07-19T21:00:00+02:00', // Final · New York/New Jersey (MetLife)
+            home: { name: 'España',    flag: 'es' },
+            away: { name: 'Argentina', flag: 'ar' },
+            cheer: '¡Vamos, España!',
+            grad: 'linear-gradient(120deg, #F1BF00 0%, #AA151B 30%, #AA151B 70%, #F1BF00 100%)',
+            confetti: ['#AA151B', '#F1BF00', '#ffffff', '#AA151B', '#F1BF00']
         }
     ];
     // Minutes to keep showing "EN VIVO" after kickoff before a match is over
